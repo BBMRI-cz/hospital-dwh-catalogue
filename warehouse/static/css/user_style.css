@@ -1,0 +1,431 @@
+.collapse:not(.show) .tables-container,
+.collapse:not(.show) .dataclasses-container {
+    display: none !important;
+}
+
+/* Vylepšení rozbalovací lišty */
+/* Základní styly pro všechny lišty */
+.dataset-footer {
+    padding: 0.7rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border-radius: 0 0 6px 6px;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Aktivní lišty (zelená a modrá) */
+.dataset-footer[role="button"] {
+    cursor: pointer;
+}
+
+/* Zelená lišta - pro tabulky */
+.footer-green {
+    background: linear-gradient(to bottom, #afca0b, #94ab09);
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.footer-green:hover {
+    background: linear-gradient(to bottom, #bedc0d, #a3bd0a);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Modrá lišta - pro dostupná data */
+.footer-blue {
+    background: linear-gradient(to bottom, #00c5db, #00a3b5);
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.footer-blue:hover {
+    background: linear-gradient(to bottom, #13d5ec, #00b4c7);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Šedá lišta - pro nedostupná data */
+.footer-grey {
+    background: linear-gradient(to bottom, #d9d9d9, #b8b8b8);
+    color: #666;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) inset;
+    cursor: not-allowed;
+}
+
+/* Vylepšení ikon */
+.dataset-footer i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+    transition: transform 0.4s;
+}
+
+/* Rotace ikony při rozbalení (přidejte třídu pomocí JavaScriptu) */
+.dataset-footer.expanded i {
+    transform: rotate(180deg);
+}
+
+/* Text ve všech lištách */
+.dataset-footer span {
+    letter-spacing: 0.5px;
+}
+.layout-wrapper, .layout-container, .layout-page {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+.content-wrapper {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+.dataset-footer {
+    width: 100%;
+    padding: 0.5rem 0.5rem;
+    font-weight: 500;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    box-shadow: 0 -4px 6px -4px rgba(0, 0, 0, 0.25);
+}
+
+/* Barvy podle typu (trvale, bez hover efektu) */
+.footer-green {
+    background-color: #a4c400; /* limetková */
+}
+
+.footer-blue {
+    background-color: #00bcd4; /* azurová */
+}
+
+.footer-grey {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    color: #666;
+}
+
+#searchInput {
+  width: 100%;
+  max-width: 600px; /* nebo třeba 80% dle potřeby */
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.filter-search:focus {
+  border-color: #afca0b !important;  /* barva orámování */
+  outline: none;          /* odstraní defaultní modrý rámeček u prohlížečů */
+
+}
+input[type="checkbox"] {
+  accent-color: #212b8f !important;
+}
+.table-striped td {
+  color: black !important;
+}
+.filter-box li.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* Vlastní margin */
+.custom-margin {
+    margin-bottom: 10px;
+}
+
+/* Karta */
+.card {
+    transition: transform 0.3s ease;
+    border: 1px solid #ccc !important;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+/* Hledací panel */
+.search-bar {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#searchInput:focus {
+    border-color: #212b8f;
+}
+
+/* Radio button */
+input[type="radio"] {
+    position: relative;
+    margin-right: 10px;
+    cursor: pointer;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    outline: none;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+input[type="radio"]:checked {
+    border-color: #212b8f !important;
+    background-color: #fff !important;
+    border: 5px solid;
+}
+
+/* Filtr */
+.filter-options {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    padding: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.filter-options label {
+    display: block;
+    margin-top: 10px;
+}
+
+.filter-options input {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Nový layout s filtrem vlevo - upraveno pro začátek u levého okraje */
+.main-content-layout {
+    display: flex;
+    width: 100%;
+    margin-left: 0;
+    padding-left: 10px !important;
+}
+
+.filter-sidebar {
+    width: 350px;
+    min-width: 280px;
+    padding: 0 20px 20px 0; /* Odstranění paddingu vlevo */
+    overflow-y: auto;
+    position: sticky;
+    top: 10px;
+    left: 0; /* Ukotvení k levému okraji */
+}
+
+.content-area {
+    flex: 1;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+/* Úprava filtrovací karty */
+.filter-card {
+    padding: 15px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: #f8f9fa; /* Světlé pozadí pro lepší viditelnost */
+    border: 1px solid #dee2e6;
+}
+
+/* Úprava vyhledávacího pole ve filtru - pro lepší viditelnost */
+.filter-box {
+    flex: 1;
+    align-items: start;
+    min-width: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    background-color: white; /* Bílé pozadí pro lepší viditelnost */
+}
+
+/* Vylepšení vyhledávacího pole */
+.filter-box .filter-search {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    color: #212529; /* Tmavý text pro lepší čitelnost */
+}
+
+.filter-box .filter-search::placeholder {
+    color: #6c757d;
+}
+
+.filter-box h5 {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+    color: #212b8f; /* Tmavý text pro lepší čitelnost */
+}
+
+.filter-box ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.filter-box li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 3px;
+    color: #212529; /* Tmavý text pro lepší čitelnost */
+}
+
+.filter-box label {
+    margin-bottom: 0;
+    color: #212529; /* Tmavý text pro lepší čitelnost */
+}
+
+/* Rozbalovací funkcionalita pro filtrovací karty */
+.filter-category {
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.filter-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f1f3f5;
+    cursor: pointer;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.filter-category-header h5 {
+    margin: 0;
+    font-size: 16px;
+    color: #212529;
+}
+
+.filter-category-content {
+    padding: 15px;
+    display: block;
+    background-color: white;
+}
+
+.filter-category-content.collapsed > *:not(#data-availability-list) {
+    display: none;
+}
+.filter-category-content.collapsed #data-availability-list {
+    display: block !important;
+}
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
+}
+
+/* Responzivní design */
+@media (max-width: 768px) {
+    .main-content-layout {
+        flex-direction: column;
+    }
+
+    .filter-sidebar {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        position: relative;
+        top: 0;
+        padding-left: 0;
+    }
+
+    .filter-box {
+        max-height: 200px;
+    }
+}
+
+/* Akce v kartě */
+.card-action-element .list-inline-item a i {
+    color: #212b8f;
+}
+
+/* Tlačítka pro filtr */
+.filter-header {
+    color: #212b8f; /* Změna na tmavou barvu pro lepší čitelnost */
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Ikony Chevron */
+.chevron-icon a i {
+    color: #212529;
+}
+
+/* Detail karty */
+.card-details {
+    transition: all 0.3s ease;
+}
+
+/* Tlačítka pro filtrování */
+.filter-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Tlačítko pro vymazání filtrů */
+.clear-filters-btn {
+    background-color: #212b8f;
+    color: white;
+    border: 1px solid #212b8f;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.clear-filters-btn:hover {
+    background-color: #afca0b;
+}
+
+/* Zaškrtnutí checkboxu */
+input[type="checkbox"]:checked {
+    accent-color: #4a7bff;
+}
+
+/* Změna barvy na hover pro checkbox */
+input[type="checkbox"]:hover {
+    accent-color: #4a7bff;
+}
+
+.icon-gray {
+    color: lightgray !important;
+}
+
+.icon-blue {
+    color: #212b8f;
+    z-index: 10;
+}
+
+.filtrovano {
+    color: #e6007c;
+}

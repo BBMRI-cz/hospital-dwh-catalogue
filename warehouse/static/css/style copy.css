@@ -1,0 +1,461 @@
+/* Import fontu */
+@font-face {
+  font-family: Matter;
+  src: url(matter-font/Matter-Regular.otf);
+}
+
+@font-face {
+  font-family: Matter;
+  src: url(matter-font/Matter-Bold.otf);
+  font-weight: bold;
+}
+
+/* Definice barev */
+:root {
+  --oranzova: #F04600;
+  --modra: #212b8f;
+}
+
+body {
+  background-color: #fbeebc;
+  background-color: #f0f0f0;
+  font-family: "Matter", sans-serif;
+  /* overflow-x: hidden; */
+}
+
+
+Scroll margin to account for the fixed height of the top nav and original navbars
+section {
+  scroll-margin-top: 60px;
+  /* Odsazení odpovídající výšce navigačních panelů */
+}
+
+#header {
+  border-bottom: 1px solid hsl(0, 0%, 30%);
+}
+
+#logo {
+  height: 50px;
+}
+
+#hero {
+  background: url('img/wallpaper_04.jpg'), hsla(0, 0%, 100%, 0.6);
+  background-position: bottom;
+  background-size: cover;
+  background-repeat: none;
+  background-blend-mode: overlay;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  display: flex;
+}
+
+/* Hlavička */
+.title {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 2px;
+  margin: 0px;
+}
+
+.title-left {
+  display: flex;
+  flex: 1;
+  padding: 10px;
+  margin: 0px;
+  margin-left: 20px;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: center;
+}
+
+.title-right {
+  display: flex;
+  flex: 1;
+  padding: 10px;
+  margin: 0px;
+  margin-right: 20px;
+  justify-content: flex-end;
+  text-align: right;
+  align-items: center;
+}
+
+.col-12.col-lg-6 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.news-tile {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
+  max-width: 80%;
+  text-align: left;
+  box-shadow: 4px 4px 8px 8px rgba(0, 0, 0, 0.2);
+}
+
+.news-list {
+  list-style-type: disc;
+  /* Zobrazí tečky jako odrážky */
+  padding-left: 20px;
+  /* Trochu odsazení od levého okraje */
+}
+
+.news-list li {
+  margin-bottom: 10px;
+  /* Mezera mezi jednotlivými položkami seznamu */
+  color: #333;
+  /* Barva textu seznamu */
+  font-size: 1em;
+  line-height: 1.5em;
+  /* Větší mezera mezi řádky pro lepší čitelnost */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: black;
+  font-weight: bold;
+}
+
+h1 {
+  color: black;
+  text-align: center;
+  text-shadow: 1px 1px hsla(0, 0%, 100%, 0.8);
+}
+
+/* #title {
+  position: absolute;
+  top: 80px;
+  left: 40px;
+  text-align: left;
+} */
+
+h1.display-1 {
+  font-size: 6rem;
+  text-align: left;
+}
+
+/* Upravený druhý řádek nadpisu */
+.subheading {
+  font-size: 0.4em;
+  color: black;
+}
+
+
+/* Top navigation bar styles */
+#top-nav {
+  display: flex;
+  border-top: 1px solid hsl(0, 0%, 50%);
+  border-bottom: 1px solid hsl(0, 0%, 85%);
+  box-shadow: 0px 0px 0px hsl(0, 0%, 70%);
+  background-color: var(--modra);
+  padding: 0px 0px;
+  margin: 0px 0px;
+  position: sticky;
+  top: 0;
+  z-index: 800;
+}
+
+#top-nav .nav-link {
+  background-color: var(--modra);
+  color: hsl(0, 0%, 100%);
+  border-radius: 5px;
+  padding: 0px 0px;
+  margin: 0px 0px;
+  border: 0px solid hsl(0, 0%, 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: background-color 0.3s, border-color 0.3s;
+  width: 150px;
+  height: 50px;
+}
+
+#top-nav .nav-link:hover {
+  border-color: hsl(0, 0%, 100%);
+  background-color: white;
+  color: var(--modra);
+}
+
+ 
+.navbar {
+  border-top: 1px solid hsl(0, 0%, 85%);
+  border-bottom: 1px solid hsl(0, 0%, 50%);
+  box-shadow: 0px 3px 3px hsl(0, 0%, 70%);
+  background-color: white;
+  position: sticky;
+  display: flex;
+  justify-content: center;
+  /* Zarovnání tlačítek na střed */
+  gap: 10px;
+  /* Mezera mezi tlačítky */
+  top: 55px;
+  /* Posun pod nový horní panel */
+  z-index: 900;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  /* Přidáme plynulý přechod pro opacity a visibility */
+  opacity: 1;
+  /* Základní viditelný stav */
+  visibility: visible;
+  /* Panel je na začátku viditelný */
+}
+
+.navbar.hidden {
+  opacity: 0;
+  /* Skrytý stav - panel je zneviditelněn */
+  visibility: hidden;
+  /* Když je opacity 0, panel se stane neviditelným */
+}
+
+/* Navigační panel - styl kontejneru pro uspořádání dvou řádků pod sebou */
+.collapse {
+  display: flex;
+  flex-direction: column;
+  /* Uspořádání do dvou řádků pod sebou */
+  align-items: center;
+  /* Zarovnání řádků na střed */
+}
+
+/* Styl pro řádky tlačítek */
+.row-1,
+.row-2 {
+  display: flex;
+  justify-content: center;
+  /* Zarovnání tlačítek na střed */
+  gap: 10px;
+  /* Mezera mezi tlačítky */
+  margin-bottom: 2px;
+  /* Mezera mezi prvním a druhým řádkem */
+}
+
+/* Styl pro tlačítka navigace */
+.nav-link {
+  background-color: var(--modra);
+  color: white;
+  border-radius: 5px;
+  padding: 0px 0px;
+  margin: 4px 4px;
+  border: 1px solid var(--modra);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: background-color 0.3s, border-color 0.3s;
+  width: 200px;
+  height: 50px;
+}
+
+/* Hover effect for nav buttons */
+.nav-link:hover {
+  border-color: var(--modra);
+  background-color: white;
+  color: var(--modra);
+}
+
+.nav-padding {
+  padding-top: 55px;
+}
+ 
+
+.velkaIkona {
+  font-size: 4rem;
+  color: hsl(0, 0%, 30%);
+}
+
+footer {
+  color: hsl(0, 0%, 30%);
+  font-size: 0.8rem;
+}
+
+
+
+
+/* Hlavička */
+.headbar {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 2px;
+  margin: 0px;
+}
+
+.headbar-left {
+  display: flex;
+  flex: 1;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 0px;
+  margin: 0px;
+  margin-left: 20px;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: center;
+}
+
+.headbar-right {
+  display: flex;
+  flex: 1;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 0px;
+  margin: 0px;
+  margin-right: 20px;
+  justify-content: flex-end;
+  text-align: right;
+  align-items: center;
+}
+
+.headbar-center {
+  display: flex;
+  flex: 10;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 0px;
+  margin: 0px;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+
+
+/* Dlaždice pro jednotlivé sekce */
+.tile {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  margin-bottom: 20px;
+}
+
+.tile-title-left {
+  display: flex;
+  flex: 1;
+  /* První řádek zabere celou šířku */
+  padding-left: 60px;
+  padding-right: 60px;
+  justify-content: center;
+  text-align: center;
+}
+
+.tile-title-right {
+  display: flex;
+  flex: 1;
+  /* První řádek zabere celou šířku */
+  padding-left: 60px;
+  padding-right: 60px;
+  justify-content: center;
+  text-align: center;
+}
+
+.tile-title-center {
+  display: flex;
+  flex: 1;
+  /* První řádek zabere celou šířku */
+  padding-left: 60px;
+  padding-right: 60px;
+  justify-content: center;
+  text-align: center;
+}
+
+.tile-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tile-content-img-left {
+  display: flex;
+  flex: 1;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 20px;
+  margin: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.tile-content-img-right {
+  display: flex;
+  flex: 1;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 20px;
+  margin: 10px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.tile-content-left {
+  display: flex;
+  flex: 2;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 20px;
+  margin: 10px;
+  justify-content: flex-end;
+  text-align: right;
+  align-items: center;
+}
+
+.tile-content-right {
+  display: flex;
+  flex: 2;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 20px;
+  margin: 10px;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: center;
+}
+
+.tile-content-center {
+  display: flex;
+  flex: 2;
+  /* Každý sloupec zabere stejný podíl šířky */
+  padding: 20px;
+  margin: 10px;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+
+
+
+
+
+
+
+
+/* Tlačítka */
+button,
+.btn {
+  background-color: var(--oranzova);
+  color: white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+button:hover,
+.btn:hover {
+  background-color: var(--oranzova);
+}
+
+/* Odkazy */
+a {
+  color: var(--oranzova);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--modra);
+}
