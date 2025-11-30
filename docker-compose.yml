@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17
+    container_name: hospital_dwh_db
+    environment:
+      POSTGRES_DB: dwhi_test
+      POSTGRES_USER: dwh_user
+      POSTGRES_PASSWORD: dwh_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/initdb.d:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dwh_user -d dwhi_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: hospital_dwh_web
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - /app/venv
+    ports:
+      - "8080:8000"
+    environment:
+      - SECRET_KEY=django-docker-dev-key
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - WAREHOUSE_DB_ENGINE=django.db.backends.postgresql
+      - WAREHOUSE_DB_NAME=dwhi_test
+      - WAREHOUSE_DB_USER=dwh_user
+      - WAREHOUSE_DB_PASSWORD=dwh_password
+      - WAREHOUSE_DB_HOST=db
+      - WAREHOUSE_DB_PORT=5432
+      - TAGS_DB_NAME=dwhi_test
+      - TAGS_DB_USER=dwh_user
+      - TAGS_DB_PASSWORD=dwh_password
+      - TAGS_DB_HOST=db
+      - TAGS_DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

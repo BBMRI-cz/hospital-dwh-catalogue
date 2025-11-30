@@ -1,6 +1,7 @@
 import psycopg2
 import json
 import re
+from decouple import config
 
 def generate_tags(text):
     """Generuje klíčová slova na základě názvu nebo popisu."""
@@ -51,13 +52,13 @@ def save_metadata(metadata, filename="metadata.json"):
     print(f"Metadata byla úspěšně uložena do souboru {filename}")
 
 def main():
-    # Připojení k databázi
+    # Připojení k databázi pomocí proměnných prostředí
     conn = psycopg2.connect(
-        dbname="",
-        user="",
-        password="",
-        host="",
-        port=""
+        dbname=config('TAGS_DB_NAME'),
+        user=config('TAGS_DB_USER'),
+        password=config('TAGS_DB_PASSWORD'),
+        host=config('TAGS_DB_HOST'),
+        port=config('TAGS_DB_PORT', default='5432')
     )
 
     try:
