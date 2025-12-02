@@ -4,7 +4,7 @@ services:
     container_name: hospital_dwh_db
     environment:
       POSTGRES_DB: dwhi_test
-      POSTGRES_USER: dwh_user
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: dwh_password
     ports:
       - "5432:5432"
@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/initdb.d:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dwh_user -d dwhi_test"]
+      test: ["CMD-SHELL", "pg_isready -U root -d dwhi_test"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,12 +34,12 @@ services:
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
       - WAREHOUSE_DB_ENGINE=django.db.backends.postgresql
       - WAREHOUSE_DB_NAME=dwhi_test
-      - WAREHOUSE_DB_USER=dwh_user
+      - WAREHOUSE_DB_USER=root
       - WAREHOUSE_DB_PASSWORD=dwh_password
       - WAREHOUSE_DB_HOST=db
       - WAREHOUSE_DB_PORT=5432
       - TAGS_DB_NAME=dwhi_test
-      - TAGS_DB_USER=dwh_user
+      - TAGS_DB_USER=root
       - TAGS_DB_PASSWORD=dwh_password
       - TAGS_DB_HOST=db
       - TAGS_DB_PORT=5432
