@@ -1,11 +1,9 @@
 from django.urls import path
 from . import views
 
-
-app_name = 'warehouse'  # Toto definuje namespace
+app_name = 'warehouse'  # Application namespace
 
 urlpatterns = [
-    path('katalog/', views.katalog, name='katalog')
-    # Přidejte další URL vzory pro aplikaci warehouse zde
+    path('catalogue/', views.CatalogueView.as_view(), name='catalogue'),
+    # Add more URL patterns for the warehouse application here
 ]
-

@@ -1,0 +1,96 @@
+{% load catalogue_tags %}
+
+<div class="filter-sidebar">
+    <div class="filter-header">
+        <br>
+        <div style="display: flex; align-items: center;">
+            <h4 style="margin: 0;"><i class="fa fa-filter"></i> Filtry</h4>
+            <button
+                id="clearFiltersButton"
+                class="clear-filters-btn"
+                style="margin-left: auto; width: auto; flex: 0 0 auto;">
+                Vymazat filtry
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtrační panel -->
+    <div class="filter-card">
+        <!-- Dostupnost dat -->
+        <h5><i class="fa-solid fa-database"></i>&nbspDostupnost dat</h5>
+        <div class="filter-box">
+            <ul class="filter-list" id="data-availability-list">
+                <li>
+                    <input type="checkbox" name="data_availability" id="filter-available-tables" data-availability="tables">
+                    <label for="filter-available-tables">
+                        <i class="fa-solid fa-circle-check" style="color: #afca0b;"></i>&nbsp Tabulky připraveny
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" name="data_availability" id="filter-available-classes" data-availability="classes">
+                    <label for="filter-available-classes">
+                        <i class="fa-solid fa-circle-question" style="color: #009fc9;"></i>&nbsp Surová data
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" name="data_availability" id="filter-available-none" data-availability="none">
+                    <label for="filter-available-none">
+                        <i class="fa-solid fa-circle-xmark" style="color: #888888;"></i>&nbsp Nedostupná data
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Klíčová slova -->
+        <h5><i class="fa-solid fa-tag"></i>&nbspKlíčová slova</h5>
+        <div class="filter-box">
+            <input type="text" class="filter-search" placeholder="Hledat...">
+            <ul class="filter-list" id="subject-tags-list">
+                {% for tag in subject_tags %}
+                    <li>
+                        <input type="checkbox" name="subject_tags" id="filter-subject-{{ tag|slugify }}" data-tag="{{ tag }}">
+                        <label for="filter-subject-{{ tag|slugify }}">{{ tag }}</label>
+                    </li>
+                {% empty %}
+                    <li>Žádná klíčová slova k zobrazení.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 1rem 0;" />
+
+        <!-- Zdroj dat -->
+        <h5><i class="fa-solid fa-globe"></i>&nbspZdroj dat</h5>
+        <div class="filter-box">
+            <input type="text" class="filter-search" placeholder="Hledat...">
+            <ul class="filter-list" id="data-source-list">
+                {% for source in data_sources %}
+                    <li>
+                        <input type="checkbox" name="data_source" id="filter-source-{{ source|slugify }}" data-holder="{{ source }}">
+                        <label for="filter-source-{{ source|slugify }}">{{ source }}</label>
+                    </li>
+                {% empty %}
+                    <li>Žádný zdroj dat k zobrazení.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 1rem 0;" />
+
+        <!-- Držitel práv -->
+        <h5><i class="fa-solid fa-section"></i>&nbspDržitel práv</h5>
+        <div class="filter-box">
+            <input type="text" class="filter-search" placeholder="Hledat...">
+            <ul class="filter-list" id="rights-holders-list">
+                {% for holder in rights_holders %}
+                    <li>
+                        <input type="checkbox" name="rights_holders" id="filter-holder-{{ holder|slugify }}" data-holder="{{ holder }}">
+                        <label for="filter-holder-{{ holder|slugify }}">{{ holder }}</label>
+                    </li>
+                {% empty %}
+                    <li>Žádný držitel práv k zobrazení.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

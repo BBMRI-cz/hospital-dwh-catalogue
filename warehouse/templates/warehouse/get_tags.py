@@ -54,11 +54,11 @@ def save_metadata(metadata, filename="metadata.json"):
 def main():
     # Připojení k databázi pomocí proměnných prostředí
     conn = psycopg2.connect(
-        dbname=config('TAGS_DB_NAME'),
-        user=config('TAGS_DB_USER'),
-        password=config('TAGS_DB_PASSWORD'),
-        host=config('TAGS_DB_HOST'),
-        port=config('TAGS_DB_PORT', default='5432')
+        dbname=config('METADATA_DB_NAME'),
+        user=config('METADATA_DB_USER'),
+        password=config('METADATA_DB_PASSWORD'),
+        host=config('METADATA_DB_HOST'),
+        port=config('METADATA_DB_PORT', default='5432')
     )
 
     try:
