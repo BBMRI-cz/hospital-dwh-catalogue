@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17
+    container_name: hospital_dwh_db_prod
+    env_file:
+      - .env
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hospital_network
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: hospital_dwh_web_prod
+    command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers 4
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=catalogue.settings.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - hospital_network
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  hospital_network:
+    driver: bridge
