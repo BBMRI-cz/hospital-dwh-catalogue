@@ -1,5 +1,5 @@
 """
-URL configuration for catalog project.
+URL configuration for catalogue project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -8,7 +8,7 @@ Function views
     1. Add an import:  from my_app import views
     2. Add a URL to urlpatterns:  path('', views.home, name='home')
 Class-based views
-    1. Add an import: from other_app.views import Home
+    1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 from warehouse import views as warehouse_views
 
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/warehouse/catalogue/', permanent=False)),
     path('admin/', admin.site.urls),
     path('warehouse/', include('warehouse.urls', namespace='warehouse')),
 ]
