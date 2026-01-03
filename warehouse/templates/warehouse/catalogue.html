@@ -1,7 +1,7 @@
 {% extends "warehouse/base.html" %}
-{% load static catalogue_tags humanize %}
+{% load static catalogue_tags humanize i18n %}
 
-{% block title %}Katalog dat MOÚ{% endblock %}
+{% block title %}{% trans "Data Catalogue MOÚ" %}{% endblock %}
 
 {% block vendor_css %}
     <link rel="stylesheet" href="{% static 'css/user_style.css' %}">
@@ -21,15 +21,17 @@
     <!-- Hlavní obsah -->
     <div class="content-area">
         <div class="container">
-            <h1>Katalog dat MOÚ</h1>
-            <p>Tento katalog slouží k evidenci datových zdrojů MOÚ za účelem jejich efektivního sdílení a sekundárního využívání.
-            Do katalogu jsou zařazeny datové zdroje ve správě Oddělení zdravotnických informací, které garantuje správnost informací,
-            kvalitu dat a poskytuje podporu při jejich využití.</p>
+            <h1>{% trans "Data Catalogue MOÚ" %}</h1>
+            <p>{% blocktranslate trimmed %}
+                This catalogue serves as a registry of MOÚ data sources for the purpose of their effective sharing and secondary use.
+                The catalogue includes data sources managed by the Department of Health Information, which guarantees the correctness 
+                of information, data quality and provides support in their use.
+            {% endblocktranslate %}</p>
 
             <!-- H2 nadpis s ikonou -->
             <h4>
-                Jak používat katalog&nbsp;
-                <i class="fa fa-info-circle" title="Kliknutím se zobrazí návod k použití katalogu." 
+                {% trans "How to use the catalogue" %}&nbsp;
+                <i class="fa fa-info-circle" title="{% trans 'Click to display the catalogue usage guide.' %}" 
                    style="margin-left: 8px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#howToModal"></i>
             </h4>
 
@@ -42,13 +44,13 @@
                     <table style="width: 100%;">
                         <tr>
                             <th style="width: 40%; color:#212b8f;">
-                                <h5><i class="fa-solid fa-magnifying-glass"></i>&nbspVyhledávání</h5>
+                                <h5><i class="fa-solid fa-magnifying-glass"></i>&nbsp{% trans "Search" %}</h5>
                             </th>
                         </tr>
                         <tr>
                             <td>
                                 <input id="searchInput" type="text" class="filter-search" name="query" 
-                                       placeholder="Zadejte hledaný text" value="{{ query }}" style="width: 80%;">
+                                       placeholder="{% trans 'Enter search text' %}" value="{{ query }}" style="width: 80%;">
                             </td>
                         </tr>
                     </table>
@@ -83,8 +85,8 @@
                                                     </span>
                                                 </small>
                                             {% endfor %}
-                                            <p><small class="source">Zdroj dat:&nbsp;{{ dataset.data_source.display_name|default:'-' }}</small></p>
-                                            <p><small class="rights-holder">Držitel práv: &nbsp;{{ dataset.rights_holder|default:'-' }}</small></p>
+                                            <p><small class="source">{% trans "Data source" %}:&nbsp;{{ dataset.data_source.display_name|default:'-' }}</small></p>
+                                            <p><small class="rights-holder">{% trans "Rights holder" %}: &nbsp;{{ dataset.rights_holder|default:'-' }}</small></p>
                                         </div>
                                     </div>
                                     <div class="dataset-footer toggle-footer {{ dataset|get_availability_class }}"

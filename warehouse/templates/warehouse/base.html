@@ -1,12 +1,13 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="cs" class="light-style layout-menu-fixed">
+<html lang="{{ LANGUAGE_CODE }}" class="light-style layout-menu-fixed">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>{% block title %}Katalog dat MOÚ{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Data warehouse catalogue{% endblock %}" />
+    <title>{% block title %}{% trans "Data Catalogue MOÚ" %}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{% trans "Data warehouse catalogue" %}{% endblock %}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'sneat/assets/img/favicon/favicon.ico' %}" />

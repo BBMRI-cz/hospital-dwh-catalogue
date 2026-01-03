@@ -1,15 +1,15 @@
-{% load catalogue_tags %}
+{% load catalogue_tags i18n %}
 
 <div class="filter-sidebar">
     <div class="filter-header">
         <br>
         <div style="display: flex; align-items: center;">
-            <h4 style="margin: 0;"><i class="fa fa-filter"></i> Filtry</h4>
+            <h4 style="margin: 0;"><i class="fa fa-filter"></i> {% trans "Filters" %}</h4>
             <button
                 id="clearFiltersButton"
                 class="clear-filters-btn"
                 style="margin-left: auto; width: auto; flex: 0 0 auto;">
-                Vymazat filtry
+                {% trans "Clear filters" %}
             </button>
         </div>
     </div>
@@ -17,34 +17,34 @@
     <!-- Filtrační panel -->
     <div class="filter-card">
         <!-- Dostupnost dat -->
-        <h5><i class="fa-solid fa-database"></i>&nbspDostupnost dat</h5>
+        <h5><i class="fa-solid fa-database"></i>&nbsp{% trans "Data availability" %}</h5>
         <div class="filter-box">
             <ul class="filter-list" id="data-availability-list">
                 <li>
                     <input type="checkbox" name="data_availability" id="filter-available-tables" data-availability="tables">
                     <label for="filter-available-tables">
-                        <i class="fa-solid fa-circle-check" style="color: #afca0b;"></i>&nbsp Tabulky připraveny
+                        <i class="fa-solid fa-circle-check" style="color: #afca0b;"></i>&nbsp {% trans "Tables ready" %}
                     </label>
                 </li>
                 <li>
                     <input type="checkbox" name="data_availability" id="filter-available-classes" data-availability="classes">
                     <label for="filter-available-classes">
-                        <i class="fa-solid fa-circle-question" style="color: #009fc9;"></i>&nbsp Surová data
+                        <i class="fa-solid fa-circle-question" style="color: #009fc9;"></i>&nbsp {% trans "Raw data" %}
                     </label>
                 </li>
                 <li>
                     <input type="checkbox" name="data_availability" id="filter-available-none" data-availability="none">
                     <label for="filter-available-none">
-                        <i class="fa-solid fa-circle-xmark" style="color: #888888;"></i>&nbsp Nedostupná data
+                        <i class="fa-solid fa-circle-xmark" style="color: #888888;"></i>&nbsp {% trans "Unavailable data" %}
                     </label>
                 </li>
             </ul>
         </div>
 
         <!-- Klíčová slova -->
-        <h5><i class="fa-solid fa-tag"></i>&nbspKlíčová slova</h5>
+        <h5><i class="fa-solid fa-tag"></i>&nbsp{% trans "Keywords" %}</h5>
         <div class="filter-box">
-            <input type="text" class="filter-search" placeholder="Hledat...">
+            <input type="text" class="filter-search" placeholder="{% trans 'Search...' %}">
             <ul class="filter-list" id="subject-tags-list">
                 {% for tag in subject_tags %}
                     <li>
@@ -52,7 +52,7 @@
                         <label for="filter-subject-{{ tag|slugify }}">{{ tag }}</label>
                     </li>
                 {% empty %}
-                    <li>Žádná klíčová slova k zobrazení.</li>
+                    <li>{% trans "No keywords to display." %}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -60,9 +60,9 @@
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 1rem 0;" />
 
         <!-- Zdroj dat -->
-        <h5><i class="fa-solid fa-globe"></i>&nbspZdroj dat</h5>
+        <h5><i class="fa-solid fa-globe"></i>&nbsp{% trans "Data source" %}</h5>
         <div class="filter-box">
-            <input type="text" class="filter-search" placeholder="Hledat...">
+            <input type="text" class="filter-search" placeholder="{% trans 'Search...' %}">
             <ul class="filter-list" id="data-source-list">
                 {% for source in data_sources %}
                     <li>
@@ -70,7 +70,7 @@
                         <label for="filter-source-{{ source|slugify }}">{{ source }}</label>
                     </li>
                 {% empty %}
-                    <li>Žádný zdroj dat k zobrazení.</li>
+                    <li>{% trans "No data sources to display." %}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -78,9 +78,9 @@
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 1rem 0;" />
 
         <!-- Držitel práv -->
-        <h5><i class="fa-solid fa-section"></i>&nbspDržitel práv</h5>
+        <h5><i class="fa-solid fa-section"></i>&nbsp{% trans "Rights holder" %}</h5>
         <div class="filter-box">
-            <input type="text" class="filter-search" placeholder="Hledat...">
+            <input type="text" class="filter-search" placeholder="{% trans 'Search...' %}">
             <ul class="filter-list" id="rights-holders-list">
                 {% for holder in rights_holders %}
                     <li>
@@ -88,7 +88,7 @@
                         <label for="filter-holder-{{ holder|slugify }}">{{ holder }}</label>
                     </li>
                 {% empty %}
-                    <li>Žádný držitel práv k zobrazení.</li>
+                    <li>{% trans "No rights holders to display." %}</li>
                 {% endfor %}
             </ul>
         </div>

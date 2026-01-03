@@ -1,33 +1,42 @@
+{% load i18n %}
 <!-- How to use catalogue modal -->
 <div class="modal fade" id="howToModal" tabindex="-1" aria-labelledby="howToModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="howToModalLabel">Jak používat katalog</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                <h2 class="modal-title" id="howToModalLabel">{% trans "How to use the catalogue" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
             </div>
             <div class="modal-body">
-                <h3>1. Vyhledávání:</h3>
+                <h3>{% trans "1. Search:" %}</h3>
                 <ul>
-                    <li>Do pole <strong>"Hledaný výraz"</strong> zadejte klíčová slova, která vás zajímají. Katalog prohledá názvy, popisy a klíčová slova datových sad.</li>
-                    <li>Stiskněte tlačítko <strong>"Vyhledat"</strong> (pokud je k dispozici).</li>
+                    <li>{% blocktranslate trimmed %}
+                        Enter keywords you are interested in into the "Search term" field. The catalogue will search through dataset names, descriptions and keywords.
+                    {% endblocktranslate %}</li>
+                    <li>{% blocktranslate trimmed %}
+                        Press the "Search" button (if available).
+                    {% endblocktranslate %}</li>
                 </ul>
 
-                <h3>2. Filtrování:</h3>
+                <h3>{% trans "2. Filtering:" %}</h3>
                 <ul>
-                    <li>Filtry jsou dostupné v levém panelu.</li>
-                    <li>Můžete filtrovat podle:
+                    <li>{% trans "Filters are available in the left panel." %}</li>
+                    <li>{% trans "You can filter by:" %}
                         <ul>
-                            <li><strong>Klíčových slov:</strong> Zaškrtněte relevantní klíčová slova. Pro rychlejší nalezení můžete použít vyhledávací pole v rámci každé sekce filtru.</li>
-                            <li><strong>Zdroje dat:</strong> Vyberte, z jakého zdroje data pocházejí.</li>
-                            <li><strong>Držitele práv:</strong> Zobrazte datové sady spravované konkrétním držitelem práv.</li>
+                            <li><strong>{% trans "Keywords:" %}</strong> {% blocktranslate trimmed %}
+                                Check relevant keywords. You can use the search field within each filter section for faster searching.
+                            {% endblocktranslate %}</li>
+                            <li><strong>{% trans "Data source:" %}</strong> {% trans "Select which source the data comes from." %}</li>
+                            <li><strong>{% trans "Rights holder:" %}</strong> {% trans "Display datasets managed by a specific rights holder." %}</li>
                         </ul>
                     </li>
-                    <li>Po zaškrtnutí filtrů se automaticky zobrazí odpovídající datové sady.</li>
-                    <li>Pro vymazání všech nastavených filtrů klikněte na tlačítko <strong>"Vymazat filtry"</strong>.</li>
+                    <li>{% trans "After checking the filters, the corresponding datasets will be automatically displayed." %}</li>
+                    <li>{% blocktranslate trimmed %}
+                        To clear all set filters, click the "Clear filters" button.
+                    {% endblocktranslate %}</li>
                 </ul>
 
-                <h3>3. Prohlížení datových sad:</h3>
+                <h3>{% trans "3. Browsing datasets:" %}</h3>
                 <ul>
                     <li>
                         Každá datová sada <i class="fa-solid fa-folder-tree icon-blue"></i> je zobrazena jako karta.
