@@ -42,7 +42,7 @@ class CatalogueView(ListView):
         # Get unique data sources
         context['data_sources'] = sorted(
             DatasetList.objects.values_list(
-                'data_source__display_name', flat=True
+                'data_source__data_source_name', flat=True
             ).distinct()
         )
         
