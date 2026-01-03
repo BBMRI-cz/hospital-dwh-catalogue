@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 class DatasourceList(models.Model):
     """Data sources for the warehouse catalogue"""
@@ -10,8 +11,8 @@ class DatasourceList(models.Model):
     class Meta:
         managed = False
         db_table = 'metadata"."datasource_list'
-        verbose_name = 'Data Source'
-        verbose_name_plural = 'Data Sources'
+        verbose_name = _('Data Source')
+        verbose_name_plural = _('Data Sources')
 
     def __str__(self):
         return self.data_source_name or self.data_source
@@ -46,8 +47,8 @@ class DatasetList(models.Model):
     class Meta:
         managed = False
         db_table = 'metadata"."dataset_list'
-        verbose_name = 'Dataset'
-        verbose_name_plural = 'Datasets'
+        verbose_name = _('Dataset')
+        verbose_name_plural = _('Datasets')
         ordering = ['data_set_name']
 
     def __str__(self):
@@ -118,8 +119,8 @@ class DataclassList(models.Model):
     class Meta:
         managed = False
         db_table = 'metadata"."dataclass_list'
-        verbose_name = 'Data Class'
-        verbose_name_plural = 'Data Classes'
+        verbose_name = _('Data Class')
+        verbose_name_plural = _('Data Classes')
         ordering = ['data_class_name']
 
     def __str__(self):
@@ -205,8 +206,8 @@ class DbTableList(models.Model):
     class Meta:
         managed = False
         db_table = 'metadata"."db_table_list'
-        verbose_name = 'Database Table'
-        verbose_name_plural = 'Database Tables'
+        verbose_name = _('Database Table')
+        verbose_name_plural = _('Database Tables')
         ordering = ['db_table_name']
 
     def __str__(self):
