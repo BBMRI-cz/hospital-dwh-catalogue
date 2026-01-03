@@ -1,29 +1,24 @@
 {% load i18n %}
 
-<form action="{% url 'set_language' %}" method="post" class="language-switcher">
+{% get_current_language as LANGUAGE_CODE %}
+<div class="btn-group" role="group" aria-label="Language selector">
+    <button type="button" onclick="switchLanguage('cs')" class="btn btn-sm {% if LANGUAGE_CODE == 'cs' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        CZ
+    </button>
+    <button type="button" onclick="switchLanguage('en')" class="btn btn-sm {% if LANGUAGE_CODE == 'en' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        EN
+    </button>
+</div>
+
+<form id="language-form" action="{% url 'set_language' %}" method="post" style="display: none;">
     {% csrf_token %}
-    <input name="next" type="hidden" value="{{ redirect_to }}" />
-    <select name="language" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto;">
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% for lang_code, lang_name in LANGUAGES %}
-            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
-                {{ lang_name }}
-            </option>
-        {% endfor %}
-    </select>
+    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
+    <input name="language" type="hidden" id="language-input" value="" />
 </form>
 
-<style>
-.language-switcher {
-    margin: 0;
-    padding: 0;
+<script>
+function switchLanguage(langCode) {
+    document.getElementById('language-input').value = langCode;
+    document.getElementById('language-form').submit();
 }
-
-.language-switcher select {
-    border: 1px solid #d4d8dd;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 0.875rem;
-}
-</style>
+</script>
