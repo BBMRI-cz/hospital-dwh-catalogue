@@ -1,0 +1,173 @@
+# English translation for Hospital DWH Catalogue
+# Copyright (C) 2026
+# This file is distributed under the same license as the catalogue package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 12:00+0100\n"
+"PO-Revision-Date: 2026-01-02 12:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Czech"
+msgstr "Czech"
+
+msgid "English"
+msgstr "English"
+
+msgid "Data Catalogue MOÚ"
+msgstr "MOÚ Data Catalogue"
+
+msgid "Data warehouse catalogue"
+msgstr "Data warehouse catalogue"
+
+msgid ""
+"This catalogue serves as a registry of MOÚ data sources for the purpose of "
+"their effective sharing and secondary use. The catalogue includes data "
+"sources managed by the Department of Health Information, which guarantees "
+"the correctness of information, data quality and provides support in their "
+"use."
+msgstr ""
+"This catalogue serves as a registry of MOÚ data sources for the purpose of "
+"their effective sharing and secondary use. The catalogue includes data "
+"sources managed by the Department of Health Information, which guarantees "
+"the correctness of information, data quality and provides support in their "
+"use."
+
+msgid "How to use the catalogue"
+msgstr "How to use the catalogue"
+
+msgid "Click to display the catalogue usage guide."
+msgstr "Click to display the catalogue usage guide."
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Enter search text"
+msgstr "Enter search text"
+
+msgid "Data source"
+msgstr "Data source"
+
+msgid "Rights holder"
+msgstr "Rights holder"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "1. Search:"
+msgstr "1. Search:"
+
+msgid ""
+"Enter keywords you are interested in into the \"Search term\" field. The "
+"catalogue will search through dataset names, descriptions and keywords."
+msgstr ""
+"Enter keywords you are interested in into the \"Search term\" field. The "
+"catalogue will search through dataset names, descriptions and keywords."
+
+msgid "Press the \"Search\" button (if available)."
+msgstr "Press the \"Search\" button (if available)."
+
+msgid "2. Filtering:"
+msgstr "2. Filtering:"
+
+msgid "Filters are available in the left panel."
+msgstr "Filters are available in the left panel."
+
+msgid "You can filter by:"
+msgstr "You can filter by:"
+
+msgid "Keywords:"
+msgstr "Keywords:"
+
+msgid ""
+"Check relevant keywords. You can use the search field within each filter "
+"section for faster searching."
+msgstr ""
+"Check relevant keywords. You can use the search field within each filter "
+"section for faster searching."
+
+msgid "Data source:"
+msgstr "Data source:"
+
+msgid "Select which source the data comes from."
+msgstr "Select which source the data comes from."
+
+msgid "Rights holder:"
+msgstr "Rights holder:"
+
+msgid "Display datasets managed by a specific rights holder."
+msgstr "Display datasets managed by a specific rights holder."
+
+msgid "After checking the filters, the corresponding datasets will be automatically displayed."
+msgstr "After checking the filters, the corresponding datasets will be automatically displayed."
+
+msgid "To clear all set filters, click the \"Clear filters\" button."
+msgstr "To clear all set filters, click the \"Clear filters\" button."
+
+msgid "3. Browsing datasets:"
+msgstr "3. Browsing datasets:"
+
+msgid "Data Source"
+msgstr "Data Source"
+
+msgid "Data Sources"
+msgstr "Data Sources"
+
+msgid "Dataset"
+msgstr "Dataset"
+
+msgid "Datasets"
+msgstr "Datasets"
+
+msgid "Data Class"
+msgstr "Data Class"
+
+msgid "Data Classes"
+msgstr "Data Classes"
+
+msgid "Database Table"
+msgstr "Database Table"
+
+msgid "Database Tables"
+msgstr "Database Tables"
+
+msgid "Filters"
+msgstr "Filters"
+
+msgid "Clear filters"
+msgstr "Clear filters"
+
+msgid "Data availability"
+msgstr "Data availability"
+
+msgid "Tables ready"
+msgstr "Tables ready"
+
+msgid "Raw data"
+msgstr "Raw data"
+
+msgid "Unavailable data"
+msgstr "Unavailable data"
+
+msgid "Keywords"
+msgstr "Keywords"
+
+msgid "Search..."
+msgstr "Search..."
+
+msgid "No keywords to display."
+msgstr "No keywords to display."
+
+msgid "No data sources to display."
+msgstr "No data sources to display."
+
+msgid "No rights holders to display."
+msgstr "No rights holders to display."

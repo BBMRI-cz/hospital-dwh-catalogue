@@ -1,0 +1,172 @@
+# Czech translation for Hospital DWH Catalogue
+# Copyright (C) 2026
+# This file is distributed under the same license as the catalogue package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 12:00+0100\n"
+"PO-Revision-Date: 2026-01-02 12:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: Czech\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+msgid "Czech"
+msgstr "Čeština"
+
+msgid "English"
+msgstr "Angličtina"
+
+msgid "Data Catalogue MOÚ"
+msgstr "Katalog dat MOÚ"
+
+msgid "Data warehouse catalogue"
+msgstr "Katalog datového skladu"
+
+msgid ""
+"This catalogue serves as a registry of MOÚ data sources for the purpose of "
+"their effective sharing and secondary use. The catalogue includes data "
+"sources managed by the Department of Health Information, which guarantees "
+"the correctness of information, data quality and provides support in their "
+"use."
+msgstr ""
+"Tento katalog slouží k evidenci datových zdrojů MOÚ za účelem jejich "
+"efektivního sdílení a sekundárního využívání. Do katalogu jsou zařazeny "
+"datové zdroje ve správě Oddělení zdravotnických informací, které garantuje "
+"správnost informací, kvalitu dat a poskytuje podporu při jejich využití."
+
+msgid "How to use the catalogue"
+msgstr "Jak používat katalog"
+
+msgid "Click to display the catalogue usage guide."
+msgstr "Kliknutím se zobrazí návod k použití katalogu."
+
+msgid "Search"
+msgstr "Vyhledávání"
+
+msgid "Enter search text"
+msgstr "Zadejte hledaný text"
+
+msgid "Data source"
+msgstr "Zdroj dat"
+
+msgid "Rights holder"
+msgstr "Držitel práv"
+
+msgid "Close"
+msgstr "Zavřít"
+
+msgid "1. Search:"
+msgstr "1. Vyhledávání:"
+
+msgid ""
+"Enter keywords you are interested in into the \"Search term\" field. The "
+"catalogue will search through dataset names, descriptions and keywords."
+msgstr ""
+"Do pole \"Hledaný výraz\" zadejte klíčová slova, která vás zajímají. Katalog "
+"prohledá názvy, popisy a klíčová slova datových sad."
+
+msgid "Press the \"Search\" button (if available)."
+msgstr "Stiskněte tlačítko \"Vyhledat\" (pokud je k dispozici)."
+
+msgid "2. Filtering:"
+msgstr "2. Filtrování:"
+
+msgid "Filters are available in the left panel."
+msgstr "Filtry jsou dostupné v levém panelu."
+
+msgid "You can filter by:"
+msgstr "Můžete filtrovat podle:"
+
+msgid "Keywords:"
+msgstr "Klíčových slov:"
+
+msgid ""
+"Check relevant keywords. You can use the search field within each filter "
+"section for faster searching."
+msgstr ""
+"Zaškrtněte relevantní klíčová slova. Pro rychlejší nalezení můžete použít "
+"vyhledávací pole v rámci každé sekce filtru."
+
+msgid "Data source:"
+msgstr "Zdroje dat:"
+
+msgid "Select which source the data comes from."
+msgstr "Vyberte, z jakého zdroje data pocházejí."
+
+msgid "Rights holder:"
+msgstr "Držitele práv:"
+
+msgid "Display datasets managed by a specific rights holder."
+msgstr "Zobrazte datové sady spravované konkrétním držitelem práv."
+
+msgid "After checking the filters, the corresponding datasets will be automatically displayed."
+msgstr "Po zaškrtnutí filtrů se automaticky zobrazí odpovídající datové sady."
+
+msgid "To clear all set filters, click the \"Clear filters\" button."
+msgstr "Pro vymazání všech nastavených filtrů klikněte na tlačítko \"Vymazat filtry\"."
+
+msgid "3. Browsing datasets:"
+msgstr "3. Prohlížení datových sad:"
+
+msgid "Data Source"
+msgstr "Datový zdroj"
+
+msgid "Data Sources"
+msgstr "Datové zdroje"
+
+msgid "Dataset"
+msgstr "Datová sada"
+
+msgid "Datasets"
+msgstr "Datové sady"
+
+msgid "Data Class"
+msgstr "Datová třída"
+
+msgid "Data Classes"
+msgstr "Datové třídy"
+
+msgid "Database Table"
+msgstr "Databázová tabulka"
+
+msgid "Database Tables"
+msgstr "Databázové tabulky"
+
+msgid "Filters"
+msgstr "Filtry"
+
+msgid "Clear filters"
+msgstr "Vymazat filtry"
+
+msgid "Data availability"
+msgstr "Dostupnost dat"
+
+msgid "Tables ready"
+msgstr "Tabulky připraveny"
+
+msgid "Raw data"
+msgstr "Surová data"
+
+msgid "Unavailable data"
+msgstr "Nedostupná data"
+
+msgid "Keywords"
+msgstr "Klíčová slova"
+
+msgid "Search..."
+msgstr "Hledat..."
+
+msgid "No keywords to display."
+msgstr "Žádná klíčová slova k zobrazení."
+
+msgid "No data sources to display."
+msgstr "Žádný zdroj dat k zobrazení."
+
+msgid "No rights holders to display."
+msgstr "Žádný držitel práv k zobrazení."
