@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: hospital_dwh_web_test
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py compilemessages && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
       - /app/venv

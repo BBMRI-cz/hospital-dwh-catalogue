@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: hospital_dwh_web_prod
-    command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers 4
+    command: sh -c "python manage.py compilemessages && gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS}"
     volumes:
       - ./staticfiles:/app/staticfiles
       - ./logs:/app/logs

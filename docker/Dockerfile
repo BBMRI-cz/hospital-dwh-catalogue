@@ -6,9 +6,10 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install PostgreSQL client
+# Install PostgreSQL client and gettext for translations
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    gettext \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
