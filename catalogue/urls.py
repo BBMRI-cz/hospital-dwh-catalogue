@@ -17,11 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
+from django.conf.urls.i18n import i18n_patterns
 from warehouse import views as warehouse_views
 
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+urlpatterns += i18n_patterns(
     path('', RedirectView.as_view(url='/warehouse/catalogue/', permanent=False)),
     path('admin/', admin.site.urls),
     path('warehouse/', include('warehouse.urls', namespace='warehouse')),
-]
+    prefix_default_language=True
+)
