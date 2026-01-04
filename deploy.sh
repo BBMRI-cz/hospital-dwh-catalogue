@@ -27,7 +27,9 @@ if [ ! -f ".env" ]; then
 fi
 
 # Load environment variables from .env file
-export $(grep -v '^#' .env | xargs)
+set -a
+source .env
+set +a
 
 # Check if DEPLOY_ENV is set
 if [ -z "$DEPLOY_ENV" ]; then
