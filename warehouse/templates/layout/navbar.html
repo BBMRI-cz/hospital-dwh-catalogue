@@ -1,6 +1,20 @@
 {% load static %}
+{% load i18n %}
 <nav class="navbar" id="layout-navbar" style="margin-right: 20px !important;">
-  <div class="navbar-nav-right d-flex align-items-center justify-content-end w-100" id="navbar-collapse">
+  <div class="navbar-nav-right d-flex align-items-center justify-content-between w-100" id="navbar-collapse">
+    <!-- Navigation Links -->
+    <div class="navbar-nav">
+      <a href="{% url 'warehouse:catalogue' %}" class="nav-link {% if request.resolver_match.url_name == 'catalogue' %}active{% endif %}">
+        <i class="fas fa-database custom-icon me-1"></i>
+        {% trans "Catalogue" %}
+      </a>
+      <a href="{% url 'fair_genomes:personal_list' %}" class="nav-link {% if 'fair_genomes' in request.resolver_match.namespace %}active{% endif %}">
+        <i class="fas fa-dna custom-icon me-1"></i>
+        {% trans "Fair Genomes" %}
+      </a>
+    </div>
+    
+    <!-- Language Switcher -->
     {% include 'layout/language_switcher.html' %}
   </div>
 </nav>
@@ -9,7 +23,23 @@
     background-color: white !important;
     color: #212b8f !important;
   }
-    .custom-icon {
+  .custom-icon {
     color: #212b8f !important; /* modrá barva pro ikony */
+  }
+  .navbar-nav .nav-link {
+    color: #212b8f;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  .navbar-nav .nav-link:hover {
+    color: #1a2270;
+    background-color: rgba(33, 43, 143, 0.05);
+    border-radius: 0.25rem;
+  }
+  .navbar-nav .nav-link.active {
+    color: #1a2270;
+    background-color: rgba(33, 43, 143, 0.1);
+    border-radius: 0.25rem;
   }
 </style>
