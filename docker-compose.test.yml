@@ -20,10 +20,10 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: hospital_dwh_web_test
-    command: sh -c "python manage.py compilemessages && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint.sh"]
+    command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers 2
     volumes:
       - .:/app
-      - /app/venv
     ports:
       - "8080:8000"
     env_file:

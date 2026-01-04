@@ -6,6 +6,7 @@ services:
       - .env
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+      - ./docker/postgres/initdb.d:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -20,7 +21,8 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: hospital_dwh_web_prod
-    command: sh -c "python manage.py compilemessages && gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS}"
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint.sh"]
+    command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS}
     volumes:
       - ./staticfiles:/app/staticfiles
       - ./logs:/app/logs
