@@ -36,3 +36,4 @@ services:
 
 volumes:
   postgres_data_dev:
+    name: hospital_dwh_postgres_data_dev
