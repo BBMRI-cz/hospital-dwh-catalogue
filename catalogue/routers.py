@@ -1,18 +1,43 @@
+"""
+Database routers for multi-database setup.
+"""
+
+
 class WarehouseRouter:
+    """
+    Router for warehouse metadata and Fair Genomes data.
+    
+    - 'fair_genomes' app models -> fair_genomes_db
+    - 'warehouse' app models -> metadata_db
+    - Everything else -> default
+    """
+    
     def db_for_read(self, model, **hints):
+        """Direct read operations to appropriate database."""
+        if model._meta.app_label == 'fair_genomes':
+            return 'fair_genomes_db'
         if model._meta.app_label == 'warehouse':
             return 'metadata_db'
         return 'default'
 
     def db_for_write(self, model, **hints):
+        """Direct write operations to appropriate database."""
+        if model._meta.app_label == 'fair_genomes':
+            return 'fair_genomes_db'
         if model._meta.app_label == 'warehouse':
             return 'metadata_db'
         return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
-        return True
+        """Allow relations if models are in the same database."""
+        db1 = self.db_for_read(obj1.__class__)
+        db2 = self.db_for_read(obj2.__class__)
+        return db1 == db2
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
+        """Ensure models are created in the correct database."""
+        if app_label == 'fair_genomes':
+            return db == 'fair_genomes_db'
         if app_label == 'warehouse':
             return db == 'metadata_db'
         return db == 'default'

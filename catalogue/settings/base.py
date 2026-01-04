@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     # My apps
     'warehouse',
+    'fair_genomes',
 ]
 
 MIDDLEWARE = [
@@ -80,6 +81,17 @@ DATABASES = {
         'PASSWORD': config('METADATA_DB_PASSWORD'),
         'HOST': config('METADATA_DB_HOST'),
         'PORT': config('METADATA_DB_PORT', default='5432'),
+        'OPTIONS': {
+            'connect_timeout': 30,
+        }
+    },
+    'fair_genomes_db': {
+        'ENGINE': config('FAIR_GENOMES_DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': config('FAIR_GENOMES_DB_NAME', default='fair_genomes'),
+        'USER': config('FAIR_GENOMES_DB_USER', default='postgres'),
+        'PASSWORD': config('FAIR_GENOMES_DB_PASSWORD'),
+        'HOST': config('FAIR_GENOMES_DB_HOST', default='localhost'),
+        'PORT': config('FAIR_GENOMES_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
         }
@@ -146,3 +158,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Fair Genomes GraphQL API Configuration
+FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL')
+FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN')
+FAIR_GENOMES_FETCH_ON_STARTUP = config('FAIR_GENOMES_FETCH_ON_STARTUP', default=False, cast=bool)
+FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
+

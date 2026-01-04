@@ -26,8 +26,9 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
-    path('', RedirectView.as_view(url='/warehouse/catalogue/', permanent=False)),
+    path('', RedirectView.as_view(url='/warehouse/', permanent=False)),
     path('admin/', admin.site.urls),
     path('warehouse/', include('warehouse.urls', namespace='warehouse')),
+    path('fair-genomes/', include('fair_genomes.urls', namespace='fair_genomes')),
     prefix_default_language=True
 )
