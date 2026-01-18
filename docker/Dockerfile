@@ -22,5 +22,5 @@ COPY . /app/
 
 EXPOSE 8000
 
-# Gunicorn by default - docker-compose overrides this for dev/test
+# Gunicorn by default - docker compose overrides this for dev/test
 CMD ["gunicorn", "catalogue.wsgi:application", "--bind", "0.0.0.0:8000"]
