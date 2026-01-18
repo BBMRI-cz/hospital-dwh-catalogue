@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Deploy script for hospital-dwh-catalogue
 # Usage: ./deploy.sh
@@ -28,7 +28,7 @@ fi
 
 # Load environment variables from .env file
 set -a
-source .env
+. ./.env
 set +a
 
 # Check if DEPLOY_ENV is set
@@ -39,15 +39,20 @@ if [ -z "$DEPLOY_ENV" ]; then
 fi
 
 # Validate DEPLOY_ENV value
-if [[ ! "$DEPLOY_ENV" =~ ^(dev|prod|test)$ ]]; then
-    echo -e "${RED}Error: Invalid DEPLOY_ENV value: $DEPLOY_ENV${NC}"
-    echo -e "${YELLOW}DEPLOY_ENV must be one of: dev, prod, test${NC}"
-    exit 1
-fi
+case "$DEPLOY_ENV" in
+    dev|prod|test)
+        # Valid environment
+        ;;
+    *)
+        echo -e "${RED}Error: Invalid DEPLOY_ENV value: $DEPLOY_ENV${NC}"
+        echo -e "${YELLOW}DEPLOY_ENV must be one of: dev, prod, test${NC}"
+        exit 1
+        ;;
+esac
 
 echo -e "${GREEN}Deploying to: ${YELLOW}$DEPLOY_ENV${GREEN} environment${NC}"
 
-# Set the docker-compose file based on environment
+# Set the docker compose file based on environment
 COMPOSE_FILE="docker-compose.$DEPLOY_ENV.yml"
 
 if [ ! -f "$COMPOSE_FILE" ]; then
@@ -55,7 +60,7 @@ if [ ! -f "$COMPOSE_FILE" ]; then
     exit 1
 fi
 
-echo -e "${GREEN}Using docker-compose file: ${YELLOW}$COMPOSE_FILE${NC}"
+echo -e "${GREEN}Using docker compose file: ${YELLOW}$COMPOSE_FILE${NC}"
 
 # Pull latest changes (skip for dev environment)
 if [ "$DEPLOY_ENV" != "dev" ]; then
@@ -72,11 +77,11 @@ fi
 
 # Stop existing containers
 echo -e "${GREEN}Stopping existing containers...${NC}"
-docker-compose -f "$COMPOSE_FILE" down
+docker compose -f "$COMPOSE_FILE" down
 
 # Build and start containers
 echo -e "${GREEN}Building and starting containers...${NC}"
-docker-compose -f "$COMPOSE_FILE" up -d --build
+docker compose -f "$COMPOSE_FILE" up -d --build
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}========================================${NC}"
@@ -86,7 +91,7 @@ if [ $? -eq 0 ]; then
     
     # Show running containers
     echo -e "${GREEN}Running containers:${NC}"
-    docker-compose -f "$COMPOSE_FILE" ps
+docker compose -f "$COMPOSE_FILE" ps
 else
     echo -e "${RED}========================================${NC}"
     echo -e "${RED}Deployment failed!${NC}"
