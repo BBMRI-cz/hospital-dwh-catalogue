@@ -74,6 +74,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
+    'auth_db': {
+        'ENGINE': config('AUTH_DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': config('AUTH_DB_NAME', default='hospital_dwh_auth'),
+        'USER': config('AUTH_DB_USER'),
+        'PASSWORD': config('AUTH_DB_PASSWORD'),
+        'HOST': config('AUTH_DB_HOST'),
+        'PORT': config('AUTH_DB_PORT', default='5432'),
+        'OPTIONS': {
+            'connect_timeout': 30,
+        }
+    },
     'metadata_db': {
         'ENGINE': config('METADATA_DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': config('METADATA_DB_NAME'),
@@ -98,7 +109,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['catalogue.routers.WarehouseRouter']
+DATABASE_ROUTERS = ['catalogue.routers.AuthRouter', 'catalogue.routers.WarehouseRouter']
 
 
 # Password validation
