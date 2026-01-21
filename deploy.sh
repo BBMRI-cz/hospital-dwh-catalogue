@@ -4,8 +4,6 @@
 # Usage: ./deploy.sh
 # Requires: .env file with DEPLOY_ENV variable set
 
-set -e  # Exit on any error
-
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -68,7 +66,6 @@ if [ "$DEPLOY_ENV" != "dev" ]; then
     git pull origin $(git branch --show-current)
     if [ $? -ne 0 ]; then
         echo -e "${RED}Error: Failed to pull latest changes${NC}"
-        exit 1
     fi
     echo -e "${GREEN}Successfully pulled latest changes${NC}"
 else
