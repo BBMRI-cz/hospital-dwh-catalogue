@@ -41,16 +41,16 @@ class CatalogueView(ListView):
         
         # Get unique data sources
         context['data_sources'] = sorted(
-            DatasetList.objects.values_list(
+            filter(None, DatasetList.objects.values_list(
                 'data_source__data_source_name', flat=True
-            ).distinct()
+            ).distinct())
         )
         
         # Get unique rights holders
         context['rights_holders'] = sorted(
-            DatasetList.objects.exclude(
+            filter(None, DatasetList.objects.exclude(
                 rights_holder=''
-            ).values_list('rights_holder', flat=True).distinct()
+            ).values_list('rights_holder', flat=True).distinct())
         )
         
         return context
