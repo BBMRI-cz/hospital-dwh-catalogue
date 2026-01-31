@@ -1,13 +1,30 @@
+"""
+Warehouse Views
+
+Class-based views for the warehouse catalogue application.
+"""
+from typing import Any
+
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest
 from django.views.generic import ListView
-from django.db.models import Q
+
 from .models import DatasetList
 
+
 class CatalogueView(ListView):
+    """
+    Main catalogue view displaying all datasets.
+    
+    Supports filtering by:
+    - Search query (name, description, subject)
+    """
     model = DatasetList
     template_name = 'warehouse/catalogue.html'
     context_object_name = 'datasets'
     
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[DatasetList]:
+        """Return filtered queryset with optimized prefetching."""
         queryset = DatasetList.objects.select_related(
             'data_source'
         ).prefetch_related('dataclasses__db_tables')
@@ -22,7 +39,8 @@ class CatalogueView(ListView):
         
         return queryset
     
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add filter options to context."""
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('query', '')
         
@@ -54,5 +72,6 @@ class CatalogueView(ListView):
         )
         
         return context
+
 
 catalogue = CatalogueView.as_view()

@@ -159,27 +159,93 @@ class DataclassList(models.Model):
 
 
 class DataclassTableSchemes(models.Model):
-    """Column definitions for data class tables"""
+    """Column definitions for data class tables."""
     pk = models.CompositePrimaryKey('data_class', 'col_order')
-    data_class = models.CharField(max_length=100, db_column='data_class')
-    col_order = models.SmallIntegerField()
-    col_var = models.CharField(max_length=100, null=True, blank=True)
-    col_name = models.CharField(max_length=255, null=True, blank=True)
-    col_description = models.TextField(null=True, blank=True)
-    col_var_r = models.CharField(max_length=100, null=True, blank=True)
-    col_transf_r = models.SmallIntegerField(null=True, blank=True)
-    datatype_r = models.CharField(max_length=20, null=True, blank=True)
-    possible_key = models.CharField(max_length=100, null=True, blank=True)
-    tag = models.CharField(max_length=100, null=True, blank=True)
-    confidentality = models.SmallIntegerField(null=True, blank=True)
-    vocabulary = models.TextField(null=True, blank=True)
-    calculated = models.SmallIntegerField(null=True, blank=True)
-    madatory = models.SmallIntegerField(null=True, blank=True)
-    unit = models.CharField(max_length=20, null=True, blank=True)
+    data_class = models.CharField(
+        max_length=100,
+        db_column='data_class',
+        verbose_name=_('Data Class')
+    )
+    col_order = models.SmallIntegerField(verbose_name=_('Column Order'))
+    col_var = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_('Column Variable')
+    )
+    col_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_('Column Name')
+    )
+    col_description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Column Description')
+    )
+    col_var_r = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_('R Variable')
+    )
+    col_transf_r = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('R Transformation')
+    )
+    datatype_r = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_('R Datatype')
+    )
+    possible_key = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_('Possible Key')
+    )
+    tag = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_('Tag')
+    )
+    confidentality = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Confidentiality Level')
+    )
+    vocabulary = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Vocabulary')
+    )
+    calculated = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Calculated')
+    )
+    mandatory = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        db_column='madatory',  # Note: preserves original DB column spelling
+        verbose_name=_('Mandatory')
+    )
+    unit = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_('Unit')
+    )
 
     class Meta:
         managed = False
         db_table = 'metadata"."dataclass_table_schemes'
+        verbose_name = _('Data Class Table Schema')
+        verbose_name_plural = _('Data Class Table Schemas')
         ordering = ['col_order']
 
     def __str__(self):
@@ -231,21 +297,62 @@ class DbTableList(models.Model):
 
 
 class DbTableSchemes(models.Model):
-    """Column definitions for database tables"""
+    """Column definitions for database tables."""
     pk = models.CompositePrimaryKey('db_table', 'var')
-    db_table = models.CharField(max_length=100, db_column='db_table')
-    var_order = models.SmallIntegerField(null=True, blank=True)
-    var = models.CharField(max_length=100)
-    key_db = models.CharField(max_length=100, null=True, blank=True)
-    type_db = models.CharField(max_length=20, null=True, blank=True)
-    type_r = models.CharField(max_length=20, null=True, blank=True)
-    var_name = models.CharField(max_length=255, null=True, blank=True)
-    var_description = models.TextField(null=True, blank=True)
-    vocabulary = models.TextField(null=True, blank=True)
+    db_table = models.CharField(
+        max_length=100,
+        db_column='db_table',
+        verbose_name=_('Database Table')
+    )
+    var_order = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Variable Order')
+    )
+    var = models.CharField(
+        max_length=100,
+        verbose_name=_('Variable')
+    )
+    key_db = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_('Database Key')
+    )
+    type_db = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_('Database Type')
+    )
+    type_r = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name=_('R Type')
+    )
+    var_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_('Variable Name')
+    )
+    var_description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Variable Description')
+    )
+    vocabulary = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Vocabulary')
+    )
 
     class Meta:
         managed = False
         db_table = 'metadata"."db_table_schemes'
+        verbose_name = _('Database Table Schema')
+        verbose_name_plural = _('Database Table Schemas')
         ordering = ['var_order']
 
     def __str__(self):

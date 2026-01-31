@@ -151,10 +151,34 @@ TIME_ZONE = 'Europe/Prague'
 
 USE_I18N = True
 
-# Note: USE_L10N is deprecated in Django 4.0+ and defaults to True
-USE_L10N = True
-
 USE_TZ = True
+
+
+# Logging base configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)
