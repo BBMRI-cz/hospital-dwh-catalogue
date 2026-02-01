@@ -68,6 +68,8 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run mypy
+        env:
+          USE_SQLITE: "True"
         run: |
           echo "Running type checker..."
           if mypy .; then
@@ -102,7 +104,6 @@ jobs:
 
       - name: Check for missing translations
         env:
-          SECRET_KEY: "test-secret-key-for-ci"
           DJANGO_SETTINGS_MODULE: "catalogue.settings.test"
           USE_SQLITE: "True"
         run: |
