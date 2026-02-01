@@ -30,5 +30,6 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('warehouse/', include('warehouse.urls', namespace='warehouse')),
     path('fair-genomes/', include('fair_genomes.urls', namespace='fair_genomes')),
+    path('ticketing/', include('ticketing.urls', namespace='ticketing')),
     prefix_default_language=True
 )

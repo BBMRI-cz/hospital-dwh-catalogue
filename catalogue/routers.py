@@ -49,6 +49,7 @@ class WarehouseRouter:
     
     - 'fair_genomes' app models -> fair_genomes_db
     - 'warehouse' app models -> metadata_db
+    - 'ticketing' app models -> default (same as auth_db in most setups)
     - Everything else -> default
     """
     
@@ -58,6 +59,8 @@ class WarehouseRouter:
             return 'fair_genomes_db'
         if model._meta.app_label == 'warehouse':
             return 'metadata_db'
+        if model._meta.app_label == 'ticketing':
+            return 'default'
         return 'default'
 
     def db_for_write(self, model, **hints):
@@ -66,6 +69,8 @@ class WarehouseRouter:
             return 'fair_genomes_db'
         if model._meta.app_label == 'warehouse':
             return 'metadata_db'
+        if model._meta.app_label == 'ticketing':
+            return 'default'
         return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
@@ -80,5 +85,7 @@ class WarehouseRouter:
             return db == 'fair_genomes_db'
         if app_label == 'warehouse':
             return db == 'metadata_db'
+        if app_label == 'ticketing':
+            return db == 'default'
         return db == 'default'
     

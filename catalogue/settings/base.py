@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     # My apps
     'warehouse',
     'fair_genomes',
+    'ticketing',
 ]
 
 MIDDLEWARE = [
@@ -200,4 +201,20 @@ FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL')
 FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN')
 FAIR_GENOMES_FETCH_ON_STARTUP = config('FAIR_GENOMES_FETCH_ON_STARTUP', default=False, cast=bool)
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
+
+
+# Alvao Service Desk Configuration
+# Set ALVAO_USE_MOCK=True for development without real Alvao server
+ALVAO_USE_MOCK = config('ALVAO_USE_MOCK', default=False, cast=bool)
+
+# Real Alvao API settings (used when ALVAO_USE_MOCK=False)
+ALVAO_API_URL = config('ALVAO_API_URL', default='')
+ALVAO_API_TOKEN = config('ALVAO_API_TOKEN', default='')
+
+# Alternative: Basic authentication (if token not available)
+ALVAO_SERVICE_ACCOUNT_USERNAME = config('ALVAO_SERVICE_ACCOUNT_USERNAME', default='')
+ALVAO_SERVICE_ACCOUNT_PASSWORD = config('ALVAO_SERVICE_ACCOUNT_PASSWORD', default='')
+
+# Default service ID for new tickets (optional)
+ALVAO_DEFAULT_SERVICE_ID = config('ALVAO_DEFAULT_SERVICE_ID', default=None, cast=lambda x: int(x) if x else None)
 
