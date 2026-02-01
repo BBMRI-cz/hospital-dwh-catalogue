@@ -1,8 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
 class DatasourceList(models.Model):
     """Data sources for the warehouse catalogue"""
+
     data_source = models.CharField(max_length=50, primary_key=True)
     data_source_name = models.CharField(max_length=255, null=True, blank=True)
     subject = models.CharField(max_length=255, null=True, blank=True)
@@ -16,7 +18,7 @@ class DatasourceList(models.Model):
 
     def __str__(self):
         return self.data_source_name or self.data_source
-    
+
     @property
     def display_name(self):
         """Returns the display name for the data source"""
@@ -25,13 +27,14 @@ class DatasourceList(models.Model):
 
 class DatasetList(models.Model):
     """Datasets within data sources"""
+
     data_source = models.ForeignKey(
         DatasourceList,
         on_delete=models.RESTRICT,
         db_column='data_source',
         null=True,
         blank=True,
-        related_name='datasets'
+        related_name='datasets',
     )
     data_set = models.CharField(max_length=100, primary_key=True)
     data_set_name = models.CharField(max_length=255, null=True, blank=True)
@@ -53,34 +56,34 @@ class DatasetList(models.Model):
 
     def __str__(self):
         return self.data_set_name or self.data_set
-    
+
     @property
     def display_name(self):
         """Returns the display name for the dataset"""
         return self.data_set_name or self.data_set
-    
+
     @property
     def is_complete(self):
         """Check if dataset is complete"""
         return self.complete and self.complete.lower() == 'ano'
-    
+
     @property
     def subject_tags_list(self):
         """Returns list of subject tags"""
         if not self.subject:
             return []
         return [tag.strip() for tag in self.subject.split(',') if tag.strip()]
-    
+
     @property
     def has_tables(self):
         """Check if dataset has database tables"""
         return any(dc.has_tables for dc in self.dataclasses.all())
-    
+
     @property
     def has_classes(self):
         """Check if dataset has data classes with repositories"""
         return any(dc.has_repository for dc in self.dataclasses.all())
-    
+
     @property
     def availability_status(self):
         """Returns the availability status of the dataset"""
@@ -93,13 +96,14 @@ class DatasetList(models.Model):
 
 class DataclassList(models.Model):
     """Data classes within datasets"""
+
     data_set = models.ForeignKey(
         DatasetList,
         on_delete=models.RESTRICT,
         db_column='data_set',
         null=True,
         blank=True,
-        related_name='dataclasses'
+        related_name='dataclasses',
     )
     data_class = models.CharField(max_length=100, primary_key=True)
     data_class_name = models.CharField(max_length=255, null=True, blank=True)
@@ -125,121 +129,79 @@ class DataclassList(models.Model):
 
     def __str__(self):
         return self.data_class_name or self.data_class
-    
+
     @property
     def display_name(self):
         """Returns the display name for the data class"""
         return self.data_class_name or self.data_class
-    
+
     @property
     def is_complete(self):
         """Check if data class is complete"""
         return self.complete and self.complete.lower() == 'ano'
-    
+
     @property
     def has_repository(self):
         """Check if data class has a repository"""
         return bool(self.repository and self.repository.strip())
-    
+
     @property
     def has_tables(self):
         """Check if data class has database tables"""
         return self.db_tables.exists()
-    
+
     @property
     def table_schemes_cache(self):
         """Lazy load table schemes for this data class"""
         if not hasattr(self, '_table_schemes_cache'):
             self._table_schemes_cache = list(
-                DataclassTableSchemes.objects
-                .filter(data_class=self.data_class)
-                .order_by('col_order')
+                DataclassTableSchemes.objects.filter(data_class=self.data_class).order_by(
+                    'col_order'
+                )
             )
         return self._table_schemes_cache
 
 
 class DataclassTableSchemes(models.Model):
     """Column definitions for data class tables."""
+
     pk = models.CompositePrimaryKey('data_class', 'col_order')
     data_class = models.CharField(
-        max_length=100,
-        db_column='data_class',
-        verbose_name=_('Data Class')
+        max_length=100, db_column='data_class', verbose_name=_('Data Class')
     )
     col_order = models.SmallIntegerField(verbose_name=_('Column Order'))
     col_var = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Column Variable')
+        max_length=100, null=True, blank=True, verbose_name=_('Column Variable')
     )
     col_name = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name=_('Column Name')
+        max_length=255, null=True, blank=True, verbose_name=_('Column Name')
     )
-    col_description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Column Description')
-    )
+    col_description = models.TextField(null=True, blank=True, verbose_name=_('Column Description'))
     col_var_r = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('R Variable')
+        max_length=100, null=True, blank=True, verbose_name=_('R Variable')
     )
     col_transf_r = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_('R Transformation')
+        null=True, blank=True, verbose_name=_('R Transformation')
     )
     datatype_r = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name=_('R Datatype')
+        max_length=20, null=True, blank=True, verbose_name=_('R Datatype')
     )
     possible_key = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Possible Key')
+        max_length=100, null=True, blank=True, verbose_name=_('Possible Key')
     )
-    tag = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Tag')
-    )
+    tag = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('Tag'))
     confidentality = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_('Confidentiality Level')
+        null=True, blank=True, verbose_name=_('Confidentiality Level')
     )
-    vocabulary = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Vocabulary')
-    )
-    calculated = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_('Calculated')
-    )
+    vocabulary = models.TextField(null=True, blank=True, verbose_name=_('Vocabulary'))
+    calculated = models.SmallIntegerField(null=True, blank=True, verbose_name=_('Calculated'))
     mandatory = models.SmallIntegerField(
         null=True,
         blank=True,
         db_column='madatory',  # Note: preserves original DB column spelling
-        verbose_name=_('Mandatory')
+        verbose_name=_('Mandatory'),
     )
-    unit = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name=_('Unit')
-    )
+    unit = models.CharField(max_length=20, null=True, blank=True, verbose_name=_('Unit'))
 
     class Meta:
         managed = False
@@ -249,18 +211,19 @@ class DataclassTableSchemes(models.Model):
         ordering = ['col_order']
 
     def __str__(self):
-        return f"{self.data_class} - {self.col_name}"
+        return f'{self.data_class} - {self.col_name}'
 
 
 class DbTableList(models.Model):
     """Database tables in the warehouse"""
+
     data_class = models.ForeignKey(
         DataclassList,
         on_delete=models.RESTRICT,
         db_column='data_class',
         null=True,
         blank=True,
-        related_name='db_tables'
+        related_name='db_tables',
     )
     db_layer = models.CharField(max_length=50, null=True, blank=True)
     db_table = models.CharField(max_length=100, primary_key=True)
@@ -278,75 +241,43 @@ class DbTableList(models.Model):
 
     def __str__(self):
         return self.db_table_name or self.db_table
-    
+
     @property
     def display_name(self):
         """Returns the display name for the table"""
         return self.db_table_name or self.db_table
-    
+
     @property
     def schemes_cache(self):
         """Lazy load table schemes for this database table"""
         if not hasattr(self, '_schemes_cache'):
             self._schemes_cache = list(
-                DbTableSchemes.objects
-                .filter(db_table=self.db_table)
-                .order_by('var_order')
+                DbTableSchemes.objects.filter(db_table=self.db_table).order_by('var_order')
             )
         return self._schemes_cache
 
 
 class DbTableSchemes(models.Model):
     """Column definitions for database tables."""
+
     pk = models.CompositePrimaryKey('db_table', 'var')
     db_table = models.CharField(
-        max_length=100,
-        db_column='db_table',
-        verbose_name=_('Database Table')
+        max_length=100, db_column='db_table', verbose_name=_('Database Table')
     )
-    var_order = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_('Variable Order')
-    )
-    var = models.CharField(
-        max_length=100,
-        verbose_name=_('Variable')
-    )
-    key_db = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Database Key')
-    )
+    var_order = models.SmallIntegerField(null=True, blank=True, verbose_name=_('Variable Order'))
+    var = models.CharField(max_length=100, verbose_name=_('Variable'))
+    key_db = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('Database Key'))
     type_db = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name=_('Database Type')
+        max_length=20, null=True, blank=True, verbose_name=_('Database Type')
     )
-    type_r = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name=_('R Type')
-    )
+    type_r = models.CharField(max_length=20, null=True, blank=True, verbose_name=_('R Type'))
     var_name = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name=_('Variable Name')
+        max_length=255, null=True, blank=True, verbose_name=_('Variable Name')
     )
     var_description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Variable Description')
+        null=True, blank=True, verbose_name=_('Variable Description')
     )
-    vocabulary = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Vocabulary')
-    )
+    vocabulary = models.TextField(null=True, blank=True, verbose_name=_('Vocabulary'))
 
     class Meta:
         managed = False
@@ -356,4 +287,4 @@ class DbTableSchemes(models.Model):
         ordering = ['var_order']
 
     def __str__(self):
-        return f"{self.db_table} - {self.var_name}"
+        return f'{self.db_table} - {self.var_name}'

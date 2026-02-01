@@ -1,10 +1,10 @@
 """
 URL configuration for the ticketing application.
 """
+
 from django.urls import path
 
 from . import views
-
 
 app_name = 'ticketing'
 
@@ -17,7 +17,6 @@ urlpatterns = [
     path('cart/submit/', views.SubmitCartView.as_view(), name='submit_cart'),
     path('cart/count/', views.CartCountView.as_view(), name='cart_count'),
     path('cart/items/', views.CartItemsView.as_view(), name='cart_items'),
-    
     # Ticket views
     path('submitted/', views.TicketSubmittedView.as_view(), name='ticket_submitted'),
     path('my-tickets/', views.MyTicketsView.as_view(), name='my_tickets'),

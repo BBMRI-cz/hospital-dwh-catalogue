@@ -3,21 +3,23 @@ Data structures for ticket services.
 
 Defines common data types used by both the real Alvao service and the mock service.
 """
+
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
 class TicketData:
     """Data structure for creating a ticket."""
+
     subject: str
     description: str
     requester_email: str
     requester_name: str = ''
-    service_id: Optional[int] = None
-    sla_id: Optional[int] = None
-    custom_fields: Optional[dict[str, Any]] = None
-    
+    service_id: int | None = None
+    sla_id: int | None = None
+    custom_fields: dict[str, Any] | None = None
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API payload."""
         data: dict[str, Any] = {
@@ -39,12 +41,13 @@ class TicketData:
 @dataclass
 class TicketResponse:
     """Response data from ticket creation."""
+
     ticket_id: str
-    ticket_number: Optional[str] = None
-    status: Optional[str] = None
-    url: Optional[str] = None
-    raw_response: Optional[dict[str, Any]] = None
-    
+    ticket_number: str | None = None
+    status: str | None = None
+    url: str | None = None
+    raw_response: dict[str, Any] | None = None
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> 'TicketResponse':
         """Create TicketResponse from API response dictionary."""
@@ -53,19 +56,20 @@ class TicketResponse:
             ticket_number=data.get('ticketNumber', data.get('number')),
             status=data.get('status', data.get('state')),
             url=data.get('url', data.get('webUrl')),
-            raw_response=data
+            raw_response=data,
         )
 
 
 @dataclass
 class TicketInfo:
     """Information about an existing ticket."""
+
     ticket_id: str
-    ticket_number: Optional[str] = None
+    ticket_number: str | None = None
     subject: str = ''
     status: str = ''
     requester_email: str = ''
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
-    url: Optional[str] = None
-    raw_response: Optional[dict[str, Any]] = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    url: str | None = None
+    raw_response: dict[str, Any] | None = None

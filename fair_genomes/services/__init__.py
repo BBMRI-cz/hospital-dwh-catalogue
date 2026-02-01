@@ -1,3 +1,3 @@
-from .fair_genomes_service import FairGenomesService, FairGenomesAPIException
+from .fair_genomes_service import FairGenomesAPIException, FairGenomesService
 
-__all__ = ['FairGenomesService', 'FairGenomesAPIException']
+__all__ = ['FairGenomesAPIException', 'FairGenomesService']

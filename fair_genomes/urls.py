@@ -1,8 +1,10 @@
 """
 Fair Genomes URL Configuration
 """
+
 from django.urls import path
-from .views import PersonalListView, PersonalDetailView
+
+from .views import PersonalDetailView, PersonalListView
 
 app_name = 'fair_genomes'
 
