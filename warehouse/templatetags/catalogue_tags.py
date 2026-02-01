@@ -1,26 +1,32 @@
 from django import template
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 register = template.Library()
 
 
 @register.filter
 def get_availability_icon(dataset):
-    """Returns HTML icon based on dataset availability status"""
+    """Returns HTML icon based on dataset availability status."""
     if hasattr(dataset, 'has_tables') and dataset.has_tables:
-        return mark_safe(
-            '<i class="fa-solid fa-circle-check" title="Data připravena v podobě tabulek" '
-            'style="color: #afca0b; font-size: 1.3rem;"></i>'
+        return format_html(
+            '<i class="fa-solid fa-circle-check" title="{}" style="color: {}; font-size: 1.3rem;">'
+            '</i>',
+            'Data připravena v podobě tabulek',
+            '#afca0b',
         )
     elif hasattr(dataset, 'has_classes') and dataset.has_classes:
-        return mark_safe(
-            '<i class="fa-solid fa-circle-question" title="Zdrojová data bez úpravy" '
-            'style="color: #009fc9; font-size: 1.3rem;"></i>'
+        return format_html(
+            '<i class="fa-solid fa-circle-question" title="{}" style="color: {}; font-size: 1.3rem;">'
+            '</i>',
+            'Zdrojová data bez úpravy',
+            '#009fc9',
         )
     else:
-        return mark_safe(
-            '<i class="fa-solid fa-circle-xmark" title="Aktuálně nedostupná data" '
-            'style="color: #888888; font-size: 1.3rem;"></i>'
+        return format_html(
+            '<i class="fa-solid fa-circle-xmark" title="{}" style="color: {}; font-size: 1.3rem;">'
+            '</i>',
+            'Aktuálně nedostupná data',
+            '#888888',
         )
 
 
