@@ -12,10 +12,23 @@
         <i class="fas fa-dna custom-icon me-1"></i>
         {% trans "Fair Genomes" %}
       </a>
+      <a href="{% url 'ticketing:my_tickets' %}" class="nav-link {% if 'ticketing' in request.resolver_match.namespace and request.resolver_match.url_name == 'my_tickets' %}active{% endif %}">
+        <i class="fas fa-list custom-icon me-1"></i>
+        {% trans "My Tickets" %}
+      </a>
     </div>
     
-    <!-- Language Switcher -->
-    {% include 'layout/language_switcher.html' %}
+    <div class="d-flex align-items-center">
+      <!-- Cart Link -->
+      <a href="{% url 'ticketing:cart' %}" class="nav-link position-relative me-3 {% if 'ticketing' in request.resolver_match.namespace and request.resolver_match.url_name == 'cart' %}active{% endif %}" id="cart-link">
+        <i class="fas fa-shopping-cart custom-icon"></i>
+        <span class="badge bg-primary rounded-pill position-absolute top-0 start-100 translate-middle" 
+              id="navbar-cart-badge" style="font-size: 0.65rem; display: none;">0</span>
+      </a>
+      
+      <!-- Language Switcher -->
+      {% include 'layout/language_switcher.html' %}
+    </div>
   </div>
 </nav>
 <style>
@@ -42,4 +55,26 @@
     background-color: rgba(33, 43, 143, 0.1);
     border-radius: 0.25rem;
   }
+  #cart-link {
+    color: #212b8f;
+    padding: 0.5rem;
+  }
+  #cart-link:hover {
+    color: #1a2270;
+  }
 </style>
+<script>
+// Update cart badge on page load
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('{% url "ticketing:cart_count" %}')
+    .then(response => response.json())
+    .then(data => {
+      const badge = document.getElementById('navbar-cart-badge');
+      if (badge && data.count > 0) {
+        badge.textContent = data.count;
+        badge.style.display = 'inline-block';
+      }
+    })
+    .catch(err => console.log('Could not fetch cart count'));
+});
+</script>
