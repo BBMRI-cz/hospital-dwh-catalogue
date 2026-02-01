@@ -1,0 +1,265 @@
+{% extends "warehouse/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Data Request Cart" %}{% endblock %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <i class="fas fa-shopping-cart me-2"></i>{% trans "Data Request Cart" %}
+    </h4>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% trans "Selected Items" %}
+                        <span class="badge bg-primary ms-2" id="cart-count">{{ items|length }}</span>
+                    </h5>
+                    {% if items %}
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="clear-cart-btn">
+                        <i class="fas fa-trash me-1"></i>{% trans "Clear All" %}
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Type" %}</th>
+                                    <th>{% trans "Name" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th class="text-center">{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-items">
+                                {% for item in items %}
+                                <tr id="item-row-{{ item.id }}">
+                                    <td>
+                                        {% if item.item_type == 'dataset' %}
+                                            <span class="badge bg-label-primary">
+                                                <i class="fas fa-database me-1"></i>{% trans "Dataset" %}
+                                            </span>
+                                        {% elif item.item_type == 'dataclass' %}
+                                            <span class="badge bg-label-info">
+                                                <i class="fas fa-folder me-1"></i>{% trans "Data Class" %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-label-success">
+                                                <i class="fas fa-table me-1"></i>{% trans "Table" %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ item.item_name }}</strong>
+                                        <br>
+                                        <small class="text-muted">ID: {{ item.item_id }}</small>
+                                        {% if item.parent_dataset %}
+                                        <br>
+                                        <small class="text-muted">{% trans "Dataset" %}: {{ item.parent_dataset }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.item_description %}
+                                            {{ item.item_description|truncatewords:20 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"
+                                                data-item-id="{{ item.id }}"
+                                                title="{% trans 'Remove from cart' %}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">{% trans "Your cart is empty." %}</p>
+                        <a href="{% url 'warehouse:catalogue' %}" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>{% trans "Browse Catalogue" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Form -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Submit Request" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if items %}
+                    <form method="post" action="{% url 'ticketing:submit_cart' %}" id="submit-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_requester_email" class="form-label">
+                                {{ form.requester_email.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.requester_email }}
+                            {% if form.requester_email.help_text %}
+                            <div class="form-text">{{ form.requester_email.help_text }}</div>
+                            {% endif %}
+                            {% if form.requester_email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.requester_email.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_requester_name" class="form-label">
+                                {{ form.requester_name.label }}
+                            </label>
+                            {{ form.requester_name }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_subject" class="form-label">
+                                {{ form.subject.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.subject }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.help_text %}
+                            <div class="form-text">{{ form.description.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="submit-btn">
+                                <i class="fas fa-paper-plane me-1"></i>{% trans "Submit Request" %}
+                            </button>
+                            <a href="{% url 'warehouse:catalogue' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans "Continue Browsing" %}
+                            </a>
+                        </div>
+                    </form>
+                    {% else %}
+                    <p class="text-muted text-center">
+                        {% trans "Add items to your cart to submit a request." %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-1"></i>{% trans "How it works" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0 ps-3">
+                        <li class="mb-2">{% trans "Browse the catalogue and add items to your cart" %}</li>
+                        <li class="mb-2">{% trans "Review your selected items" %}</li>
+                        <li class="mb-2">{% trans "Fill in your contact information" %}</li>
+                        <li>{% trans "Submit your request - a ticket will be created and you'll receive a confirmation" %}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CSRF token for AJAX requests
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                      '{{ csrf_token }}';
+    
+    // Remove item from cart
+    document.querySelectorAll('.remove-item-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            const row = document.getElementById('item-row-' + itemId);
+            
+            fetch(`{% url 'ticketing:remove_from_cart' item_id=0 %}`.replace('0', itemId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    row.remove();
+                    document.getElementById('cart-count').textContent = data.cart_count;
+                    updateCartBadge(data.cart_count);
+                    
+                    // If cart is empty, reload page
+                    if (data.cart_count === 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+    
+    // Clear cart
+    const clearBtn = document.getElementById('clear-cart-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (confirm('{% trans "Are you sure you want to clear your cart?" %}')) {
+                fetch('{% url "ticketing:clear_cart" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+    
+    // Update cart badge in navbar
+    function updateCartBadge(count) {
+        const badge = document.getElementById('navbar-cart-badge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+    }
+});
+</script>
+{% endblock %}
