@@ -23,86 +23,76 @@ msgid "English"
 msgstr "Angličtina"
 
 msgid "Inserted By"
-msgstr ""
+msgstr "Vložil"
 
 msgid "User who created this record"
-msgstr ""
+msgstr "Uživatel, který vytvořil tento záznam"
 
 msgid "Inserted On"
-msgstr ""
+msgstr "Vloženo"
 
 msgid "Timestamp when record was created"
-msgstr ""
+msgstr "Časové razítko vytvoření záznamu"
 
-#, fuzzy
-#| msgid "Updated At"
 msgid "Updated By"
-msgstr "Aktualizováno"
+msgstr "Aktualizoval"
 
 msgid "User who last updated this record"
-msgstr ""
+msgstr "Uživatel, který naposledy aktualizoval tento záznam"
 
-#, fuzzy
-#| msgid "Updated At"
 msgid "Updated On"
 msgstr "Aktualizováno"
 
 msgid "Timestamp when record was last updated"
-msgstr ""
+msgstr "Časové razítko poslední aktualizace záznamu"
 
 msgid "Personal Identifier"
-msgstr ""
+msgstr "Osobní identifikátor"
 
 msgid "Unique identifier for the individual"
-msgstr ""
+msgstr "Jedinečný identifikátor osoby"
 
 msgid "Year of Birth"
-msgstr ""
+msgstr "Rok narození"
 
 msgid "Year the individual was born"
-msgstr ""
+msgstr "Rok, ve kterém se osoba narodila"
 
 msgid "Personal Record"
-msgstr ""
+msgstr "Osobní záznam"
 
 msgid "Personal Records"
-msgstr ""
+msgstr "Osobní záznamy"
 
 msgid "Fair Genomes"
 msgstr "Fair Genomes"
 
 msgid "Personal Record Details"
-msgstr ""
+msgstr "Detaily osobního záznamu"
 
 msgid "Personal Information"
-msgstr ""
+msgstr "Osobní informace"
 
 msgid "Not specified"
-msgstr ""
+msgstr "Neuvedeno"
 
-#, fuzzy
-#| msgid "Raw data"
 msgid "Metadata"
-msgstr "Surová data"
+msgstr "Metadata"
 
-#, fuzzy
-#| msgid "Back to My Tickets"
 msgid "Back to List"
-msgstr "Zpět na moje tickety"
+msgstr "Zpět na seznam"
 
-#, fuzzy
-#| msgid "Fair Genomes"
 msgid "Fair Genomes - Personal Data"
-msgstr "Fair Genomes"
+msgstr "Fair Genomes - Osobní data"
 
 msgid "Total Records"
-msgstr ""
+msgstr "Celkem záznamů"
 
 msgid "Search by identifier or user..."
-msgstr ""
+msgstr "Hledat podle identifikátoru nebo uživatele..."
 
 msgid "All Years of Birth"
-msgstr ""
+msgstr "Všechny roky narození"
 
 msgid "Search"
 msgstr "Vyhledávání"
@@ -111,31 +101,31 @@ msgid "Actions"
 msgstr "Akce"
 
 msgid "View"
-msgstr ""
+msgstr "Zobrazit"
 
 msgid "First"
-msgstr ""
+msgstr "První"
 
 msgid "Previous"
 msgstr "Předchozí"
 
 msgid "Page"
-msgstr ""
+msgstr "Stránka"
 
 msgid "of"
-msgstr ""
+msgstr "z"
 
 msgid "Next"
 msgstr "Další"
 
 msgid "Last"
-msgstr ""
+msgstr "Poslední"
 
 msgid "No records found matching your search criteria."
-msgstr ""
+msgstr "Nebyly nalezeny žádné záznamy odpovídající vašim kritériím."
 
 msgid "No Fair Genomes data available."
-msgstr ""
+msgstr "Nejsou dostupná žádná data Fair Genomes."
 
 # Ticketing / Cart translations
 msgid "Ticketing"
@@ -148,13 +138,13 @@ msgid "We will use this email to contact you about your request."
 msgstr "Tento email použijeme pro komunikaci ohledně vašeho požadavku."
 
 msgid "your.email@example.com"
-msgstr ""
+msgstr "vas.email@example.com"
 
 msgid "Your Name"
 msgstr "Vaše jméno"
 
 msgid "John Doe"
-msgstr ""
+msgstr "Jan Novák"
 
 msgid "Subject"
 msgstr "Předmět"
@@ -241,10 +231,8 @@ msgstr "Odesláno"
 msgid "Ticket Request"
 msgstr "Požadavek ticketu"
 
-#, fuzzy
-#| msgid "Ticket Request"
 msgid "Ticket Requests"
-msgstr "Požadavek ticketu"
+msgstr "Požadavky ticketů"
 
 msgid "Dataset"
 msgstr "Datová sada"
@@ -423,10 +411,8 @@ msgstr "Vytvořeno"
 msgid "Items Count"
 msgstr "Počet položek"
 
-#, fuzzy
-#| msgid "Request Submitted Successfully!"
 msgid "Request Submitted"
-msgstr "Požadavek úspěšně odeslán!"
+msgstr "Požadavek odeslán"
 
 msgid "Request Submitted Successfully!"
 msgstr "Požadavek úspěšně odeslán!"
@@ -434,8 +420,7 @@ msgstr "Požadavek úspěšně odeslán!"
 msgid "Your ticket ID:"
 msgstr "ID vašeho ticketu:"
 
-#, fuzzy, python-format
-#| msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
+#, python-format
 msgid ""
 "\n"
 "                        A confirmation email will be sent to "
@@ -512,106 +497,82 @@ msgid "Data Classes"
 msgstr "Datové třídy"
 
 msgid "Column Order"
-msgstr ""
+msgstr "Pořadí sloupce"
 
 msgid "Column Variable"
-msgstr ""
+msgstr "Proměnná sloupce"
 
-#, fuzzy
-#| msgid "Your Name"
 msgid "Column Name"
-msgstr "Vaše jméno"
+msgstr "Název sloupce"
 
-#, fuzzy
-#| msgid "Item Description"
 msgid "Column Description"
-msgstr "Popis položky"
+msgstr "Popis sloupce"
 
 msgid "R Variable"
-msgstr ""
+msgstr "R proměnná"
 
 msgid "R Transformation"
-msgstr ""
+msgstr "R transformace"
 
 msgid "R Datatype"
-msgstr ""
+msgstr "R datový typ"
 
-#, fuzzy
-#| msgid "Session Key"
 msgid "Possible Key"
-msgstr "Klíč relace"
+msgstr "Možný klíč"
 
 msgid "Tag"
-msgstr ""
+msgstr "Štítek"
 
 msgid "Confidentiality Level"
-msgstr ""
+msgstr "Úroveň důvěrnosti"
 
 msgid "Vocabulary"
-msgstr ""
+msgstr "Slovník"
 
 msgid "Calculated"
-msgstr ""
+msgstr "Vypočítané"
 
 msgid "Mandatory"
-msgstr ""
+msgstr "Povinné"
 
 msgid "Unit"
-msgstr ""
+msgstr "Jednotka"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Data Class Table Schema"
-msgstr "Databázová tabulka"
+msgstr "Schéma tabulky datové třídy"
 
-#, fuzzy
-#| msgid "Data Classes"
 msgid "Data Class Table Schemas"
-msgstr "Datové třídy"
+msgstr "Schémata tabulek datových tříd"
 
 msgid "Database Tables"
 msgstr "Databázové tabulky"
 
 msgid "Variable Order"
-msgstr ""
+msgstr "Pořadí proměnné"
 
-#, fuzzy
-#| msgid "Table"
 msgid "Variable"
-msgstr "Tabulka"
+msgstr "Proměnná"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Key"
-msgstr "Databázová tabulka"
+msgstr "Databázový klíč"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Type"
-msgstr "Databázová tabulka"
+msgstr "Databázový typ"
 
-#, fuzzy
-#| msgid "Type"
 msgid "R Type"
-msgstr "Typ"
+msgstr "R typ"
 
 msgid "Variable Name"
-msgstr ""
+msgstr "Název proměnné"
 
-#, fuzzy
-#| msgid "Item Description"
 msgid "Variable Description"
-msgstr "Popis položky"
+msgstr "Popis proměnné"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Table Schema"
-msgstr "Databázová tabulka"
+msgstr "Schéma databázové tabulky"
 
-#, fuzzy
-#| msgid "Database Tables"
 msgid "Database Table Schemas"
-msgstr "Databázové tabulky"
+msgstr "Schémata databázových tabulek"
 
 msgid "Catalogue"
 msgstr "Katalog"
@@ -652,27 +613,23 @@ msgstr "Zdroj dat"
 msgid "Rights holder"
 msgstr "Držitel práv"
 
-#, fuzzy
-#| msgid "Could not add item to cart"
 msgid "Could not update cart"
-msgstr "Nepodařilo se přidat položku do košíku"
+msgstr "Nepodařilo se aktualizovat košík"
 
-#, fuzzy
-#| msgid "Data Source"
 msgid "Data Source:"
-msgstr "Datový zdroj"
+msgstr "Datový zdroj:"
 
 msgid "This data is synced from the Fair Genomes GraphQL API."
-msgstr ""
+msgstr "Tato data jsou synchronizována z Fair Genomes GraphQL API."
 
 msgid "To update, run:"
-msgstr ""
+msgstr "Pro aktualizaci spusťte:"
 
 msgid "Patient demographic data synced from Fair Genomes GraphQL API"
-msgstr ""
+msgstr "Demografická data pacientů synchronizovaná z Fair Genomes GraphQL API"
 
 msgid "No Fair Genomes data available. Run sync to fetch data:"
-msgstr ""
+msgstr "Nejsou dostupná žádná data Fair Genomes. Pro načtení dat spusťte:"
 
 msgid "Filters"
 msgstr "Filtry"

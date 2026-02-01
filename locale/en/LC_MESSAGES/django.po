@@ -23,86 +23,76 @@ msgid "English"
 msgstr "English"
 
 msgid "Inserted By"
-msgstr ""
+msgstr "Inserted By"
 
 msgid "User who created this record"
-msgstr ""
+msgstr "User who created this record"
 
 msgid "Inserted On"
-msgstr ""
+msgstr "Inserted On"
 
 msgid "Timestamp when record was created"
-msgstr ""
+msgstr "Timestamp when record was created"
 
-#, fuzzy
-#| msgid "Updated At"
 msgid "Updated By"
-msgstr "Updated At"
+msgstr "Updated By"
 
 msgid "User who last updated this record"
-msgstr ""
+msgstr "User who last updated this record"
 
-#, fuzzy
-#| msgid "Updated At"
 msgid "Updated On"
-msgstr "Updated At"
+msgstr "Updated On"
 
 msgid "Timestamp when record was last updated"
-msgstr ""
+msgstr "Timestamp when record was last updated"
 
 msgid "Personal Identifier"
-msgstr ""
+msgstr "Personal Identifier"
 
 msgid "Unique identifier for the individual"
-msgstr ""
+msgstr "Unique identifier for the individual"
 
 msgid "Year of Birth"
-msgstr ""
+msgstr "Year of Birth"
 
 msgid "Year the individual was born"
-msgstr ""
+msgstr "Year the individual was born"
 
 msgid "Personal Record"
-msgstr ""
+msgstr "Personal Record"
 
 msgid "Personal Records"
-msgstr ""
+msgstr "Personal Records"
 
 msgid "Fair Genomes"
 msgstr "Fair Genomes"
 
 msgid "Personal Record Details"
-msgstr ""
+msgstr "Personal Record Details"
 
 msgid "Personal Information"
-msgstr ""
+msgstr "Personal Information"
 
 msgid "Not specified"
-msgstr ""
+msgstr "Not specified"
 
-#, fuzzy
-#| msgid "Raw data"
 msgid "Metadata"
-msgstr "Raw data"
+msgstr "Metadata"
 
-#, fuzzy
-#| msgid "Back to My Tickets"
 msgid "Back to List"
-msgstr "Back to My Tickets"
+msgstr "Back to List"
 
-#, fuzzy
-#| msgid "Fair Genomes"
 msgid "Fair Genomes - Personal Data"
-msgstr "Fair Genomes"
+msgstr "Fair Genomes - Personal Data"
 
 msgid "Total Records"
-msgstr ""
+msgstr "Total Records"
 
 msgid "Search by identifier or user..."
-msgstr ""
+msgstr "Search by identifier or user..."
 
 msgid "All Years of Birth"
-msgstr ""
+msgstr "All Years of Birth"
 
 msgid "Search"
 msgstr "Search"
@@ -111,31 +101,31 @@ msgid "Actions"
 msgstr "Actions"
 
 msgid "View"
-msgstr ""
+msgstr "View"
 
 msgid "First"
-msgstr ""
+msgstr "First"
 
 msgid "Previous"
 msgstr "Previous"
 
 msgid "Page"
-msgstr ""
+msgstr "Page"
 
 msgid "of"
-msgstr ""
+msgstr "of"
 
 msgid "Next"
 msgstr "Next"
 
 msgid "Last"
-msgstr ""
+msgstr "Last"
 
 msgid "No records found matching your search criteria."
-msgstr ""
+msgstr "No records found matching your search criteria."
 
 msgid "No Fair Genomes data available."
-msgstr ""
+msgstr "No Fair Genomes data available."
 
 # Ticketing / Cart translations
 msgid "Ticketing"
@@ -148,13 +138,13 @@ msgid "We will use this email to contact you about your request."
 msgstr "We will use this email to contact you about your request."
 
 msgid "your.email@example.com"
-msgstr ""
+msgstr "your.email@example.com"
 
 msgid "Your Name"
 msgstr "Your Name"
 
 msgid "John Doe"
-msgstr ""
+msgstr "John Doe"
 
 msgid "Subject"
 msgstr "Subject"
@@ -241,10 +231,8 @@ msgstr "Submitted At"
 msgid "Ticket Request"
 msgstr "Ticket Request"
 
-#, fuzzy
-#| msgid "Ticket Request"
 msgid "Ticket Requests"
-msgstr "Ticket Request"
+msgstr "Ticket Requests"
 
 msgid "Dataset"
 msgstr "Dataset"
@@ -425,10 +413,8 @@ msgstr "Created"
 msgid "Items Count"
 msgstr "Items Count"
 
-#, fuzzy
-#| msgid "Request Submitted Successfully!"
 msgid "Request Submitted"
-msgstr "Request Submitted Successfully!"
+msgstr "Request Submitted"
 
 msgid "Request Submitted Successfully!"
 msgstr "Request Submitted Successfully!"
@@ -436,8 +422,7 @@ msgstr "Request Submitted Successfully!"
 msgid "Your ticket ID:"
 msgstr "Your ticket ID:"
 
-#, fuzzy, python-format
-#| msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
+#, python-format
 msgid ""
 "\n"
 "                        A confirmation email will be sent to "
@@ -513,106 +498,82 @@ msgid "Data Classes"
 msgstr "Data Classes"
 
 msgid "Column Order"
-msgstr ""
+msgstr "Column Order"
 
 msgid "Column Variable"
-msgstr ""
+msgstr "Column Variable"
 
-#, fuzzy
-#| msgid "Your Name"
 msgid "Column Name"
-msgstr "Your Name"
+msgstr "Column Name"
 
-#, fuzzy
-#| msgid "Item Description"
 msgid "Column Description"
-msgstr "Item Description"
+msgstr "Column Description"
 
 msgid "R Variable"
-msgstr ""
+msgstr "R Variable"
 
 msgid "R Transformation"
-msgstr ""
+msgstr "R Transformation"
 
 msgid "R Datatype"
-msgstr ""
+msgstr "R Datatype"
 
-#, fuzzy
-#| msgid "Session Key"
 msgid "Possible Key"
-msgstr "Session Key"
+msgstr "Possible Key"
 
 msgid "Tag"
-msgstr ""
+msgstr "Tag"
 
 msgid "Confidentiality Level"
-msgstr ""
+msgstr "Confidentiality Level"
 
 msgid "Vocabulary"
-msgstr ""
+msgstr "Vocabulary"
 
 msgid "Calculated"
-msgstr ""
+msgstr "Calculated"
 
 msgid "Mandatory"
-msgstr ""
+msgstr "Mandatory"
 
 msgid "Unit"
-msgstr ""
+msgstr "Unit"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Data Class Table Schema"
-msgstr "Database Table"
+msgstr "Data Class Table Schema"
 
-#, fuzzy
-#| msgid "Data Classes"
 msgid "Data Class Table Schemas"
-msgstr "Data Classes"
+msgstr "Data Class Table Schemas"
 
 msgid "Database Tables"
 msgstr "Database Tables"
 
 msgid "Variable Order"
-msgstr ""
+msgstr "Variable Order"
 
-#, fuzzy
-#| msgid "Table"
 msgid "Variable"
-msgstr "Table"
+msgstr "Variable"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Key"
-msgstr "Database Table"
+msgstr "Database Key"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Type"
-msgstr "Database Table"
+msgstr "Database Type"
 
-#, fuzzy
-#| msgid "Type"
 msgid "R Type"
-msgstr "Type"
+msgstr "R Type"
 
 msgid "Variable Name"
-msgstr ""
+msgstr "Variable Name"
 
-#, fuzzy
-#| msgid "Item Description"
 msgid "Variable Description"
-msgstr "Item Description"
+msgstr "Variable Description"
 
-#, fuzzy
-#| msgid "Database Table"
 msgid "Database Table Schema"
-msgstr "Database Table"
+msgstr "Database Table Schema"
 
-#, fuzzy
-#| msgid "Database Tables"
 msgid "Database Table Schemas"
-msgstr "Database Tables"
+msgstr "Database Table Schemas"
 
 msgid "Catalogue"
 msgstr "Catalogue"
@@ -654,27 +615,23 @@ msgstr "Data source"
 msgid "Rights holder"
 msgstr "Rights holder"
 
-#, fuzzy
-#| msgid "Could not add item to cart"
 msgid "Could not update cart"
-msgstr "Could not add item to cart"
+msgstr "Could not update cart"
 
-#, fuzzy
-#| msgid "Data Source"
 msgid "Data Source:"
-msgstr "Data Source"
+msgstr "Data Source:"
 
 msgid "This data is synced from the Fair Genomes GraphQL API."
-msgstr ""
+msgstr "This data is synced from the Fair Genomes GraphQL API."
 
 msgid "To update, run:"
-msgstr ""
+msgstr "To update, run:"
 
 msgid "Patient demographic data synced from Fair Genomes GraphQL API"
-msgstr ""
+msgstr "Patient demographic data synced from Fair Genomes GraphQL API"
 
 msgid "No Fair Genomes data available. Run sync to fetch data:"
-msgstr ""
+msgstr "No Fair Genomes data available. Run sync to fetch data:"
 
 msgid "Filters"
 msgstr "Filters"

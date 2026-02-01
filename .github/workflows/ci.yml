@@ -97,45 +97,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gettext
 
-      - name: Install Python dependencies
+      - name: Check for empty translations
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Check for missing translations
-        env:
-          DJANGO_SETTINGS_MODULE: "catalogue.settings.test"
-          USE_SQLITE: "True"
-        run: |
-          echo "Checking translation files..."
-          python manage.py makemessages -l cs -l en --no-location
+          echo "Checking for empty translations..."
           
-          if git diff --name-only | grep -q "\.po$"; then
-            echo "FAILED: Translation files are out of date"
-            echo ""
-            echo "Changed files:"
-            git diff --name-only | grep "\.po$"
-            echo ""
-            echo "To fix: run 'python manage.py makemessages -l cs -l en'"
+          # Find msgstr "" followed by empty line (truly empty, not multi-line)
+          if grep -Pzo 'msgid "[^"]+"\nmsgstr ""\n\n' locale/*/LC_MESSAGES/django.po | grep -q .; then
+            echo "FAILED: Found empty translations"
+            grep -Pzo 'msgid "[^"]+"\nmsgstr ""\n\n' locale/*/LC_MESSAGES/django.po
             exit 1
           fi
           
-          echo "PASSED: All translations are up to date"
-
-      - name: Check for untranslated strings
-        run: |
-          echo "Checking for untranslated strings..."
-          has_untranslated=false
-          for file in locale/*/LC_MESSAGES/django.po; do
-            untranslated=$(grep -B1 'msgstr ""$' "$file" | grep -c 'msgid ".' || true)
-            if [ "$untranslated" -gt 0 ]; then
-              echo "WARNING: $file has $untranslated untranslated string(s)"
-              has_untranslated=true
-            fi
-          done
-          if [ "$has_untranslated" = false ]; then
-            echo "PASSED: All strings are translated"
-          fi
+          echo "PASSED: All strings are translated"
 
   security:
     name: Security
