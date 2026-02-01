@@ -3,8 +3,9 @@ Base settings for catalogue project.
 Shared settings used across all environments.
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -84,7 +85,7 @@ DATABASES = {
         'PORT': config('AUTH_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
-        }
+        },
     },
     'metadata_db': {
         'ENGINE': config('METADATA_DB_ENGINE', default='django.db.backends.postgresql'),
@@ -95,7 +96,7 @@ DATABASES = {
         'PORT': config('METADATA_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
-        }
+        },
     },
     'fair_genomes_db': {
         'ENGINE': config('FAIR_GENOMES_DB_ENGINE', default='django.db.backends.postgresql'),
@@ -106,8 +107,8 @@ DATABASES = {
         'PORT': config('FAIR_GENOMES_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
-        }
-    }
+        },
+    },
 }
 
 DATABASE_ROUTERS = ['catalogue.routers.AuthRouter', 'catalogue.routers.WarehouseRouter']
@@ -216,5 +217,6 @@ ALVAO_SERVICE_ACCOUNT_USERNAME = config('ALVAO_SERVICE_ACCOUNT_USERNAME', defaul
 ALVAO_SERVICE_ACCOUNT_PASSWORD = config('ALVAO_SERVICE_ACCOUNT_PASSWORD', default='')
 
 # Default service ID for new tickets (optional)
-ALVAO_DEFAULT_SERVICE_ID = config('ALVAO_DEFAULT_SERVICE_ID', default=None, cast=lambda x: int(x) if x else None)
-
+ALVAO_DEFAULT_SERVICE_ID = config(
+    'ALVAO_DEFAULT_SERVICE_ID', default=None, cast=lambda x: int(x) if x else None
+)

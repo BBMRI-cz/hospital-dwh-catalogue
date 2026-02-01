@@ -6,16 +6,16 @@ Database routers for multi-database setup.
 class AuthRouter:
     """
     Router for Django authentication and authorization models.
-    
+
     Routes all auth-related models to the dedicated auth_db:
     - auth.User, auth.Group, auth.Permission
     - contenttypes.ContentType (required for permissions)
     - sessions.Session
     - admin.LogEntry
     """
-    
+
     AUTH_APPS = {'auth', 'contenttypes', 'sessions', 'admin'}
-    
+
     def db_for_read(self, model, **hints):
         """Direct read operations for auth models to auth_db."""
         if model._meta.app_label in self.AUTH_APPS:
@@ -46,13 +46,13 @@ class AuthRouter:
 class WarehouseRouter:
     """
     Router for warehouse metadata and Fair Genomes data.
-    
+
     - 'fair_genomes' app models -> fair_genomes_db
     - 'warehouse' app models -> metadata_db
     - 'ticketing' app models -> default (same as auth_db in most setups)
     - Everything else -> default
     """
-    
+
     def db_for_read(self, model, **hints):
         """Direct read operations to appropriate database."""
         if model._meta.app_label == 'fair_genomes':
@@ -88,4 +88,3 @@ class WarehouseRouter:
         if app_label == 'ticketing':
             return db == 'default'
         return db == 'default'
-    

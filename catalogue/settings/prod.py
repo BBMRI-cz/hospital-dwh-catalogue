@@ -3,8 +3,9 @@ Production settings for catalogue project.
 Secure configuration for production deployment.
 """
 
+from decouple import Csv, config
+
 from .base import *
-from decouple import config, Csv
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False

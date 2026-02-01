@@ -3,8 +3,9 @@ Development settings for catalogue project.
 Local development environment configuration.
 """
 
+from decouple import Csv, config
+
 from .base import *
-from decouple import config, Csv
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)

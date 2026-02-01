@@ -14,12 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
-from django.conf.urls.i18n import i18n_patterns
-from warehouse import views as warehouse_views
-
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
@@ -31,5 +30,5 @@ urlpatterns += i18n_patterns(
     path('warehouse/', include('warehouse.urls', namespace='warehouse')),
     path('fair-genomes/', include('fair_genomes.urls', namespace='fair_genomes')),
     path('ticketing/', include('ticketing.urls', namespace='ticketing')),
-    prefix_default_language=True
+    prefix_default_language=True,
 )
