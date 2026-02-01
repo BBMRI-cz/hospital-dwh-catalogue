@@ -73,6 +73,13 @@
                                         aria-expanded="true">
                                         {{ dataset|get_availability_icon }}&nbsp;&nbsp;{{ dataset.display_name }}
                                     </h5>
+                                    <button type="button" class="btn btn-sm btn-outline-primary add-to-cart-btn"
+                                            data-item-type="dataset"
+                                            data-item-id="{{ dataset.data_set }}"
+                                            title="{% trans 'Add to cart' %}"
+                                            style="position: absolute; top: 10px; right: 10px;">
+                                        <i class="fas fa-cart-plus"></i>
+                                    </button>
                                 </div>
                                 <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="headingOne">
                                     <div class="card-body">
@@ -339,5 +346,99 @@
             const wb = XLSX.utils.table_to_book(table, { sheet: "Proměnné" });
             XLSX.writeFile(wb, filename + ".xlsx");
         }
+
+        // Add to cart functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token }}';
+            
+            // Helper to update button state
+            function setButtonInCart(button, inCart) {
+                if (inCart) {
+                    button.innerHTML = '<i class="fas fa-minus"></i>';
+                    button.classList.remove('btn-outline-primary');
+                    button.classList.add('btn-danger');
+                    button.title = '{% trans "Remove from cart" %}';
+                } else {
+                    button.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-outline-primary');
+                    button.title = '{% trans "Add to cart" %}';
+                }
+            }
+            
+            // Load cart items on page load to set initial button states
+            fetch('{% url "ticketing:cart_items" %}')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Cart items loaded:', data);
+                    const cartItems = new Set(data.items.map(item => `${item.type}-${item.id}`));
+                    
+                    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                        const key = `${btn.dataset.itemType}-${btn.dataset.itemId}`;
+                        if (cartItems.has(key)) {
+                            setButtonInCart(btn, true);
+                        }
+                    });
+                    
+                    // Update navbar badge
+                    const badge = document.getElementById('navbar-cart-badge');
+                    if (badge && data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    }
+                })
+                .catch(error => console.error('Error loading cart:', error));
+            
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent card collapse toggle
+                    
+                    const itemType = this.dataset.itemType;
+                    const itemId = this.dataset.itemId;
+                    const button = this;
+                    
+                    // Disable button temporarily
+                    button.disabled = true;
+                    const wasInCart = button.classList.contains('btn-danger');
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    
+                    fetch('{% url "ticketing:add_to_cart" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `item_type=${itemType}&item_id=${itemId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        button.disabled = false;
+                        
+                        if (data.success) {
+                            // Toggle button state based on action
+                            const nowInCart = data.action === 'added';
+                            setButtonInCart(button, nowInCart);
+                            
+                            // Update navbar cart badge
+                            const badge = document.getElementById('navbar-cart-badge');
+                            if (badge) {
+                                badge.textContent = data.cart_count;
+                                badge.style.display = data.cart_count > 0 ? 'inline-block' : 'none';
+                            }
+                        } else {
+                            // Restore previous state on error
+                            setButtonInCart(button, wasInCart);
+                            alert(data.error || '{% trans "Could not update cart" %}');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        button.disabled = false;
+                        setButtonInCart(button, wasInCart);
+                        alert('{% trans "Could not update cart" %}');
+                    });
+                });
+            });
+        });
     </script>
 {% endblock %}
