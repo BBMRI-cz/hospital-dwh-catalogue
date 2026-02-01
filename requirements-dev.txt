@@ -1,0 +1,13 @@
+# Development dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Linting and formatting
+ruff>=0.4.0
+
+# Type checking
+mypy>=1.10.0
+django-stubs>=5.0.0
+types-requests>=2.31.0
+
+# Security
+bandit>=1.7.0

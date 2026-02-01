@@ -1,0 +1,33 @@
+# Pre-commit hooks for local development
+# Install with: pip install pre-commit && pre-commit install
+# Run manually with: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      # Run the linter (check only, no auto-fix)
+      - id: ruff
+      # Run the formatter (check only, no auto-fix)
+      - id: ruff-format
+        args: [--check]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - django-stubs>=5.0.0
+          - types-requests>=2.31.0
+        args: [--config-file=pyproject.toml]
+        exclude: ^migrations/
