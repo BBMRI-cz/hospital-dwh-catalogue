@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-02 12:00+0100\n"
+"POT-Creation-Date: 2026-02-01 22:39+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -21,6 +21,601 @@ msgstr "Czech"
 
 msgid "English"
 msgstr "English"
+
+msgid "Inserted By"
+msgstr ""
+
+msgid "User who created this record"
+msgstr ""
+
+msgid "Inserted On"
+msgstr ""
+
+msgid "Timestamp when record was created"
+msgstr ""
+
+#, fuzzy
+#| msgid "Updated At"
+msgid "Updated By"
+msgstr "Updated At"
+
+msgid "User who last updated this record"
+msgstr ""
+
+#, fuzzy
+#| msgid "Updated At"
+msgid "Updated On"
+msgstr "Updated At"
+
+msgid "Timestamp when record was last updated"
+msgstr ""
+
+msgid "Personal Identifier"
+msgstr ""
+
+msgid "Unique identifier for the individual"
+msgstr ""
+
+msgid "Year of Birth"
+msgstr ""
+
+msgid "Year the individual was born"
+msgstr ""
+
+msgid "Personal Record"
+msgstr ""
+
+msgid "Personal Records"
+msgstr ""
+
+msgid "Fair Genomes"
+msgstr "Fair Genomes"
+
+msgid "Personal Record Details"
+msgstr ""
+
+msgid "Personal Information"
+msgstr ""
+
+msgid "Not specified"
+msgstr ""
+
+#, fuzzy
+#| msgid "Raw data"
+msgid "Metadata"
+msgstr "Raw data"
+
+#, fuzzy
+#| msgid "Back to My Tickets"
+msgid "Back to List"
+msgstr "Back to My Tickets"
+
+#, fuzzy
+#| msgid "Fair Genomes"
+msgid "Fair Genomes - Personal Data"
+msgstr "Fair Genomes"
+
+msgid "Total Records"
+msgstr ""
+
+msgid "Search by identifier or user..."
+msgstr ""
+
+msgid "All Years of Birth"
+msgstr ""
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "View"
+msgstr ""
+
+msgid "First"
+msgstr ""
+
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Page"
+msgstr ""
+
+msgid "of"
+msgstr ""
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Last"
+msgstr ""
+
+msgid "No records found matching your search criteria."
+msgstr ""
+
+msgid "No Fair Genomes data available."
+msgstr ""
+
+# Ticketing / Cart translations
+msgid "Ticketing"
+msgstr "Ticketing"
+
+msgid "Your Email"
+msgstr "Your Email"
+
+msgid "We will use this email to contact you about your request."
+msgstr "We will use this email to contact you about your request."
+
+msgid "your.email@example.com"
+msgstr ""
+
+msgid "Your Name"
+msgstr "Your Name"
+
+msgid "John Doe"
+msgstr ""
+
+msgid "Subject"
+msgstr "Subject"
+
+msgid "Data Access Request"
+msgstr "Data Access Request"
+
+msgid "Brief description of your request"
+msgstr "Brief description of your request"
+
+msgid "Additional Notes"
+msgstr "Additional Notes"
+
+msgid ""
+"Please provide any additional information about your data request, such as "
+"purpose of use, timeframe needed, etc."
+msgstr ""
+"Please provide any additional information about your data request, such as "
+"purpose of use, timeframe needed, etc."
+
+msgid "Draft"
+msgstr "Draft"
+
+msgid "Submitted"
+msgstr "Submitted"
+
+msgid "Confirmed by Alvao"
+msgstr "Confirmed by Alvao"
+
+msgid "Submission Failed"
+msgstr "Submission Failed"
+
+msgid "Requester Email"
+msgstr "Requester Email"
+
+msgid "Email of the person requesting data access"
+msgstr "Email of the person requesting data access"
+
+msgid "Requester Name"
+msgstr "Requester Name"
+
+msgid "Full name of the requester"
+msgstr "Full name of the requester"
+
+msgid "Ticket subject/title"
+msgstr "Ticket subject/title"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Additional details or notes for the request"
+msgstr "Additional details or notes for the request"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Alvao Ticket ID"
+msgstr "Alvao Ticket ID"
+
+msgid "Ticket ID returned by Alvao after submission"
+msgstr "Ticket ID returned by Alvao after submission"
+
+msgid "Alvao Response"
+msgstr "Alvao Response"
+
+msgid "Full response from Alvao API"
+msgstr "Full response from Alvao API"
+
+msgid "Session Key"
+msgstr "Session Key"
+
+msgid "Session key for tracking cart before submission"
+msgstr "Session key for tracking cart before submission"
+
+msgid "Created At"
+msgstr "Created At"
+
+msgid "Updated At"
+msgstr "Updated At"
+
+msgid "Submitted At"
+msgstr "Submitted At"
+
+msgid "Ticket Request"
+msgstr "Ticket Request"
+
+#, fuzzy
+#| msgid "Ticket Request"
+msgid "Ticket Requests"
+msgstr "Ticket Request"
+
+msgid "Dataset"
+msgstr "Dataset"
+
+msgid "Data Class"
+msgstr "Data Class"
+
+msgid "Database Table"
+msgstr "Database Table"
+
+msgid "Item Type"
+msgstr "Item Type"
+
+msgid "Item ID"
+msgstr "Item ID"
+
+msgid "Primary key of the requested item"
+msgstr "Primary key of the requested item"
+
+msgid "Item Name"
+msgstr "Item Name"
+
+msgid "Display name of the requested item"
+msgstr "Display name of the requested item"
+
+msgid "Item Description"
+msgstr "Item Description"
+
+msgid "Parent Dataset"
+msgstr "Parent Dataset"
+
+msgid "Parent dataset ID for dataclasses and tables"
+msgstr "Parent dataset ID for dataclasses and tables"
+
+msgid "Added At"
+msgstr "Added At"
+
+msgid "Ticket Request Item"
+msgstr "Ticket Request Item"
+
+msgid "Ticket Request Items"
+msgstr "Ticket Request Items"
+
+msgid "Data Request Cart"
+msgstr "Data Request Cart"
+
+msgid "Selected Items"
+msgstr "Selected Items"
+
+msgid "Clear All"
+msgstr "Clear All"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Table"
+msgstr "Table"
+
+msgid "Remove from cart"
+msgstr "Remove from cart"
+
+msgid "Your cart is empty."
+msgstr "Your cart is empty."
+
+msgid "Browse Catalogue"
+msgstr "Browse Catalogue"
+
+msgid "Submit Request"
+msgstr "Submit Request"
+
+msgid "Continue Browsing"
+msgstr "Continue Browsing"
+
+msgid "Add items to your cart to submit a request."
+msgstr "Add items to your cart to submit a request."
+
+msgid "How it works"
+msgstr "How it works"
+
+msgid "Browse the catalogue and add items to your cart"
+msgstr "Browse the catalogue and add items to your cart"
+
+msgid "Review your selected items"
+msgstr "Review your selected items"
+
+msgid "Fill in your contact information"
+msgstr "Fill in your contact information"
+
+msgid ""
+"Submit your request - a ticket will be created and you'll receive a "
+"confirmation"
+msgstr ""
+"Submit your request - a ticket will be created and you'll receive a "
+"confirmation"
+
+msgid "Are you sure you want to clear your cart?"
+msgstr "Are you sure you want to clear your cart?"
+
+msgid "My Tickets"
+msgstr "My Tickets"
+
+msgid "Enter your email to view your tickets"
+msgstr "Enter your email to view your tickets"
+
+#, python-format
+msgid "Tickets for %(email)s"
+msgstr "Tickets for %(email)s"
+
+msgid "Ticket ID"
+msgstr "Ticket ID"
+
+msgid "Items"
+msgstr "Items"
+
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Failed"
+msgstr "Failed"
+
+msgid "View Details"
+msgstr "View Details"
+
+msgid "Page navigation"
+msgstr "Page navigation"
+
+msgid "No tickets found for this email address."
+msgstr "No tickets found for this email address."
+
+msgid "Could not fetch remote ticket status from Alvao."
+msgstr "Could not fetch remote ticket status from Alvao."
+
+msgid "Enter your email address above to view your submitted tickets."
+msgstr "Enter your email address above to view your submitted tickets."
+
+msgid "Ticket Details"
+msgstr "Ticket Details"
+
+msgid "Ticket"
+msgstr "Ticket"
+
+msgid "Back to My Tickets"
+msgstr "Back to My Tickets"
+
+msgid "Requested Items"
+msgstr "Requested Items"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "No items"
+msgstr "No items"
+
+msgid "Alvao Status"
+msgstr "Alvao Status"
+
+msgid "Ticket Number"
+msgstr "Ticket Number"
+
+msgid "View in Alvao"
+msgstr "View in Alvao"
+
+msgid "Could not fetch current status from Alvao."
+msgstr "Could not fetch current status from Alvao."
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Requester"
+msgstr "Requester"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Items Count"
+msgstr "Items Count"
+
+#, fuzzy
+#| msgid "Request Submitted Successfully!"
+msgid "Request Submitted"
+msgstr "Request Submitted Successfully!"
+
+msgid "Request Submitted Successfully!"
+msgstr "Request Submitted Successfully!"
+
+msgid "Your ticket ID:"
+msgstr "Your ticket ID:"
+
+#, fuzzy, python-format
+#| msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
+msgid ""
+"\n"
+"                        A confirmation email will be sent to "
+"<strong>%(email)s</strong>.\n"
+"                        "
+msgstr "A confirmation email will be sent to <strong>%(email)s</strong>."
+
+msgid "Request Summary"
+msgstr "Request Summary"
+
+msgid "Subject:"
+msgstr "Subject:"
+
+msgid "Items:"
+msgstr "Items:"
+
+msgid "Submitted:"
+msgstr "Submitted:"
+
+msgid ""
+"Your data access request has been submitted. You will receive a confirmation "
+"email shortly."
+msgstr ""
+"Your data access request has been submitted. You will receive a confirmation "
+"email shortly."
+
+msgid "View My Tickets"
+msgstr "View My Tickets"
+
+msgid "Missing item type or ID"
+msgstr "Missing item type or ID"
+
+msgid "Invalid item type"
+msgstr "Invalid item type"
+
+msgid "Item removed from cart"
+msgstr "Item removed from cart"
+
+msgid "Item added to cart"
+msgstr "Item added to cart"
+
+msgid "Item not found in cart"
+msgstr "Item not found in cart"
+
+msgid "Cart cleared"
+msgstr "Cart cleared"
+
+#, python-format
+msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+msgstr "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+
+#, python-format
+msgid "Failed to submit your request. Please try again later. Error: %(error)s"
+msgstr ""
+"Failed to submit your request. Please try again later. Error: %(error)s"
+
+msgid "Please correct the errors below."
+msgstr "Please correct the errors below."
+
+msgid "Requested Data Items:"
+msgstr "Requested Data Items:"
+
+msgid "Data Source"
+msgstr "Data Source"
+
+msgid "Data Sources"
+msgstr "Data Sources"
+
+msgid "Datasets"
+msgstr "Datasets"
+
+msgid "Data Classes"
+msgstr "Data Classes"
+
+msgid "Column Order"
+msgstr ""
+
+msgid "Column Variable"
+msgstr ""
+
+#, fuzzy
+#| msgid "Your Name"
+msgid "Column Name"
+msgstr "Your Name"
+
+#, fuzzy
+#| msgid "Item Description"
+msgid "Column Description"
+msgstr "Item Description"
+
+msgid "R Variable"
+msgstr ""
+
+msgid "R Transformation"
+msgstr ""
+
+msgid "R Datatype"
+msgstr ""
+
+#, fuzzy
+#| msgid "Session Key"
+msgid "Possible Key"
+msgstr "Session Key"
+
+msgid "Tag"
+msgstr ""
+
+msgid "Confidentiality Level"
+msgstr ""
+
+msgid "Vocabulary"
+msgstr ""
+
+msgid "Calculated"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "Unit"
+msgstr ""
+
+#, fuzzy
+#| msgid "Database Table"
+msgid "Data Class Table Schema"
+msgstr "Database Table"
+
+#, fuzzy
+#| msgid "Data Classes"
+msgid "Data Class Table Schemas"
+msgstr "Data Classes"
+
+msgid "Database Tables"
+msgstr "Database Tables"
+
+msgid "Variable Order"
+msgstr ""
+
+#, fuzzy
+#| msgid "Table"
+msgid "Variable"
+msgstr "Table"
+
+#, fuzzy
+#| msgid "Database Table"
+msgid "Database Key"
+msgstr "Database Table"
+
+#, fuzzy
+#| msgid "Database Table"
+msgid "Database Type"
+msgstr "Database Table"
+
+#, fuzzy
+#| msgid "Type"
+msgid "R Type"
+msgstr "Type"
+
+msgid "Variable Name"
+msgstr ""
+
+#, fuzzy
+#| msgid "Item Description"
+msgid "Variable Description"
+msgstr "Item Description"
+
+#, fuzzy
+#| msgid "Database Table"
+msgid "Database Table Schema"
+msgstr "Database Table"
+
+#, fuzzy
+#| msgid "Database Tables"
+msgid "Database Table Schemas"
+msgstr "Database Tables"
+
+msgid "Catalogue"
+msgstr "Catalogue"
 
 msgid "Data Catalogue MOÚ"
 msgstr "MOÚ Data Catalogue"
@@ -47,17 +642,72 @@ msgstr "How to use the catalogue"
 msgid "Click to display the catalogue usage guide."
 msgstr "Click to display the catalogue usage guide."
 
-msgid "Search"
-msgstr "Search"
-
 msgid "Enter search text"
 msgstr "Enter search text"
+
+msgid "Add to cart"
+msgstr "Add to cart"
 
 msgid "Data source"
 msgstr "Data source"
 
 msgid "Rights holder"
 msgstr "Rights holder"
+
+#, fuzzy
+#| msgid "Could not add item to cart"
+msgid "Could not update cart"
+msgstr "Could not add item to cart"
+
+#, fuzzy
+#| msgid "Data Source"
+msgid "Data Source:"
+msgstr "Data Source"
+
+msgid "This data is synced from the Fair Genomes GraphQL API."
+msgstr ""
+
+msgid "To update, run:"
+msgstr ""
+
+msgid "Patient demographic data synced from Fair Genomes GraphQL API"
+msgstr ""
+
+msgid "No Fair Genomes data available. Run sync to fetch data:"
+msgstr ""
+
+msgid "Filters"
+msgstr "Filters"
+
+msgid "Clear filters"
+msgstr "Clear filters"
+
+msgid "Data availability"
+msgstr "Data availability"
+
+msgid "Tables ready"
+msgstr "Tables ready"
+
+msgid "Raw data"
+msgstr "Raw data"
+
+msgid "Unavailable data"
+msgstr "Unavailable data"
+
+msgid "Keywords"
+msgstr "Keywords"
+
+msgid "Search..."
+msgstr "Search..."
+
+msgid "No keywords to display."
+msgstr "No keywords to display."
+
+msgid "No data sources to display."
+msgstr "No data sources to display."
+
+msgid "No rights holders to display."
+msgstr "No rights holders to display."
 
 msgid "Close"
 msgstr "Close"
@@ -106,8 +756,12 @@ msgstr "Rights holder:"
 msgid "Display datasets managed by a specific rights holder."
 msgstr "Display datasets managed by a specific rights holder."
 
-msgid "After checking the filters, the corresponding datasets will be automatically displayed."
-msgstr "After checking the filters, the corresponding datasets will be automatically displayed."
+msgid ""
+"After checking the filters, the corresponding datasets will be automatically "
+"displayed."
+msgstr ""
+"After checking the filters, the corresponding datasets will be automatically "
+"displayed."
 
 msgid "To clear all set filters, click the \"Clear filters\" button."
 msgstr "To clear all set filters, click the \"Clear filters\" button."
@@ -115,399 +769,5 @@ msgstr "To clear all set filters, click the \"Clear filters\" button."
 msgid "3. Browsing datasets:"
 msgstr "3. Browsing datasets:"
 
-msgid "Data Source"
-msgstr "Data Source"
-
-msgid "Data Sources"
-msgstr "Data Sources"
-
-msgid "Dataset"
-msgstr "Dataset"
-
-msgid "Datasets"
-msgstr "Datasets"
-
-msgid "Data Class"
-msgstr "Data Class"
-
-msgid "Data Classes"
-msgstr "Data Classes"
-
-msgid "Database Table"
-msgstr "Database Table"
-
-msgid "Database Tables"
-msgstr "Database Tables"
-
-msgid "Filters"
-msgstr "Filters"
-
-msgid "Clear filters"
-msgstr "Clear filters"
-
-msgid "Data availability"
-msgstr "Data availability"
-
-msgid "Tables ready"
-msgstr "Tables ready"
-
-msgid "Raw data"
-msgstr "Raw data"
-
-msgid "Unavailable data"
-msgstr "Unavailable data"
-
-msgid "Keywords"
-msgstr "Keywords"
-
-msgid "Search..."
-msgstr "Search..."
-
-msgid "No keywords to display."
-msgstr "No keywords to display."
-
-msgid "No data sources to display."
-msgstr "No data sources to display."
-
-msgid "No rights holders to display."
-msgstr "No rights holders to display."
-
-# Ticketing / Cart translations
-msgid "Ticketing"
-msgstr "Ticketing"
-
-msgid "Data Request Cart"
-msgstr "Data Request Cart"
-
-msgid "Selected Items"
-msgstr "Selected Items"
-
-msgid "Clear All"
-msgstr "Clear All"
-
-msgid "Your cart is empty."
-msgstr "Your cart is empty."
-
-msgid "Browse Catalogue"
-msgstr "Browse Catalogue"
-
-msgid "Submit Request"
-msgstr "Submit Request"
-
-msgid "Type"
-msgstr "Type"
-
-msgid "Name"
-msgstr "Name"
-
-msgid "Description"
-msgstr "Description"
-
-msgid "Actions"
-msgstr "Actions"
-
-msgid "Table"
-msgstr "Table"
-
-msgid "Remove from cart"
-msgstr "Remove from cart"
-
-msgid "Your Email"
-msgstr "Your Email"
-
-msgid "We will use this email to contact you about your request."
-msgstr "We will use this email to contact you about your request."
-
-msgid "Your Name"
-msgstr "Your Name"
-
-msgid "Subject"
-msgstr "Subject"
-
-msgid "Data Access Request"
-msgstr "Data Access Request"
-
-msgid "Brief description of your request"
-msgstr "Brief description of your request"
-
-msgid "Additional Notes"
-msgstr "Additional Notes"
-
-msgid "Please provide any additional information about your data request, such as purpose of use, timeframe needed, etc."
-msgstr "Please provide any additional information about your data request, such as purpose of use, timeframe needed, etc."
-
-msgid "Continue Browsing"
-msgstr "Continue Browsing"
-
-msgid "How it works"
-msgstr "How it works"
-
-msgid "Browse the catalogue and add items to your cart"
-msgstr "Browse the catalogue and add items to your cart"
-
-msgid "Review your selected items"
-msgstr "Review your selected items"
-
-msgid "Fill in your contact information"
-msgstr "Fill in your contact information"
-
-msgid "Submit your request - a ticket will be created and you'll receive a confirmation"
-msgstr "Submit your request - a ticket will be created and you'll receive a confirmation"
-
-msgid "Add items to your cart to submit a request."
-msgstr "Add items to your cart to submit a request."
-
-msgid "Are you sure you want to clear your cart?"
-msgstr "Are you sure you want to clear your cart?"
-
-msgid "Missing item type or ID"
-msgstr "Missing item type or ID"
-
-msgid "Invalid item type"
-msgstr "Invalid item type"
-
-msgid "Item already in cart"
-msgstr "Item already in cart"
-
-msgid "Item added to cart"
-msgstr "Item added to cart"
-
-msgid "Item removed from cart"
-msgstr "Item removed from cart"
-
-msgid "Cart cleared"
-msgstr "Cart cleared"
-
-msgid "Item not found in cart"
-msgstr "Item not found in cart"
-
-msgid "Please correct the errors below."
-msgstr "Please correct the errors below."
-
-msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
-msgstr "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
-
-msgid "Failed to submit your request. Please try again later. Error: %(error)s"
-msgstr "Failed to submit your request. Please try again later. Error: %(error)s"
-
-msgid "Requested Data Items:"
-msgstr "Requested Data Items:"
-
-msgid "Request Submitted Successfully!"
-msgstr "Request Submitted Successfully!"
-
-msgid "Your ticket ID:"
-msgstr "Your ticket ID:"
-
-msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
-msgstr "A confirmation email will be sent to <strong>%(email)s</strong>."
-
-msgid "Request Summary"
-msgstr "Request Summary"
-
-msgid "Subject:"
-msgstr "Subject:"
-
-msgid "Items:"
-msgstr "Items:"
-
-msgid "Submitted:"
-msgstr "Submitted:"
-
-msgid "Your data access request has been submitted. You will receive a confirmation email shortly."
-msgstr "Your data access request has been submitted. You will receive a confirmation email shortly."
-
-msgid "View My Tickets"
-msgstr "View My Tickets"
-
-msgid "My Tickets"
-msgstr "My Tickets"
-
-msgid "Enter your email to view your tickets"
-msgstr "Enter your email to view your tickets"
-
-msgid "Tickets for %(email)s"
-msgstr "Tickets for %(email)s"
-
-msgid "Ticket ID"
-msgstr "Ticket ID"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Items"
-msgstr "Items"
-
-msgid "View Details"
-msgstr "View Details"
-
-msgid "Previous"
-msgstr "Previous"
-
-msgid "Next"
-msgstr "Next"
-
-msgid "No tickets found for this email address."
-msgstr "No tickets found for this email address."
-
-msgid "Could not fetch remote ticket status from Alvao."
-msgstr "Could not fetch remote ticket status from Alvao."
-
-msgid "Enter your email address above to view your submitted tickets."
-msgstr "Enter your email address above to view your submitted tickets."
-
-msgid "Ticket Details"
-msgstr "Ticket Details"
-
-msgid "Ticket"
-msgstr "Ticket"
-
-msgid "Back to My Tickets"
-msgstr "Back to My Tickets"
-
-msgid "Requested Items"
-msgstr "Requested Items"
-
-msgid "ID"
-msgstr "ID"
-
-msgid "No items"
-msgstr "No items"
-
-msgid "Alvao Status"
-msgstr "Alvao Status"
-
-msgid "Ticket Number"
-msgstr "Ticket Number"
-
-msgid "View in Alvao"
-msgstr "View in Alvao"
-
-msgid "Could not fetch current status from Alvao."
-msgstr "Could not fetch current status from Alvao."
-
-msgid "Details"
-msgstr "Details"
-
-msgid "Requester"
-msgstr "Requester"
-
-msgid "Alvao Ticket ID"
-msgstr "Alvao Ticket ID"
-
-msgid "Created"
-msgstr "Created"
-
-msgid "Items Count"
-msgstr "Items Count"
-
-msgid "Add to cart"
-msgstr "Add to cart"
-
-msgid "Could not add item to cart"
-msgstr "Could not add item to cart"
-
-msgid "Catalogue"
-msgstr "Catalogue"
-
-msgid "Fair Genomes"
-msgstr "Fair Genomes"
-
-msgid "Draft"
-msgstr "Draft"
-
-msgid "Submitted"
-msgstr "Submitted"
-
-msgid "Confirmed by Alvao"
-msgstr "Confirmed by Alvao"
-
-msgid "Submission Failed"
-msgstr "Submission Failed"
-
-msgid "Confirmed"
-msgstr "Confirmed"
-
-msgid "Failed"
-msgstr "Failed"
-
-msgid "Requester Email"
-msgstr "Requester Email"
-
-msgid "Email of the person requesting data access"
-msgstr "Email of the person requesting data access"
-
-msgid "Requester Name"
-msgstr "Requester Name"
-
-msgid "Full name of the requester"
-msgstr "Full name of the requester"
-
-msgid "Ticket subject/title"
-msgstr "Ticket subject/title"
-
-msgid "Additional details or notes for the request"
-msgstr "Additional details or notes for the request"
-
-msgid "Ticket ID returned by Alvao after submission"
-msgstr "Ticket ID returned by Alvao after submission"
-
-msgid "Alvao Response"
-msgstr "Alvao Response"
-
-msgid "Full response from Alvao API"
-msgstr "Full response from Alvao API"
-
-msgid "Session Key"
-msgstr "Session Key"
-
-msgid "Session key for tracking cart before submission"
-msgstr "Session key for tracking cart before submission"
-
-msgid "Created At"
-msgstr "Created At"
-
-msgid "Updated At"
-msgstr "Updated At"
-
-msgid "Submitted At"
-msgstr "Submitted At"
-
-msgid "Ticket Request"
-msgstr "Ticket Request"
-
-msgid "Ticket Request Item"
-msgstr "Ticket Request Item"
-
-msgid "Ticket Request Items"
-msgstr "Ticket Request Items"
-
-msgid "Item Type"
-msgstr "Item Type"
-
-msgid "Item ID"
-msgstr "Item ID"
-
-msgid "Primary key of the requested item"
-msgstr "Primary key of the requested item"
-
-msgid "Item Name"
-msgstr "Item Name"
-
-msgid "Display name of the requested item"
-msgstr "Display name of the requested item"
-
-msgid "Item Description"
-msgstr "Item Description"
-
-msgid "Parent Dataset"
-msgstr "Parent Dataset"
-
-msgid "Parent dataset ID for dataclasses and tables"
-msgstr "Parent dataset ID for dataclasses and tables"
-
-msgid "Added At"
-msgstr "Added At"
-
-msgid "Page navigation"
-msgstr "Page navigation"
+#~ msgid "Item already in cart"
+#~ msgstr "Item already in cart"
