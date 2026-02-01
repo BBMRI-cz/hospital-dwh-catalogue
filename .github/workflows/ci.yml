@@ -104,6 +104,7 @@ jobs:
         env:
           SECRET_KEY: "test-secret-key-for-ci"
           DJANGO_SETTINGS_MODULE: "catalogue.settings.test"
+          USE_SQLITE: "True"
         run: |
           echo "Checking translation files..."
           python manage.py makemessages -l cs -l en --no-location
