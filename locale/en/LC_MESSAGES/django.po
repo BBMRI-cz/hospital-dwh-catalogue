@@ -171,3 +171,343 @@ msgstr "No data sources to display."
 
 msgid "No rights holders to display."
 msgstr "No rights holders to display."
+
+# Ticketing / Cart translations
+msgid "Ticketing"
+msgstr "Ticketing"
+
+msgid "Data Request Cart"
+msgstr "Data Request Cart"
+
+msgid "Selected Items"
+msgstr "Selected Items"
+
+msgid "Clear All"
+msgstr "Clear All"
+
+msgid "Your cart is empty."
+msgstr "Your cart is empty."
+
+msgid "Browse Catalogue"
+msgstr "Browse Catalogue"
+
+msgid "Submit Request"
+msgstr "Submit Request"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Table"
+msgstr "Table"
+
+msgid "Remove from cart"
+msgstr "Remove from cart"
+
+msgid "Your Email"
+msgstr "Your Email"
+
+msgid "We will use this email to contact you about your request."
+msgstr "We will use this email to contact you about your request."
+
+msgid "Your Name"
+msgstr "Your Name"
+
+msgid "Subject"
+msgstr "Subject"
+
+msgid "Data Access Request"
+msgstr "Data Access Request"
+
+msgid "Brief description of your request"
+msgstr "Brief description of your request"
+
+msgid "Additional Notes"
+msgstr "Additional Notes"
+
+msgid "Please provide any additional information about your data request, such as purpose of use, timeframe needed, etc."
+msgstr "Please provide any additional information about your data request, such as purpose of use, timeframe needed, etc."
+
+msgid "Continue Browsing"
+msgstr "Continue Browsing"
+
+msgid "How it works"
+msgstr "How it works"
+
+msgid "Browse the catalogue and add items to your cart"
+msgstr "Browse the catalogue and add items to your cart"
+
+msgid "Review your selected items"
+msgstr "Review your selected items"
+
+msgid "Fill in your contact information"
+msgstr "Fill in your contact information"
+
+msgid "Submit your request - a ticket will be created and you'll receive a confirmation"
+msgstr "Submit your request - a ticket will be created and you'll receive a confirmation"
+
+msgid "Add items to your cart to submit a request."
+msgstr "Add items to your cart to submit a request."
+
+msgid "Are you sure you want to clear your cart?"
+msgstr "Are you sure you want to clear your cart?"
+
+msgid "Missing item type or ID"
+msgstr "Missing item type or ID"
+
+msgid "Invalid item type"
+msgstr "Invalid item type"
+
+msgid "Item already in cart"
+msgstr "Item already in cart"
+
+msgid "Item added to cart"
+msgstr "Item added to cart"
+
+msgid "Item removed from cart"
+msgstr "Item removed from cart"
+
+msgid "Cart cleared"
+msgstr "Cart cleared"
+
+msgid "Item not found in cart"
+msgstr "Item not found in cart"
+
+msgid "Please correct the errors below."
+msgstr "Please correct the errors below."
+
+msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+msgstr "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+
+msgid "Failed to submit your request. Please try again later. Error: %(error)s"
+msgstr "Failed to submit your request. Please try again later. Error: %(error)s"
+
+msgid "Requested Data Items:"
+msgstr "Requested Data Items:"
+
+msgid "Request Submitted Successfully!"
+msgstr "Request Submitted Successfully!"
+
+msgid "Your ticket ID:"
+msgstr "Your ticket ID:"
+
+msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
+msgstr "A confirmation email will be sent to <strong>%(email)s</strong>."
+
+msgid "Request Summary"
+msgstr "Request Summary"
+
+msgid "Subject:"
+msgstr "Subject:"
+
+msgid "Items:"
+msgstr "Items:"
+
+msgid "Submitted:"
+msgstr "Submitted:"
+
+msgid "Your data access request has been submitted. You will receive a confirmation email shortly."
+msgstr "Your data access request has been submitted. You will receive a confirmation email shortly."
+
+msgid "View My Tickets"
+msgstr "View My Tickets"
+
+msgid "My Tickets"
+msgstr "My Tickets"
+
+msgid "Enter your email to view your tickets"
+msgstr "Enter your email to view your tickets"
+
+msgid "Tickets for %(email)s"
+msgstr "Tickets for %(email)s"
+
+msgid "Ticket ID"
+msgstr "Ticket ID"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Items"
+msgstr "Items"
+
+msgid "View Details"
+msgstr "View Details"
+
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "No tickets found for this email address."
+msgstr "No tickets found for this email address."
+
+msgid "Could not fetch remote ticket status from Alvao."
+msgstr "Could not fetch remote ticket status from Alvao."
+
+msgid "Enter your email address above to view your submitted tickets."
+msgstr "Enter your email address above to view your submitted tickets."
+
+msgid "Ticket Details"
+msgstr "Ticket Details"
+
+msgid "Ticket"
+msgstr "Ticket"
+
+msgid "Back to My Tickets"
+msgstr "Back to My Tickets"
+
+msgid "Requested Items"
+msgstr "Requested Items"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "No items"
+msgstr "No items"
+
+msgid "Alvao Status"
+msgstr "Alvao Status"
+
+msgid "Ticket Number"
+msgstr "Ticket Number"
+
+msgid "View in Alvao"
+msgstr "View in Alvao"
+
+msgid "Could not fetch current status from Alvao."
+msgstr "Could not fetch current status from Alvao."
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Requester"
+msgstr "Requester"
+
+msgid "Alvao Ticket ID"
+msgstr "Alvao Ticket ID"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Items Count"
+msgstr "Items Count"
+
+msgid "Add to cart"
+msgstr "Add to cart"
+
+msgid "Could not add item to cart"
+msgstr "Could not add item to cart"
+
+msgid "Catalogue"
+msgstr "Catalogue"
+
+msgid "Fair Genomes"
+msgstr "Fair Genomes"
+
+msgid "Draft"
+msgstr "Draft"
+
+msgid "Submitted"
+msgstr "Submitted"
+
+msgid "Confirmed by Alvao"
+msgstr "Confirmed by Alvao"
+
+msgid "Submission Failed"
+msgstr "Submission Failed"
+
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Failed"
+msgstr "Failed"
+
+msgid "Requester Email"
+msgstr "Requester Email"
+
+msgid "Email of the person requesting data access"
+msgstr "Email of the person requesting data access"
+
+msgid "Requester Name"
+msgstr "Requester Name"
+
+msgid "Full name of the requester"
+msgstr "Full name of the requester"
+
+msgid "Ticket subject/title"
+msgstr "Ticket subject/title"
+
+msgid "Additional details or notes for the request"
+msgstr "Additional details or notes for the request"
+
+msgid "Ticket ID returned by Alvao after submission"
+msgstr "Ticket ID returned by Alvao after submission"
+
+msgid "Alvao Response"
+msgstr "Alvao Response"
+
+msgid "Full response from Alvao API"
+msgstr "Full response from Alvao API"
+
+msgid "Session Key"
+msgstr "Session Key"
+
+msgid "Session key for tracking cart before submission"
+msgstr "Session key for tracking cart before submission"
+
+msgid "Created At"
+msgstr "Created At"
+
+msgid "Updated At"
+msgstr "Updated At"
+
+msgid "Submitted At"
+msgstr "Submitted At"
+
+msgid "Ticket Request"
+msgstr "Ticket Request"
+
+msgid "Ticket Request Item"
+msgstr "Ticket Request Item"
+
+msgid "Ticket Request Items"
+msgstr "Ticket Request Items"
+
+msgid "Item Type"
+msgstr "Item Type"
+
+msgid "Item ID"
+msgstr "Item ID"
+
+msgid "Primary key of the requested item"
+msgstr "Primary key of the requested item"
+
+msgid "Item Name"
+msgstr "Item Name"
+
+msgid "Display name of the requested item"
+msgstr "Display name of the requested item"
+
+msgid "Item Description"
+msgstr "Item Description"
+
+msgid "Parent Dataset"
+msgstr "Parent Dataset"
+
+msgid "Parent dataset ID for dataclasses and tables"
+msgstr "Parent dataset ID for dataclasses and tables"
+
+msgid "Added At"
+msgstr "Added At"
+
+msgid "Page navigation"
+msgstr "Page navigation"

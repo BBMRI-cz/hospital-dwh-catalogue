@@ -170,3 +170,344 @@ msgstr "Žádný zdroj dat k zobrazení."
 
 msgid "No rights holders to display."
 msgstr "Žádný držitel práv k zobrazení."
+
+# Ticketing / Cart translations
+msgid "Ticketing"
+msgstr "Ticketing"
+
+msgid "Data Request Cart"
+msgstr "Košík požadavků na data"
+
+msgid "Selected Items"
+msgstr "Vybrané položky"
+
+msgid "Clear All"
+msgstr "Vymazat vše"
+
+msgid "Your cart is empty."
+msgstr "Váš košík je prázdný."
+
+msgid "Browse Catalogue"
+msgstr "Procházet katalog"
+
+msgid "Submit Request"
+msgstr "Odeslat požadavek"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Name"
+msgstr "Název"
+
+msgid "Description"
+msgstr "Popis"
+
+msgid "Actions"
+msgstr "Akce"
+
+msgid "Table"
+msgstr "Tabulka"
+
+msgid "Remove from cart"
+msgstr "Odebrat z košíku"
+
+msgid "Your Email"
+msgstr "Váš email"
+
+msgid "We will use this email to contact you about your request."
+msgstr "Tento email použijeme pro komunikaci ohledně vašeho požadavku."
+
+msgid "Your Name"
+msgstr "Vaše jméno"
+
+msgid "Subject"
+msgstr "Předmět"
+
+msgid "Data Access Request"
+msgstr "Žádost o přístup k datům"
+
+msgid "Brief description of your request"
+msgstr "Stručný popis vašeho požadavku"
+
+msgid "Additional Notes"
+msgstr "Další poznámky"
+
+msgid "Please provide any additional information about your data request, such as purpose of use, timeframe needed, etc."
+msgstr "Uveďte prosím další informace o vašem požadavku na data, jako je účel použití, požadovaný časový rámec apod."
+
+msgid "Continue Browsing"
+msgstr "Pokračovat v prohlížení"
+
+msgid "How it works"
+msgstr "Jak to funguje"
+
+msgid "Browse the catalogue and add items to your cart"
+msgstr "Procházejte katalog a přidávejte položky do košíku"
+
+msgid "Review your selected items"
+msgstr "Zkontrolujte vybrané položky"
+
+msgid "Fill in your contact information"
+msgstr "Vyplňte své kontaktní údaje"
+
+msgid "Submit your request - a ticket will be created and you'll receive a confirmation"
+msgstr "Odešlete požadavek - bude vytvořen ticket a obdržíte potvrzení"
+
+msgid "Add items to your cart to submit a request."
+msgstr "Přidejte položky do košíku pro odeslání požadavku."
+
+msgid "Are you sure you want to clear your cart?"
+msgstr "Opravdu chcete vyprázdnit košík?"
+
+msgid "Missing item type or ID"
+msgstr "Chybí typ položky nebo ID"
+
+msgid "Invalid item type"
+msgstr "Neplatný typ položky"
+
+msgid "Item already in cart"
+msgstr "Položka je již v košíku"
+
+msgid "Item added to cart"
+msgstr "Položka přidána do košíku"
+
+msgid "Item removed from cart"
+msgstr "Položka odebrána z košíku"
+
+msgid "Cart cleared"
+msgstr "Košík vyprázdněn"
+
+msgid "Item not found in cart"
+msgstr "Položka nebyla v košíku nalezena"
+
+msgid "Please correct the errors below."
+msgstr "Opravte prosím níže uvedené chyby."
+
+msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+msgstr "Váš požadavek byl úspěšně odeslán. ID ticketu: %(ticket_id)s"
+
+msgid "Failed to submit your request. Please try again later. Error: %(error)s"
+msgstr "Nepodařilo se odeslat váš požadavek. Zkuste to prosím znovu později. Chyba: %(error)s"
+
+msgid "Requested Data Items:"
+msgstr "Požadované datové položky:"
+
+msgid "Request Submitted Successfully!"
+msgstr "Požadavek úspěšně odeslán!"
+
+msgid "Your ticket ID:"
+msgstr "ID vašeho ticketu:"
+
+msgid "A confirmation email will be sent to <strong>%(email)s</strong>."
+msgstr "Potvrzovací email bude odeslán na <strong>%(email)s</strong>."
+
+msgid "Request Summary"
+msgstr "Souhrn požadavku"
+
+msgid "Subject:"
+msgstr "Předmět:"
+
+msgid "Items:"
+msgstr "Položky:"
+
+msgid "Submitted:"
+msgstr "Odesláno:"
+
+msgid "Your data access request has been submitted. You will receive a confirmation email shortly."
+msgstr "Váš požadavek na přístup k datům byl odeslán. Brzy obdržíte potvrzovací email."
+
+msgid "View My Tickets"
+msgstr "Zobrazit mé tickety"
+
+msgid "My Tickets"
+msgstr "Moje tickety"
+
+msgid "Enter your email to view your tickets"
+msgstr "Zadejte svůj email pro zobrazení ticketů"
+
+msgid "Tickets for %(email)s"
+msgstr "Tickety pro %(email)s"
+
+msgid "Ticket ID"
+msgstr "ID ticketu"
+
+msgid "Status"
+msgstr "Stav"
+
+msgid "Items"
+msgstr "Položky"
+
+msgid "View Details"
+msgstr "Zobrazit detaily"
+
+msgid "Previous"
+msgstr "Předchozí"
+
+msgid "Next"
+msgstr "Další"
+
+msgid "No tickets found for this email address."
+msgstr "Pro tuto emailovou adresu nebyly nalezeny žádné tickety."
+
+msgid "Could not fetch remote ticket status from Alvao."
+msgstr "Nepodařilo se načíst stav ticketu z Alvao."
+
+msgid "Enter your email address above to view your submitted tickets."
+msgstr "Pro zobrazení odeslaných ticketů zadejte výše svou emailovou adresu."
+
+msgid "Ticket Details"
+msgstr "Detaily ticketu"
+
+msgid "Ticket"
+msgstr "Ticket"
+
+msgid "Back to My Tickets"
+msgstr "Zpět na moje tickety"
+
+msgid "Requested Items"
+msgstr "Požadované položky"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "No items"
+msgstr "Žádné položky"
+
+msgid "Alvao Status"
+msgstr "Stav v Alvao"
+
+msgid "Ticket Number"
+msgstr "Číslo ticketu"
+
+msgid "View in Alvao"
+msgstr "Zobrazit v Alvao"
+
+msgid "Could not fetch current status from Alvao."
+msgstr "Nepodařilo se načíst aktuální stav z Alvao."
+
+msgid "Details"
+msgstr "Detaily"
+
+msgid "Requester"
+msgstr "Žadatel"
+
+msgid "Alvao Ticket ID"
+msgstr "ID ticketu v Alvao"
+
+msgid "Created"
+msgstr "Vytvořeno"
+
+msgid "Items Count"
+msgstr "Počet položek"
+
+msgid "Add to cart"
+msgstr "Přidat do košíku"
+
+msgid "Could not add item to cart"
+msgstr "Nepodařilo se přidat položku do košíku"
+
+msgid "Catalogue"
+msgstr "Katalog"
+
+msgid "Fair Genomes"
+msgstr "Fair Genomes"
+
+msgid "Draft"
+msgstr "Koncept"
+
+msgid "Submitted"
+msgstr "Odesláno"
+
+msgid "Confirmed by Alvao"
+msgstr "Potvrzeno Alvao"
+
+msgid "Submission Failed"
+msgstr "Odeslání se nezdařilo"
+
+msgid "Confirmed"
+msgstr "Potvrzeno"
+
+msgid "Failed"
+msgstr "Selhalo"
+
+msgid "Requester Email"
+msgstr "Email žadatele"
+
+msgid "Email of the person requesting data access"
+msgstr "Email osoby žádající o přístup k datům"
+
+msgid "Requester Name"
+msgstr "Jméno žadatele"
+
+msgid "Full name of the requester"
+msgstr "Celé jméno žadatele"
+
+msgid "Ticket subject/title"
+msgstr "Předmět/název ticketu"
+
+msgid "Additional details or notes for the request"
+msgstr "Další podrobnosti nebo poznámky k požadavku"
+
+msgid "Ticket ID returned by Alvao after submission"
+msgstr "ID ticketu vrácené Alvao po odeslání"
+
+msgid "Alvao Response"
+msgstr "Odpověď Alvao"
+
+msgid "Full response from Alvao API"
+msgstr "Úplná odpověď z API Alvao"
+
+msgid "Session Key"
+msgstr "Klíč relace"
+
+msgid "Session key for tracking cart before submission"
+msgstr "Klíč relace pro sledování košíku před odesláním"
+
+msgid "Created At"
+msgstr "Vytvořeno"
+
+msgid "Updated At"
+msgstr "Aktualizováno"
+
+msgid "Submitted At"
+msgstr "Odesláno"
+
+msgid "Ticket Request"
+msgstr "Požadavek ticketu"
+
+msgid "Ticket Request Item"
+msgstr "Položka požadavku"
+
+msgid "Ticket Request Items"
+msgstr "Položky požadavku"
+
+msgid "Item Type"
+msgstr "Typ položky"
+
+msgid "Item ID"
+msgstr "ID položky"
+
+msgid "Primary key of the requested item"
+msgstr "Primární klíč požadované položky"
+
+msgid "Item Name"
+msgstr "Název položky"
+
+msgid "Display name of the requested item"
+msgstr "Zobrazovaný název požadované položky"
+
+msgid "Item Description"
+msgstr "Popis položky"
+
+msgid "Parent Dataset"
+msgstr "Nadřazená datová sada"
+
+msgid "Parent dataset ID for dataclasses and tables"
+msgstr "ID nadřazené datové sady pro datové třídy a tabulky"
+
+msgid "Added At"
+msgstr "Přidáno"
+
+msgid "Page navigation"
+msgstr "Navigace stránek"
+
