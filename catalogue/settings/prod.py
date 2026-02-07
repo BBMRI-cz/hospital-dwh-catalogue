@@ -3,14 +3,16 @@ Production settings for catalogue project.
 Secure configuration for production deployment.
 """
 
-from decouple import Csv, config
+import os
+
+from decouple import config
 
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 
 # Security settings

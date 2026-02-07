@@ -15,6 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
 
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')]
+)
+
 
 # Application definition
 
@@ -79,9 +85,9 @@ DATABASES = {
     'auth_db': {
         'ENGINE': config('AUTH_DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': config('AUTH_DB_NAME', default='hospital_dwh_auth'),
-        'USER': config('AUTH_DB_USER'),
-        'PASSWORD': config('AUTH_DB_PASSWORD'),
-        'HOST': config('AUTH_DB_HOST'),
+        'USER': config('AUTH_DB_USER', default='postgres'),
+        'PASSWORD': config('AUTH_DB_PASSWORD', default=''),
+        'HOST': config('AUTH_DB_HOST', default='localhost'),
         'PORT': config('AUTH_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
@@ -89,10 +95,10 @@ DATABASES = {
     },
     'metadata_db': {
         'ENGINE': config('METADATA_DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': config('METADATA_DB_NAME'),
-        'USER': config('METADATA_DB_USER'),
-        'PASSWORD': config('METADATA_DB_PASSWORD'),
-        'HOST': config('METADATA_DB_HOST'),
+        'NAME': config('METADATA_DB_NAME', default='hospital_dwh'),
+        'USER': config('METADATA_DB_USER', default='postgres'),
+        'PASSWORD': config('METADATA_DB_PASSWORD', default=''),
+        'HOST': config('METADATA_DB_HOST', default='localhost'),
         'PORT': config('METADATA_DB_PORT', default='5432'),
         'OPTIONS': {
             'connect_timeout': 30,
@@ -102,7 +108,7 @@ DATABASES = {
         'ENGINE': config('FAIR_GENOMES_DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': config('FAIR_GENOMES_DB_NAME', default='fair_genomes'),
         'USER': config('FAIR_GENOMES_DB_USER', default='postgres'),
-        'PASSWORD': config('FAIR_GENOMES_DB_PASSWORD'),
+        'PASSWORD': config('FAIR_GENOMES_DB_PASSWORD', default=''),
         'HOST': config('FAIR_GENOMES_DB_HOST', default='localhost'),
         'PORT': config('FAIR_GENOMES_DB_PORT', default='5432'),
         'OPTIONS': {
@@ -131,9 +137,11 @@ else:
     # Production: Use real LDAP/AD authentication
     try:
         import django_auth_ldap
+
         AUTHENTICATION_BACKENDS.append('django_auth_ldap.backend.LDAPBackend')
     except ImportError:
         import logging
+
         logging.warning('django-auth-ldap not installed. LDAP authentication unavailable.')
 
 # Always include ModelBackend as fallback (for superuser access)
@@ -153,14 +161,16 @@ LOGOUT_REDIRECT_URL = 'login'
 if not AUTH_USE_MOCK_LDAP:
     try:
         import ldap
-        from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+        from django_auth_ldap.config import GroupOfNamesType, LDAPSearch
 
         AUTH_LDAP_SERVER_URI = config('AUTH_LDAP_SERVER_URI', default='')
         AUTH_LDAP_BIND_DN = config('AUTH_LDAP_BIND_DN', default='')
         AUTH_LDAP_BIND_PASSWORD = config('AUTH_LDAP_BIND_PASSWORD', default='')
 
         # User search base (where to look for users in AD)
-        AUTH_LDAP_USER_SEARCH_BASE = config('AUTH_LDAP_USER_SEARCH_BASE', default='dc=example,dc=com')
+        AUTH_LDAP_USER_SEARCH_BASE = config(
+            'AUTH_LDAP_USER_SEARCH_BASE', default='dc=example,dc=com'
+        )
         AUTH_LDAP_USER_SEARCH = LDAPSearch(
             AUTH_LDAP_USER_SEARCH_BASE,
             ldap.SCOPE_SUBTREE,
@@ -187,8 +197,8 @@ if not AUTH_USE_MOCK_LDAP:
         AUTH_LDAP_START_TLS = config('AUTH_LDAP_START_TLS', default=False, cast=bool)
     except ImportError:
         import logging
-        logging.warning('python-ldap not installed. Real LDAP authentication unavailable.')
 
+        logging.warning('python-ldap not installed. Real LDAP authentication unavailable.')
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -272,8 +282,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Fair Genomes GraphQL API Configuration
-FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL')
-FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN')
+FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')
+FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN', default='')
 FAIR_GENOMES_FETCH_ON_STARTUP = config('FAIR_GENOMES_FETCH_ON_STARTUP', default=False, cast=bool)
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
 
