@@ -26,6 +26,24 @@
               id="navbar-cart-badge" style="font-size: 0.65rem; display: none;">0</span>
       </a>
       
+      <!-- User Info & Logout -->
+      {% if user.is_authenticated %}
+      <div class="dropdown me-3">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user-circle custom-icon me-1"></i>
+          <span>{{ user.get_full_name|default:user.username }}</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <li><span class="dropdown-item-text"><small class="text-muted">{{ user.email }}</small></span></li>
+          <li><hr class="dropdown-divider"></li>
+          {% if user.is_staff %}
+          <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog me-2"></i>{% trans "Admin" %}</a></li>
+          {% endif %}
+          <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>{% trans "Logout" %}</a></li>
+        </ul>
+      </div>
+      {% endif %}
+      
       <!-- Language Switcher -->
       {% include 'layout/language_switcher.html' %}
     </div>
