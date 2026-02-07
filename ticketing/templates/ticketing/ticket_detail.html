@@ -10,7 +10,7 @@
             <i class="fas fa-ticket-alt me-2"></i>
             {% trans "Ticket" %}: {{ ticket.alvao_ticket_id|default:ticket.id }}
         </h4>
-        <a href="{% url 'ticketing:my_tickets' %}?email={{ ticket.requester_email }}" class="btn btn-outline-secondary">
+        <a href="{% url 'ticketing:my_tickets' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>{% trans "Back to My Tickets" %}
         </a>
     </div>

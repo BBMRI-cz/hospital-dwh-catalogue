@@ -9,30 +9,6 @@ from django.utils.translation import gettext_lazy as _
 class TicketSubmitForm(forms.Form):
     """Form for submitting a ticket request."""
 
-    requester_email = forms.EmailField(
-        label=_('Your Email'),
-        help_text=_('We will use this email to contact you about your request.'),
-        widget=forms.EmailInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': _('your.email@example.com'),
-                'required': True,
-            }
-        ),
-    )
-
-    requester_name = forms.CharField(
-        label=_('Your Name'),
-        max_length=255,
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': _('John Doe'),
-            }
-        ),
-    )
-
     subject = forms.CharField(
         label=_('Subject'),
         max_length=500,

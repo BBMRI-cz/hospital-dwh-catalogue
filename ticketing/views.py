@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -80,7 +81,7 @@ class CartMixin:
         return cart.item_count if cart else 0
 
 
-class CartView(CartMixin, TemplateView):
+class CartView(LoginRequiredMixin, CartMixin, TemplateView):
     """View the current cart contents."""
 
     template_name = 'ticketing/cart.html'
@@ -104,7 +105,7 @@ class CartView(CartMixin, TemplateView):
         return context
 
 
-class AddToCartView(CartMixin, View):
+class AddToCartView(LoginRequiredMixin, CartMixin, View):
     """Toggle an item in the cart (add if not present, remove if present)."""
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -192,7 +193,7 @@ class AddToCartView(CartMixin, View):
         raise ValueError(f'Unknown item type: {item_type}')
 
 
-class RemoveFromCartView(CartMixin, View):
+class RemoveFromCartView(LoginRequiredMixin, CartMixin, View):
     """Remove an item from the cart."""
 
     def post(self, request: HttpRequest, item_id: int) -> HttpResponse:
@@ -217,7 +218,7 @@ class RemoveFromCartView(CartMixin, View):
             )
 
 
-class ClearCartView(CartMixin, View):
+class ClearCartView(LoginRequiredMixin, CartMixin, View):
     """Clear all items from the cart."""
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -230,7 +231,7 @@ class ClearCartView(CartMixin, View):
         return JsonResponse({'success': True, 'message': _('Cart cleared'), 'cart_count': 0})
 
 
-class SubmitCartView(CartMixin, FormView):
+class SubmitCartView(LoginRequiredMixin, CartMixin, FormView):
     """Submit the cart as a ticket to Alvao."""
 
     template_name = 'ticketing/cart.html'
@@ -248,8 +249,11 @@ class SubmitCartView(CartMixin, FormView):
         # Update cart with form data
         cart.subject = form.cleaned_data['subject']
         cart.description = form.cleaned_data['description']
-        cart.requester_email = form.cleaned_data['requester_email']
-        cart.requester_name = form.cleaned_data.get('requester_name', '')
+        
+        # Use authenticated user's information
+        user = self.request.user
+        cart.requester_email = user.email or f'{user.username}@example.com'
+        cart.requester_name = user.get_full_name() or user.username
 
         # Build ticket description with items
         full_description = self._build_ticket_description(cart)
@@ -330,7 +334,7 @@ class SubmitCartView(CartMixin, FormView):
         return '\n'.join(str(line) for line in lines)
 
 
-class TicketSubmittedView(TemplateView):
+class TicketSubmittedView(LoginRequiredMixin, TemplateView):
     """Success page after ticket submission."""
 
     template_name = 'ticketing/ticket_submitted.html'
@@ -347,7 +351,7 @@ class TicketSubmittedView(TemplateView):
         return context
 
 
-class MyTicketsView(ListView):
+class MyTicketsView(LoginRequiredMixin, ListView):
     """View tickets submitted by the current user."""
 
     template_name = 'ticketing/my_tickets.html'
@@ -355,11 +359,10 @@ class MyTicketsView(ListView):
     paginate_by = 20
 
     def get_queryset(self) -> QuerySet[TicketRequest]:
-        """Get tickets for the provided email."""
-        email = self.request.GET.get('email', '').strip()
-
-        if not email:
-            return TicketRequest.objects.none()
+        """Get tickets for the logged-in user."""
+        # Use logged-in user's email
+        user = self.request.user
+        email = user.email or f'{user.username}@example.com'
 
         # Get local tickets
         local_tickets = TicketRequest.objects.filter(
@@ -372,10 +375,13 @@ class MyTicketsView(ListView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add extra context."""
         context = super().get_context_data(**kwargs)
-        context['search_email'] = self.request.GET.get('email', '')
+        
+        # Use logged-in user's email
+        user = self.request.user
+        email = user.email or f'{user.username}@example.com'
+        context['search_email'] = email
 
         # Try to fetch remote tickets from Alvao
-        email = self.request.GET.get('email', '').strip()
         if email:
             try:
                 service = get_ticket_service()
@@ -387,7 +393,7 @@ class MyTicketsView(ListView):
         return context
 
 
-class TicketDetailView(DetailView):
+class TicketDetailView(LoginRequiredMixin, DetailView):
     """View details of a specific ticket."""
 
     model = TicketRequest
@@ -410,7 +416,7 @@ class TicketDetailView(DetailView):
         return context
 
 
-class CartCountView(CartMixin, View):
+class CartCountView(LoginRequiredMixin, CartMixin, View):
     """API endpoint to get current cart count."""
 
     def get(self, request: HttpRequest) -> JsonResponse:
@@ -418,7 +424,7 @@ class CartCountView(CartMixin, View):
         return JsonResponse({'count': self.get_cart_count(request)})
 
 
-class CartItemsView(CartMixin, View):
+class CartItemsView(LoginRequiredMixin, CartMixin, View):
     """API endpoint to get list of item IDs in cart."""
 
     def get(self, request: HttpRequest) -> JsonResponse:

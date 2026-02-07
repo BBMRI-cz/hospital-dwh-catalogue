@@ -116,28 +116,6 @@
                     {% if items %}
                     <form method="post" action="{% url 'ticketing:submit_cart' %}" id="submit-form">
                         {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="id_requester_email" class="form-label">
-                                {{ form.requester_email.label }} <span class="text-danger">*</span>
-                            </label>
-                            {{ form.requester_email }}
-                            {% if form.requester_email.help_text %}
-                            <div class="form-text">{{ form.requester_email.help_text }}</div>
-                            {% endif %}
-                            {% if form.requester_email.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.requester_email.errors|join:", " }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_requester_name" class="form-label">
-                                {{ form.requester_name.label }}
-                            </label>
-                            {{ form.requester_name }}
-                        </div>
 
                         <div class="mb-3">
                             <label for="id_subject" class="form-label">

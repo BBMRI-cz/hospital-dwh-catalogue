@@ -20,32 +20,11 @@
     </div>
     {% endif %}
 
-    <!-- Email Search Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-8">
-                    <label for="email" class="form-label">{% trans "Enter your email to view your tickets" %}</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           value="{{ search_email }}" 
-                           placeholder="{% trans 'your.email@example.com' %}"
-                           required>
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i>{% trans "Search" %}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {% if search_email %}
     <!-- Results -->
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">
-                {% blocktrans with email=search_email %}Tickets for {{ email }}{% endblocktrans %}
+                {% trans "Your Tickets" %}
             </h5>
         </div>
         <div class="card-body">
@@ -126,7 +105,7 @@
             {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                <p class="text-muted">{% trans "No tickets found for this email address." %}</p>
+                <p class="text-muted">{% trans "You haven't submitted any tickets yet." %}</p>
             </div>
             {% endif %}
 
@@ -139,13 +118,5 @@
             {% endif %}
         </div>
     </div>
-    {% else %}
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
-            <p class="text-muted">{% trans "Enter your email address above to view your submitted tickets." %}</p>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
