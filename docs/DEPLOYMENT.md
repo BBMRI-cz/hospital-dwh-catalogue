@@ -38,14 +38,3 @@ For manual deployment to production:
    ```
 
 **Note:** Migrations run automatically via the entrypoint script when containers start.
-
-## Production Checklist
-
-- [ ] `.env` file configured with secure credentials
-- [ ] `SECRET_KEY` is strong and unique
-- [ ] Database passwords are secure
-- [ ] `DEBUG=False` in production settings
-- [ ] HTTPS is configured (if applicable)
-- [ ] Database backups are scheduled (see [Backup Guide](BACKUP.md))
-- [ ] Backup restore process has been tested
-- [ ] Off-site backup storage is configured
