@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-01 22:39+0100\n"
+"POT-Creation-Date: 2026-02-06 22:25+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: Czech\n"
@@ -16,148 +16,321 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
+#: catalogue/settings/base.py:215 catalogue/settings/test.py:140
 msgid "Czech"
 msgstr "Čeština"
 
+#: catalogue/settings/base.py:216 catalogue/settings/test.py:141
 msgid "English"
 msgstr "Angličtina"
 
+#: catalogue/templates/catalogue/login.html:5 catalogue/views.py:23
+msgid "Sign In"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:16
+#: warehouse/templates/warehouse/base.html:9
+#: warehouse/templates/warehouse/catalogue.html:4
+#: warehouse/templates/warehouse/catalogue.html:24
+msgid "Data Catalogue MOÚ"
+msgstr "Katalog dat MOÚ"
+
+#: catalogue/templates/catalogue/login.html:20
+msgid "Welcome!"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:21
+msgid "Please sign in with your Windows domain credentials"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:25
+msgid "Development Mode"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:27
+msgid "Mock LDAP enabled: Test users available."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:28
+msgid "Test users: admin/admin123, jnovak/password123, test/test123"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:30
+msgid "LDAP is configured and will be used for authentication."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:32
+msgid "Use local Django user accounts."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:42
+msgid "Invalid username or password. Please try again."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:51
+msgid "Username"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:57
+msgid "Enter your domain username"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:66
+msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:71
+msgid "Password"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:78
+msgid "Enter your password"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:92
+msgid "Sign in"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:100
+msgid "Your account will be created automatically on first login."
+msgstr ""
+
+#: fair_genomes/models.py:21
+#: fair_genomes/templates/fair_genomes/personal_detail.html:76
+#: fair_genomes/templates/fair_genomes/personal_list.html:73
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:76
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:76
 msgid "Inserted By"
 msgstr "Vložil"
 
+#: fair_genomes/models.py:22
 msgid "User who created this record"
 msgstr "Uživatel, který vytvořil tento záznam"
 
+#: fair_genomes/models.py:27
+#: fair_genomes/templates/fair_genomes/personal_detail.html:80
+#: fair_genomes/templates/fair_genomes/personal_list.html:74
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:80
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:77
 msgid "Inserted On"
 msgstr "Vloženo"
 
+#: fair_genomes/models.py:28
 msgid "Timestamp when record was created"
 msgstr "Časové razítko vytvoření záznamu"
 
+#: fair_genomes/models.py:34
+#: fair_genomes/templates/fair_genomes/personal_detail.html:90
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:90
 msgid "Updated By"
 msgstr "Aktualizoval"
 
+#: fair_genomes/models.py:35
 msgid "User who last updated this record"
 msgstr "Uživatel, který naposledy aktualizoval tento záznam"
 
+#: fair_genomes/models.py:40
+#: fair_genomes/templates/fair_genomes/personal_detail.html:94
+#: fair_genomes/templates/fair_genomes/personal_list.html:75
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:94
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:78
 msgid "Updated On"
 msgstr "Aktualizováno"
 
+#: fair_genomes/models.py:41
 msgid "Timestamp when record was last updated"
 msgstr "Časové razítko poslední aktualizace záznamu"
 
+#: fair_genomes/models.py:59
+#: fair_genomes/templates/fair_genomes/personal_detail.html:45
+#: fair_genomes/templates/fair_genomes/personal_list.html:71
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:45
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:74
 msgid "Personal Identifier"
 msgstr "Osobní identifikátor"
 
+#: fair_genomes/models.py:60
 msgid "Unique identifier for the individual"
 msgstr "Jedinečný identifikátor osoby"
 
+#: fair_genomes/models.py:66
+#: fair_genomes/templates/fair_genomes/personal_detail.html:51
+#: fair_genomes/templates/fair_genomes/personal_list.html:72
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:51
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:75
 msgid "Year of Birth"
 msgstr "Rok narození"
 
+#: fair_genomes/models.py:67
 msgid "Year the individual was born"
 msgstr "Rok, ve kterém se osoba narodila"
 
+#: fair_genomes/models.py:72
 msgid "Personal Record"
 msgstr "Osobní záznam"
 
+#: fair_genomes/models.py:73
 msgid "Personal Records"
 msgstr "Osobní záznamy"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:4
+#: fair_genomes/templates/fair_genomes/personal_detail.html:15
+#: warehouse/templates/layout/navbar.html:13
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:4
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:15
 msgid "Fair Genomes"
 msgstr "Fair Genomes"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:26
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:26
 msgid "Personal Record Details"
 msgstr "Detaily osobního záznamu"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:38
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:38
 msgid "Personal Information"
 msgstr "Osobní informace"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:56
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:56
 msgid "Not specified"
 msgstr "Neuvedeno"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:71
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:71
 msgid "Metadata"
 msgstr "Metadata"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:111
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:111
 msgid "Back to List"
 msgstr "Zpět na seznam"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:4
+#: fair_genomes/templates/fair_genomes/personal_list.html:13
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:4
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:13
 msgid "Fair Genomes - Personal Data"
 msgstr "Fair Genomes - Osobní data"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:23
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:26
 msgid "Total Records"
 msgstr "Celkem záznamů"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:37
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:40
 msgid "Search by identifier or user..."
 msgstr "Hledat podle identifikátoru nebo uživatele..."
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:42
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:45
 msgid "All Years of Birth"
 msgstr "Všechny roky narození"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:52
+#: ticketing/templates/ticketing/my_tickets.html:36
+#: warehouse/templates/warehouse/catalogue.html:47
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:55
 msgid "Search"
 msgstr "Vyhledávání"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:76
+#: ticketing/templates/ticketing/cart.html:47
+#: ticketing/templates/ticketing/my_tickets.html:62
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:79
 msgid "Actions"
 msgstr "Akce"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:92
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:95
 msgid "View"
 msgstr "Zobrazit"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:108
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:111
 msgid "First"
 msgstr "První"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:113
+#: ticketing/templates/ticketing/my_tickets.html:104
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:116
 msgid "Previous"
 msgstr "Předchozí"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:120
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
 msgid "Page"
 msgstr "Stránka"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:120
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
 msgid "of"
 msgstr "z"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:127
+#: ticketing/templates/ticketing/my_tickets.html:118
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:130
 msgid "Next"
 msgstr "Další"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:132
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:135
 msgid "Last"
 msgstr "Poslední"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:143
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:146
 msgid "No records found matching your search criteria."
 msgstr "Nebyly nalezeny žádné záznamy odpovídající vašim kritériím."
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:145
 msgid "No Fair Genomes data available."
 msgstr "Nejsou dostupná žádná data Fair Genomes."
 
 # Ticketing / Cart translations
+#: ticketing/apps.py:14
 msgid "Ticketing"
 msgstr "Ticketing"
 
+#: ticketing/forms.py:13
 msgid "Your Email"
 msgstr "Váš email"
 
+#: ticketing/forms.py:14
 msgid "We will use this email to contact you about your request."
 msgstr "Tento email použijeme pro komunikaci ohledně vašeho požadavku."
 
+#: ticketing/forms.py:18 ticketing/templates/ticketing/my_tickets.html:31
 msgid "your.email@example.com"
 msgstr "vas.email@example.com"
 
+#: ticketing/forms.py:25
 msgid "Your Name"
 msgstr "Vaše jméno"
 
+#: ticketing/forms.py:31
 msgid "John Doe"
 msgstr "Jan Novák"
 
+#: ticketing/forms.py:37 ticketing/models.py:45
+#: ticketing/templates/ticketing/my_tickets.html:58
 msgid "Subject"
 msgstr "Předmět"
 
+#: ticketing/forms.py:39 ticketing/views.py:66
 msgid "Data Access Request"
 msgstr "Žádost o přístup k datům"
 
+#: ticketing/forms.py:43
 msgid "Brief description of your request"
 msgstr "Stručný popis vašeho požadavku"
 
+#: ticketing/forms.py:50
 msgid "Additional Notes"
 msgstr "Další poznámky"
 
+#: ticketing/forms.py:57
 msgid ""
 "Please provide any additional information about your data request, such as "
 "purpose of use, timeframe needed, etc."
@@ -165,261 +338,366 @@ msgstr ""
 "Uveďte prosím další informace o vašem požadavku na data, jako je účel "
 "použití, požadovaný časový rámec apod."
 
+#: ticketing/models.py:27
 msgid "Draft"
 msgstr "Koncept"
 
+#: ticketing/models.py:28 ticketing/templates/ticketing/my_tickets.html:61
+#: ticketing/templates/ticketing/my_tickets.html:74
+#: ticketing/templates/ticketing/ticket_detail.html:25
+#: ticketing/templates/ticketing/ticket_detail.html:139
 msgid "Submitted"
 msgstr "Odesláno"
 
+#: ticketing/models.py:29
 msgid "Confirmed by Alvao"
 msgstr "Potvrzeno Alvao"
 
+#: ticketing/models.py:30
 msgid "Submission Failed"
 msgstr "Odeslání se nezdařilo"
 
+#: ticketing/models.py:34
 msgid "Requester Email"
 msgstr "Email žadatele"
 
+#: ticketing/models.py:34
 msgid "Email of the person requesting data access"
 msgstr "Email osoby žádající o přístup k datům"
 
+#: ticketing/models.py:39
 msgid "Requester Name"
 msgstr "Jméno žadatele"
 
+#: ticketing/models.py:40
 msgid "Full name of the requester"
 msgstr "Celé jméno žadatele"
 
+#: ticketing/models.py:45
 msgid "Ticket subject/title"
 msgstr "Předmět/název ticketu"
 
+#: ticketing/models.py:49 ticketing/templates/ticketing/cart.html:46
+#: ticketing/templates/ticketing/ticket_detail.html:37
 msgid "Description"
 msgstr "Popis"
 
+#: ticketing/models.py:50
 msgid "Additional details or notes for the request"
 msgstr "Další podrobnosti nebo poznámky k požadavku"
 
+#: ticketing/models.py:55 ticketing/templates/ticketing/my_tickets.html:59
+#: ticketing/templates/ticketing/ticket_detail.html:87
 msgid "Status"
 msgstr "Stav"
 
+#: ticketing/models.py:63 ticketing/templates/ticketing/ticket_detail.html:132
 msgid "Alvao Ticket ID"
 msgstr "ID ticketu v Alvao"
 
+#: ticketing/models.py:64
 msgid "Ticket ID returned by Alvao after submission"
 msgstr "ID ticketu vrácené Alvao po odeslání"
 
+#: ticketing/models.py:69
 msgid "Alvao Response"
 msgstr "Odpověď Alvao"
 
+#: ticketing/models.py:70
 msgid "Full response from Alvao API"
 msgstr "Úplná odpověď z API Alvao"
 
+#: ticketing/models.py:79
 msgid "Session Key"
 msgstr "Klíč relace"
 
+#: ticketing/models.py:80
 msgid "Session key for tracking cart before submission"
 msgstr "Klíč relace pro sledování košíku před odesláním"
 
+#: ticketing/models.py:84
 msgid "Created At"
 msgstr "Vytvořeno"
 
+#: ticketing/models.py:85
 msgid "Updated At"
 msgstr "Aktualizováno"
 
+#: ticketing/models.py:86
 msgid "Submitted At"
 msgstr "Odesláno"
 
+#: ticketing/models.py:90 ticketing/models.py:132
 msgid "Ticket Request"
 msgstr "Požadavek ticketu"
 
+#: ticketing/models.py:91
 msgid "Ticket Requests"
 msgstr "Požadavky ticketů"
 
+#: ticketing/models.py:124 ticketing/templates/ticketing/cart.html:56
+#: ticketing/templates/ticketing/cart.html:74
+#: ticketing/templates/ticketing/ticket_detail.html:57 warehouse/models.py:53
 msgid "Dataset"
 msgstr "Datová sada"
 
+#: ticketing/models.py:125 ticketing/templates/ticketing/cart.html:60
+#: ticketing/templates/ticketing/ticket_detail.html:59 warehouse/models.py:126
+#: warehouse/models.py:170
 msgid "Data Class"
 msgstr "Datová třída"
 
+#: ticketing/models.py:126 warehouse/models.py:238 warehouse/models.py:265
 msgid "Database Table"
 msgstr "Databázová tabulka"
 
+#: ticketing/models.py:136
 msgid "Item Type"
 msgstr "Typ položky"
 
+#: ticketing/models.py:139
 msgid "Item ID"
 msgstr "ID položky"
 
+#: ticketing/models.py:139
 msgid "Primary key of the requested item"
 msgstr "Primární klíč požadované položky"
 
+#: ticketing/models.py:143
 msgid "Item Name"
 msgstr "Název položky"
 
+#: ticketing/models.py:144
 msgid "Display name of the requested item"
 msgstr "Zobrazovaný název požadované položky"
 
+#: ticketing/models.py:146
 msgid "Item Description"
 msgstr "Popis položky"
 
+#: ticketing/models.py:152
 msgid "Parent Dataset"
 msgstr "Nadřazená datová sada"
 
+#: ticketing/models.py:153
 msgid "Parent dataset ID for dataclasses and tables"
 msgstr "ID nadřazené datové sady pro datové třídy a tabulky"
 
+#: ticketing/models.py:156
 msgid "Added At"
 msgstr "Přidáno"
 
+#: ticketing/models.py:160
 msgid "Ticket Request Item"
 msgstr "Položka požadavku"
 
+#: ticketing/models.py:161
 msgid "Ticket Request Items"
 msgstr "Položky požadavku"
 
+#: ticketing/templates/ticketing/cart.html:4
+#: ticketing/templates/ticketing/cart.html:9
 msgid "Data Request Cart"
 msgstr "Košík požadavků na data"
 
+#: ticketing/templates/ticketing/cart.html:29
 msgid "Selected Items"
 msgstr "Vybrané položky"
 
+#: ticketing/templates/ticketing/cart.html:34
 msgid "Clear All"
 msgstr "Vymazat vše"
 
+#: ticketing/templates/ticketing/cart.html:44
+#: ticketing/templates/ticketing/ticket_detail.html:47
 msgid "Type"
 msgstr "Typ"
 
+#: ticketing/templates/ticketing/cart.html:45
+#: ticketing/templates/ticketing/ticket_detail.html:48
 msgid "Name"
 msgstr "Název"
 
+#: ticketing/templates/ticketing/cart.html:64
+#: ticketing/templates/ticketing/ticket_detail.html:61
 msgid "Table"
 msgstr "Tabulka"
 
+#: ticketing/templates/ticketing/cart.html:87
+#: warehouse/templates/warehouse/catalogue.html:360
 msgid "Remove from cart"
 msgstr "Odebrat z košíku"
 
+#: ticketing/templates/ticketing/cart.html:99 ticketing/views.py:246
 msgid "Your cart is empty."
 msgstr "Váš košík je prázdný."
 
+#: ticketing/templates/ticketing/cart.html:101
+#: ticketing/templates/ticketing/ticket_submitted.html:48
 msgid "Browse Catalogue"
 msgstr "Procházet katalog"
 
+#: ticketing/templates/ticketing/cart.html:113
+#: ticketing/templates/ticketing/cart.html:163
 msgid "Submit Request"
 msgstr "Odeslat požadavek"
 
+#: ticketing/templates/ticketing/cart.html:166
 msgid "Continue Browsing"
 msgstr "Pokračovat v prohlížení"
 
+#: ticketing/templates/ticketing/cart.html:172
 msgid "Add items to your cart to submit a request."
 msgstr "Přidejte položky do košíku pro odeslání požadavku."
 
+#: ticketing/templates/ticketing/cart.html:181
 msgid "How it works"
 msgstr "Jak to funguje"
 
+#: ticketing/templates/ticketing/cart.html:185
 msgid "Browse the catalogue and add items to your cart"
 msgstr "Procházejte katalog a přidávejte položky do košíku"
 
+#: ticketing/templates/ticketing/cart.html:186
 msgid "Review your selected items"
 msgstr "Zkontrolujte vybrané položky"
 
+#: ticketing/templates/ticketing/cart.html:187
 msgid "Fill in your contact information"
 msgstr "Vyplňte své kontaktní údaje"
 
+#: ticketing/templates/ticketing/cart.html:188
 msgid ""
 "Submit your request - a ticket will be created and you'll receive a "
 "confirmation"
 msgstr "Odešlete požadavek - bude vytvořen ticket a obdržíte potvrzení"
 
+#: ticketing/templates/ticketing/cart.html:237
 msgid "Are you sure you want to clear your cart?"
 msgstr "Opravdu chcete vyprázdnit košík?"
 
+#: ticketing/templates/ticketing/my_tickets.html:4
+#: ticketing/templates/ticketing/my_tickets.html:9
+#: warehouse/templates/layout/navbar.html:17
 msgid "My Tickets"
 msgstr "Moje tickety"
 
+#: ticketing/templates/ticketing/my_tickets.html:28
 msgid "Enter your email to view your tickets"
 msgstr "Zadejte svůj email pro zobrazení ticketů"
 
+#: ticketing/templates/ticketing/my_tickets.html:48
 #, python-format
 msgid "Tickets for %(email)s"
 msgstr "Tickety pro %(email)s"
 
+#: ticketing/templates/ticketing/my_tickets.html:57
 msgid "Ticket ID"
 msgstr "ID ticketu"
 
+#: ticketing/templates/ticketing/my_tickets.html:60
 msgid "Items"
 msgstr "Položky"
 
+#: ticketing/templates/ticketing/my_tickets.html:76
+#: ticketing/templates/ticketing/ticket_detail.html:27
 msgid "Confirmed"
 msgstr "Potvrzeno"
 
+#: ticketing/templates/ticketing/my_tickets.html:78
+#: ticketing/templates/ticketing/ticket_detail.html:29
 msgid "Failed"
 msgstr "Selhalo"
 
+#: ticketing/templates/ticketing/my_tickets.html:88
 msgid "View Details"
 msgstr "Zobrazit detaily"
 
+#: ticketing/templates/ticketing/my_tickets.html:99
 msgid "Page navigation"
 msgstr "Navigace stránek"
 
+#: ticketing/templates/ticketing/my_tickets.html:129
 msgid "No tickets found for this email address."
 msgstr "Pro tuto emailovou adresu nebyly nalezeny žádné tickety."
 
+#: ticketing/templates/ticketing/my_tickets.html:136
 msgid "Could not fetch remote ticket status from Alvao."
 msgstr "Nepodařilo se načíst stav ticketu z Alvao."
 
+#: ticketing/templates/ticketing/my_tickets.html:146
 msgid "Enter your email address above to view your submitted tickets."
 msgstr "Pro zobrazení odeslaných ticketů zadejte výše svou emailovou adresu."
 
+#: ticketing/templates/ticketing/ticket_detail.html:4
 msgid "Ticket Details"
 msgstr "Detaily ticketu"
 
+#: ticketing/templates/ticketing/ticket_detail.html:11
 msgid "Ticket"
 msgstr "Ticket"
 
+#: ticketing/templates/ticketing/ticket_detail.html:14
 msgid "Back to My Tickets"
 msgstr "Zpět na moje tickety"
 
+#: ticketing/templates/ticketing/ticket_detail.html:42
 msgid "Requested Items"
 msgstr "Požadované položky"
 
+#: ticketing/templates/ticketing/ticket_detail.html:49
 msgid "ID"
 msgstr "ID"
 
+#: ticketing/templates/ticketing/ticket_detail.html:69
 msgid "No items"
 msgstr "Žádné položky"
 
+#: ticketing/templates/ticketing/ticket_detail.html:82
 msgid "Alvao Status"
 msgstr "Stav v Alvao"
 
+#: ticketing/templates/ticketing/ticket_detail.html:92
 msgid "Ticket Number"
 msgstr "Číslo ticketu"
 
+#: ticketing/templates/ticketing/ticket_detail.html:99
 msgid "View in Alvao"
 msgstr "Zobrazit v Alvao"
 
+#: ticketing/templates/ticketing/ticket_detail.html:111
 msgid "Could not fetch current status from Alvao."
 msgstr "Nepodařilo se načíst aktuální stav z Alvao."
 
+#: ticketing/templates/ticketing/ticket_detail.html:121
 msgid "Details"
 msgstr "Detaily"
 
+#: ticketing/templates/ticketing/ticket_detail.html:125
 msgid "Requester"
 msgstr "Žadatel"
 
+#: ticketing/templates/ticketing/ticket_detail.html:135
 msgid "Created"
 msgstr "Vytvořeno"
 
+#: ticketing/templates/ticketing/ticket_detail.html:143
 msgid "Items Count"
 msgstr "Počet položek"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:4
 msgid "Request Submitted"
 msgstr "Požadavek odeslán"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:16
 msgid "Request Submitted Successfully!"
 msgstr "Požadavek úspěšně odeslán!"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:20
 msgid "Your ticket ID:"
 msgstr "ID vašeho ticketu:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:27
 #, python-format
 msgid ""
 "\n"
@@ -428,18 +706,23 @@ msgid ""
 "                        "
 msgstr "Potvrzovací email bude odeslán na <strong>%(email)s</strong>."
 
+#: ticketing/templates/ticketing/ticket_submitted.html:34
 msgid "Request Summary"
 msgstr "Souhrn požadavku"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:35
 msgid "Subject:"
 msgstr "Předmět:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:36
 msgid "Items:"
 msgstr "Položky:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:37
 msgid "Submitted:"
 msgstr "Odesláno:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:42
 msgid ""
 "Your data access request has been submitted. You will receive a confirmation "
 "email shortly."
@@ -447,142 +730,191 @@ msgstr ""
 "Váš požadavek na přístup k datům byl odeslán. Brzy obdržíte potvrzovací "
 "email."
 
+#: ticketing/templates/ticketing/ticket_submitted.html:51
 msgid "View My Tickets"
 msgstr "Zobrazit mé tickety"
 
+#: ticketing/views.py:118
 msgid "Missing item type or ID"
 msgstr "Chybí typ položky nebo ID"
 
+#: ticketing/views.py:123
 msgid "Invalid item type"
 msgstr "Neplatný typ položky"
 
+#: ticketing/views.py:137 ticketing/views.py:211
 msgid "Item removed from cart"
 msgstr "Položka odebrána z košíku"
 
+#: ticketing/views.py:165
 msgid "Item added to cart"
 msgstr "Položka přidána do košíku"
 
+#: ticketing/views.py:217
 msgid "Item not found in cart"
 msgstr "Položka nebyla v košíku nalezena"
 
+#: ticketing/views.py:231
 msgid "Cart cleared"
 msgstr "Košík vyprázdněn"
 
+#: ticketing/views.py:285
 #, python-format
 msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 msgstr "Váš požadavek byl úspěšně odeslán. ID ticketu: %(ticket_id)s"
 
+#: ticketing/views.py:299
 #, python-format
 msgid "Failed to submit your request. Please try again later. Error: %(error)s"
 msgstr ""
 "Nepodařilo se odeslat váš požadavek. Zkuste to prosím znovu později. Chyba: "
 "%(error)s"
 
+#: ticketing/views.py:306
 msgid "Please correct the errors below."
 msgstr "Opravte prosím níže uvedené chyby."
 
+#: ticketing/views.py:319
 msgid "Requested Data Items:"
 msgstr "Požadované datové položky:"
 
+#: warehouse/models.py:16
 msgid "Data Source"
 msgstr "Datový zdroj"
 
+#: warehouse/models.py:17
 msgid "Data Sources"
 msgstr "Datové zdroje"
 
+#: warehouse/models.py:54
 msgid "Datasets"
 msgstr "Datové sady"
 
+#: warehouse/models.py:127
 msgid "Data Classes"
 msgstr "Datové třídy"
 
+#: warehouse/models.py:172
 msgid "Column Order"
 msgstr "Pořadí sloupce"
 
+#: warehouse/models.py:174
 msgid "Column Variable"
 msgstr "Proměnná sloupce"
 
+#: warehouse/models.py:177
 msgid "Column Name"
 msgstr "Název sloupce"
 
+#: warehouse/models.py:179
 msgid "Column Description"
 msgstr "Popis sloupce"
 
+#: warehouse/models.py:181
 msgid "R Variable"
 msgstr "R proměnná"
 
+#: warehouse/models.py:184
 msgid "R Transformation"
 msgstr "R transformace"
 
+#: warehouse/models.py:187
 msgid "R Datatype"
 msgstr "R datový typ"
 
+#: warehouse/models.py:190
 msgid "Possible Key"
 msgstr "Možný klíč"
 
+#: warehouse/models.py:192
 msgid "Tag"
 msgstr "Štítek"
 
+#: warehouse/models.py:194
 msgid "Confidentiality Level"
 msgstr "Úroveň důvěrnosti"
 
+#: warehouse/models.py:196 warehouse/models.py:280
 msgid "Vocabulary"
 msgstr "Slovník"
 
+#: warehouse/models.py:197
 msgid "Calculated"
 msgstr "Vypočítané"
 
+#: warehouse/models.py:202
 msgid "Mandatory"
 msgstr "Povinné"
 
+#: warehouse/models.py:204
 msgid "Unit"
 msgstr "Jednotka"
 
+#: warehouse/models.py:209
 msgid "Data Class Table Schema"
 msgstr "Schéma tabulky datové třídy"
 
+#: warehouse/models.py:210
 msgid "Data Class Table Schemas"
 msgstr "Schémata tabulek datových tříd"
 
+#: warehouse/models.py:239
 msgid "Database Tables"
 msgstr "Databázové tabulky"
 
+#: warehouse/models.py:267
 msgid "Variable Order"
 msgstr "Pořadí proměnné"
 
+#: warehouse/models.py:268
 msgid "Variable"
 msgstr "Proměnná"
 
+#: warehouse/models.py:269
 msgid "Database Key"
 msgstr "Databázový klíč"
 
+#: warehouse/models.py:271
 msgid "Database Type"
 msgstr "Databázový typ"
 
+#: warehouse/models.py:273
 msgid "R Type"
 msgstr "R typ"
 
+#: warehouse/models.py:275
 msgid "Variable Name"
 msgstr "Název proměnné"
 
+#: warehouse/models.py:278
 msgid "Variable Description"
 msgstr "Popis proměnné"
 
+#: warehouse/models.py:285
 msgid "Database Table Schema"
 msgstr "Schéma databázové tabulky"
 
+#: warehouse/models.py:286
 msgid "Database Table Schemas"
 msgstr "Schémata databázových tabulek"
 
+#: warehouse/templates/layout/navbar.html:9
 msgid "Catalogue"
 msgstr "Katalog"
 
-msgid "Data Catalogue MOÚ"
-msgstr "Katalog dat MOÚ"
+#: warehouse/templates/layout/navbar.html:40
+msgid "Admin"
+msgstr ""
 
+#: warehouse/templates/layout/navbar.html:42
+msgid "Logout"
+msgstr ""
+
+#: warehouse/templates/warehouse/base.html:10
 msgid "Data warehouse catalogue"
 msgstr "Katalog datového skladu"
 
+#: warehouse/templates/warehouse/catalogue.html:25
 msgid ""
 "This catalogue serves as a registry of MOÚ data sources for the purpose of "
 "their effective sharing and secondary use. The catalogue includes data "
@@ -595,81 +927,114 @@ msgstr ""
 "datové zdroje ve správě Oddělení zdravotnických informací, které garantuje "
 "správnost informací, kvalitu dat a poskytuje podporu při jejich využití."
 
+#: warehouse/templates/warehouse/catalogue.html:33
+#: warehouse/templates/warehouse/includes/help_modal.html:7
 msgid "How to use the catalogue"
 msgstr "Jak používat katalog"
 
+#: warehouse/templates/warehouse/catalogue.html:34
 msgid "Click to display the catalogue usage guide."
 msgstr "Kliknutím se zobrazí návod k použití katalogu."
 
+#: warehouse/templates/warehouse/catalogue.html:53
 msgid "Enter search text"
 msgstr "Zadejte hledaný text"
 
+#: warehouse/templates/warehouse/catalogue.html:79
+#: warehouse/templates/warehouse/catalogue.html:365
 msgid "Add to cart"
 msgstr "Přidat do košíku"
 
+#: warehouse/templates/warehouse/catalogue.html:95
+#: warehouse/templates/warehouse/includes/filters.html:63
 msgid "Data source"
 msgstr "Zdroj dat"
 
+#: warehouse/templates/warehouse/catalogue.html:96
+#: warehouse/templates/warehouse/includes/filters.html:81
 msgid "Rights holder"
 msgstr "Držitel práv"
 
+#: warehouse/templates/warehouse/catalogue.html:431
+#: warehouse/templates/warehouse/catalogue.html:438
 msgid "Could not update cart"
 msgstr "Nepodařilo se aktualizovat košík"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:123
 msgid "Data Source:"
 msgstr "Datový zdroj:"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:124
 msgid "This data is synced from the Fair Genomes GraphQL API."
 msgstr "Tato data jsou synchronizována z Fair Genomes GraphQL API."
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:125
 msgid "To update, run:"
 msgstr "Pro aktualizaci spusťte:"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:16
 msgid "Patient demographic data synced from Fair Genomes GraphQL API"
 msgstr "Demografická data pacientů synchronizovaná z Fair Genomes GraphQL API"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:148
 msgid "No Fair Genomes data available. Run sync to fetch data:"
 msgstr "Nejsou dostupná žádná data Fair Genomes. Pro načtení dat spusťte:"
 
+#: warehouse/templates/warehouse/includes/filters.html:7
 msgid "Filters"
 msgstr "Filtry"
 
+#: warehouse/templates/warehouse/includes/filters.html:12
 msgid "Clear filters"
 msgstr "Vymazat filtry"
 
+#: warehouse/templates/warehouse/includes/filters.html:20
 msgid "Data availability"
 msgstr "Dostupnost dat"
 
+#: warehouse/templates/warehouse/includes/filters.html:26
 msgid "Tables ready"
 msgstr "Tabulky připraveny"
 
+#: warehouse/templates/warehouse/includes/filters.html:32
 msgid "Raw data"
 msgstr "Surová data"
 
+#: warehouse/templates/warehouse/includes/filters.html:38
 msgid "Unavailable data"
 msgstr "Nedostupná data"
 
+#: warehouse/templates/warehouse/includes/filters.html:45
 msgid "Keywords"
 msgstr "Klíčová slova"
 
+#: warehouse/templates/warehouse/includes/filters.html:47
+#: warehouse/templates/warehouse/includes/filters.html:65
+#: warehouse/templates/warehouse/includes/filters.html:83
 msgid "Search..."
 msgstr "Hledat..."
 
+#: warehouse/templates/warehouse/includes/filters.html:55
 msgid "No keywords to display."
 msgstr "Žádná klíčová slova k zobrazení."
 
+#: warehouse/templates/warehouse/includes/filters.html:73
 msgid "No data sources to display."
 msgstr "Žádný zdroj dat k zobrazení."
 
+#: warehouse/templates/warehouse/includes/filters.html:91
 msgid "No rights holders to display."
 msgstr "Žádný držitel práv k zobrazení."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:8
 msgid "Close"
 msgstr "Zavřít"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:11
 msgid "1. Search:"
 msgstr "1. Vyhledávání:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:13
 msgid ""
 "Enter keywords you are interested in into the \"Search term\" field. The "
 "catalogue will search through dataset names, descriptions and keywords."
@@ -677,21 +1042,27 @@ msgstr ""
 "Do pole \"Hledaný výraz\" zadejte klíčová slova, která vás zajímají. Katalog "
 "prohledá názvy, popisy a klíčová slova datových sad."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:16
 msgid "Press the \"Search\" button (if available)."
 msgstr "Stiskněte tlačítko \"Vyhledat\" (pokud je k dispozici)."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:21
 msgid "2. Filtering:"
 msgstr "2. Filtrování:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:23
 msgid "Filters are available in the left panel."
 msgstr "Filtry jsou dostupné v levém panelu."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:24
 msgid "You can filter by:"
 msgstr "Můžete filtrovat podle:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:26
 msgid "Keywords:"
 msgstr "Klíčových slov:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:26
 msgid ""
 "Check relevant keywords. You can use the search field within each filter "
 "section for faster searching."
@@ -699,28 +1070,35 @@ msgstr ""
 "Zaškrtněte relevantní klíčová slova. Pro rychlejší nalezení můžete použít "
 "vyhledávací pole v rámci každé sekce filtru."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:29
 msgid "Data source:"
 msgstr "Zdroje dat:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:29
 msgid "Select which source the data comes from."
 msgstr "Vyberte, z jakého zdroje data pocházejí."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:30
 msgid "Rights holder:"
 msgstr "Držitele práv:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:30
 msgid "Display datasets managed by a specific rights holder."
 msgstr "Zobrazte datové sady spravované konkrétním držitelem práv."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:33
 msgid ""
 "After checking the filters, the corresponding datasets will be automatically "
 "displayed."
 msgstr "Po zaškrtnutí filtrů se automaticky zobrazí odpovídající datové sady."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:34
 msgid "To clear all set filters, click the \"Clear filters\" button."
 msgstr ""
 "Pro vymazání všech nastavených filtrů klikněte na tlačítko \"Vymazat "
 "filtry\"."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:39
 msgid "3. Browsing datasets:"
 msgstr "3. Prohlížení datových sad:"
 

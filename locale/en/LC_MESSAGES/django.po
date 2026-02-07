@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-01 22:39+0100\n"
+"POT-Creation-Date: 2026-02-06 22:25+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -16,148 +16,321 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: catalogue/settings/base.py:215 catalogue/settings/test.py:140
 msgid "Czech"
 msgstr "Czech"
 
+#: catalogue/settings/base.py:216 catalogue/settings/test.py:141
 msgid "English"
 msgstr "English"
 
+#: catalogue/templates/catalogue/login.html:5 catalogue/views.py:23
+msgid "Sign In"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:16
+#: warehouse/templates/warehouse/base.html:9
+#: warehouse/templates/warehouse/catalogue.html:4
+#: warehouse/templates/warehouse/catalogue.html:24
+msgid "Data Catalogue MOÚ"
+msgstr "MOÚ Data Catalogue"
+
+#: catalogue/templates/catalogue/login.html:20
+msgid "Welcome!"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:21
+msgid "Please sign in with your Windows domain credentials"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:25
+msgid "Development Mode"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:27
+msgid "Mock LDAP enabled: Test users available."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:28
+msgid "Test users: admin/admin123, jnovak/password123, test/test123"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:30
+msgid "LDAP is configured and will be used for authentication."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:32
+msgid "Use local Django user accounts."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:42
+msgid "Invalid username or password. Please try again."
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:51
+msgid "Username"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:57
+msgid "Enter your domain username"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:66
+msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:71
+msgid "Password"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:78
+msgid "Enter your password"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:92
+msgid "Sign in"
+msgstr ""
+
+#: catalogue/templates/catalogue/login.html:100
+msgid "Your account will be created automatically on first login."
+msgstr ""
+
+#: fair_genomes/models.py:21
+#: fair_genomes/templates/fair_genomes/personal_detail.html:76
+#: fair_genomes/templates/fair_genomes/personal_list.html:73
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:76
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:76
 msgid "Inserted By"
 msgstr "Inserted By"
 
+#: fair_genomes/models.py:22
 msgid "User who created this record"
 msgstr "User who created this record"
 
+#: fair_genomes/models.py:27
+#: fair_genomes/templates/fair_genomes/personal_detail.html:80
+#: fair_genomes/templates/fair_genomes/personal_list.html:74
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:80
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:77
 msgid "Inserted On"
 msgstr "Inserted On"
 
+#: fair_genomes/models.py:28
 msgid "Timestamp when record was created"
 msgstr "Timestamp when record was created"
 
+#: fair_genomes/models.py:34
+#: fair_genomes/templates/fair_genomes/personal_detail.html:90
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:90
 msgid "Updated By"
 msgstr "Updated By"
 
+#: fair_genomes/models.py:35
 msgid "User who last updated this record"
 msgstr "User who last updated this record"
 
+#: fair_genomes/models.py:40
+#: fair_genomes/templates/fair_genomes/personal_detail.html:94
+#: fair_genomes/templates/fair_genomes/personal_list.html:75
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:94
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:78
 msgid "Updated On"
 msgstr "Updated On"
 
+#: fair_genomes/models.py:41
 msgid "Timestamp when record was last updated"
 msgstr "Timestamp when record was last updated"
 
+#: fair_genomes/models.py:59
+#: fair_genomes/templates/fair_genomes/personal_detail.html:45
+#: fair_genomes/templates/fair_genomes/personal_list.html:71
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:45
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:74
 msgid "Personal Identifier"
 msgstr "Personal Identifier"
 
+#: fair_genomes/models.py:60
 msgid "Unique identifier for the individual"
 msgstr "Unique identifier for the individual"
 
+#: fair_genomes/models.py:66
+#: fair_genomes/templates/fair_genomes/personal_detail.html:51
+#: fair_genomes/templates/fair_genomes/personal_list.html:72
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:51
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:75
 msgid "Year of Birth"
 msgstr "Year of Birth"
 
+#: fair_genomes/models.py:67
 msgid "Year the individual was born"
 msgstr "Year the individual was born"
 
+#: fair_genomes/models.py:72
 msgid "Personal Record"
 msgstr "Personal Record"
 
+#: fair_genomes/models.py:73
 msgid "Personal Records"
 msgstr "Personal Records"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:4
+#: fair_genomes/templates/fair_genomes/personal_detail.html:15
+#: warehouse/templates/layout/navbar.html:13
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:4
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:15
 msgid "Fair Genomes"
 msgstr "Fair Genomes"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:26
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:26
 msgid "Personal Record Details"
 msgstr "Personal Record Details"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:38
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:38
 msgid "Personal Information"
 msgstr "Personal Information"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:56
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:56
 msgid "Not specified"
 msgstr "Not specified"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:71
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:71
 msgid "Metadata"
 msgstr "Metadata"
 
+#: fair_genomes/templates/fair_genomes/personal_detail.html:111
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:111
 msgid "Back to List"
 msgstr "Back to List"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:4
+#: fair_genomes/templates/fair_genomes/personal_list.html:13
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:4
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:13
 msgid "Fair Genomes - Personal Data"
 msgstr "Fair Genomes - Personal Data"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:23
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:26
 msgid "Total Records"
 msgstr "Total Records"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:37
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:40
 msgid "Search by identifier or user..."
 msgstr "Search by identifier or user..."
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:42
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:45
 msgid "All Years of Birth"
 msgstr "All Years of Birth"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:52
+#: ticketing/templates/ticketing/my_tickets.html:36
+#: warehouse/templates/warehouse/catalogue.html:47
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:55
 msgid "Search"
 msgstr "Search"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:76
+#: ticketing/templates/ticketing/cart.html:47
+#: ticketing/templates/ticketing/my_tickets.html:62
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:79
 msgid "Actions"
 msgstr "Actions"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:92
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:95
 msgid "View"
 msgstr "View"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:108
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:111
 msgid "First"
 msgstr "First"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:113
+#: ticketing/templates/ticketing/my_tickets.html:104
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:116
 msgid "Previous"
 msgstr "Previous"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:120
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
 msgid "Page"
 msgstr "Page"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:120
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
 msgid "of"
 msgstr "of"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:127
+#: ticketing/templates/ticketing/my_tickets.html:118
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:130
 msgid "Next"
 msgstr "Next"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:132
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:135
 msgid "Last"
 msgstr "Last"
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:143
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:146
 msgid "No records found matching your search criteria."
 msgstr "No records found matching your search criteria."
 
+#: fair_genomes/templates/fair_genomes/personal_list.html:145
 msgid "No Fair Genomes data available."
 msgstr "No Fair Genomes data available."
 
 # Ticketing / Cart translations
+#: ticketing/apps.py:14
 msgid "Ticketing"
 msgstr "Ticketing"
 
+#: ticketing/forms.py:13
 msgid "Your Email"
 msgstr "Your Email"
 
+#: ticketing/forms.py:14
 msgid "We will use this email to contact you about your request."
 msgstr "We will use this email to contact you about your request."
 
+#: ticketing/forms.py:18 ticketing/templates/ticketing/my_tickets.html:31
 msgid "your.email@example.com"
 msgstr "your.email@example.com"
 
+#: ticketing/forms.py:25
 msgid "Your Name"
 msgstr "Your Name"
 
+#: ticketing/forms.py:31
 msgid "John Doe"
 msgstr "John Doe"
 
+#: ticketing/forms.py:37 ticketing/models.py:45
+#: ticketing/templates/ticketing/my_tickets.html:58
 msgid "Subject"
 msgstr "Subject"
 
+#: ticketing/forms.py:39 ticketing/views.py:66
 msgid "Data Access Request"
 msgstr "Data Access Request"
 
+#: ticketing/forms.py:43
 msgid "Brief description of your request"
 msgstr "Brief description of your request"
 
+#: ticketing/forms.py:50
 msgid "Additional Notes"
 msgstr "Additional Notes"
 
+#: ticketing/forms.py:57
 msgid ""
 "Please provide any additional information about your data request, such as "
 "purpose of use, timeframe needed, etc."
@@ -165,165 +338,235 @@ msgstr ""
 "Please provide any additional information about your data request, such as "
 "purpose of use, timeframe needed, etc."
 
+#: ticketing/models.py:27
 msgid "Draft"
 msgstr "Draft"
 
+#: ticketing/models.py:28 ticketing/templates/ticketing/my_tickets.html:61
+#: ticketing/templates/ticketing/my_tickets.html:74
+#: ticketing/templates/ticketing/ticket_detail.html:25
+#: ticketing/templates/ticketing/ticket_detail.html:139
 msgid "Submitted"
 msgstr "Submitted"
 
+#: ticketing/models.py:29
 msgid "Confirmed by Alvao"
 msgstr "Confirmed by Alvao"
 
+#: ticketing/models.py:30
 msgid "Submission Failed"
 msgstr "Submission Failed"
 
+#: ticketing/models.py:34
 msgid "Requester Email"
 msgstr "Requester Email"
 
+#: ticketing/models.py:34
 msgid "Email of the person requesting data access"
 msgstr "Email of the person requesting data access"
 
+#: ticketing/models.py:39
 msgid "Requester Name"
 msgstr "Requester Name"
 
+#: ticketing/models.py:40
 msgid "Full name of the requester"
 msgstr "Full name of the requester"
 
+#: ticketing/models.py:45
 msgid "Ticket subject/title"
 msgstr "Ticket subject/title"
 
+#: ticketing/models.py:49 ticketing/templates/ticketing/cart.html:46
+#: ticketing/templates/ticketing/ticket_detail.html:37
 msgid "Description"
 msgstr "Description"
 
+#: ticketing/models.py:50
 msgid "Additional details or notes for the request"
 msgstr "Additional details or notes for the request"
 
+#: ticketing/models.py:55 ticketing/templates/ticketing/my_tickets.html:59
+#: ticketing/templates/ticketing/ticket_detail.html:87
 msgid "Status"
 msgstr "Status"
 
+#: ticketing/models.py:63 ticketing/templates/ticketing/ticket_detail.html:132
 msgid "Alvao Ticket ID"
 msgstr "Alvao Ticket ID"
 
+#: ticketing/models.py:64
 msgid "Ticket ID returned by Alvao after submission"
 msgstr "Ticket ID returned by Alvao after submission"
 
+#: ticketing/models.py:69
 msgid "Alvao Response"
 msgstr "Alvao Response"
 
+#: ticketing/models.py:70
 msgid "Full response from Alvao API"
 msgstr "Full response from Alvao API"
 
+#: ticketing/models.py:79
 msgid "Session Key"
 msgstr "Session Key"
 
+#: ticketing/models.py:80
 msgid "Session key for tracking cart before submission"
 msgstr "Session key for tracking cart before submission"
 
+#: ticketing/models.py:84
 msgid "Created At"
 msgstr "Created At"
 
+#: ticketing/models.py:85
 msgid "Updated At"
 msgstr "Updated At"
 
+#: ticketing/models.py:86
 msgid "Submitted At"
 msgstr "Submitted At"
 
+#: ticketing/models.py:90 ticketing/models.py:132
 msgid "Ticket Request"
 msgstr "Ticket Request"
 
+#: ticketing/models.py:91
 msgid "Ticket Requests"
 msgstr "Ticket Requests"
 
+#: ticketing/models.py:124 ticketing/templates/ticketing/cart.html:56
+#: ticketing/templates/ticketing/cart.html:74
+#: ticketing/templates/ticketing/ticket_detail.html:57 warehouse/models.py:53
 msgid "Dataset"
 msgstr "Dataset"
 
+#: ticketing/models.py:125 ticketing/templates/ticketing/cart.html:60
+#: ticketing/templates/ticketing/ticket_detail.html:59 warehouse/models.py:126
+#: warehouse/models.py:170
 msgid "Data Class"
 msgstr "Data Class"
 
+#: ticketing/models.py:126 warehouse/models.py:238 warehouse/models.py:265
 msgid "Database Table"
 msgstr "Database Table"
 
+#: ticketing/models.py:136
 msgid "Item Type"
 msgstr "Item Type"
 
+#: ticketing/models.py:139
 msgid "Item ID"
 msgstr "Item ID"
 
+#: ticketing/models.py:139
 msgid "Primary key of the requested item"
 msgstr "Primary key of the requested item"
 
+#: ticketing/models.py:143
 msgid "Item Name"
 msgstr "Item Name"
 
+#: ticketing/models.py:144
 msgid "Display name of the requested item"
 msgstr "Display name of the requested item"
 
+#: ticketing/models.py:146
 msgid "Item Description"
 msgstr "Item Description"
 
+#: ticketing/models.py:152
 msgid "Parent Dataset"
 msgstr "Parent Dataset"
 
+#: ticketing/models.py:153
 msgid "Parent dataset ID for dataclasses and tables"
 msgstr "Parent dataset ID for dataclasses and tables"
 
+#: ticketing/models.py:156
 msgid "Added At"
 msgstr "Added At"
 
+#: ticketing/models.py:160
 msgid "Ticket Request Item"
 msgstr "Ticket Request Item"
 
+#: ticketing/models.py:161
 msgid "Ticket Request Items"
 msgstr "Ticket Request Items"
 
+#: ticketing/templates/ticketing/cart.html:4
+#: ticketing/templates/ticketing/cart.html:9
 msgid "Data Request Cart"
 msgstr "Data Request Cart"
 
+#: ticketing/templates/ticketing/cart.html:29
 msgid "Selected Items"
 msgstr "Selected Items"
 
+#: ticketing/templates/ticketing/cart.html:34
 msgid "Clear All"
 msgstr "Clear All"
 
+#: ticketing/templates/ticketing/cart.html:44
+#: ticketing/templates/ticketing/ticket_detail.html:47
 msgid "Type"
 msgstr "Type"
 
+#: ticketing/templates/ticketing/cart.html:45
+#: ticketing/templates/ticketing/ticket_detail.html:48
 msgid "Name"
 msgstr "Name"
 
+#: ticketing/templates/ticketing/cart.html:64
+#: ticketing/templates/ticketing/ticket_detail.html:61
 msgid "Table"
 msgstr "Table"
 
+#: ticketing/templates/ticketing/cart.html:87
+#: warehouse/templates/warehouse/catalogue.html:360
 msgid "Remove from cart"
 msgstr "Remove from cart"
 
+#: ticketing/templates/ticketing/cart.html:99 ticketing/views.py:246
 msgid "Your cart is empty."
 msgstr "Your cart is empty."
 
+#: ticketing/templates/ticketing/cart.html:101
+#: ticketing/templates/ticketing/ticket_submitted.html:48
 msgid "Browse Catalogue"
 msgstr "Browse Catalogue"
 
+#: ticketing/templates/ticketing/cart.html:113
+#: ticketing/templates/ticketing/cart.html:163
 msgid "Submit Request"
 msgstr "Submit Request"
 
+#: ticketing/templates/ticketing/cart.html:166
 msgid "Continue Browsing"
 msgstr "Continue Browsing"
 
+#: ticketing/templates/ticketing/cart.html:172
 msgid "Add items to your cart to submit a request."
 msgstr "Add items to your cart to submit a request."
 
+#: ticketing/templates/ticketing/cart.html:181
 msgid "How it works"
 msgstr "How it works"
 
+#: ticketing/templates/ticketing/cart.html:185
 msgid "Browse the catalogue and add items to your cart"
 msgstr "Browse the catalogue and add items to your cart"
 
+#: ticketing/templates/ticketing/cart.html:186
 msgid "Review your selected items"
 msgstr "Review your selected items"
 
+#: ticketing/templates/ticketing/cart.html:187
 msgid "Fill in your contact information"
 msgstr "Fill in your contact information"
 
+#: ticketing/templates/ticketing/cart.html:188
 msgid ""
 "Submit your request - a ticket will be created and you'll receive a "
 "confirmation"
@@ -331,97 +574,132 @@ msgstr ""
 "Submit your request - a ticket will be created and you'll receive a "
 "confirmation"
 
+#: ticketing/templates/ticketing/cart.html:237
 msgid "Are you sure you want to clear your cart?"
 msgstr "Are you sure you want to clear your cart?"
 
+#: ticketing/templates/ticketing/my_tickets.html:4
+#: ticketing/templates/ticketing/my_tickets.html:9
+#: warehouse/templates/layout/navbar.html:17
 msgid "My Tickets"
 msgstr "My Tickets"
 
+#: ticketing/templates/ticketing/my_tickets.html:28
 msgid "Enter your email to view your tickets"
 msgstr "Enter your email to view your tickets"
 
+#: ticketing/templates/ticketing/my_tickets.html:48
 #, python-format
 msgid "Tickets for %(email)s"
 msgstr "Tickets for %(email)s"
 
+#: ticketing/templates/ticketing/my_tickets.html:57
 msgid "Ticket ID"
 msgstr "Ticket ID"
 
+#: ticketing/templates/ticketing/my_tickets.html:60
 msgid "Items"
 msgstr "Items"
 
+#: ticketing/templates/ticketing/my_tickets.html:76
+#: ticketing/templates/ticketing/ticket_detail.html:27
 msgid "Confirmed"
 msgstr "Confirmed"
 
+#: ticketing/templates/ticketing/my_tickets.html:78
+#: ticketing/templates/ticketing/ticket_detail.html:29
 msgid "Failed"
 msgstr "Failed"
 
+#: ticketing/templates/ticketing/my_tickets.html:88
 msgid "View Details"
 msgstr "View Details"
 
+#: ticketing/templates/ticketing/my_tickets.html:99
 msgid "Page navigation"
 msgstr "Page navigation"
 
+#: ticketing/templates/ticketing/my_tickets.html:129
 msgid "No tickets found for this email address."
 msgstr "No tickets found for this email address."
 
+#: ticketing/templates/ticketing/my_tickets.html:136
 msgid "Could not fetch remote ticket status from Alvao."
 msgstr "Could not fetch remote ticket status from Alvao."
 
+#: ticketing/templates/ticketing/my_tickets.html:146
 msgid "Enter your email address above to view your submitted tickets."
 msgstr "Enter your email address above to view your submitted tickets."
 
+#: ticketing/templates/ticketing/ticket_detail.html:4
 msgid "Ticket Details"
 msgstr "Ticket Details"
 
+#: ticketing/templates/ticketing/ticket_detail.html:11
 msgid "Ticket"
 msgstr "Ticket"
 
+#: ticketing/templates/ticketing/ticket_detail.html:14
 msgid "Back to My Tickets"
 msgstr "Back to My Tickets"
 
+#: ticketing/templates/ticketing/ticket_detail.html:42
 msgid "Requested Items"
 msgstr "Requested Items"
 
+#: ticketing/templates/ticketing/ticket_detail.html:49
 msgid "ID"
 msgstr "ID"
 
+#: ticketing/templates/ticketing/ticket_detail.html:69
 msgid "No items"
 msgstr "No items"
 
+#: ticketing/templates/ticketing/ticket_detail.html:82
 msgid "Alvao Status"
 msgstr "Alvao Status"
 
+#: ticketing/templates/ticketing/ticket_detail.html:92
 msgid "Ticket Number"
 msgstr "Ticket Number"
 
+#: ticketing/templates/ticketing/ticket_detail.html:99
 msgid "View in Alvao"
 msgstr "View in Alvao"
 
+#: ticketing/templates/ticketing/ticket_detail.html:111
 msgid "Could not fetch current status from Alvao."
 msgstr "Could not fetch current status from Alvao."
 
+#: ticketing/templates/ticketing/ticket_detail.html:121
 msgid "Details"
 msgstr "Details"
 
+#: ticketing/templates/ticketing/ticket_detail.html:125
 msgid "Requester"
 msgstr "Requester"
 
+#: ticketing/templates/ticketing/ticket_detail.html:135
 msgid "Created"
 msgstr "Created"
 
+#: ticketing/templates/ticketing/ticket_detail.html:143
 msgid "Items Count"
 msgstr "Items Count"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:4
 msgid "Request Submitted"
 msgstr "Request Submitted"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:16
 msgid "Request Submitted Successfully!"
 msgstr "Request Submitted Successfully!"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:20
 msgid "Your ticket ID:"
 msgstr "Your ticket ID:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:27
 #, python-format
 msgid ""
 "\n"
@@ -430,18 +708,23 @@ msgid ""
 "                        "
 msgstr "A confirmation email will be sent to <strong>%(email)s</strong>."
 
+#: ticketing/templates/ticketing/ticket_submitted.html:34
 msgid "Request Summary"
 msgstr "Request Summary"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:35
 msgid "Subject:"
 msgstr "Subject:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:36
 msgid "Items:"
 msgstr "Items:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:37
 msgid "Submitted:"
 msgstr "Submitted:"
 
+#: ticketing/templates/ticketing/ticket_submitted.html:42
 msgid ""
 "Your data access request has been submitted. You will receive a confirmation "
 "email shortly."
@@ -449,141 +732,190 @@ msgstr ""
 "Your data access request has been submitted. You will receive a confirmation "
 "email shortly."
 
+#: ticketing/templates/ticketing/ticket_submitted.html:51
 msgid "View My Tickets"
 msgstr "View My Tickets"
 
+#: ticketing/views.py:118
 msgid "Missing item type or ID"
 msgstr "Missing item type or ID"
 
+#: ticketing/views.py:123
 msgid "Invalid item type"
 msgstr "Invalid item type"
 
+#: ticketing/views.py:137 ticketing/views.py:211
 msgid "Item removed from cart"
 msgstr "Item removed from cart"
 
+#: ticketing/views.py:165
 msgid "Item added to cart"
 msgstr "Item added to cart"
 
+#: ticketing/views.py:217
 msgid "Item not found in cart"
 msgstr "Item not found in cart"
 
+#: ticketing/views.py:231
 msgid "Cart cleared"
 msgstr "Cart cleared"
 
+#: ticketing/views.py:285
 #, python-format
 msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 msgstr "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 
+#: ticketing/views.py:299
 #, python-format
 msgid "Failed to submit your request. Please try again later. Error: %(error)s"
 msgstr ""
 "Failed to submit your request. Please try again later. Error: %(error)s"
 
+#: ticketing/views.py:306
 msgid "Please correct the errors below."
 msgstr "Please correct the errors below."
 
+#: ticketing/views.py:319
 msgid "Requested Data Items:"
 msgstr "Requested Data Items:"
 
+#: warehouse/models.py:16
 msgid "Data Source"
 msgstr "Data Source"
 
+#: warehouse/models.py:17
 msgid "Data Sources"
 msgstr "Data Sources"
 
+#: warehouse/models.py:54
 msgid "Datasets"
 msgstr "Datasets"
 
+#: warehouse/models.py:127
 msgid "Data Classes"
 msgstr "Data Classes"
 
+#: warehouse/models.py:172
 msgid "Column Order"
 msgstr "Column Order"
 
+#: warehouse/models.py:174
 msgid "Column Variable"
 msgstr "Column Variable"
 
+#: warehouse/models.py:177
 msgid "Column Name"
 msgstr "Column Name"
 
+#: warehouse/models.py:179
 msgid "Column Description"
 msgstr "Column Description"
 
+#: warehouse/models.py:181
 msgid "R Variable"
 msgstr "R Variable"
 
+#: warehouse/models.py:184
 msgid "R Transformation"
 msgstr "R Transformation"
 
+#: warehouse/models.py:187
 msgid "R Datatype"
 msgstr "R Datatype"
 
+#: warehouse/models.py:190
 msgid "Possible Key"
 msgstr "Possible Key"
 
+#: warehouse/models.py:192
 msgid "Tag"
 msgstr "Tag"
 
+#: warehouse/models.py:194
 msgid "Confidentiality Level"
 msgstr "Confidentiality Level"
 
+#: warehouse/models.py:196 warehouse/models.py:280
 msgid "Vocabulary"
 msgstr "Vocabulary"
 
+#: warehouse/models.py:197
 msgid "Calculated"
 msgstr "Calculated"
 
+#: warehouse/models.py:202
 msgid "Mandatory"
 msgstr "Mandatory"
 
+#: warehouse/models.py:204
 msgid "Unit"
 msgstr "Unit"
 
+#: warehouse/models.py:209
 msgid "Data Class Table Schema"
 msgstr "Data Class Table Schema"
 
+#: warehouse/models.py:210
 msgid "Data Class Table Schemas"
 msgstr "Data Class Table Schemas"
 
+#: warehouse/models.py:239
 msgid "Database Tables"
 msgstr "Database Tables"
 
+#: warehouse/models.py:267
 msgid "Variable Order"
 msgstr "Variable Order"
 
+#: warehouse/models.py:268
 msgid "Variable"
 msgstr "Variable"
 
+#: warehouse/models.py:269
 msgid "Database Key"
 msgstr "Database Key"
 
+#: warehouse/models.py:271
 msgid "Database Type"
 msgstr "Database Type"
 
+#: warehouse/models.py:273
 msgid "R Type"
 msgstr "R Type"
 
+#: warehouse/models.py:275
 msgid "Variable Name"
 msgstr "Variable Name"
 
+#: warehouse/models.py:278
 msgid "Variable Description"
 msgstr "Variable Description"
 
+#: warehouse/models.py:285
 msgid "Database Table Schema"
 msgstr "Database Table Schema"
 
+#: warehouse/models.py:286
 msgid "Database Table Schemas"
 msgstr "Database Table Schemas"
 
+#: warehouse/templates/layout/navbar.html:9
 msgid "Catalogue"
 msgstr "Catalogue"
 
-msgid "Data Catalogue MOÚ"
-msgstr "MOÚ Data Catalogue"
+#: warehouse/templates/layout/navbar.html:40
+msgid "Admin"
+msgstr ""
 
+#: warehouse/templates/layout/navbar.html:42
+msgid "Logout"
+msgstr ""
+
+#: warehouse/templates/warehouse/base.html:10
 msgid "Data warehouse catalogue"
 msgstr "Data warehouse catalogue"
 
+#: warehouse/templates/warehouse/catalogue.html:25
 msgid ""
 "This catalogue serves as a registry of MOÚ data sources for the purpose of "
 "their effective sharing and secondary use. The catalogue includes data "
@@ -597,81 +929,114 @@ msgstr ""
 "the correctness of information, data quality and provides support in their "
 "use."
 
+#: warehouse/templates/warehouse/catalogue.html:33
+#: warehouse/templates/warehouse/includes/help_modal.html:7
 msgid "How to use the catalogue"
 msgstr "How to use the catalogue"
 
+#: warehouse/templates/warehouse/catalogue.html:34
 msgid "Click to display the catalogue usage guide."
 msgstr "Click to display the catalogue usage guide."
 
+#: warehouse/templates/warehouse/catalogue.html:53
 msgid "Enter search text"
 msgstr "Enter search text"
 
+#: warehouse/templates/warehouse/catalogue.html:79
+#: warehouse/templates/warehouse/catalogue.html:365
 msgid "Add to cart"
 msgstr "Add to cart"
 
+#: warehouse/templates/warehouse/catalogue.html:95
+#: warehouse/templates/warehouse/includes/filters.html:63
 msgid "Data source"
 msgstr "Data source"
 
+#: warehouse/templates/warehouse/catalogue.html:96
+#: warehouse/templates/warehouse/includes/filters.html:81
 msgid "Rights holder"
 msgstr "Rights holder"
 
+#: warehouse/templates/warehouse/catalogue.html:431
+#: warehouse/templates/warehouse/catalogue.html:438
 msgid "Could not update cart"
 msgstr "Could not update cart"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:123
 msgid "Data Source:"
 msgstr "Data Source:"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:124
 msgid "This data is synced from the Fair Genomes GraphQL API."
 msgstr "This data is synced from the Fair Genomes GraphQL API."
 
+#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:125
 msgid "To update, run:"
 msgstr "To update, run:"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:16
 msgid "Patient demographic data synced from Fair Genomes GraphQL API"
 msgstr "Patient demographic data synced from Fair Genomes GraphQL API"
 
+#: warehouse/templates/warehouse/fair_genomes_personal_list.html:148
 msgid "No Fair Genomes data available. Run sync to fetch data:"
 msgstr "No Fair Genomes data available. Run sync to fetch data:"
 
+#: warehouse/templates/warehouse/includes/filters.html:7
 msgid "Filters"
 msgstr "Filters"
 
+#: warehouse/templates/warehouse/includes/filters.html:12
 msgid "Clear filters"
 msgstr "Clear filters"
 
+#: warehouse/templates/warehouse/includes/filters.html:20
 msgid "Data availability"
 msgstr "Data availability"
 
+#: warehouse/templates/warehouse/includes/filters.html:26
 msgid "Tables ready"
 msgstr "Tables ready"
 
+#: warehouse/templates/warehouse/includes/filters.html:32
 msgid "Raw data"
 msgstr "Raw data"
 
+#: warehouse/templates/warehouse/includes/filters.html:38
 msgid "Unavailable data"
 msgstr "Unavailable data"
 
+#: warehouse/templates/warehouse/includes/filters.html:45
 msgid "Keywords"
 msgstr "Keywords"
 
+#: warehouse/templates/warehouse/includes/filters.html:47
+#: warehouse/templates/warehouse/includes/filters.html:65
+#: warehouse/templates/warehouse/includes/filters.html:83
 msgid "Search..."
 msgstr "Search..."
 
+#: warehouse/templates/warehouse/includes/filters.html:55
 msgid "No keywords to display."
 msgstr "No keywords to display."
 
+#: warehouse/templates/warehouse/includes/filters.html:73
 msgid "No data sources to display."
 msgstr "No data sources to display."
 
+#: warehouse/templates/warehouse/includes/filters.html:91
 msgid "No rights holders to display."
 msgstr "No rights holders to display."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:8
 msgid "Close"
 msgstr "Close"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:11
 msgid "1. Search:"
 msgstr "1. Search:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:13
 msgid ""
 "Enter keywords you are interested in into the \"Search term\" field. The "
 "catalogue will search through dataset names, descriptions and keywords."
@@ -679,21 +1044,27 @@ msgstr ""
 "Enter keywords you are interested in into the \"Search term\" field. The "
 "catalogue will search through dataset names, descriptions and keywords."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:16
 msgid "Press the \"Search\" button (if available)."
 msgstr "Press the \"Search\" button (if available)."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:21
 msgid "2. Filtering:"
 msgstr "2. Filtering:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:23
 msgid "Filters are available in the left panel."
 msgstr "Filters are available in the left panel."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:24
 msgid "You can filter by:"
 msgstr "You can filter by:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:26
 msgid "Keywords:"
 msgstr "Keywords:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:26
 msgid ""
 "Check relevant keywords. You can use the search field within each filter "
 "section for faster searching."
@@ -701,18 +1072,23 @@ msgstr ""
 "Check relevant keywords. You can use the search field within each filter "
 "section for faster searching."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:29
 msgid "Data source:"
 msgstr "Data source:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:29
 msgid "Select which source the data comes from."
 msgstr "Select which source the data comes from."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:30
 msgid "Rights holder:"
 msgstr "Rights holder:"
 
+#: warehouse/templates/warehouse/includes/help_modal.html:30
 msgid "Display datasets managed by a specific rights holder."
 msgstr "Display datasets managed by a specific rights holder."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:33
 msgid ""
 "After checking the filters, the corresponding datasets will be automatically "
 "displayed."
@@ -720,9 +1096,11 @@ msgstr ""
 "After checking the filters, the corresponding datasets will be automatically "
 "displayed."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:34
 msgid "To clear all set filters, click the \"Clear filters\" button."
 msgstr "To clear all set filters, click the \"Clear filters\" button."
 
+#: warehouse/templates/warehouse/includes/help_modal.html:39
 msgid "3. Browsing datasets:"
 msgstr "3. Browsing datasets:"
 
