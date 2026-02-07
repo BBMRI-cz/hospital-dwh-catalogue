@@ -6,18 +6,21 @@ Class-based views for the warehouse catalogue application.
 
 from typing import Any
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, QuerySet
 from django.views.generic import ListView
 
 from .models import DatasetList
 
 
-class CatalogueView(ListView):
+class CatalogueView(LoginRequiredMixin, ListView):
     """
     Main catalogue view displaying all datasets.
 
     Supports filtering by:
     - Search query (name, description, subject)
+    
+    Requires user authentication.
     """
 
     model = DatasetList

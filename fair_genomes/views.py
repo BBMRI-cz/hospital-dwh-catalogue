@@ -4,16 +4,19 @@ Fair Genomes Views
 
 import contextlib
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.views.generic import DetailView, ListView
 
 from .models import Personal
 
 
-class PersonalListView(ListView):
+class PersonalListView(LoginRequiredMixin, ListView):
     """
     List view for Personal records from Fair Genomes API.
     Includes search and filtering capabilities.
+    
+    Requires user authentication.
     """
 
     model = Personal
@@ -56,9 +59,11 @@ class PersonalListView(ListView):
         return context
 
 
-class PersonalDetailView(DetailView):
+class PersonalDetailView(LoginRequiredMixin, DetailView):
     """
     Detail view for a single Personal record.
+    
+    Requires user authentication.
     """
 
     model = Personal
