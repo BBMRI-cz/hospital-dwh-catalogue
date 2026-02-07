@@ -20,8 +20,12 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+from .views import CustomLoginView, logout_view
+
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', logout_view, name='logout'),
 ]
 
 urlpatterns += i18n_patterns(

@@ -117,6 +117,80 @@ DATABASE_ROUTERS = ['catalogue.routers.AuthRouter', 'catalogue.routers.Warehouse
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
+# Authentication backends
+# Configure based on environment: mock for dev, real LDAP for prod
+AUTH_USE_MOCK_LDAP = config('AUTH_USE_MOCK_LDAP', default=False, cast=bool)
+
+# Build authentication backends list based on configuration
+AUTHENTICATION_BACKENDS = []
+
+if AUTH_USE_MOCK_LDAP:
+    # Development: Use mock LDAP (accepts any credentials)
+    AUTHENTICATION_BACKENDS.append('catalogue.mock_ldap.MockLDAPBackend')
+else:
+    # Production: Use real LDAP/AD authentication
+    try:
+        import django_auth_ldap
+        AUTHENTICATION_BACKENDS.append('django_auth_ldap.backend.LDAPBackend')
+    except ImportError:
+        import logging
+        logging.warning('django-auth-ldap not installed. LDAP authentication unavailable.')
+
+# Always include ModelBackend as fallback (for superuser access)
+AUTHENTICATION_BACKENDS.append('django.contrib.auth.backends.ModelBackend')
+
+# Mock LDAP Configuration (Development Only)
+# Set to True to use mock LDAP backend instead of real AD
+
+# Login/Logout URLs
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = 'login'
+
+
+# Active Directory / LDAP Configuration (Production only)
+# Only loaded when AUTH_USE_MOCK_LDAP=False
+if not AUTH_USE_MOCK_LDAP:
+    try:
+        import ldap
+        from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+
+        AUTH_LDAP_SERVER_URI = config('AUTH_LDAP_SERVER_URI', default='')
+        AUTH_LDAP_BIND_DN = config('AUTH_LDAP_BIND_DN', default='')
+        AUTH_LDAP_BIND_PASSWORD = config('AUTH_LDAP_BIND_PASSWORD', default='')
+
+        # User search base (where to look for users in AD)
+        AUTH_LDAP_USER_SEARCH_BASE = config('AUTH_LDAP_USER_SEARCH_BASE', default='dc=example,dc=com')
+        AUTH_LDAP_USER_SEARCH = LDAPSearch(
+            AUTH_LDAP_USER_SEARCH_BASE,
+            ldap.SCOPE_SUBTREE,
+            '(sAMAccountName=%(user)s)',  # Standard AD username attribute
+        )
+
+        # Populate Django user from LDAP attributes
+        AUTH_LDAP_USER_ATTR_MAP = {
+            'first_name': 'givenName',
+            'last_name': 'sn',
+            'email': 'mail',
+        }
+
+        # Auto-create users on first login
+        AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+        # LDAP Connection Options
+        AUTH_LDAP_CONNECTION_OPTIONS = {
+            ldap.OPT_REFERRALS: 0,
+            ldap.OPT_NETWORK_TIMEOUT: 30,
+        }
+
+        # Use StartTLS for secure connection (if not using ldaps://)
+        AUTH_LDAP_START_TLS = config('AUTH_LDAP_START_TLS', default=False, cast=bool)
+    except ImportError:
+        import logging
+        logging.warning('python-ldap not installed. Real LDAP authentication unavailable.')
+
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
