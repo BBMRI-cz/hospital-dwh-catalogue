@@ -1,8 +1,8 @@
 #!/bin/bash
 # =============================================================================
-# Code Quality Script - Auto-fix and Check
+# Code Quality Script - Master Orchestrator
 # =============================================================================
-# This script runs comprehensive code quality checks:
+# This script runs all code quality checks by calling individual check scripts:
 # 1. Linting (Ruff) - Auto-fixable
 # 2. Code formatting (Ruff) - Auto-fixable
 # 3. Type checking (mypy) - Manual fixes required
@@ -13,6 +13,14 @@
 # Usage:
 #   ./scripts/check.sh          # Run all checks with auto-fix
 #   ./scripts/check.sh --check  # Check only, no auto-fix (used in CI)
+# 
+# Individual checks can also be run separately:
+#   ./scripts/check-lint.sh
+#   ./scripts/check-format.sh
+#   ./scripts/check-types.sh
+#   ./scripts/check-security.sh
+#   ./scripts/check-translations.sh
+#   ./scripts/check-tests.sh
 # =============================================================================
 
 set -e
@@ -22,6 +30,9 @@ CHECK_ONLY=false
 if [ "$1" = "--check" ]; then
     CHECK_ONLY=true
 fi
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Setup virtual environment if it doesn't exist
 if [ ! -d ".venv" ]; then
@@ -61,69 +72,38 @@ echo "Hospital DWH Catalogue - Code Quality"
 echo "========================================"
 echo ""
 
+# Pass --check flag to scripts that support it
+CHECK_FLAG=""
+if [ "$CHECK_ONLY" = true ]; then
+    CHECK_FLAG="--check"
+fi
+
 # -----------------------------------------------------------------------------
 # Step 1: Ruff Linting
 # -----------------------------------------------------------------------------
-echo "[1/5] Ruff Linting"
+echo "[1/6] Ruff Linting"
 echo "----------------------------------------"
-
-if [ "$CHECK_ONLY" = true ]; then
-    if $PYTHON -m ruff check . 2>&1; then
-        echo "PASSED: No linting issues"
-    else
-        echo "FAILED: Linting errors found"
-        FAILED=true
-    fi
-else
-    echo "Auto-fixing linting issues..."
-    $PYTHON -m ruff check . --fix 2>&1 || true
-    
-    if $PYTHON -m ruff check . 2>&1; then
-        echo "PASSED: Linting complete (auto-fixed where possible)"
-    else
-        echo ""
-        echo "ISSUES REQUIRING MANUAL FIX:"
-        $PYTHON -m ruff check . 2>&1 || true
-        FAILED=true
-    fi
+if ! "$SCRIPT_DIR/check-lint.sh" $CHECK_FLAG; then
+    FAILED=true
 fi
 echo ""
 
 # -----------------------------------------------------------------------------
 # Step 2: Ruff Formatting
 # -----------------------------------------------------------------------------
-echo "[2/5] Code Formatting"
+echo "[2/6] Code Formatting"
 echo "----------------------------------------"
-
-if [ "$CHECK_ONLY" = true ]; then
-    if $PYTHON -m ruff format --check . 2>&1; then
-        echo "PASSED: All files formatted correctly"
-    else
-        echo "FAILED: Some files need formatting"
-        echo "Run './scripts/check.sh' to auto-fix"
-        FAILED=true
-    fi
-else
-    echo "Auto-formatting code..."
-    FORMAT_OUTPUT=$($PYTHON -m ruff format . 2>&1)
-    if echo "$FORMAT_OUTPUT" | grep -q "file.*reformatted"; then
-        echo "Formatted: $FORMAT_OUTPUT"
-    else
-        echo "PASSED: All files already formatted"
-    fi
+if ! "$SCRIPT_DIR/check-format.sh" $CHECK_FLAG; then
+    FAILED=true
 fi
 echo ""
 
 # -----------------------------------------------------------------------------
 # Step 3: Type Checking (mypy)
 # -----------------------------------------------------------------------------
-echo "[3/5] Type Checking (mypy)"
+echo "[3/6] Type Checking (mypy)"
 echo "----------------------------------------"
-
-if $PYTHON -m mypy . 2>&1; then
-    echo "PASSED: No type errors"
-else
-    echo "FAILED: Type errors found (manual fix required)"
+if ! "$SCRIPT_DIR/check-types.sh"; then
     FAILED=true
 fi
 echo ""
@@ -131,19 +111,10 @@ echo ""
 # -----------------------------------------------------------------------------
 # Step 4: Security Check (bandit)
 # -----------------------------------------------------------------------------
-echo "[4/5] Security Check (bandit)"
+echo "[4/6] Security Check (bandit)"
 echo "----------------------------------------"
-
-BANDIT_OUTPUT=$($PYTHON -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll 2>&1) || true
-if echo "$BANDIT_OUTPUT" | grep -q "No issues identified"; then
-    echo "PASSED: No security issues"
-elif echo "$BANDIT_OUTPUT" | grep -q "Severity: Medium\|Severity: High"; then
-    echo "FAILED: Security issues found (manual fix required)"
-    echo ""
-    echo "$BANDIT_OUTPUT" | grep -A5 "Issue:" || true
+if ! "$SCRIPT_DIR/check-security.sh"; then
     FAILED=true
-else
-    echo "PASSED: No medium/high severity issues"
 fi
 echo ""
 
@@ -152,49 +123,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo "[5/6] Translation Check"
 echo "----------------------------------------"
-
-TRANSLATION_ISSUES=false
-
-# Check for fuzzy translations
-echo "Checking for fuzzy translations..."
-if grep -r "^#, fuzzy" locale/*/LC_MESSAGES/django.po 2>/dev/null; then
-    echo "FAILED: Fuzzy translations found - please review and update translations"
-    TRANSLATION_ISSUES=true
-fi
-
-# Check for empty translations (same approach as CI)
-echo "Checking for empty translations..."
-for po_file in locale/*/LC_MESSAGES/django.po; do
-    if [ -f "$po_file" ]; then
-        # Find msgid followed by msgstr "" with no continuation (truly empty)
-        EMPTY_FOUND=$(awk '
-            /^msgid "[^"]/ {
-                msgid=$0
-                line=NR
-                getline
-                if (/^msgstr ""$/) {
-                    getline
-                    # Empty if next line is blank, a comment, or another msgid
-                    if ($0 ~ /^$/ || $0 ~ /^#/ || $0 ~ /^msgid/) {
-                        print FILENAME ":" line ":" msgid
-                        found++
-                    }
-                }
-            }
-            END { exit (found > 0) }
-        ' "$po_file" 2>&1)
-        
-        if [ $? -ne 0 ]; then
-            echo "FAILED: Empty translations found in $po_file"
-            echo "$EMPTY_FOUND"
-            TRANSLATION_ISSUES=true
-        fi
-    fi
-done
-
-if [ "$TRANSLATION_ISSUES" = false ]; then
-    echo "PASSED: All translations complete"
-else
+if ! "$SCRIPT_DIR/check-translations.sh"; then
     FAILED=true
 fi
 echo ""
@@ -204,11 +133,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo "[6/6] Tests"
 echo "----------------------------------------"
-
-if DJANGO_SETTINGS_MODULE=catalogue.settings.test $PYTHON manage.py test --verbosity 1 2>&1; then
-    echo "PASSED: All tests passed"
-else
-    echo "FAILED: Some tests failed"
+if ! "$SCRIPT_DIR/check-tests.sh"; then
     FAILED=true
 fi
 echo ""
@@ -230,3 +155,4 @@ else
     echo "========================================"
     exit 0
 fi
+

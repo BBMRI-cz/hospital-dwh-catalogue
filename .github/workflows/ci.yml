@@ -24,31 +24,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Run Ruff linter
+      - name: Run linting
         run: |
           echo "Running linter..."
-          if ruff check .; then
-            echo "PASSED: No linting issues found"
-          else
-            echo "FAILED: Linting errors detected"
-            echo ""
-            echo "To fix: run './scripts/check.sh' locally"
-            exit 1
-          fi
+          ./scripts/check-lint.sh --check
 
-      - name: Run Ruff formatter check
+      - name: Run formatting check
         run: |
           echo "Checking code formatting..."
-          if ruff format --check .; then
-            echo "PASSED: All files properly formatted"
-          else
-            echo "FAILED: Some files need formatting"
-            echo ""
-            echo "To fix: run './scripts/check.sh' locally"
-            exit 1
-          fi
+          ./scripts/check-format.sh --check
 
   type-check:
     name: Type Checking
@@ -73,14 +60,7 @@ jobs:
       - name: Run mypy
         run: |
           echo "Running type checker..."
-          if mypy .; then
-            echo "PASSED: No type errors found"
-          else
-            echo "FAILED: Type errors detected"
-            echo ""
-            echo "These must be fixed manually"
-            exit 1
-          fi
+          ./scripts/check-types.sh
 
   translations:
     name: Translations
@@ -98,47 +78,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gettext
 
-      - name: Check for fuzzy translations
+      - name: Check translations
         run: |
-          echo "Checking for fuzzy translations..."
-          
-          if grep -r "^#, fuzzy" locale/*/LC_MESSAGES/django.po 2>/dev/null; then
-            echo "FAILED: Fuzzy translations found - please review and update"
-            exit 1
-          fi
-          
-          echo "  No fuzzy translations found"
-
-      - name: Check for empty translations
-        run: |
-          echo "Checking for empty translations..."
-          
-          # Find msgid followed by msgstr "" with no continuation (truly empty)
-          for po_file in locale/*/LC_MESSAGES/django.po; do
-            if awk '
-              /^msgid "[^"]/ {
-                msgid=$0
-                line=NR
-                getline
-                if (/^msgstr ""$/) {
-                  getline
-                  # Empty if next line is blank, a comment, or another msgid
-                  if ($0 ~ /^$/ || $0 ~ /^#/ || $0 ~ /^msgid/) {
-                    print FILENAME ":" line ":" msgid
-                    found++
-                  }
-                }
-              }
-              END { exit (found > 0) }
-            ' "$po_file" 2>&1; then
-              : # Continue
-            else
-              echo "FAILED: Empty translations found in $po_file"
-              exit 1
-            fi
-          done
-          
-          echo "PASSED: All strings are translated"
+          echo "Checking translations..."
+          ./scripts/check-translations.sh
 
   security:
     name: Security
@@ -154,21 +97,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install bandit
+          pip install -r requirements-dev.txt
 
       - name: Run Bandit security linter
         run: |
           echo "Running security scan..."
-          if bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll; then
-            echo "PASSED: No security issues found"
-          else
-            echo "FAILED: Security issues detected"
-            echo ""
-            echo "Common fixes:"
-            echo "  - Use format_html() instead of mark_safe()"
-            echo "  - Use parameterized queries instead of f-strings in SQL"
-            exit 1
-          fi
+          ./scripts/check-security.sh
 
   test:
     name: Tests
@@ -204,12 +138,7 @@ jobs:
 
   ci-success:
     name: CI Result
-    needs: [lint, type-check, translations, security, test]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Check all jobs passed
-        run: |
+    needs:./scripts/check-tests.sh |
           echo "========================================"
           echo "CI Results"
           echo "========================================"

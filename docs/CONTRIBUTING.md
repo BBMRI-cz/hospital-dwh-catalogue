@@ -49,6 +49,17 @@ This will:
 
 **Only commit when all checks pass!**
 
+You can also run individual checks if needed:
+
+```bash
+./scripts/check-lint.sh          # Linting only
+./scripts/check-format.sh        # Formatting only
+./scripts/check-types.sh         # Type checking only
+./scripts/check-security.sh      # Security scan only
+./scripts/check-translations.sh  # Translations only
+./scripts/check-tests.sh         # Tests only
+```
+
 ### 4. Commit and Push
 
 ```bash
