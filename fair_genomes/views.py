@@ -15,7 +15,7 @@ class PersonalListView(LoginRequiredMixin, ListView):
     """
     List view for Personal records from Fair Genomes API.
     Includes search and filtering capabilities.
-    
+
     Requires user authentication.
     """
 
@@ -62,7 +62,7 @@ class PersonalListView(LoginRequiredMixin, ListView):
 class PersonalDetailView(LoginRequiredMixin, DetailView):
     """
     Detail view for a single Personal record.
-    
+
     Requires user authentication.
     """
 

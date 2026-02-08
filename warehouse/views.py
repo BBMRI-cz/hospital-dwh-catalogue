@@ -19,7 +19,7 @@ class CatalogueView(LoginRequiredMixin, ListView):
 
     Supports filtering by:
     - Search query (name, description, subject)
-    
+
     Requires user authentication.
     """
 

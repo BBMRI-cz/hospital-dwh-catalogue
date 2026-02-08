@@ -72,6 +72,11 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
+        'fair_genomes.services.fair_genomes_service': {
+            'handlers': ['console'],
+            'level': 'CRITICAL',  # Suppress ERROR/WARNING during tests
+            'propagate': False,
+        },
     },
 }
 

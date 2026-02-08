@@ -4,7 +4,20 @@ This document describes the development workflow and code quality requirements f
 
 ## Development Workflow
 
-### 1. Create a Feature Branch
+### 1. Install Development Dependencies
+
+First time setup - install development tools:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+This installs:
+- `ruff` - Linting and formatting
+- `mypy` - Type checking
+- `bandit` - Security scanning
+
+### 2. Create a Feature Branch
 
 Never push directly to `master`. Always create a feature branch:
 
@@ -14,11 +27,11 @@ git checkout -b feature/your-feature-name
 git checkout -b fix/bug-description
 ```
 
-### 2. Make Your Changes
+### 3. Make Your Changes
 
 Write your code.
 
-### 3. Run Code Quality Checks
+### 4. Run Code Quality Checks
 
 Before committing, **always run the lint script**:
 
@@ -60,6 +73,7 @@ All code must pass these checks before merging:
 | Formatting     | Ruff   | `ruff format --check .`                           | Yes          |
 | Type Checking  | mypy   | `mypy .`                                          | No           |
 | Security       | Bandit | `bandit -r . -x ./warehouse/static,./venv -ll`    | No           |
+| Tests          | Django | `python manage.py test`                           | No           |
 
 ## Pre-commit Hooks (Optional)
 
@@ -104,4 +118,5 @@ docker volume rm hospital_dwh_postgres_data_dev
 | Type Checking    | Validates type hints          | Fix type errors manually                   |
 | Translations     | Checks i18n files             | Run `python manage.py makemessages`        |
 | Security         | Scans for vulnerabilities     | Fix security issues manually               |
+| Tests            | Runs the test suite           | Fix failing tests                          |
 | CI Success       | Final gate                    | All above must pass                        |

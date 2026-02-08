@@ -141,9 +141,41 @@ jobs:
             exit 1
           fi
 
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Set up environment
+        run: cp .env.dev.example .env
+
+      - name: Run tests
+        env:
+          DJANGO_SETTINGS_MODULE: catalogue.settings.test
+        run: |
+          echo "Running tests..."
+          if python manage.py test --verbosity 2; then
+            echo "PASSED: All tests passed"
+          else
+            echo "FAILED: Some tests failed"
+            exit 1
+          fi
+
   ci-success:
     name: CI Result
-    needs: [lint, type-check, translations, security]
+    needs: [lint, type-check, translations, security, test]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -157,12 +189,14 @@ jobs:
           echo "  Type Check:   ${{ needs.type-check.result }}"
           echo "  Translations: ${{ needs.translations.result }}"
           echo "  Security:     ${{ needs.security.result }}"
+          echo "  Tests:        ${{ needs.test.result }}"
           echo ""
           
           if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.type-check.result }}" != "success" ] || \
              [ "${{ needs.translations.result }}" != "success" ] || \
-             [ "${{ needs.security.result }}" != "success" ]; then
+             [ "${{ needs.security.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ]; then
             echo "========================================"
             echo "FAILED: Some checks did not pass"
             echo "========================================"

@@ -1,6 +1,7 @@
 """
 Authentication views for the catalogue application.
 """
+
 from django.conf import settings
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.views import LoginView
@@ -15,6 +16,7 @@ class CustomLoginView(LoginView):
     Users authenticate with their Windows domain credentials.
     User accounts are automatically created on first successful login.
     """
+
     template_name = 'catalogue/login.html'
     redirect_authenticated_user = True
 

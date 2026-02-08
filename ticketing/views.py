@@ -6,10 +6,11 @@ Provides cart management, ticket submission, and ticket viewing functionality.
 
 import contextlib
 import logging
-from typing import Any
+from typing import Any, cast
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -249,9 +250,9 @@ class SubmitCartView(LoginRequiredMixin, CartMixin, FormView):
         # Update cart with form data
         cart.subject = form.cleaned_data['subject']
         cart.description = form.cleaned_data['description']
-        
-        # Use authenticated user's information
-        user = self.request.user
+
+        # Use authenticated user's information (LoginRequiredMixin ensures user is authenticated)
+        user = cast(User, self.request.user)
         cart.requester_email = user.email or f'{user.username}@example.com'
         cart.requester_name = user.get_full_name() or user.username
 
@@ -360,8 +361,8 @@ class MyTicketsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[TicketRequest]:
         """Get tickets for the logged-in user."""
-        # Use logged-in user's email
-        user = self.request.user
+        # Use logged-in user's email (LoginRequiredMixin ensures user is authenticated)
+        user = cast(User, self.request.user)
         email = user.email or f'{user.username}@example.com'
 
         # Get local tickets
@@ -375,9 +376,9 @@ class MyTicketsView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add extra context."""
         context = super().get_context_data(**kwargs)
-        
-        # Use logged-in user's email
-        user = self.request.user
+
+        # Use logged-in user's email (LoginRequiredMixin ensures user is authenticated)
+        user = cast(User, self.request.user)
         email = user.email or f'{user.username}@example.com'
         context['search_email'] = email
 
