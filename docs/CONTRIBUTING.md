@@ -33,10 +33,10 @@ Write your code.
 
 ### 4. Run Code Quality Checks
 
-Before committing, **always run the lint script**:
+Before committing, **always run the quality check script**:
 
 ```bash
-./scripts/lint.sh
+./scripts/check.sh
 ```
 
 This will:
@@ -44,6 +44,8 @@ This will:
 - Auto-format your code
 - Show type errors (fix manually)
 - Show security issues (fix manually)
+- Check translation completeness (fix manually)
+- Run test suite
 
 **Only commit when all checks pass!**
 
@@ -88,7 +90,7 @@ This will run checks automatically when you run `git commit`.
 
 Configuration is in `.pre-commit-config.yaml`.
 
-Thanks to this you do not have to run the `./lint.sh` manually.
+Thanks to this you do not have to run the `./scripts/check.sh` manually.
 
 ---
 
@@ -114,7 +116,7 @@ docker volume rm hospital_dwh_postgres_data_dev
 
 | Job              | Description                   | Failure Action                             |
 |------------------|-------------------------------|--------------------------------------------|
-| Lint & Format    | Checks code style             | Run `./scripts/lint.sh`                    |
+| Quality Checks   | Lint, format, type, security  | Run `./scripts/check.sh`                   |
 | Type Checking    | Validates type hints          | Fix type errors manually                   |
 | Translations     | Checks i18n files             | Run `python manage.py makemessages`        |
 | Security         | Scans for vulnerabilities     | Fix security issues manually               |

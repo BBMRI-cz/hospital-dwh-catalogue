@@ -12,7 +12,11 @@ SECRET_KEY = config('SECRET_KEY', default='test-secret-key-not-for-production')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=lambda v: [s.strip() for s in v.split(',')],
+)
 
 # Use SQLite for all databases in CI/testing for simplicity
 USE_SQLITE = config('USE_SQLITE', default=True, cast=bool)

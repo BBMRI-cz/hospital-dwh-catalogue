@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 22:25+0100\n"
+"POT-Creation-Date: 2026-02-08 07:48+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: Czech\n"
@@ -16,84 +16,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: catalogue/settings/base.py:215 catalogue/settings/test.py:140
+#: catalogue/settings/base.py:228
 msgid "Czech"
 msgstr "Čeština"
 
-#: catalogue/settings/base.py:216 catalogue/settings/test.py:141
+#: catalogue/settings/base.py:229
 msgid "English"
 msgstr "Angličtina"
 
-#: catalogue/templates/catalogue/login.html:5 catalogue/views.py:23
+#: catalogue/views.py:25 warehouse/templates/catalogue/login.html:5
 msgid "Sign In"
-msgstr ""
+msgstr "Přihlásit se"
 
-#: catalogue/templates/catalogue/login.html:16
-#: warehouse/templates/warehouse/base.html:9
-#: warehouse/templates/warehouse/catalogue.html:4
-#: warehouse/templates/warehouse/catalogue.html:24
-msgid "Data Catalogue MOÚ"
-msgstr "Katalog dat MOÚ"
-
-#: catalogue/templates/catalogue/login.html:20
-msgid "Welcome!"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:21
-msgid "Please sign in with your Windows domain credentials"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:25
-msgid "Development Mode"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:27
-msgid "Mock LDAP enabled: Test users available."
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:28
-msgid "Test users: admin/admin123, jnovak/password123, test/test123"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:30
-msgid "LDAP is configured and will be used for authentication."
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:32
-msgid "Use local Django user accounts."
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:42
-msgid "Invalid username or password. Please try again."
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:51
-msgid "Username"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:57
-msgid "Enter your domain username"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:66
-msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:71
-msgid "Password"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:78
-msgid "Enter your password"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:92
-msgid "Sign in"
-msgstr ""
-
-#: catalogue/templates/catalogue/login.html:100
-msgid "Your account will be created automatically on first login."
-msgstr ""
+#: fair_genomes/apps.py:15
+msgid "Fair Genomes Integration"
+msgstr "Integrace Fair Genomes"
 
 #: fair_genomes/models.py:21
 #: fair_genomes/templates/fair_genomes/personal_detail.html:76
@@ -229,7 +166,6 @@ msgid "All Years of Birth"
 msgstr "Všechny roky narození"
 
 #: fair_genomes/templates/fair_genomes/personal_list.html:52
-#: ticketing/templates/ticketing/my_tickets.html:36
 #: warehouse/templates/warehouse/catalogue.html:47
 #: warehouse/templates/warehouse/fair_genomes_personal_list.html:55
 msgid "Search"
@@ -237,7 +173,7 @@ msgstr "Vyhledávání"
 
 #: fair_genomes/templates/fair_genomes/personal_list.html:76
 #: ticketing/templates/ticketing/cart.html:47
-#: ticketing/templates/ticketing/my_tickets.html:62
+#: ticketing/templates/ticketing/my_tickets.html:41
 #: warehouse/templates/warehouse/fair_genomes_personal_list.html:79
 msgid "Actions"
 msgstr "Akce"
@@ -253,7 +189,7 @@ msgid "First"
 msgstr "První"
 
 #: fair_genomes/templates/fair_genomes/personal_list.html:113
-#: ticketing/templates/ticketing/my_tickets.html:104
+#: ticketing/templates/ticketing/my_tickets.html:83
 #: warehouse/templates/warehouse/fair_genomes_personal_list.html:116
 msgid "Previous"
 msgstr "Předchozí"
@@ -269,7 +205,7 @@ msgid "of"
 msgstr "z"
 
 #: fair_genomes/templates/fair_genomes/personal_list.html:127
-#: ticketing/templates/ticketing/my_tickets.html:118
+#: ticketing/templates/ticketing/my_tickets.html:97
 #: warehouse/templates/warehouse/fair_genomes_personal_list.html:130
 msgid "Next"
 msgstr "Další"
@@ -293,44 +229,24 @@ msgstr "Nejsou dostupná žádná data Fair Genomes."
 msgid "Ticketing"
 msgstr "Ticketing"
 
-#: ticketing/forms.py:13
-msgid "Your Email"
-msgstr "Váš email"
-
-#: ticketing/forms.py:14
-msgid "We will use this email to contact you about your request."
-msgstr "Tento email použijeme pro komunikaci ohledně vašeho požadavku."
-
-#: ticketing/forms.py:18 ticketing/templates/ticketing/my_tickets.html:31
-msgid "your.email@example.com"
-msgstr "vas.email@example.com"
-
-#: ticketing/forms.py:25
-msgid "Your Name"
-msgstr "Vaše jméno"
-
-#: ticketing/forms.py:31
-msgid "John Doe"
-msgstr "Jan Novák"
-
-#: ticketing/forms.py:37 ticketing/models.py:45
-#: ticketing/templates/ticketing/my_tickets.html:58
+#: ticketing/forms.py:13 ticketing/models.py:45
+#: ticketing/templates/ticketing/my_tickets.html:37
 msgid "Subject"
 msgstr "Předmět"
 
-#: ticketing/forms.py:39 ticketing/views.py:66
+#: ticketing/forms.py:15 ticketing/views.py:67
 msgid "Data Access Request"
 msgstr "Žádost o přístup k datům"
 
-#: ticketing/forms.py:43
+#: ticketing/forms.py:19
 msgid "Brief description of your request"
 msgstr "Stručný popis vašeho požadavku"
 
-#: ticketing/forms.py:50
+#: ticketing/forms.py:26
 msgid "Additional Notes"
 msgstr "Další poznámky"
 
-#: ticketing/forms.py:57
+#: ticketing/forms.py:33
 msgid ""
 "Please provide any additional information about your data request, such as "
 "purpose of use, timeframe needed, etc."
@@ -342,8 +258,8 @@ msgstr ""
 msgid "Draft"
 msgstr "Koncept"
 
-#: ticketing/models.py:28 ticketing/templates/ticketing/my_tickets.html:61
-#: ticketing/templates/ticketing/my_tickets.html:74
+#: ticketing/models.py:28 ticketing/templates/ticketing/my_tickets.html:40
+#: ticketing/templates/ticketing/my_tickets.html:53
 #: ticketing/templates/ticketing/ticket_detail.html:25
 #: ticketing/templates/ticketing/ticket_detail.html:139
 msgid "Submitted"
@@ -386,7 +302,7 @@ msgstr "Popis"
 msgid "Additional details or notes for the request"
 msgstr "Další podrobnosti nebo poznámky k požadavku"
 
-#: ticketing/models.py:55 ticketing/templates/ticketing/my_tickets.html:59
+#: ticketing/models.py:55 ticketing/templates/ticketing/my_tickets.html:38
 #: ticketing/templates/ticketing/ticket_detail.html:87
 msgid "Status"
 msgstr "Stav"
@@ -528,7 +444,7 @@ msgstr "Tabulka"
 msgid "Remove from cart"
 msgstr "Odebrat z košíku"
 
-#: ticketing/templates/ticketing/cart.html:99 ticketing/views.py:246
+#: ticketing/templates/ticketing/cart.html:99 ticketing/views.py:247
 msgid "Your cart is empty."
 msgstr "Váš košík je prázdný."
 
@@ -538,41 +454,41 @@ msgid "Browse Catalogue"
 msgstr "Procházet katalog"
 
 #: ticketing/templates/ticketing/cart.html:113
-#: ticketing/templates/ticketing/cart.html:163
+#: ticketing/templates/ticketing/cart.html:141
 msgid "Submit Request"
 msgstr "Odeslat požadavek"
 
-#: ticketing/templates/ticketing/cart.html:166
+#: ticketing/templates/ticketing/cart.html:144
 msgid "Continue Browsing"
 msgstr "Pokračovat v prohlížení"
 
-#: ticketing/templates/ticketing/cart.html:172
+#: ticketing/templates/ticketing/cart.html:150
 msgid "Add items to your cart to submit a request."
 msgstr "Přidejte položky do košíku pro odeslání požadavku."
 
-#: ticketing/templates/ticketing/cart.html:181
+#: ticketing/templates/ticketing/cart.html:159
 msgid "How it works"
 msgstr "Jak to funguje"
 
-#: ticketing/templates/ticketing/cart.html:185
+#: ticketing/templates/ticketing/cart.html:163
 msgid "Browse the catalogue and add items to your cart"
 msgstr "Procházejte katalog a přidávejte položky do košíku"
 
-#: ticketing/templates/ticketing/cart.html:186
+#: ticketing/templates/ticketing/cart.html:164
 msgid "Review your selected items"
 msgstr "Zkontrolujte vybrané položky"
 
-#: ticketing/templates/ticketing/cart.html:187
+#: ticketing/templates/ticketing/cart.html:165
 msgid "Fill in your contact information"
 msgstr "Vyplňte své kontaktní údaje"
 
-#: ticketing/templates/ticketing/cart.html:188
+#: ticketing/templates/ticketing/cart.html:166
 msgid ""
 "Submit your request - a ticket will be created and you'll receive a "
 "confirmation"
 msgstr "Odešlete požadavek - bude vytvořen ticket a obdržíte potvrzení"
 
-#: ticketing/templates/ticketing/cart.html:237
+#: ticketing/templates/ticketing/cart.html:215
 msgid "Are you sure you want to clear your cart?"
 msgstr "Opravdu chcete vyprázdnit košík?"
 
@@ -582,52 +498,43 @@ msgstr "Opravdu chcete vyprázdnit košík?"
 msgid "My Tickets"
 msgstr "Moje tickety"
 
-#: ticketing/templates/ticketing/my_tickets.html:28
-msgid "Enter your email to view your tickets"
-msgstr "Zadejte svůj email pro zobrazení ticketů"
+#: ticketing/templates/ticketing/my_tickets.html:27
+msgid "Your Tickets"
+msgstr "Vaše požadavky"
 
-#: ticketing/templates/ticketing/my_tickets.html:48
-#, python-format
-msgid "Tickets for %(email)s"
-msgstr "Tickety pro %(email)s"
-
-#: ticketing/templates/ticketing/my_tickets.html:57
+#: ticketing/templates/ticketing/my_tickets.html:36
 msgid "Ticket ID"
 msgstr "ID ticketu"
 
-#: ticketing/templates/ticketing/my_tickets.html:60
+#: ticketing/templates/ticketing/my_tickets.html:39
 msgid "Items"
 msgstr "Položky"
 
-#: ticketing/templates/ticketing/my_tickets.html:76
+#: ticketing/templates/ticketing/my_tickets.html:55
 #: ticketing/templates/ticketing/ticket_detail.html:27
 msgid "Confirmed"
 msgstr "Potvrzeno"
 
-#: ticketing/templates/ticketing/my_tickets.html:78
+#: ticketing/templates/ticketing/my_tickets.html:57
 #: ticketing/templates/ticketing/ticket_detail.html:29
 msgid "Failed"
 msgstr "Selhalo"
 
-#: ticketing/templates/ticketing/my_tickets.html:88
+#: ticketing/templates/ticketing/my_tickets.html:67
 msgid "View Details"
 msgstr "Zobrazit detaily"
 
-#: ticketing/templates/ticketing/my_tickets.html:99
+#: ticketing/templates/ticketing/my_tickets.html:78
 msgid "Page navigation"
 msgstr "Navigace stránek"
 
-#: ticketing/templates/ticketing/my_tickets.html:129
-msgid "No tickets found for this email address."
-msgstr "Pro tuto emailovou adresu nebyly nalezeny žádné tickety."
+#: ticketing/templates/ticketing/my_tickets.html:108
+msgid "You haven't submitted any tickets yet."
+msgstr "Zatím jste neodeslali žádné požadavky."
 
-#: ticketing/templates/ticketing/my_tickets.html:136
+#: ticketing/templates/ticketing/my_tickets.html:115
 msgid "Could not fetch remote ticket status from Alvao."
 msgstr "Nepodařilo se načíst stav ticketu z Alvao."
-
-#: ticketing/templates/ticketing/my_tickets.html:146
-msgid "Enter your email address above to view your submitted tickets."
-msgstr "Pro zobrazení odeslaných ticketů zadejte výše svou emailovou adresu."
 
 #: ticketing/templates/ticketing/ticket_detail.html:4
 msgid "Ticket Details"
@@ -734,49 +641,53 @@ msgstr ""
 msgid "View My Tickets"
 msgstr "Zobrazit mé tickety"
 
-#: ticketing/views.py:118
+#: ticketing/views.py:119
 msgid "Missing item type or ID"
 msgstr "Chybí typ položky nebo ID"
 
-#: ticketing/views.py:123
+#: ticketing/views.py:124
 msgid "Invalid item type"
 msgstr "Neplatný typ položky"
 
-#: ticketing/views.py:137 ticketing/views.py:211
+#: ticketing/views.py:138 ticketing/views.py:212
 msgid "Item removed from cart"
 msgstr "Položka odebrána z košíku"
 
-#: ticketing/views.py:165
+#: ticketing/views.py:166
 msgid "Item added to cart"
 msgstr "Položka přidána do košíku"
 
-#: ticketing/views.py:217
+#: ticketing/views.py:218
 msgid "Item not found in cart"
 msgstr "Položka nebyla v košíku nalezena"
 
-#: ticketing/views.py:231
+#: ticketing/views.py:232
 msgid "Cart cleared"
 msgstr "Košík vyprázdněn"
 
-#: ticketing/views.py:285
+#: ticketing/views.py:289
 #, python-format
 msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 msgstr "Váš požadavek byl úspěšně odeslán. ID ticketu: %(ticket_id)s"
 
-#: ticketing/views.py:299
+#: ticketing/views.py:303
 #, python-format
 msgid "Failed to submit your request. Please try again later. Error: %(error)s"
 msgstr ""
 "Nepodařilo se odeslat váš požadavek. Zkuste to prosím znovu později. Chyba: "
 "%(error)s"
 
-#: ticketing/views.py:306
+#: ticketing/views.py:310
 msgid "Please correct the errors below."
 msgstr "Opravte prosím níže uvedené chyby."
 
-#: ticketing/views.py:319
+#: ticketing/views.py:323
 msgid "Requested Data Items:"
 msgstr "Požadované datové položky:"
+
+#: warehouse/apps.py:8
+msgid "Data Warehouse Catalogue"
+msgstr "Katalog datového skladu"
 
 #: warehouse/models.py:16
 msgid "Data Source"
@@ -898,17 +809,64 @@ msgstr "Schéma databázové tabulky"
 msgid "Database Table Schemas"
 msgstr "Schémata databázových tabulek"
 
+#: warehouse/templates/catalogue/login.html:16
+#: warehouse/templates/warehouse/base.html:9
+#: warehouse/templates/warehouse/catalogue.html:4
+#: warehouse/templates/warehouse/catalogue.html:24
+msgid "Data Catalogue MOÚ"
+msgstr "Katalog dat MOÚ"
+
+#: warehouse/templates/catalogue/login.html:20
+msgid "Welcome!"
+msgstr "Vítejte!"
+
+#: warehouse/templates/catalogue/login.html:21
+msgid "Please sign in with your Windows domain credentials"
+msgstr "Přihlaste se prosím pomocí svých doménových přihlašovacích údajů"
+
+#: warehouse/templates/catalogue/login.html:28
+msgid "Invalid username or password. Please try again."
+msgstr "Neplatné uživatelské jméno nebo heslo. Zkuste to prosím znovu."
+
+#: warehouse/templates/catalogue/login.html:37
+msgid "Username"
+msgstr "Uživatelské jméno"
+
+#: warehouse/templates/catalogue/login.html:43
+msgid "Enter your domain username"
+msgstr "Zadejte své doménové uživatelské jméno"
+
+#: warehouse/templates/catalogue/login.html:52
+msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
+msgstr "Použijte své doménové uživatelské jméno (např. jnovak nebo DOMAIN\\\\jnovak)"
+
+#: warehouse/templates/catalogue/login.html:57
+msgid "Password"
+msgstr "Heslo"
+
+#: warehouse/templates/catalogue/login.html:64
+msgid "Enter your password"
+msgstr "Zadejte své heslo"
+
+#: warehouse/templates/catalogue/login.html:78
+msgid "Sign in"
+msgstr "Přihlásit se"
+
+#: warehouse/templates/catalogue/login.html:86
+msgid "Your account will be created automatically on first login."
+msgstr "Váš účet bude vytvořen automaticky při prvním přihlášení."
+
 #: warehouse/templates/layout/navbar.html:9
 msgid "Catalogue"
 msgstr "Katalog"
 
 #: warehouse/templates/layout/navbar.html:40
 msgid "Admin"
-msgstr ""
+msgstr "Administrace"
 
 #: warehouse/templates/layout/navbar.html:42
 msgid "Logout"
-msgstr ""
+msgstr "Odhlásit se"
 
 #: warehouse/templates/warehouse/base.html:10
 msgid "Data warehouse catalogue"
@@ -1101,6 +1059,35 @@ msgstr ""
 #: warehouse/templates/warehouse/includes/help_modal.html:39
 msgid "3. Browsing datasets:"
 msgstr "3. Prohlížení datových sad:"
+
+#~ msgid "Your Email"
+#~ msgstr "Váš email"
+
+#~ msgid "We will use this email to contact you about your request."
+#~ msgstr "Tento email použijeme pro komunikaci ohledně vašeho požadavku."
+
+#~ msgid "your.email@example.com"
+#~ msgstr "vas.email@example.com"
+
+#~ msgid "Your Name"
+#~ msgstr "Vaše jméno"
+
+#~ msgid "John Doe"
+#~ msgstr "Jan Novák"
+
+#~ msgid "Enter your email to view your tickets"
+#~ msgstr "Zadejte svůj email pro zobrazení ticketů"
+
+#, python-format
+#~ msgid "Tickets for %(email)s"
+#~ msgstr "Tickety pro %(email)s"
+
+#~ msgid "No tickets found for this email address."
+#~ msgstr "Pro tuto emailovou adresu nebyly nalezeny žádné tickety."
+
+#~ msgid "Enter your email address above to view your submitted tickets."
+#~ msgstr ""
+#~ "Pro zobrazení odeslaných ticketů zadejte výše svou emailovou adresu."
 
 #~ msgid "Item already in cart"
 #~ msgstr "Položka je již v košíku"

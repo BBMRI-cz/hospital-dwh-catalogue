@@ -34,7 +34,7 @@ jobs:
           else
             echo "FAILED: Linting errors detected"
             echo ""
-            echo "To fix: run './scripts/lint.sh' locally"
+            echo "To fix: run './scripts/check.sh' locally"
             exit 1
           fi
 
@@ -46,7 +46,7 @@ jobs:
           else
             echo "FAILED: Some files need formatting"
             echo ""
-            echo "To fix: run './scripts/lint.sh' locally"
+            echo "To fix: run './scripts/check.sh' locally"
             exit 1
           fi
 
@@ -98,16 +98,45 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gettext
 
+      - name: Check for fuzzy translations
+        run: |
+          echo "Checking for fuzzy translations..."
+          
+          if grep -r "^#, fuzzy" locale/*/LC_MESSAGES/django.po 2>/dev/null; then
+            echo "FAILED: Fuzzy translations found - please review and update"
+            exit 1
+          fi
+          
+          echo "  No fuzzy translations found"
+
       - name: Check for empty translations
         run: |
           echo "Checking for empty translations..."
           
-          # Find msgstr "" followed by empty line (truly empty, not multi-line)
-          if grep -Pzo 'msgid "[^"]+"\nmsgstr ""\n\n' locale/*/LC_MESSAGES/django.po | grep -q .; then
-            echo "FAILED: Found empty translations"
-            grep -Pzo 'msgid "[^"]+"\nmsgstr ""\n\n' locale/*/LC_MESSAGES/django.po
-            exit 1
-          fi
+          # Find msgid followed by msgstr "" with no continuation (truly empty)
+          for po_file in locale/*/LC_MESSAGES/django.po; do
+            if awk '
+              /^msgid "[^"]/ {
+                msgid=$0
+                line=NR
+                getline
+                if (/^msgstr ""$/) {
+                  getline
+                  # Empty if next line is blank, a comment, or another msgid
+                  if ($0 ~ /^$/ || $0 ~ /^#/ || $0 ~ /^msgid/) {
+                    print FILENAME ":" line ":" msgid
+                    found++
+                  }
+                }
+              }
+              END { exit (found > 0) }
+            ' "$po_file" 2>&1; then
+              : # Continue
+            else
+              echo "FAILED: Empty translations found in $po_file"
+              exit 1
+            fi
+          done
           
           echo "PASSED: All strings are translated"
 
@@ -201,7 +230,7 @@ jobs:
             echo "FAILED: Some checks did not pass"
             echo "========================================"
             echo ""
-            echo "Run './scripts/lint.sh' locally to fix auto-fixable issues."
+            echo "Run './scripts/check.sh' locally to fix auto-fixable issues."
             exit 1
           fi
           

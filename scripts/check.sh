@@ -2,14 +2,17 @@
 # =============================================================================
 # Code Quality Script - Auto-fix and Check
 # =============================================================================
-# This script will:
-# 1. Auto-fix all issues that can be fixed automatically
-# 2. Show only issues that require manual intervention
-# 3. Run the test suite
+# This script runs comprehensive code quality checks:
+# 1. Linting (Ruff) - Auto-fixable
+# 2. Code formatting (Ruff) - Auto-fixable
+# 3. Type checking (mypy) - Manual fixes required
+# 4. Security scanning (Bandit) - Manual fixes required
+# 5. Translation completeness - Manual fixes required
+# 6. Test suite
 # 
 # Usage:
-#   ./scripts/lint.sh          # Run all checks with auto-fix
-#   ./scripts/lint.sh --check  # Check only, no auto-fix (used in CI)
+#   ./scripts/check.sh          # Run all checks with auto-fix
+#   ./scripts/check.sh --check  # Check only, no auto-fix (used in CI)
 # =============================================================================
 
 set -e
@@ -97,7 +100,7 @@ if [ "$CHECK_ONLY" = true ]; then
         echo "PASSED: All files formatted correctly"
     else
         echo "FAILED: Some files need formatting"
-        echo "Run './scripts/lint.sh' to auto-fix"
+        echo "Run './scripts/check.sh' to auto-fix"
         FAILED=true
     fi
 else
@@ -145,9 +148,61 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------------
-# Step 5: Tests
+# Step 5: Translation Check
 # -----------------------------------------------------------------------------
-echo "[5/5] Tests"
+echo "[5/6] Translation Check"
+echo "----------------------------------------"
+
+TRANSLATION_ISSUES=false
+
+# Check for fuzzy translations
+echo "Checking for fuzzy translations..."
+if grep -r "^#, fuzzy" locale/*/LC_MESSAGES/django.po 2>/dev/null; then
+    echo "FAILED: Fuzzy translations found - please review and update translations"
+    TRANSLATION_ISSUES=true
+fi
+
+# Check for empty translations (same approach as CI)
+echo "Checking for empty translations..."
+for po_file in locale/*/LC_MESSAGES/django.po; do
+    if [ -f "$po_file" ]; then
+        # Find msgid followed by msgstr "" with no continuation (truly empty)
+        EMPTY_FOUND=$(awk '
+            /^msgid "[^"]/ {
+                msgid=$0
+                line=NR
+                getline
+                if (/^msgstr ""$/) {
+                    getline
+                    # Empty if next line is blank, a comment, or another msgid
+                    if ($0 ~ /^$/ || $0 ~ /^#/ || $0 ~ /^msgid/) {
+                        print FILENAME ":" line ":" msgid
+                        found++
+                    }
+                }
+            }
+            END { exit (found > 0) }
+        ' "$po_file" 2>&1)
+        
+        if [ $? -ne 0 ]; then
+            echo "FAILED: Empty translations found in $po_file"
+            echo "$EMPTY_FOUND"
+            TRANSLATION_ISSUES=true
+        fi
+    fi
+done
+
+if [ "$TRANSLATION_ISSUES" = false ]; then
+    echo "PASSED: All translations complete"
+else
+    FAILED=true
+fi
+echo ""
+
+# -----------------------------------------------------------------------------
+# Step 6: Tests
+# -----------------------------------------------------------------------------
+echo "[6/6] Tests"
 echo "----------------------------------------"
 
 if DJANGO_SETTINGS_MODULE=catalogue.settings.test $PYTHON manage.py test --verbosity 1 2>&1; then

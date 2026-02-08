@@ -4,6 +4,7 @@ import logging
 
 from django.apps import AppConfig
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 class FairGenomesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'fair_genomes'
-    verbose_name = 'Fair Genomes Integration'
+    verbose_name = _('Fair Genomes Integration')
 
     def ready(self):
         """
