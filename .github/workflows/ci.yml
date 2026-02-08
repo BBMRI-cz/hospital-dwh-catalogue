@@ -129,16 +129,16 @@ jobs:
           DJANGO_SETTINGS_MODULE: catalogue.settings.test
         run: |
           echo "Running tests..."
-          if python manage.py test --verbosity 2; then
-            echo "PASSED: All tests passed"
-          else
-            echo "FAILED: Some tests failed"
-            exit 1
-          fi
+          ./scripts/check-tests.sh
 
   ci-success:
     name: CI Result
-    needs:./scripts/check-tests.sh |
+    needs: [lint, type-check, translations, security, test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
           echo "========================================"
           echo "CI Results"
           echo "========================================"
