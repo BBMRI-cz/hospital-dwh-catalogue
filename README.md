@@ -33,6 +33,7 @@ A Django-based web application for browsing and managing hospital data warehouse
 - [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
 - [Contributing Guide](docs/CONTRIBUTING.md) - Development workflow and branch protection
 - [Internationalization](docs/INTERNATIONALIZATION.md) - Adding and updating translations
+- [FAIR Genomes](docs/FAIR_GENOMES.md) - FAIR Genomes API integration and data sync
 - [Ticketing](docs/TICKETING.md) - Alvao Ticketing integration
 
 ## Project Structure

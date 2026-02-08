@@ -104,7 +104,7 @@ class FairGenomesScheduler:
 
     def is_running(self) -> bool:
         """Check if scheduler is running."""
-        return self._running and self._thread and self._thread.is_alive()
+        return self._running and self._thread is not None and self._thread.is_alive()
 
 
 # Global scheduler instance

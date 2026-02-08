@@ -67,7 +67,7 @@ class Personal(FairGenomesBase):
         help_text=_('Year the individual was born'),
     )
 
-    class Meta:
+    class Meta(FairGenomesBase.Meta):
         db_table = 'fair_genomes_personal'
         verbose_name = _('Personal Record')
         verbose_name_plural = _('Personal Records')

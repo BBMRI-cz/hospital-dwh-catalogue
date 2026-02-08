@@ -70,7 +70,7 @@ class FairGenomesService:
         Raises:
             FairGenomesAPIException: On API or network errors
         """
-        payload = {'query': query}
+        payload: dict[str, Any] = {'query': query}
         if variables:
             payload['variables'] = variables
 
