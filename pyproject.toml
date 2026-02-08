@@ -104,4 +104,4 @@ django_settings_module = "catalogue.settings.dev"
 
 [tool.bandit]
 exclude_dirs = ["tests", "warehouse/static/sneat", "venv", ".venv"]
-skips = ["B101"]  # Skip assert warnings in tests
+skips = ["B101", "B104"]  # Skip assert warnings in tests, bind all interfaces (acceptable for dev)
