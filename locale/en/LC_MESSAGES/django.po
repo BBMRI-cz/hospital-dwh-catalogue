@@ -613,7 +613,11 @@ msgid ""
 "                        A confirmation email will be sent to "
 "<strong>%(email)s</strong>.\n"
 "                        "
-msgstr "A confirmation email will be sent to <strong>%(email)s</strong>."
+msgstr ""
+"\n"
+"                        A confirmation email will be sent to "
+"<strong>%(email)s</strong>.\n"
+"                        "
 
 #: ticketing/templates/ticketing/ticket_submitted.html:34
 msgid "Request Summary"

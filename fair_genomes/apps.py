@@ -31,14 +31,14 @@ class FairGenomesConfig(AppConfig):
     def _fetch_fair_genomes_on_startup(self):
         """
         Fetch Fair Genomes data during application startup.
-        Runs asynchronously to avoid blocking startup.
+        Runs after migrations complete using Django signals.
         """
-        from threading import Thread
+        from django.db.models.signals import post_migrate
 
-        def sync_in_background():
-            """Background thread function to sync data."""
+        def run_sync(sender, **kwargs):
+            """Run sync after migrations complete."""
             try:
-                logger.info('Starting Fair Genomes data sync on startup')
+                logger.info('Starting Fair Genomes data sync after migrations')
                 from .services import FairGenomesService
 
                 with FairGenomesService() as service:
@@ -51,10 +51,8 @@ class FairGenomesConfig(AppConfig):
             except Exception as e:
                 logger.error(f'Startup sync failed: {e}', exc_info=True)
 
-        # Run in background thread to not block Django startup
-        thread = Thread(target=sync_in_background, daemon=True)
-        thread.start()
-        logger.info('Fair Genomes startup sync initiated in background')
+        post_migrate.connect(run_sync, sender=self)
+        logger.info('Fair Genomes startup sync scheduled to run after migrations')
 
     def _start_periodic_scheduler(self, interval_hours: int):
         """

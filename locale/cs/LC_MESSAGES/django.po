@@ -611,7 +611,11 @@ msgid ""
 "                        A confirmation email will be sent to "
 "<strong>%(email)s</strong>.\n"
 "                        "
-msgstr "Potvrzovací email bude odeslán na <strong>%(email)s</strong>."
+msgstr ""
+"\n"
+"                        Potvrzovací email bude odeslán na "
+"<strong>%(email)s</strong>.\n"
+"                        "
 
 #: ticketing/templates/ticketing/ticket_submitted.html:34
 msgid "Request Summary"
