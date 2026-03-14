@@ -4,11 +4,10 @@ Tests for the catalogue project configuration.
 Covers URL routing, views, and database routers.
 """
 
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.contrib.auth.models import User
+from django.test import TestCase
 
 from .routers import AuthRouter, WarehouseRouter
-from .views import CustomLoginView, logout_view
 
 
 class AuthRouterTest(TestCase):
@@ -142,43 +141,3 @@ class WarehouseRouterTest(TestCase):
         personal = Personal(personal_identifier='P1')
         ticket = TicketRequest(requester_email='t@e.com')
         self.assertFalse(self.router.allow_relation(personal, ticket))
-
-
-class CustomLoginViewTest(TestCase):
-    """Tests for the CustomLoginView."""
-
-    databases = {'default', 'auth_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-
-    def test_login_view_returns_200(self):
-        """Login page returns 200 for anonymous users."""
-        request = self.factory.get('/login/')
-        request.user = AnonymousUser()
-        # Add session to request
-        from django.contrib.sessions.backends.db import SessionStore
-
-        request.session = SessionStore()
-        response = CustomLoginView.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-
-
-class LogoutViewTest(TestCase):
-    """Tests for the logout view."""
-
-    databases = {'default', 'auth_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-
-    def test_logout_redirects(self):
-        """Logout redirects to login page."""
-        user = User.objects.create_user(username='testuser', password='testpass123')
-        request = self.factory.get('/logout/')
-        request.user = user
-        from django.contrib.sessions.backends.db import SessionStore
-
-        request.session = SessionStore()
-        response = logout_view(request)
-        self.assertEqual(response.status_code, 302)

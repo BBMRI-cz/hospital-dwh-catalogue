@@ -15,24 +15,4 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.conf.urls.i18n import i18n_patterns
-from django.contrib import admin
-from django.urls import include, path
-from django.views.generic import RedirectView
-
-from .views import CustomLoginView, logout_view
-
-urlpatterns = [
-    path('i18n/', include('django.conf.urls.i18n')),
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', logout_view, name='logout'),
-]
-
-urlpatterns += i18n_patterns(
-    path('', RedirectView.as_view(url='/warehouse/', permanent=False)),
-    path('admin/', admin.site.urls),
-    path('warehouse/', include('warehouse.urls', namespace='warehouse')),
-    path('fair-genomes/', include('fair_genomes.urls', namespace='fair_genomes')),
-    path('ticketing/', include('ticketing.urls', namespace='ticketing')),
-    prefix_default_language=True,
-)
+urlpatterns = []

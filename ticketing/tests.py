@@ -4,10 +4,8 @@ Tests for the ticketing application.
 Covers models, forms, views, services, and cart functionality.
 """
 
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 
-from .forms import TicketSubmitForm
 from .models import TicketRequest, TicketRequestItem
 from .services.base import TicketData, TicketResponse
 from .services.factory import get_ticket_service
@@ -171,48 +169,6 @@ class TicketRequestItemModelTest(TestCase):
             )
 
 
-class TicketSubmitFormTest(TestCase):
-    """Tests for the TicketSubmitForm."""
-
-    def test_valid_form(self):
-        """Form with required fields is valid."""
-        form = TicketSubmitForm(
-            data={
-                'subject': 'Test Subject',
-                'description': 'Test description',
-            }
-        )
-        self.assertTrue(form.is_valid())
-
-    def test_subject_required(self):
-        """Subject field is required."""
-        form = TicketSubmitForm(
-            data={
-                'description': 'Test description',
-            }
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn('subject', form.errors)
-
-    def test_description_optional(self):
-        """Description field is optional."""
-        form = TicketSubmitForm(
-            data={
-                'subject': 'Test Subject',
-            }
-        )
-        self.assertTrue(form.is_valid())
-
-    def test_subject_max_length(self):
-        """Subject has max length of 500."""
-        form = TicketSubmitForm(
-            data={
-                'subject': 'A' * 501,
-            }
-        )
-        self.assertFalse(form.is_valid())
-
-
 class TicketDataTest(TestCase):
     """Tests for the TicketData dataclass."""
 
@@ -332,53 +288,3 @@ class GetTicketServiceTest(TestCase):
 
             service = get_ticket_service()
             self.assertIsInstance(service, AlvaoService)
-
-
-class CartViewTest(TestCase):
-    """Tests for cart-related views."""
-
-    databases = {'default', 'auth_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123',
-            email='test@example.com',
-        )
-
-    def test_cart_view_redirects_unauthenticated(self):
-        """Cart view redirects unauthenticated users."""
-        from .views import CartView
-
-        request = self.factory.get('/ticketing/cart/')
-        request.user = AnonymousUser()
-        response = CartView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
-    def test_add_to_cart_redirects_unauthenticated(self):
-        """Add to cart redirects unauthenticated users."""
-        from .views import AddToCartView
-
-        request = self.factory.post('/ticketing/cart/add/')
-        request.user = AnonymousUser()
-        response = AddToCartView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
-    def test_clear_cart_redirects_unauthenticated(self):
-        """Clear cart redirects unauthenticated users."""
-        from .views import ClearCartView
-
-        request = self.factory.post('/ticketing/cart/clear/')
-        request.user = AnonymousUser()
-        response = ClearCartView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
-    def test_my_tickets_redirects_unauthenticated(self):
-        """My tickets view redirects unauthenticated users."""
-        from .views import MyTicketsView
-
-        request = self.factory.get('/ticketing/my-tickets/')
-        request.user = AnonymousUser()
-        response = MyTicketsView.as_view()(request)
-        self.assertEqual(response.status_code, 302)

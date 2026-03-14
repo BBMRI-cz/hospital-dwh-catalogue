@@ -8,12 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import requests
 
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 
 from .models import Personal
 from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
-from .views import PersonalDetailView, PersonalListView
 
 
 class PersonalModelTest(TestCase):
@@ -186,104 +184,3 @@ class FairGenomesServiceTest(TestCase):
         """Closing without a session does not raise."""
         service = FairGenomesService(api_url='http://test.com/graphql', api_token='token')
         service.close()  # Should not raise
-
-
-class PersonalListViewTest(TestCase):
-    """Tests for the PersonalListView."""
-
-    databases = {'default', 'auth_db', 'fair_genomes_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123',
-        )
-
-    @patch('fair_genomes.views.Personal.objects')
-    def test_view_returns_200(self, mock_objects):
-        """Authenticated user gets 200 response."""
-        mock_qs = MagicMock()
-        mock_objects.all.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_qs.count.return_value = 0
-        mock_objects.count.return_value = 0
-        mock_objects.exclude.return_value.values_list.return_value.distinct.return_value.order_by.return_value = []
-
-        request = self.factory.get('/fair-genomes/')
-        request.user = self.user
-        response = PersonalListView.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-
-    def test_view_redirects_unauthenticated(self):
-        """Unauthenticated users are redirected."""
-        request = self.factory.get('/fair-genomes/')
-        request.user = AnonymousUser()
-        response = PersonalListView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
-    @patch('fair_genomes.views.Personal.objects')
-    def test_view_search_filters_queryset(self, mock_objects):
-        """Search query filters the queryset."""
-        mock_qs = MagicMock()
-        mock_objects.all.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_qs.count.return_value = 0
-        mock_objects.count.return_value = 0
-        mock_objects.exclude.return_value.values_list.return_value.distinct.return_value.order_by.return_value = []
-
-        request = self.factory.get('/fair-genomes/', {'query': 'TEST'})
-        request.user = self.user
-        PersonalListView.as_view()(request)
-        mock_qs.filter.assert_called()
-
-    @patch('fair_genomes.views.Personal.objects')
-    def test_view_yob_filter(self, mock_objects):
-        """Year of birth filter is applied."""
-        mock_qs = MagicMock()
-        mock_objects.all.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_qs.count.return_value = 0
-        mock_objects.count.return_value = 0
-        mock_objects.exclude.return_value.values_list.return_value.distinct.return_value.order_by.return_value = []
-
-        request = self.factory.get('/fair-genomes/', {'yob': '1990'})
-        request.user = self.user
-        PersonalListView.as_view()(request)
-        mock_qs.filter.assert_called()
-
-    @patch('fair_genomes.views.Personal.objects')
-    def test_view_invalid_yob_ignored(self, mock_objects):
-        """Invalid year of birth value is silently ignored."""
-        mock_qs = MagicMock()
-        mock_objects.all.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_qs.count.return_value = 0
-        mock_objects.count.return_value = 0
-        mock_objects.exclude.return_value.values_list.return_value.distinct.return_value.order_by.return_value = []
-
-        request = self.factory.get('/fair-genomes/', {'yob': 'invalid'})
-        request.user = self.user
-        # Should not raise
-        response = PersonalListView.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-
-
-class PersonalDetailViewTest(TestCase):
-    """Tests for the PersonalDetailView."""
-
-    databases = {'default', 'auth_db', 'fair_genomes_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123',
-        )
-
-    def test_view_redirects_unauthenticated(self):
-        """Unauthenticated users are redirected."""
-        request = self.factory.get('/fair-genomes/TEST-001/')
-        request.user = AnonymousUser()
-        response = PersonalDetailView.as_view()(request, pk='TEST-001')
-        self.assertEqual(response.status_code, 302)

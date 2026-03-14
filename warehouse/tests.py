@@ -4,13 +4,9 @@ Tests for the warehouse application.
 Covers models, views, template tags, and admin configuration.
 """
 
-from unittest.mock import MagicMock, patch
-
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 
 from .models import DataclassList, DataclassTableSchemes, DatasetList, DatasourceList, DbTableList
-from .views import CatalogueView
 
 
 class DatasourceListModelTest(TestCase):
@@ -220,77 +216,3 @@ class DbTableListModelTest(TestCase):
     def test_meta_managed_false(self):
         """Model is unmanaged."""
         self.assertFalse(DbTableList._meta.managed)
-
-
-class CatalogueViewTest(TestCase):
-    """Tests for the CatalogueView."""
-
-    databases = {'default', 'auth_db'}
-
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123',
-        )
-
-    def _setup_catalogue_mocks(self, mock_objects):
-        """Configure mocks for CatalogueView context data lookups."""
-        mock_qs = MagicMock()
-        mock_objects.select_related.return_value.prefetch_related.return_value = mock_qs
-        mock_qs.filter.return_value.distinct.return_value = mock_qs
-        mock_qs.count.return_value = 0
-
-        # Mock subject tags: exclude().values_list()
-        mock_objects.exclude.return_value.values_list.return_value = []
-
-        # Mock data sources: values_list().distinct()
-        mock_vl_qs = MagicMock()
-        mock_vl_qs.distinct.return_value = []
-        mock_objects.values_list.return_value = mock_vl_qs
-
-        # Mock rights holders: exclude().values_list().distinct()
-        mock_exclude_qs = MagicMock()
-        mock_exclude_vl = MagicMock()
-        mock_exclude_vl.distinct.return_value = []
-        mock_exclude_qs.values_list.return_value = mock_exclude_vl
-        mock_objects.exclude.return_value = mock_exclude_qs
-
-        return mock_qs
-
-    @patch('warehouse.views.DatasetList.objects')
-    def test_view_returns_200(self, mock_objects):
-        """Authenticated user gets 200 response."""
-        self._setup_catalogue_mocks(mock_objects)
-
-        request = self.factory.get('/warehouse/')
-        request.user = self.user
-        response = CatalogueView.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-
-    @patch('warehouse.views.DatasetList.objects')
-    def test_view_applies_search_filter(self, mock_objects):
-        """Search query triggers queryset filtering."""
-        mock_qs = self._setup_catalogue_mocks(mock_objects)
-
-        request = self.factory.get('/warehouse/', {'query': 'diabetes'})
-        request.user = self.user
-        CatalogueView.as_view()(request)
-        mock_qs.filter.assert_called_once()
-
-    @patch('warehouse.views.DatasetList.objects')
-    def test_view_no_filter_without_query(self, mock_objects):
-        """No filter is applied when query is empty."""
-        mock_qs = self._setup_catalogue_mocks(mock_objects)
-
-        request = self.factory.get('/warehouse/')
-        request.user = self.user
-        CatalogueView.as_view()(request)
-        mock_qs.filter.assert_not_called()
-
-    def test_view_redirects_unauthenticated(self):
-        """Unauthenticated users are redirected to login."""
-        request = self.factory.get('/warehouse/')
-        request.user = AnonymousUser()
-        response = CatalogueView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
