@@ -17,7 +17,7 @@ The ticketing system allows users to:
 For development, the mock service is used:
 
 ```env
-ALVAO_USE_MOCK=True
+MOCK_ALVAO=True
 ```
 
 The mock service:
@@ -31,7 +31,7 @@ The mock service:
 For testing against a real Alvao test instance:
 
 ```env
-ALVAO_USE_MOCK=False
+MOCK_ALVAO=False
 ALVAO_API_URL=https://test-alvao.yourcompany.com/api/v1
 ALVAO_API_TOKEN=your-test-api-token
 ```
@@ -41,7 +41,7 @@ ALVAO_API_TOKEN=your-test-api-token
 For production with the real Alvao server:
 
 ```env
-ALVAO_USE_MOCK=False
+MOCK_ALVAO=False
 ALVAO_API_URL=https://alvao.yourcompany.com/api/v1
 ALVAO_API_TOKEN=your-production-api-token
 ALVAO_DEFAULT_SERVICE_ID=123  # Optional: default service for tickets

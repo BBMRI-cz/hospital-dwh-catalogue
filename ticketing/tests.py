@@ -276,14 +276,14 @@ class GetTicketServiceTest(TestCase):
     """Tests for the service factory."""
 
     def test_returns_mock_when_configured(self):
-        """Factory returns MockAlvaoService when ALVAO_USE_MOCK is True."""
-        with self.settings(ALVAO_USE_MOCK=True):
+        """Factory returns MockAlvaoService when MOCK_ALVAO is True."""
+        with self.settings(MOCK_ALVAO=True):
             service = get_ticket_service()
             self.assertIsInstance(service, MockAlvaoService)
 
     def test_returns_alvao_when_not_mock(self):
-        """Factory returns AlvaoService when ALVAO_USE_MOCK is False."""
-        with self.settings(ALVAO_USE_MOCK=False):
+        """Factory returns AlvaoService when MOCK_ALVAO is False."""
+        with self.settings(MOCK_ALVAO=False):
             from .services.alvao_service import AlvaoService
 
             service = get_ticket_service()

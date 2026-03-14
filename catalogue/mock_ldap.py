@@ -25,7 +25,7 @@ class MockLDAPBackend(ModelBackend):
     Accepts any non-empty username/password combination.
     Creates Django users automatically with generated attributes.
 
-    Controlled by AUTH_USE_MOCK_LDAP setting.
+    Controlled by MOCK_LDAP setting.
     """
 
     def authenticate(self, request, username=None, password=None, **kwargs):
@@ -40,8 +40,8 @@ class MockLDAPBackend(ModelBackend):
         Returns:
             User instance if authentication succeeds, None otherwise
         """
-        # Only active if AUTH_USE_MOCK_LDAP is True
-        if not getattr(settings, 'AUTH_USE_MOCK_LDAP', False):
+        # Only active if MOCK_LDAP is True
+        if not getattr(settings, 'MOCK_LDAP', False):
             return None
 
         if not username or not password:

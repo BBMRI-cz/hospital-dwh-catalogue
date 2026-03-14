@@ -20,13 +20,13 @@ def get_ticket_service() -> TicketService:
     Get the appropriate ticket service based on configuration.
 
     Returns:
-        - MockAlvaoService if ALVAO_USE_MOCK is True (dev environment)
+        - MockAlvaoService if MOCK_ALVAO is True (dev environment)
         - AlvaoService for production/test environments
     """
-    use_mock = getattr(settings, 'ALVAO_USE_MOCK', False)
+    use_mock = getattr(settings, 'MOCK_ALVAO', False)
 
     if use_mock:
-        logger.info('Using mock Alvao service (ALVAO_USE_MOCK=True)')
+        logger.info('Using mock Alvao service (MOCK_ALVAO=True)')
         return MockAlvaoService(use_database=True)
 
     logger.info('Using real Alvao service')

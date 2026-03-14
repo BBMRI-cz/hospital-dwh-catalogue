@@ -1,133 +1,123 @@
--- DROP SCHEMA metadata;
+-- ============================================================
+-- Local Metadata HealthDCAT-AP Schema  (lm_* tables)
+-- ============================================================
+-- Runs once on first Postgres container start via initdb.d/.
+-- Matches warehouse/models.py (managed=False).
+--
+-- FK naming follows Django defaults:
+--   ForeignKey field "foo" without db_column → column "foo_id"
+--   ForeignKey field "bar" with db_column='bar' → column "bar"
+-- ============================================================
 
-CREATE SCHEMA metadata;
--- metadata.datasource_list definition
+CREATE SCHEMA IF NOT EXISTS metadata;
 
--- Drop table
-
--- DROP TABLE metadata.datasource_list;
-
-CREATE TABLE metadata.datasource_list (
-	data_source varchar(50) NOT NULL,
-	data_source_name varchar(255) NULL,
-	subject varchar(255) NULL,
-	description text NULL,
-	CONSTRAINT xpk_datasource_list PRIMARY KEY (data_source)
+-- ── 1. ContactPoint ─────────────────────────────────────────
+-- Maps to warehouse.ContactPoint / shared.ContactPointBase
+-- Both fields are nullable: a ContactPoint may carry
+-- email only, page only, both, or neither.
+CREATE TABLE IF NOT EXISTS metadata."lm_contact_point" (
+    id           BIGSERIAL    PRIMARY KEY,
+    email        VARCHAR(255),           -- vcard:email (nullable)
+    contact_page VARCHAR(500)            -- vcard:hasURL (nullable)
 );
 
-
--- metadata.dataset_list definition
-
--- Drop table
-
--- DROP TABLE metadata.dataset_list;
-
-CREATE TABLE metadata.dataset_list (
-	data_source varchar(50) NULL,
-	data_set varchar(100) NOT NULL,
-	data_set_name varchar(255) NULL,
-	subject varchar(255) NULL,
-	description text NULL,
-	author varchar(100) NULL,
-	contributor varchar(100) NULL,
-	publisher varchar(100) NULL,
-	rights_holder varchar(100) NULL,
-	provenance text NULL,
-	complete varchar(3) NULL,
-	CONSTRAINT xpk_dataset_list PRIMARY KEY (data_set),
-	CONSTRAINT fk_source FOREIGN KEY (data_source) REFERENCES metadata.datasource_list(data_source) ON DELETE RESTRICT ON UPDATE CASCADE
+-- ── 2. Agent ─────────────────────────────────────────────────
+-- Maps to warehouse.Agent / shared.AgentBase
+-- name is the natural key / PK throughout the catalogue.
+CREATE TABLE IF NOT EXISTS metadata."lm_agent" (
+    name              VARCHAR(255) PRIMARY KEY,
+    contact_point_id  BIGINT REFERENCES metadata."lm_contact_point"(id)
+                           ON DELETE SET NULL
 );
 
-
--- metadata.dataclass_list definition
-
--- Drop table
-
--- DROP TABLE metadata.dataclass_list;
-
-CREATE TABLE metadata.dataclass_list (
-	data_set varchar(100) NULL,
-	data_class varchar(100) NOT NULL,
-	data_class_name varchar(255) NULL,
-	subject varchar(255) NULL,
-	description text NULL,
-	file_extension varchar(50) NULL,
-	resource_type varchar(50) NULL,
-	resource_content varchar(50) NULL,
-	data_confidentality varchar(100) NULL,
-	language_code varchar(50) NULL,
-	provenance text NULL,
-	data_quality varchar(100) NULL,
-	repository varchar(5) NULL,
-	complete varchar(5) NULL,
-	etl varchar(5) NULL,
-	CONSTRAINT xpk_dataclass_list PRIMARY KEY (data_class),
-	CONSTRAINT fk_dataset FOREIGN KEY (data_set) REFERENCES metadata.dataset_list(data_set) ON DELETE RESTRICT ON UPDATE CASCADE
+-- ── 3. Catalog ───────────────────────────────────────────────
+-- Maps to warehouse.Catalog / shared.CatalogBase
+-- applicable_legislation is mandatory (HealthDCAT-AP v6 §4.2).
+CREATE TABLE IF NOT EXISTS metadata."lm_catalog" (
+    name                   VARCHAR(255) PRIMARY KEY,
+    title                  VARCHAR(500),
+    description            TEXT,
+    publisher_id           VARCHAR(255) REFERENCES metadata."lm_agent"(name)
+                               ON DELETE SET NULL,
+    applicable_legislation VARCHAR(500) NOT NULL
 );
 
-
--- metadata.dataclass_table_schemes definition
-
--- Drop table
-
--- DROP TABLE metadata.dataclass_table_schemes;
-
-CREATE TABLE metadata.dataclass_table_schemes (
-	data_class varchar(100) NOT NULL,
-	col_order int2 NOT NULL,
-	col_var varchar(100) NULL,
-	col_name varchar(255) NULL,
-	col_description text NULL,
-	col_var_r varchar(100) NULL,
-	col_transf_r int2 NULL,
-	datatype_r varchar(20) NULL,
-	possible_key varchar(100) NULL,
-	tag varchar(100) NULL,
-	confidentality int2 NULL,
-	vocabulary text NULL,
-	calculated int2 NULL,
-	madatory int2 NULL,
-	unit varchar(20) NULL,
-	CONSTRAINT xpk_dataclass_table_schemes PRIMARY KEY (data_class, col_order),
-	CONSTRAINT fk_dataclass_desc FOREIGN KEY (data_class) REFERENCES metadata.dataclass_list(data_class) ON DELETE RESTRICT ON UPDATE CASCADE
+-- ── 4. Dataset ───────────────────────────────────────────────
+-- Maps to warehouse.Dataset / shared.DatasetBase
+-- Mandatory HealthDCAT-AP v6 fields:
+--   access_rights, applicable_legislation, health_category, hdab_id.
+CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
+    name                   VARCHAR(255) PRIMARY KEY,
+    title                  VARCHAR(500),
+    version                VARCHAR(100),
+    description            TEXT,
+    theme                  VARCHAR(500),           -- dcat:theme URI
+    publisher_id           VARCHAR(255) REFERENCES metadata."lm_agent"(name)
+                               ON DELETE SET NULL,
+    license                VARCHAR(500),           -- dct:license URI / SPDX
+    conformed_to           VARCHAR(500),           -- dct:conformsTo URI
+    issued                 TIMESTAMPTZ,            -- dct:issued
+    modified               TIMESTAMPTZ,            -- dct:modified
+    keyword                TEXT,                   -- dcat:keyword (comma-sep)
+    source                 TEXT,                   -- dct:source URI
+    creator                TEXT,                   -- dct:creator name(s)
+    contact_point_id       BIGINT REFERENCES metadata."lm_contact_point"(id)
+                               ON DELETE SET NULL,
+    rights_holder          TEXT,                   -- dct:rightsHolder
+    provenance             TEXT,                   -- dct:provenance
+    catalog_id             VARCHAR(255) REFERENCES metadata."lm_catalog"(name)
+                               ON DELETE SET NULL,
+    -- Mandatory HealthDCAT-AP v6
+    access_rights          VARCHAR(500) NOT NULL,  -- dct:accessRights
+    applicable_legislation VARCHAR(500) NOT NULL,  -- dct:applicableLegislation
+    health_category        VARCHAR(500) NOT NULL,  -- healthdcat:healthCategory
+    hdab_id                VARCHAR(255) NOT NULL   -- healthdcat:hdab
+                               REFERENCES metadata."lm_agent"(name)
+                               ON DELETE RESTRICT
 );
 
-
--- metadata.db_table_list definition
-
--- Drop table
-
--- DROP TABLE metadata.db_table_list;
-
-CREATE TABLE metadata.db_table_list (
-	data_class varchar(100) NULL,
-	db_layer varchar(50) NULL,
-	db_table varchar(100) NOT NULL,
-	db_table_name varchar(255) NULL,
-	description text NULL,
-	datetime_created date NULL,
-	datetime_last_modified date NULL,
-	CONSTRAINT xpk_db_table_list PRIMARY KEY (db_table),
-	CONSTRAINT fk_dataclass FOREIGN KEY (data_class) REFERENCES metadata.dataclass_list(data_class) ON DELETE RESTRICT ON UPDATE CASCADE
+-- ── 5. Distribution ──────────────────────────────────────────
+-- Maps to warehouse.Distribution / shared.DistributionBase
+-- + db_layer (LM-specific DWH layer: raw / clean / analytical / NULL).
+-- dataset_name uses explicit db_column (to_field='name' in Django model).
+CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
+    name                   VARCHAR(255) PRIMARY KEY,
+    dataset_name           VARCHAR(255) NOT NULL   -- FK with explicit db_column
+                               REFERENCES metadata."lm_dataset"(name)
+                               ON DELETE CASCADE,
+    title                  VARCHAR(500),
+    description            TEXT,
+    format                 VARCHAR(100),            -- dct:format
+    conformed_to           VARCHAR(500),
+    byte_size              INTEGER,                 -- dcat:byteSize
+    rights                 VARCHAR(500),            -- dct:rights
+    issued                 TIMESTAMPTZ,
+    modified               TIMESTAMPTZ,
+    -- Mandatory HealthDCAT-AP v6
+    access_url             VARCHAR(500) NOT NULL,  -- dcat:accessURL
+    applicable_legislation VARCHAR(500) NOT NULL,
+    -- LM-specific
+    db_layer               VARCHAR(100)            -- DWH layer (raw/clean/analytical)
 );
 
-
--- metadata.db_table_schemes definition
-
--- Drop table
-
--- DROP TABLE metadata.db_table_schemes;
-
-CREATE TABLE metadata.db_table_schemes (
-	db_table varchar(100) NOT NULL,
-	var_order int2 NULL,
-	var varchar(100) NOT NULL,
-	key_db varchar(100) NULL,
-	type_db varchar(20) NULL,
-	type_r varchar(20) NULL,
-	var_name varchar(255) NULL,
-	var_description text NULL,
-	vocabulary text NULL,
-	CONSTRAINT xpk_db_table_schemes PRIMARY KEY (db_table, var),
-	CONSTRAINT fk_dbtable FOREIGN KEY (db_table) REFERENCES metadata.db_table_list(db_table) ON DELETE RESTRICT ON UPDATE CASCADE
+-- ── 6. Attribute ─────────────────────────────────────────────
+-- Maps to warehouse.Attribute (no abstract base — LM-specific only).
+-- Describes physical columns within a Distribution (DB table).
+-- distribution_name uses explicit db_column (to_field='name' in Django model).
+CREATE TABLE IF NOT EXISTS metadata."lm_attribute" (
+    name               VARCHAR(255) PRIMARY KEY,
+    distribution_name  VARCHAR(255) NOT NULL   -- FK with explicit db_column
+                           REFERENCES metadata."lm_distribution"(name)
+                           ON DELETE CASCADE,
+    title              VARCHAR(500),           -- human-readable column name
+    description        TEXT,
+    datatype           VARCHAR(100),           -- DB datatype (VARCHAR, INTEGER …)
+    property_url       VARCHAR(500),           -- semantic property URI (ontology)
+    var_order          SMALLINT,               -- position in source table
+    key_db             VARCHAR(100),           -- PK / FK / UK / NULL
+    type_r             VARCHAR(50),            -- R datatype (character/integer …)
+    definition_ddl     TEXT,                   -- full DDL column definition
+    definition_pk_pom1 TEXT,                   -- PK derivation helper 1
+    definition_pk_pom2 TEXT,                   -- PK derivation helper 2
+    definition_pk      TEXT                    -- PK definition expression
 );

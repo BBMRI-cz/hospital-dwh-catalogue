@@ -125,12 +125,12 @@ DATABASE_ROUTERS = ['catalogue.routers.AuthRouter', 'catalogue.routers.Warehouse
 
 # Authentication backends
 # Configure based on environment: mock for dev, real LDAP for prod
-AUTH_USE_MOCK_LDAP = config('AUTH_USE_MOCK_LDAP', default=False, cast=bool)
+MOCK_LDAP = config('MOCK_LDAP', default=False, cast=bool)
 
 # Build authentication backends list based on configuration
 AUTHENTICATION_BACKENDS = []
 
-if AUTH_USE_MOCK_LDAP:
+if MOCK_LDAP:
     # Development: Use mock LDAP (accepts any credentials)
     AUTHENTICATION_BACKENDS.append('catalogue.mock_ldap.MockLDAPBackend')
 else:
@@ -147,9 +147,6 @@ else:
 # Always include ModelBackend as fallback (for superuser access)
 AUTHENTICATION_BACKENDS.append('django.contrib.auth.backends.ModelBackend')
 
-# Mock LDAP Configuration (Development Only)
-# Set to True to use mock LDAP backend instead of real AD
-
 # Login/Logout URLs
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
@@ -157,8 +154,8 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 # Active Directory / LDAP Configuration (Production only)
-# Only loaded when AUTH_USE_MOCK_LDAP=False
-if not AUTH_USE_MOCK_LDAP:
+# Only loaded when MOCK_LDAP=False
+if not MOCK_LDAP:
     try:
         import ldap
         from django_auth_ldap.config import GroupOfNamesType, LDAPSearch
@@ -289,10 +286,10 @@ FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', de
 
 
 # Alvao Service Desk Configuration
-# Set ALVAO_USE_MOCK=True for development without real Alvao server
-ALVAO_USE_MOCK = config('ALVAO_USE_MOCK', default=False, cast=bool)
+# Set MOCK_ALVAO=True for development without real Alvao server
+MOCK_ALVAO = config('MOCK_ALVAO', default=False, cast=bool)
 
-# Real Alvao API settings (used when ALVAO_USE_MOCK=False)
+# Real Alvao API settings (used when MOCK_ALVAO=False)
 ALVAO_API_URL = config('ALVAO_API_URL', default='')
 ALVAO_API_TOKEN = config('ALVAO_API_TOKEN', default='')
 
@@ -304,3 +301,7 @@ ALVAO_SERVICE_ACCOUNT_PASSWORD = config('ALVAO_SERVICE_ACCOUNT_PASSWORD', defaul
 ALVAO_DEFAULT_SERVICE_ID = config(
     'ALVAO_DEFAULT_SERVICE_ID', default=None, cast=lambda x: int(x) if x else None
 )
+
+# Mock Data Settings
+# Set MOCK_FAIR_GENOMES=True to seed sample data into fair_genomes_db on startup
+MOCK_FAIR_GENOMES = config('MOCK_FAIR_GENOMES', default=False, cast=bool)

@@ -23,7 +23,7 @@ The `DevAuthBackend` automatically creates user accounts when you log in:
 - Display name is the capitalized username
 - First user created becomes a superuser
 
-**Important**: The development backend only works when both `DEBUG=True` and `AUTH_USE_MOCK_LDAP=True` are set to true. It cannot be accidentally used in production.
+**Important**: The development backend only works when both `DEBUG=True` and `MOCK_LDAP=True` are set. It cannot be accidentally used in production.
 
 ## Production Setup with LDAP
 

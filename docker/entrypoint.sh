@@ -11,6 +11,13 @@ python manage.py migrate --noinput
 # fair_genomes_db: fair_genomes app
 python manage.py migrate --database=fair_genomes_db --noinput
 
+# Seed fair_genomes_db with mock data when MOCK_FAIR_GENOMES=True.
+# Tables must already exist (migration above), so this runs after migrate.
+if [ "${MOCK_FAIR_GENOMES:-False}" = "True" ]; then
+    echo "MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data..."
+    python manage.py seed_fair_genomes_mock
+fi
+
 # Compile translation messages
 python manage.py compilemessages
 

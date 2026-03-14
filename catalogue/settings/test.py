@@ -45,7 +45,7 @@ if USE_SQLITE:
 FAIR_GENOMES_FETCH_ON_STARTUP = False
 
 # Alvao settings (always use mock in tests)
-ALVAO_USE_MOCK = True
+MOCK_ALVAO = True
 
 # Email backend for testing
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
