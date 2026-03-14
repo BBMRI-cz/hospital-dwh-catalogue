@@ -1,218 +1,146 @@
-"""
-Tests for the warehouse application.
+﻿"""
+Tests for the warehouse application â€” Local Metadata HealthDCAT-AP Profile.
 
-Covers models, views, template tags, and admin configuration.
+All warehouse models are managed=False (pre-existing metadata_db tables).
+Tests verify model structure, __str__, and Meta without DB writes.
 """
 
 from django.test import TestCase
 
-from .models import DataclassList, DataclassTableSchemes, DatasetList, DatasourceList, DbTableList
+from .models import Agent, Attribute, Catalog, ContactPoint, Dataset, Distribution
 
 
-class DatasourceListModelTest(TestCase):
-    """Tests for the DatasourceList model."""
-
-    databases = {'default', 'auth_db'}
-
-    def test_str_with_name(self):
-        """Model __str__ returns data_source_name when available."""
-        obj = DatasourceList(data_source='ds1', data_source_name='Data Source 1')
-        self.assertEqual(str(obj), 'Data Source 1')
-
-    def test_str_without_name(self):
-        """Model __str__ falls back to data_source when name is empty."""
-        obj = DatasourceList(data_source='ds1', data_source_name='')
-        self.assertEqual(str(obj), 'ds1')
-
-    def test_str_with_none_name(self):
-        """Model __str__ falls back to data_source when name is None."""
-        obj = DatasourceList(data_source='ds1', data_source_name=None)
-        self.assertEqual(str(obj), 'ds1')
-
-    def test_display_name_with_name(self):
-        """display_name returns data_source_name when available."""
-        obj = DatasourceList(data_source='ds1', data_source_name='Data Source 1')
-        self.assertEqual(obj.display_name, 'Data Source 1')
-
-    def test_display_name_without_name(self):
-        """display_name falls back to data_source."""
-        obj = DatasourceList(data_source='ds1', data_source_name='')
-        self.assertEqual(obj.display_name, 'ds1')
-
-    def test_meta_managed_false(self):
-        """Model is unmanaged (read-only)."""
-        self.assertFalse(DatasourceList._meta.managed)
-
-
-class DatasetListModelTest(TestCase):
-    """Tests for the DatasetList model."""
+class ContactPointModelTest(TestCase):
+    """Tests for the ContactPoint model."""
 
     databases = {'default', 'auth_db'}
 
-    def test_str_with_name(self):
-        """Model __str__ returns data_set_name when available."""
-        obj = DatasetList(data_set='ds1', data_set_name='Dataset 1')
-        self.assertEqual(str(obj), 'Dataset 1')
+    def test_str_with_email(self):
+        obj = ContactPoint(email='test@example.com')
+        self.assertEqual(str(obj), 'test@example.com')
 
-    def test_str_without_name(self):
-        """Model __str__ falls back to data_set."""
-        obj = DatasetList(data_set='ds1', data_set_name='')
-        self.assertEqual(str(obj), 'ds1')
-
-    def test_display_name(self):
-        """display_name returns data_set_name when available."""
-        obj = DatasetList(data_set='ds1', data_set_name='Dataset 1')
-        self.assertEqual(obj.display_name, 'Dataset 1')
-
-    def test_display_name_fallback(self):
-        """display_name falls back to data_set."""
-        obj = DatasetList(data_set='ds1', data_set_name='')
-        self.assertEqual(obj.display_name, 'ds1')
-
-    def test_is_complete_true(self):
-        """is_complete returns True when complete is 'ano'."""
-        obj = DatasetList(data_set='ds1', complete='ano')
-        self.assertTrue(obj.is_complete)
-
-    def test_is_complete_case_insensitive(self):
-        """is_complete is case insensitive."""
-        obj = DatasetList(data_set='ds1', complete='Ano')
-        self.assertTrue(obj.is_complete)
-
-    def test_is_complete_false(self):
-        """is_complete returns False for non-'ano' values."""
-        obj = DatasetList(data_set='ds1', complete='ne')
-        self.assertFalse(obj.is_complete)
-
-    def test_is_complete_none(self):
-        """is_complete returns False when complete is None."""
-        obj = DatasetList(data_set='ds1', complete=None)
-        self.assertFalse(obj.is_complete)
-
-    def test_subject_tags_list(self):
-        """subject_tags_list parses comma-separated tags."""
-        obj = DatasetList(data_set='ds1', subject='tag1, tag2, tag3')
-        self.assertEqual(obj.subject_tags_list, ['tag1', 'tag2', 'tag3'])
-
-    def test_subject_tags_list_empty(self):
-        """subject_tags_list returns empty list when subject is empty."""
-        obj = DatasetList(data_set='ds1', subject='')
-        self.assertEqual(obj.subject_tags_list, [])
-
-    def test_subject_tags_list_none(self):
-        """subject_tags_list returns empty list when subject is None."""
-        obj = DatasetList(data_set='ds1', subject=None)
-        self.assertEqual(obj.subject_tags_list, [])
-
-    def test_subject_tags_list_strips_whitespace(self):
-        """subject_tags_list strips whitespace from tags."""
-        obj = DatasetList(data_set='ds1', subject=' tag1 ,  tag2 ')
-        self.assertEqual(obj.subject_tags_list, ['tag1', 'tag2'])
+    def test_str_with_page(self):
+        obj = ContactPoint(contact_page='https://example.com/contact')
+        self.assertEqual(str(obj), 'https://example.com/contact')
 
     def test_meta_managed_false(self):
-        """Model is unmanaged."""
-        self.assertFalse(DatasetList._meta.managed)
+        self.assertFalse(ContactPoint._meta.managed)
 
-    def test_meta_ordering(self):
-        """Default ordering is by data_set_name."""
-        self.assertEqual(DatasetList._meta.ordering, ['data_set_name'])
+    def test_meta_db_table(self):
+        self.assertEqual(ContactPoint._meta.db_table, 'metadata"."lm_contact_point')
 
 
-class DataclassListModelTest(TestCase):
-    """Tests for the DataclassList model."""
-
-    databases = {'default', 'auth_db'}
-
-    def test_str_with_name(self):
-        """Model __str__ returns data_class_name when available."""
-        obj = DataclassList(data_class='dc1', data_class_name='Data Class 1')
-        self.assertEqual(str(obj), 'Data Class 1')
-
-    def test_str_without_name(self):
-        """Model __str__ falls back to data_class."""
-        obj = DataclassList(data_class='dc1', data_class_name='')
-        self.assertEqual(str(obj), 'dc1')
-
-    def test_display_name(self):
-        """display_name property returns correct value."""
-        obj = DataclassList(data_class='dc1', data_class_name='Data Class 1')
-        self.assertEqual(obj.display_name, 'Data Class 1')
-
-    def test_is_complete_true(self):
-        """is_complete returns True for 'ano'."""
-        obj = DataclassList(data_class='dc1', complete='ano')
-        self.assertTrue(obj.is_complete)
-
-    def test_is_complete_false(self):
-        """is_complete returns False for non-'ano' values."""
-        obj = DataclassList(data_class='dc1', complete='ne')
-        self.assertFalse(obj.is_complete)
-
-    def test_has_repository_true(self):
-        """has_repository returns True when repository has value."""
-        obj = DataclassList(data_class='dc1', repository='repo1')
-        self.assertTrue(obj.has_repository)
-
-    def test_has_repository_false_empty(self):
-        """has_repository returns False for empty string."""
-        obj = DataclassList(data_class='dc1', repository='')
-        self.assertFalse(obj.has_repository)
-
-    def test_has_repository_false_whitespace(self):
-        """has_repository returns False for whitespace-only string."""
-        obj = DataclassList(data_class='dc1', repository='  ')
-        self.assertFalse(obj.has_repository)
-
-    def test_has_repository_false_none(self):
-        """has_repository returns False for None."""
-        obj = DataclassList(data_class='dc1', repository=None)
-        self.assertFalse(obj.has_repository)
-
-    def test_meta_managed_false(self):
-        """Model is unmanaged."""
-        self.assertFalse(DataclassList._meta.managed)
-
-
-class DataclassTableSchemesModelTest(TestCase):
-    """Tests for the DataclassTableSchemes model."""
+class AgentModelTest(TestCase):
+    """Tests for the Agent model."""
 
     databases = {'default', 'auth_db'}
 
     def test_str(self):
-        """Model __str__ returns expected format."""
-        obj = DataclassTableSchemes(data_class='dc1', col_name='Column 1')
-        self.assertEqual(str(obj), 'dc1 - Column 1')
+        obj = Agent(name='Hospital Publisher')
+        self.assertEqual(str(obj), 'Hospital Publisher')
 
     def test_meta_managed_false(self):
-        """Model is unmanaged."""
-        self.assertFalse(DataclassTableSchemes._meta.managed)
+        self.assertFalse(Agent._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Agent._meta.db_table, 'metadata"."lm_agent')
 
 
-class DbTableListModelTest(TestCase):
-    """Tests for the DbTableList model."""
+class CatalogModelTest(TestCase):
+    """Tests for the Catalog model."""
 
     databases = {'default', 'auth_db'}
 
-    def test_str_with_name(self):
-        """Model __str__ returns db_table_name when available."""
-        obj = DbTableList(db_table='tbl1', db_table_name='Table 1')
-        self.assertEqual(str(obj), 'Table 1')
+    def test_str_with_title(self):
+        obj = Catalog(name='cat1', title='Hospital Catalogue')
+        self.assertEqual(str(obj), 'Hospital Catalogue')
 
-    def test_str_without_name(self):
-        """Model __str__ falls back to db_table."""
-        obj = DbTableList(db_table='tbl1', db_table_name='')
-        self.assertEqual(str(obj), 'tbl1')
-
-    def test_display_name(self):
-        """display_name returns db_table_name when available."""
-        obj = DbTableList(db_table='tbl1', db_table_name='Table 1')
-        self.assertEqual(obj.display_name, 'Table 1')
-
-    def test_display_name_fallback(self):
-        """display_name falls back to db_table."""
-        obj = DbTableList(db_table='tbl1', db_table_name='')
-        self.assertEqual(obj.display_name, 'tbl1')
+    def test_str_fallback_to_name(self):
+        obj = Catalog(name='cat1', title='')
+        self.assertEqual(str(obj), 'cat1')
 
     def test_meta_managed_false(self):
-        """Model is unmanaged."""
-        self.assertFalse(DbTableList._meta.managed)
+        self.assertFalse(Catalog._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Catalog._meta.db_table, 'metadata"."lm_catalog')
+
+
+class DatasetModelTest(TestCase):
+    """Tests for the Dataset model."""
+
+    databases = {'default', 'auth_db'}
+
+    def test_str_with_title(self):
+        obj = Dataset(name='ds1', title='Patient Dataset')
+        self.assertEqual(str(obj), 'Patient Dataset')
+
+    def test_str_fallback_to_name(self):
+        obj = Dataset(name='ds1', title='')
+        self.assertEqual(str(obj), 'ds1')
+
+    def test_meta_managed_false(self):
+        self.assertFalse(Dataset._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Dataset._meta.db_table, 'metadata"."lm_dataset')
+
+    def test_mandatory_fields_present(self):
+        """access_rights, applicable_legislation, health_category must not allow blank."""
+        for field_name in ('access_rights', 'applicable_legislation', 'health_category'):
+            field = Dataset._meta.get_field(field_name)
+            self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
+
+
+class DistributionModelTest(TestCase):
+    """Tests for the Distribution model."""
+
+    databases = {'default', 'auth_db'}
+
+    def test_str_with_title(self):
+        obj = Distribution(name='dist1', title='CSV Export')
+        self.assertEqual(str(obj), 'CSV Export')
+
+    def test_str_fallback_to_name(self):
+        obj = Distribution(name='dist1', title='')
+        self.assertEqual(str(obj), 'dist1')
+
+    def test_db_layer_field_nullable(self):
+        field = Distribution._meta.get_field('db_layer')
+        self.assertTrue(field.null)
+        self.assertTrue(field.blank)
+
+    def test_meta_managed_false(self):
+        self.assertFalse(Distribution._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Distribution._meta.db_table, 'metadata"."lm_distribution')
+
+    def test_mandatory_fields_present(self):
+        for field_name in ('access_url', 'applicable_legislation'):
+            field = Distribution._meta.get_field(field_name)
+            self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
+
+
+class AttributeModelTest(TestCase):
+    """Tests for the Attribute model."""
+
+    databases = {'default', 'auth_db'}
+
+    def test_str_with_title(self):
+        obj = Attribute(name='attr1', title='Patient ID')
+        self.assertEqual(str(obj), 'Patient ID')
+
+    def test_str_fallback_to_name(self):
+        obj = Attribute(name='attr1', title='')
+        self.assertEqual(str(obj), 'attr1')
+
+    def test_meta_managed_false(self):
+        self.assertFalse(Attribute._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Attribute._meta.db_table, 'metadata"."lm_attribute')
+
+    def test_meta_ordering(self):
+        self.assertEqual(Attribute._meta.ordering, ['var_order', 'name'])
+

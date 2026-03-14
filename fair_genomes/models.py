@@ -1,84 +1,115 @@
 """
-Fair Genomes Models
+Fair Genomes Models — HealthDCAT-AP Profile
+===========================================
 
-Django models for Fair Genomes GraphQL API integration.
+Concrete, managed=True Django models for the FAIR Genomes catalogue.
+All models are created and managed by Django migrations in fair_genomes_db.
+
+Design
+  All five models (ContactPoint, Agent, Catalog, Dataset, Distribution)
+  extend the corresponding shared HealthDCAT-AP abstract base classes from
+  shared.abstract_models.  The FAIR Genomes profile requires no schema-specific
+  extensions beyond the shared base — it stays intentionally close to the
+  HealthDCAT-AP v6 standard.
+
+  If FAIR Genomes-specific fields are needed in the future, add them here
+  rather than in the shared base, following the same pattern used by
+  warehouse.Distribution.db_layer.
+
+FK strategy
+  All FKs point to sibling models in the same app / same DB (fair_genomes_db).
+  Cross-DB FKs are never used (enforced by WarehouseRouter).
 """
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from shared.abstract_models import (
+    AgentBase,
+    CatalogBase,
+    ContactPointBase,
+    DatasetBase,
+    DistributionBase,
+)
 
-class FairGenomesBase(models.Model):
-    """
-    Abstract base model for Fair Genomes entities.
-    Provides common metadata fields.
-    """
 
-    inserted_by = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Inserted By'),
-        help_text=_('User who created this record'),
-    )
-    inserted_on = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('Inserted On'),
-        help_text=_('Timestamp when record was created'),
-    )
-    updated_by = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_('Updated By'),
-        help_text=_('User who last updated this record'),
-    )
-    updated_on = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('Updated On'),
-        help_text=_('Timestamp when record was last updated'),
-    )
+class ContactPoint(ContactPointBase):
+    """
+    FAIR Genomes ContactPoint.
+
+    Inherits all fields from ContactPointBase (email, contact_page).
+    No FAIR Genomes-specific extensions — stays close to the HealthDCAT-AP base.
+    """
 
     class Meta:
-        abstract = True
+        managed = True
+        db_table = 'fair_genomes_contact_point'
+        verbose_name = _('Contact Point')
+        verbose_name_plural = _('Contact Points')
 
 
-class Personal(FairGenomesBase):
+class Agent(AgentBase):
     """
-    Personal information from Fair Genomes GraphQL API.
+    FAIR Genomes Agent (publisher, rights holder, HDAB …).
 
-    This model stores patient demographic data synced from the
-    Fair Genomes MOLGENIS instance.
+    Inherits name (PK) and contact_point FK from AgentBase.
+    No FAIR Genomes-specific extensions.
     """
 
-    personal_identifier = models.CharField(
-        max_length=255,
-        primary_key=True,
-        verbose_name=_('Personal Identifier'),
-        help_text=_('Unique identifier for the individual'),
-    )
-    year_of_birth = models.IntegerField(
-        null=True,
-        blank=True,
-        db_index=True,
-        verbose_name=_('Year of Birth'),
-        help_text=_('Year the individual was born'),
-    )
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_agent'
+        verbose_name = _('Agent')
+        verbose_name_plural = _('Agents')
 
-    class Meta(FairGenomesBase.Meta):
-        db_table = 'fair_genomes_personal'
-        verbose_name = _('Personal Record')
-        verbose_name_plural = _('Personal Records')
-        ordering = ['-inserted_on']
-        indexes = [
-            models.Index(fields=['year_of_birth'], name='idx_personal_yob'),
-            models.Index(fields=['inserted_on'], name='idx_personal_inserted'),
-        ]
 
-    def __str__(self):
-        return f'{self.personal_identifier}'
+class Catalog(CatalogBase):
+    """
+    FAIR Genomes Catalog.
 
-    def __repr__(self):
-        return f'<Personal: {self.personal_identifier} (born {self.year_of_birth})>'
+    Inherits name (PK), title, description, publisher, applicable_legislation
+    from CatalogBase.  No FAIR Genomes-specific extensions.
+    """
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_catalog'
+        verbose_name = _('Catalog')
+        verbose_name_plural = _('Catalogs')
+
+
+class Dataset(DatasetBase):
+    """
+    FAIR Genomes Dataset.
+
+    Inherits all shared HealthDCAT-AP fields from DatasetBase including the four
+    mandatory HealthDCAT-AP v6 fields:
+      access_rights, applicable_legislation, health_category, hdab.
+
+    No FAIR Genomes-specific extensions — this profile intentionally stays close
+    to the HealthDCAT-AP v6 standard.  If FAIR Genomes-specific fields are
+    needed in the future, add them here (not in the shared base).
+    """
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_dataset'
+        verbose_name = _('Dataset')
+        verbose_name_plural = _('Datasets')
+        ordering = ['name']
+
+
+class Distribution(DistributionBase):
+    """
+    FAIR Genomes Distribution.
+
+    Inherits all shared HealthDCAT-AP fields from DistributionBase.
+    No FAIR Genomes-specific extensions.
+    """
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_distribution'
+        verbose_name = _('Distribution')
+        verbose_name_plural = _('Distributions')
+

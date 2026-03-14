@@ -75,15 +75,15 @@ class WarehouseRouterTest(TestCase):
 
     def test_db_for_read_warehouse(self):
         """Warehouse models are routed to metadata_db."""
-        from warehouse.models import DatasetList
+        from warehouse.models import Dataset
 
-        self.assertEqual(self.router.db_for_read(DatasetList), 'metadata_db')
+        self.assertEqual(self.router.db_for_read(Dataset), 'metadata_db')
 
     def test_db_for_read_fair_genomes(self):
         """Fair genomes models are routed to fair_genomes_db."""
-        from fair_genomes.models import Personal
+        from fair_genomes.models import Dataset
 
-        self.assertEqual(self.router.db_for_read(Personal), 'fair_genomes_db')
+        self.assertEqual(self.router.db_for_read(Dataset), 'fair_genomes_db')
 
     def test_db_for_read_ticketing(self):
         """Ticketing models are routed to default."""
@@ -93,15 +93,15 @@ class WarehouseRouterTest(TestCase):
 
     def test_db_for_write_warehouse(self):
         """Warehouse models write to metadata_db."""
-        from warehouse.models import DatasetList
+        from warehouse.models import Dataset
 
-        self.assertEqual(self.router.db_for_write(DatasetList), 'metadata_db')
+        self.assertEqual(self.router.db_for_write(Dataset), 'metadata_db')
 
     def test_db_for_write_fair_genomes(self):
         """Fair genomes models write to fair_genomes_db."""
-        from fair_genomes.models import Personal
+        from fair_genomes.models import Dataset
 
-        self.assertEqual(self.router.db_for_write(Personal), 'fair_genomes_db')
+        self.assertEqual(self.router.db_for_write(Dataset), 'fair_genomes_db')
 
     def test_db_for_write_ticketing(self):
         """Ticketing models write to default."""
@@ -135,9 +135,9 @@ class WarehouseRouterTest(TestCase):
 
     def test_allow_relation_different_db(self):
         """Relations across databases are blocked."""
-        from fair_genomes.models import Personal
+        from fair_genomes.models import Dataset
         from ticketing.models import TicketRequest
 
-        personal = Personal(personal_identifier='P1')
+        fg_dataset = Dataset(name='fg-ds1')
         ticket = TicketRequest(requester_email='t@e.com')
-        self.assertFalse(self.router.allow_relation(personal, ticket))
+        self.assertFalse(self.router.allow_relation(fg_dataset, ticket))

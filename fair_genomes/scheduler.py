@@ -53,20 +53,11 @@ class FairGenomesScheduler:
         logger.info('Fair Genomes scheduler stopped')
 
     def _perform_sync(self):
-        """Execute the sync operation."""
-        try:
-            from .services import FairGenomesService
-
-            with FairGenomesService() as service:
-                stats = service.sync_personal_data(dry_run=False)
-
-            logger.info(
-                f'Scheduled sync completed: {stats["created"]} created, '
-                f'{stats["updated"]} updated, {stats["failed"]} failed'
-            )
-
-        except Exception as e:
-            logger.error(f'Scheduled sync failed: {e}', exc_info=True)
+        """Sync stub — re-implement once HealthDCAT-AP migration is complete."""
+        logger.warning(
+            'FairGenomesScheduler._perform_sync() called but sync is not yet '
+            'implemented for the new HealthDCAT-AP schema.'
+        )
 
     def start(self):
         """Start the background scheduler thread."""

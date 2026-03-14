@@ -42,12 +42,9 @@ class FairGenomesConfig(AppConfig):
                 from .services import FairGenomesService
 
                 with FairGenomesService() as service:
-                    stats = service.sync_personal_data(dry_run=False)
+                    result = service.sync()
 
-                logger.info(
-                    f'Startup sync completed: {stats["created"]} created, '
-                    f'{stats["updated"]} updated'
-                )
+                logger.info(f'Startup sync result: {result}')
             except Exception as e:
                 logger.error(f'Startup sync failed: {e}', exc_info=True)
 
