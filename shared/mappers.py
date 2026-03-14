@@ -125,6 +125,7 @@ def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
         rights=obj.rights,
         issued=_dt_str(obj, 'issued'),
         modified=_dt_str(obj, 'modified'),
+        db_layer=getattr(obj, 'db_layer', None),
     )
 
 

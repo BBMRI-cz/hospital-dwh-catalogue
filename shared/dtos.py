@@ -13,7 +13,10 @@ The `source` field on every DTO carries the originating app label
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    pass  # avoid circular imports
 
 
 @dataclass
@@ -66,6 +69,7 @@ class UnifiedDataset:
     applicable_legislation: Optional[str] = None
     health_category: Optional[str] = None
     hdab_name: Optional[str] = None
+    distributions: list[UnifiedDistribution] = field(default_factory=list)
 
 
 @dataclass
@@ -83,3 +87,5 @@ class UnifiedDistribution:
     rights: Optional[str] = None
     issued: Optional[str] = None
     modified: Optional[str] = None
+    # Warehouse-specific; None for FAIR Genomes distributions
+    db_layer: Optional[str] = None

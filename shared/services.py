@@ -10,6 +10,7 @@ originates from the Local Metadata (warehouse) or FAIR Genomes DB.
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from shared.dtos import UnifiedDataset, UnifiedDistribution
@@ -102,3 +103,68 @@ class UnifiedCatalogService:
             logger.exception('Failed to load fair_genomes distributions')
 
         return results
+
+    def get_datasets_with_distributions(
+        self,
+    ) -> list[UnifiedDataset]:
+        """
+        Return datasets with a ``distributions`` attribute attached to each DTO.
+
+        Each item is a standard UnifiedDataset plus an extra
+        ``distributions: list[UnifiedDistribution]`` attribute stapled on so
+        that views can pass a single list to the template.
+        """
+        datasets = self.get_datasets()
+        all_dists = self.get_distributions()
+
+        # Group distributions by (source, dataset_name)
+        dist_map: dict[tuple[str, str], list[UnifiedDistribution]] = defaultdict(list)
+        for d in all_dists:
+            if d.dataset_name:
+                dist_map[(d.source, d.dataset_name)].append(d)
+
+        for ds in datasets:
+            ds.distributions = dist_map.get((ds.source, ds.name), [])
+
+        return datasets
+
+    def get_single_dataset(
+        self, source: str, name: str
+    ) -> tuple[UnifiedDataset, list[UnifiedDistribution]] | tuple[None, list]:
+        """
+        Return a (UnifiedDataset, distributions) tuple for a single dataset.
+
+        Returns (None, []) when the dataset is not found.
+        """
+        datasets = self.get_datasets_with_distributions()
+        for ds in datasets:
+            if ds.source == source and ds.name == name:
+                return ds, ds.distributions
+        return None, []
+
+    def get_schema_json(self) -> dict:
+        """
+        Return a dict keyed by semantics string (e.g. "dct:title") with term
+        metadata from the active schema registry version.
+
+        Used to populate the schema info modal JS in templates.
+        Falls back to an empty dict if the schema registry has no active version.
+        """
+        try:
+            from schema_registry.services import list_terms
+
+            terms = list_terms()
+            return {
+                t.semantics: {
+                    'prefix': t.prefix,
+                    'local_name': t.local_name,
+                    'uri': t.uri,
+                    'requirement': t.requirement,
+                    'label': t.base_label_en,
+                    'description': t.base_description_en,
+                }
+                for t in terms
+            }
+        except Exception:
+            logger.exception('Failed to load schema registry terms')
+            return {}

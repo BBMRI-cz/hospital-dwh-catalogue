@@ -3,3 +3,156 @@ Views for the ticketing application.
 
 Provides cart management, ticket submission, and ticket viewing functionality.
 """
+
+from __future__ import annotations
+
+import logging
+
+from django import forms
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import ListView, View
+
+from ticketing.cart import CartService
+from ticketing.models import TicketRequest, TicketRequestItem
+from ticketing.services.factory import get_ticket_service
+from ticketing.services.base import TicketData
+
+logger = logging.getLogger(__name__)
+
+
+# ── Forms ─────────────────────────────────────────────────────────────────────
+
+
+class TicketSubmitForm(forms.Form):
+    subject = forms.CharField(
+        max_length=500,
+        label=_('Subject'),
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': _('Data access request subject')}),
+    )
+    description = forms.CharField(
+        required=False,
+        label=_('Additional notes'),
+        widget=forms.Textarea(attrs={'class': 'textarea textarea-bordered w-full', 'rows': 4, 'placeholder': _('Optional context or requirements…')}),
+    )
+
+
+# ── Cart views ────────────────────────────────────────────────────────────────
+
+
+class CartAddView(LoginRequiredMixin, View):
+    """POST: add a dataset to the session cart."""
+
+    def post(self, request):
+        source = request.POST.get('source', '')
+        name = request.POST.get('name', '')
+        title = request.POST.get('title', '')
+        if source and name:
+            CartService.add(request.session, source, name, title)
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+        return redirect(next_url)
+
+
+class CartRemoveView(LoginRequiredMixin, View):
+    """POST: remove a dataset from the session cart."""
+
+    def post(self, request):
+        source = request.POST.get('source', '')
+        name = request.POST.get('name', '')
+        if source and name:
+            CartService.remove(request.session, source, name)
+        return redirect('ticketing:cart')
+
+
+class CartView(LoginRequiredMixin, View):
+    """Cart review + ticket submission form."""
+
+    template_name = 'ticketing/cart.html'
+
+    def get(self, request):
+        cart = CartService.get(request.session)
+        form = TicketSubmitForm()
+        return render(request, self.template_name, {'cart': cart, 'form': form})
+
+    def post(self, request):
+        cart = CartService.get(request.session)
+        form = TicketSubmitForm(request.POST)
+
+        if not cart:
+            messages.error(request, _('Your cart is empty.'))
+            return render(request, self.template_name, {'cart': cart, 'form': form})
+
+        if not form.is_valid():
+            return render(request, self.template_name, {'cart': cart, 'form': form})
+
+        # Create TicketRequest
+        ticket = TicketRequest.objects.create(
+            requester_email=request.user.email,
+            requester_name=request.user.get_full_name() or request.user.username,
+            subject=form.cleaned_data['subject'],
+            description=form.cleaned_data.get('description', ''),
+            status=TicketRequest.Status.DRAFT,
+            session_key=request.session.session_key,
+        )
+
+        for item in cart:
+            TicketRequestItem.objects.create(
+                ticket_request=ticket,
+                item_type=TicketRequestItem.ItemType.DATASET,
+                item_id=f"{item['source']}/{item['name']}",
+                item_name=item['title'],
+                parent_dataset=item['name'],
+            )
+
+        # Submit to Alvao
+        try:
+            service = get_ticket_service()
+            ticket_data = TicketData(
+                subject=ticket.subject,
+                description=_build_ticket_description(ticket, cart),
+                requester_email=ticket.requester_email,
+                requester_name=ticket.requester_name,
+            )
+            response = service.create_ticket(ticket_data)
+            ticket.alvao_ticket_id = response.ticket_id
+            ticket.status = TicketRequest.Status.SUBMITTED
+            ticket.submitted_at = timezone.now()
+            ticket.save()
+            CartService.clear(request.session)
+            messages.success(request, _('Your request has been submitted.'))
+        except Exception:
+            logger.exception('Ticket submission failed for ticket pk=%s user=%s', ticket.pk, request.user)
+            ticket.status = TicketRequest.Status.FAILED
+            ticket.save()
+            messages.error(request, _('Submission to the ticketing system failed. Your request has been saved and our team will follow up.'))
+
+        return redirect('ticketing:ticket_history')
+
+
+def _build_ticket_description(ticket: TicketRequest, cart: list[dict]) -> str:
+    lines = [ticket.description, '', '--- Requested datasets ---']
+    for item in cart:
+        lines.append(f"  [{item['source']}] {item['title']} ({item['name']})")
+    return '\n'.join(lines)
+
+
+# ── History view ──────────────────────────────────────────────────────────────
+
+
+class TicketHistoryView(LoginRequiredMixin, ListView):
+    """List of the current user's past ticket requests."""
+
+    template_name = 'ticketing/history.html'
+    context_object_name = 'tickets'
+    paginate_by = 25
+
+    def get_queryset(self):
+        return (
+            TicketRequest.objects
+            .filter(requester_email=self.request.user.email)
+            .prefetch_related('items')
+            .order_by('-created_at')
+        )

@@ -1,0 +1,62 @@
+{% load i18n %}
+<!-- Schema Info Modal — populated by showSchemaModal(semantics) JS function -->
+<dialog id="schema-modal" class="modal">
+  <div class="modal-box max-w-md">
+    <div class="flex items-start gap-3 mb-3">
+      <span id="sm-prefix" class="badge font-mono text-xs shrink-0 mt-0.5" style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb;"></span>
+      <h3 id="sm-name" class="font-serif text-xl text-gray-900 leading-snug flex-1"></h3>
+      <form method="dialog" class="shrink-0">
+        <button class="btn btn-ghost btn-sm btn-circle text-gray-400">✕</button>
+      </form>
+    </div>
+
+    <div id="sm-req" class="mb-3"></div>
+
+    <p id="sm-desc" class="text-sm text-gray-600 leading-relaxed mb-4"></p>
+
+    <a id="sm-uri" href="#" target="_blank" rel="noopener"
+      class="flex items-center gap-2 font-mono text-[11px] rounded-lg px-3 py-2 border border-gray-200 bg-gray-50 text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors break-all">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <span id="sm-uri-text"></span>
+    </a>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>{% trans "close" %}</button></form>
+</dialog>
+
+<script>
+/* Global schema data — populated by each page that uses ⓘ buttons */
+let SCHEMA_DATA = {};
+
+function loadSchemaData(jsonElementId) {
+  try {
+    const el = document.getElementById(jsonElementId);
+    if (el) SCHEMA_DATA = JSON.parse(el.textContent);
+  } catch(e) { console.warn('Could not parse schema data', e); }
+}
+
+function showSchemaModal(semantics) {
+  const s = SCHEMA_DATA[semantics];
+  if (!s) return;
+
+  document.getElementById('sm-prefix').textContent = s.prefix + ':';
+  document.getElementById('sm-name').textContent   = s.local_name;
+  document.getElementById('sm-desc').textContent   = s.description;
+  document.getElementById('sm-uri').href           = s.uri;
+  document.getElementById('sm-uri-text').textContent = s.uri;
+
+  const reqEl = document.getElementById('sm-req');
+  const reqMap = {
+    mandatory:   ['Mandatory',    'bg-green-100 text-green-800 border border-green-200'],
+    recommended: ['Recommended',  'bg-yellow-100 text-yellow-800 border border-yellow-200'],
+    optional:    ['Optional',     'bg-gray-100 text-gray-600 border border-gray-200'],
+    deprecated:  ['Deprecated',   'bg-red-100 text-red-700 border border-red-200'],
+  };
+  const [label, cls] = reqMap[s.requirement] || reqMap.optional;
+  reqEl.innerHTML = `<span class="badge font-mono text-[10px] ${cls}">${label}</span>`;
+
+  document.getElementById('schema-modal').showModal();
+}
+</script>

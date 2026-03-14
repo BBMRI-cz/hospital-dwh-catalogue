@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Catalogue" %}{% endblock %}
+
+{# ══ Navbar search — inside the filter form via JS form.submit() ══ #}
+{% block navbar_search %}
+<div class="relative">
+  <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <input id="navbarSearch" type="text" name="q" form="filter-form"
+    value="{{ filter_params.q }}"
+    placeholder="{% trans 'Search datasets, distributions…' %}"
+    class="input input-sm input-bordered w-full pl-8 focus:w-72 transition-all duration-200 bg-gray-50 focus:bg-white text-sm">
+</div>
+{% endblock %}
+
+{% block content %}
+{{ schema_json|json_script:"schema-data" }}
+
+<div class="max-w-screen-2xl mx-auto flex" style="min-height:calc(100vh - 56px)">
+
+  {# ══ SIDEBAR — all controls live inside one GET form ══ #}
+  <aside class="w-60 shrink-0 bg-white border-r border-gray-200 sticky top-14 self-start h-[calc(100vh-56px)] overflow-y-auto flex flex-col gap-6 px-3 py-6">
+
+    <form id="filter-form" method="GET" action="{% url 'warehouse:catalogue' %}">
+      {# Hidden page reset: when filters change, go back to p.1 #}
+      <input type="hidden" name="page" value="1">
+
+      {# ── Data Availability ── #}
+      <div>
+        <div class="font-mono text-[9.5px] font-medium uppercase tracking-[1.5px] text-gray-400 mb-2.5">{% trans "Availability" %}</div>
+        <div class="flex flex-col gap-1">
+          {% with statuses=filter_params.status %}
+          <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-md cursor-pointer text-sm text-gray-700 hover:bg-gray-50 transition-colors {% if 'ready' in statuses or not statuses %}bg-gray-50{% endif %}">
+            <input type="checkbox" name="status" value="ready" class="checkbox checkbox-xs status-filter"
+              {% if 'ready' in statuses or not statuses %}checked{% endif %}>
+            <span class="w-2 h-2 rounded-full shrink-0" style="background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)"></span>
+            <span class="flex-1">{% trans "Ready" %}</span>
+            <span class="font-mono text-[10.5px] text-gray-400">{{ sidebar_counts.ready|default:0 }}</span>
+          </label>
+          <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-md cursor-pointer text-sm text-gray-700 hover:bg-gray-50 transition-colors {% if 'raw' in statuses or not statuses %}bg-gray-50{% endif %}">
+            <input type="checkbox" name="status" value="raw" class="checkbox checkbox-xs status-filter"
+              {% if 'raw' in statuses or not statuses %}checked{% endif %}>
+            <span class="w-2 h-2 rounded-full shrink-0" style="background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.15)"></span>
+            <span class="flex-1">{% trans "Raw data" %}</span>
+            <span class="font-mono text-[10.5px] text-gray-400">{{ sidebar_counts.raw|default:0 }}</span>
+          </label>
+          <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-md cursor-pointer text-sm text-gray-700 hover:bg-gray-50 transition-colors {% if 'unavailable' in statuses or not statuses %}bg-gray-50{% endif %}">
+            <input type="checkbox" name="status" value="unavailable" class="checkbox checkbox-xs status-filter"
+              {% if 'unavailable' in statuses or not statuses %}checked{% endif %}>
+            <span class="w-2 h-2 rounded-full shrink-0" style="background:#9ca3af"></span>
+            <span class="flex-1">{% trans "Unavailable" %}</span>
+            <span class="font-mono text-[10.5px] text-gray-400">{{ sidebar_counts.unavailable|default:0 }}</span>
+          </label>
+          {% endwith %}
+        </div>
+      </div>
+
+      {# ── Keywords ── #}
+      {% if sidebar_keywords %}
+      <div>
+        <div class="font-mono text-[9.5px] font-medium uppercase tracking-[1.5px] text-gray-400 mb-2">{% trans "Keywords" %}</div>
+        <input type="text" placeholder="{% trans 'Filter…' %}" oninput="filterList(this,'kw-list')"
+          class="input input-xs input-bordered w-full mb-1.5 text-xs bg-gray-50">
+        <div class="flex flex-col gap-0.5 max-h-36 overflow-y-auto" id="kw-list">
+          {% for item in sidebar_keywords %}
+          <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+            <input type="checkbox" name="keyword" value="{{ item.value }}" class="checkbox checkbox-xs" style="accent-color:#53c0d7"
+              {% if item.checked %}checked{% endif %}>
+            <span class="truncate flex-1">{{ item.value }}</span>
+            <span class="font-mono text-[10px] text-gray-400">{{ item.count }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── Rights Holder ── #}
+      {% if sidebar_rights_holders %}
+      <div>
+        <div class="font-mono text-[9.5px] font-medium uppercase tracking-[1.5px] text-gray-400 mb-2">{% trans "Rights Holder" %}</div>
+        <input type="text" placeholder="{% trans 'Filter…' %}" oninput="filterList(this,'rh-list')"
+          class="input input-xs input-bordered w-full mb-1.5 text-xs bg-gray-50">
+        <div class="flex flex-col gap-0.5 max-h-32 overflow-y-auto" id="rh-list">
+          {% for item in sidebar_rights_holders %}
+          <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+            <input type="checkbox" name="rights_holder" value="{{ item.value }}" class="checkbox checkbox-xs" style="accent-color:#53c0d7"
+              {% if item.checked %}checked{% endif %}>
+            <span class="truncate flex-1">{{ item.value }}</span>
+            <span class="font-mono text-[10px] text-gray-400">{{ item.count }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── Health Category ── #}
+      {% if sidebar_health_categories %}
+      <div>
+        <div class="font-mono text-[9.5px] font-medium uppercase tracking-[1.5px] text-gray-400 mb-2">{% trans "Health Category" %}</div>
+        <input type="text" placeholder="{% trans 'Filter…' %}" oninput="filterList(this,'hc-list')"
+          class="input input-xs input-bordered w-full mb-1.5 text-xs bg-gray-50">
+        <div class="flex flex-col gap-0.5 max-h-32 overflow-y-auto" id="hc-list">
+          {% for item in sidebar_health_categories %}
+          <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+            <input type="checkbox" name="health_category" value="{{ item.value }}" class="checkbox checkbox-xs" style="accent-color:#53c0d7"
+              {% if item.checked %}checked{% endif %}>
+            <span class="truncate flex-1">{{ item.value }}</span>
+            <span class="font-mono text-[10px] text-gray-400">{{ item.count }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── Search / Clear buttons ── #}
+      <div class="flex flex-col gap-2 pt-1">
+        <button type="submit"
+          class="btn btn-sm w-full text-white font-medium"
+          style="background:#53c0d7;border-color:#53c0d7;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mr-1">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          {% trans "Search" %}
+        </button>
+        <a href="{% url 'warehouse:catalogue' %}"
+          class="btn btn-sm btn-ghost w-full text-gray-500 text-xs">
+          {% trans "Clear filters" %}
+        </a>
+      </div>
+
+    </form>{# end filter-form #}
+  </aside>
+
+  {# ══ MAIN ══ #}
+  <main class="flex-1 min-w-0 px-10 py-8 overflow-y-auto">
+
+    {# Hero #}
+    <div class="mb-8 pb-7 border-b border-gray-200">
+      <div class="font-mono text-[10px] uppercase tracking-[2px] text-gray-400 mb-2">Health DCAT-AP · FAIR Data Register</div>
+      <h1 class="font-serif text-5xl font-normal leading-tight tracking-tight text-gray-900">
+        {% trans "Data" %} <em class="italic" style="color:#53c0d7">{% trans "Catalogue" %}</em>
+      </h1>
+      <p class="mt-3 text-sm text-gray-500 max-w-xl leading-relaxed">
+        {% trans "Evidence and description of data sources of Masaryk Oncology Institute for secondary use. Each record is based on the Health DCAT-AP schema — click" %} <strong>ⓘ</strong> {% trans "to display the field definition and ontology link." %}
+      </p>
+    </div>
+
+    {# Stats bar #}
+    <div class="flex border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden mb-6">
+      <div class="flex-1 px-4 py-3 border-r border-gray-200">
+        <div class="font-serif text-2xl" style="color:#53c0d7">{{ active_count }}</div>
+        <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400">{% trans "Active datasets" %}</div>
+      </div>
+      <div class="flex-1 px-4 py-3 border-r border-gray-200">
+        <div class="font-serif text-2xl text-gray-700">{{ total_count }}</div>
+        <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400">{% trans "Total datasets" %}</div>
+      </div>
+      <div class="flex-1 px-4 py-3 border-r border-gray-200">
+        <div class="font-serif text-2xl" style="color:#f04600">{{ dist_count }}</div>
+        <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400">{% trans "Distributions" %}</div>
+      </div>
+      <div class="flex-1 px-4 py-3">
+        <div class="font-serif text-2xl text-gray-400">{{ unavail_count }}</div>
+        <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400">{% trans "Unavailable" %}</div>
+      </div>
+    </div>
+
+    {# Results meta #}
+    <div class="flex items-center gap-3 mb-4 font-mono text-[11px] text-gray-400">
+      <strong class="text-gray-700">{{ page_obj.paginator.count }}</strong>
+      <span>{% trans "datasets matching filters" %}</span>
+      {% if filter_params.q %}
+        <span class="badge badge-sm" style="background:#fbeebc;color:#92400e;border:1px solid #fcd34d;">
+          "{{ filter_params.q }}"
+        </span>
+      {% endif %}
+      <div class="flex-1 h-px bg-gray-200"></div>
+      <span>{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
+    </div>
+
+    {# Dataset list #}
+    {% if page_obj.object_list %}
+    <div id="ds-list" class="flex flex-col gap-2.5">
+      {% for dataset in page_obj %}
+      {% with status=dataset.status source=dataset.source %}
+
+      <div class="bg-white border rounded-lg overflow-hidden transition-shadow hover:shadow-md"
+        id="card-{{ forloop.counter }}"
+        style="border-color:#e5e7eb"
+        data-card>
+
+        {# Card header — click to expand #}
+        <div class="flex items-center gap-3 px-5 py-3.5 cursor-pointer select-none"
+          onclick="toggleCard({{ forloop.counter }})">
+          {# Status pip #}
+          {% if dataset.status == 'ready' %}
+            <span class="w-2.5 h-2.5 rounded-full shrink-0 inline-block" style="background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)"></span>
+          {% elif dataset.status == 'raw' %}
+            <span class="w-2.5 h-2.5 rounded-full shrink-0 inline-block" style="background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2)"></span>
+          {% else %}
+            <span class="w-2.5 h-2.5 rounded-full shrink-0 inline-block" style="background:#9ca3af"></span>
+          {% endif %}
+
+          <span class="font-serif text-[17px] text-gray-900 flex-1 leading-snug">{{ dataset.title|default:dataset.name }}</span>
+
+          {# Dist count #}
+          <span class="badge badge-sm font-mono text-[10px] border text-gray-500 bg-gray-50 border-gray-200">
+            {{ dataset.distributions|length }} dist.
+          </span>
+
+          {# Cart add #}
+          <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block">
+            {% csrf_token %}
+            <input type="hidden" name="source" value="{{ dataset.source }}">
+            <input type="hidden" name="name" value="{{ dataset.name }}">
+            <input type="hidden" name="title" value="{{ dataset.title|default:dataset.name }}">
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" title="{% trans 'Add to cart' %}"
+              class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+            </button>
+          </form>
+
+          {# Eye / detail link #}
+          <a href="{% url 'warehouse:dataset_detail' source=dataset.source name=dataset.name %}"
+            title="{% trans 'View full detail' %}"
+            class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+            onclick="event.stopPropagation()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </a>
+
+          {# Chevron #}
+          <svg class="chevron-icon text-gray-300 shrink-0 transition-transform" id="chev-{{ forloop.counter }}"
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+
+        {# Expandable body #}
+        <div class="hidden" id="body-{{ forloop.counter }}">
+          <div class="border-t border-gray-100">
+
+            {# DCAT field grid #}
+            <div class="grid grid-cols-2 border-b border-gray-100">
+              {% if dataset.title %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:title <button type="button" onclick="showSchemaModal('dct:title');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 font-medium leading-snug">{{ dataset.title }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.access_rights %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:accessRights <button type="button" onclick="showSchemaModal('dct:accessRights');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 font-medium leading-snug">{{ dataset.access_rights }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.description %}
+              <div class="col-span-2 flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:description <button type="button" onclick="showSchemaModal('dct:description');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13px] text-gray-700 leading-relaxed">{{ dataset.description }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.keywords %}
+              <div class="flex flex-col gap-1.5 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dcat:keyword <button type="button" onclick="showSchemaModal('dcat:keyword');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  {% for kw in dataset.keywords %}
+                  <span class="badge badge-sm font-mono text-[10px]" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">{{ kw }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if dataset.source_uri %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:source <button type="button" onclick="showSchemaModal('dct:source');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.source_uri }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.rights_holder %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:rightsHolder <button type="button" onclick="showSchemaModal('dct:rightsHolder');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.rights_holder }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.health_category %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  healthdcatap:healthCategory <button type="button" onclick="showSchemaModal('healthdcatap:hasHealthCategory');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.health_category }}</div>
+              </div>
+              {% endif %}
+
+              {% if dataset.publisher %}
+              <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+                <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                  dct:publisher <button type="button" onclick="showSchemaModal('dct:publisher');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                </div>
+                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.publisher }}</div>
+              </div>
+              {% endif %}
+            </div>
+
+            {# Distributions #}
+            {% if dataset.distributions %}
+            <div class="px-5 pb-5 pt-4">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-[3px] h-4 rounded-full shrink-0" style="background:#f04600"></div>
+                <span class="font-mono text-[10px] uppercase tracking-[1.2px]" style="color:#f04600">
+                  dcat:distribution — {{ dataset.distributions|length }} {% trans "table(s)" %}
+                </span>
+                <div class="flex-1 h-px" style="background:#fdeee7"></div>
+              </div>
+
+              <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2" id="dist-grid-{{ forloop.counter }}">
+                {% for dist in dataset.distributions %}
+                <div class="rounded-md border p-3 cursor-pointer flex flex-col gap-2 transition-all hover:-translate-y-px hover:shadow-sm dist-tile"
+                  id="dtile-{{ forloop.parentloop.counter }}-{{ forloop.counter }}"
+                  onclick="toggleDist('{{ forloop.parentloop.counter }}','{{ forloop.counter }}')"
+                  style="border-color:#e5e7eb">
+                  <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded flex items-center justify-center shrink-0" style="background:#fdeee7;border:1px solid #f9bfa8">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f04600" stroke-width="2.2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                      </svg>
+                    </div>
+                    <div class="text-[12.5px] font-semibold text-gray-800 leading-snug flex-1">{{ dist.title|default:dist.name }}</div>
+                  </div>
+                  <div class="flex items-center gap-1 flex-wrap">
+                    {% if dist.format %}<span class="badge badge-xs font-mono" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">{{ dist.format }}</span>{% endif %}
+                    {% if dist.db_layer %}<span class="badge badge-xs font-mono" style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb;">{{ dist.db_layer }}</span>{% endif %}
+                  </div>
+                </div>
+
+                {# Distribution detail panel — hidden by default, toggled by JS #}
+                <div class="col-span-full hidden dist-panel"
+                  id="dpanel-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                  <div class="mt-2 rounded-lg border overflow-hidden" style="border-color:#f04600">
+                    <div class="flex items-center gap-3 px-4 py-2.5 border-b" style="background:linear-gradient(135deg,#fdeee7,#fff8f5);border-color:#f9bfa8">
+                      <div class="w-0.5 h-5 rounded" style="background:#f04600"></div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-serif text-[15px] leading-snug truncate" style="color:#f04600">{{ dist.title|default:dist.name }}</div>
+                        <div class="font-mono text-[10px] text-gray-400">healthdcatap:HealthDistribution</div>
+                      </div>
+                      <a href="{% url 'warehouse:dataset_detail' source=dataset.source name=dataset.name %}#dist-{{ dist.name }}"
+                        title="{% trans 'View full detail' %}"
+                        class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-orange-500"
+                        onclick="event.stopPropagation()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </a>
+                      <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block" onclick="event.stopPropagation()">
+                        {% csrf_token %}
+                        <input type="hidden" name="source" value="{{ dataset.source }}">
+                        <input type="hidden" name="name" value="{{ dataset.name }}">
+                        <input type="hidden" name="title" value="{{ dist.title|default:dist.name }}">
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" title="{% trans 'Add to cart' %}" class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-orange-500">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                          </svg>
+                        </button>
+                      </form>
+                      <button type="button"
+                        onclick="toggleDist('{{ forloop.parentloop.counter }}','{{ forloop.counter }}')"
+                        class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:bg-orange-100">✕</button>
+                    </div>
+                    <div class="grid grid-cols-2 bg-white">
+                      {% if dist.description %}
+                      <div class="col-span-2 flex flex-col gap-1 px-4 py-2.5 border-r border-b border-gray-100">
+                        <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                          dct:description <button type="button" onclick="showSchemaModal('dct:description');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                        </div>
+                        <div class="text-[12.5px] text-gray-700 leading-snug">{{ dist.description }}</div>
+                      </div>
+                      {% endif %}
+                      {% if dist.access_url %}
+                      <div class="flex flex-col gap-1 px-4 py-2.5 border-r border-b border-gray-100">
+                        <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                          dcat:accessURL <button type="button" onclick="showSchemaModal('dcat:accessURL');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                        </div>
+                        <div class="text-[12.5px] text-gray-700 leading-snug">{{ dist.access_url }}</div>
+                      </div>
+                      {% endif %}
+                      {% if dist.format %}
+                      <div class="flex flex-col gap-1 px-4 py-2.5 border-r border-b border-gray-100">
+                        <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                          dct:format <button type="button" onclick="showSchemaModal('dct:format');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                        </div>
+                        <div class="text-[12.5px] text-gray-700 leading-snug">{{ dist.format }}</div>
+                      </div>
+                      {% endif %}
+                      {% if dist.byte_size %}
+                      <div class="flex flex-col gap-1 px-4 py-2.5 border-r border-b border-gray-100">
+                        <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                          dcat:byteSize <button type="button" onclick="showSchemaModal('dcat:byteSize');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                        </div>
+                        <div class="text-[12.5px] text-gray-700 leading-snug">{{ dist.byte_size }} B</div>
+                      </div>
+                      {% endif %}
+                      {% if dist.rights %}
+                      <div class="flex flex-col gap-1 px-4 py-2.5 border-r border-b border-gray-100">
+                        <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+                          dct:rights <button type="button" onclick="showSchemaModal('dct:rights');event.stopPropagation()" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold hover:bg-blue-500 hover:text-white transition-colors shrink-0">ⓘ</button>
+                        </div>
+                        <div class="text-[12.5px] text-gray-700 leading-snug">{{ dist.rights }}</div>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <div class="px-5 py-4 text-sm text-gray-400 italic">{% trans "No distributions available." %}</div>
+            {% endif %}
+
+          </div>{# end expandable body #}
+        </div>
+
+      </div>{# end card #}
+      {% endwith %}
+      {% empty %}
+      <div class="text-center py-20 text-gray-400">
+        <svg class="mx-auto mb-4 opacity-20" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <p class="font-serif text-xl text-gray-500 mb-1">{% trans "No datasets found" %}</p>
+        <span class="text-sm italic">{% trans "Try a different query or adjust the sidebar filters." %}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="flex justify-center mt-8">
+      <div class="join">
+        {% if page_obj.has_previous %}
+        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
+          class="join-item btn btn-sm">«</a>
+        {% else %}
+        <button class="join-item btn btn-sm btn-disabled">«</button>
+        {% endif %}
+
+        {% for p in page_obj.paginator.page_range %}
+          {% if p == page_obj.number %}
+          <button class="join-item btn btn-sm btn-active" style="background:#53c0d7;border-color:#53c0d7;color:#fff;">{{ p }}</button>
+          {% elif p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
+          <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}"
+            class="join-item btn btn-sm">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+          class="join-item btn btn-sm">»</a>
+        {% else %}
+        <button class="join-item btn btn-sm btn-disabled">»</button>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    {# No results at all #}
+    <div class="text-center py-20 text-gray-400">
+      <svg class="mx-auto mb-4 opacity-20" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <p class="font-serif text-xl text-gray-500 mb-1">{% trans "No datasets found" %}</p>
+      <a href="{% url 'warehouse:catalogue' %}" class="text-sm underline text-brand-cyan">{% trans "Clear all filters" %}</a>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+
+{% include "includes/schema_modal.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+'use strict';
+
+/* ── Schema modal ─────────────────────────────────────────────────────── */
+function loadSchemaData() {
+  const el = document.getElementById('schema-data');
+  if (el) {
+    try { window.SCHEMA_DATA = JSON.parse(el.textContent); }
+    catch(e) { window.SCHEMA_DATA = {}; }
+  }
+}
+function showSchemaModal(semantics) {
+  const data = (window.SCHEMA_DATA || {})[semantics];
+  const modal = document.getElementById('schema-modal');
+  if (!modal) return;
+  document.getElementById('sm-semantics').textContent = semantics;
+  document.getElementById('sm-label').textContent     = data?.label || semantics;
+  document.getElementById('sm-desc').textContent      = data?.description || '—';
+  document.getElementById('sm-uri').textContent       = data?.uri || '';
+  document.getElementById('sm-req').textContent       = data?.requirement || '';
+  const uriEl = document.getElementById('sm-uri-link');
+  if (uriEl) {
+    uriEl.href = data?.uri || '#';
+    uriEl.style.display = data?.uri ? '' : 'none';
+  }
+  modal.showModal();
+}
+
+/* ── Card expand / collapse ───────────────────────────────────────────── */
+const openCards = new Set();
+function toggleCard(idx) {
+  const body  = document.getElementById('body-' + idx);
+  const chev  = document.getElementById('chev-' + idx);
+  const card  = body?.closest('[data-card]');
+  if (!body) return;
+  const isOpen = !body.classList.contains('hidden');
+  if (isOpen) {
+    body.classList.add('hidden');
+    chev?.classList.remove('rotate-180');
+    card?.style.setProperty('border-color', '#e5e7eb');
+    openCards.delete(idx);
+  } else {
+    body.classList.remove('hidden');
+    chev?.classList.add('rotate-180');
+    card?.style.setProperty('border-color', '#53c0d7');
+    openCards.add(idx);
+  }
+}
+
+/* ── Distribution tile expand / collapse ─────────────────────────────── */
+const openDists = {};   // { cardIdx: distIdx | null }
+function toggleDist(cardIdx, distIdx) {
+  const panelId = 'dpanel-' + cardIdx + '-' + distIdx;
+  const tileId  = 'dtile-'  + cardIdx + '-' + distIdx;
+  const current = openDists[cardIdx];
+
+  // Close currently open panel for this card
+  if (current) {
+    const oldPanel = document.getElementById('dpanel-' + cardIdx + '-' + current);
+    const oldTile  = document.getElementById('dtile-'  + cardIdx + '-' + current);
+    if (oldPanel) oldPanel.classList.add('hidden');
+    if (oldTile)  { oldTile.style.borderColor='#e5e7eb'; oldTile.style.background=''; }
+    openDists[cardIdx] = null;
+    if (current === distIdx) return;   // toggled same → just close
+  }
+
+  const panel = document.getElementById(panelId);
+  const tile  = document.getElementById(tileId);
+  if (panel) panel.classList.remove('hidden');
+  if (tile)  { tile.style.borderColor='#f04600'; tile.style.background='#fdeee7'; }
+  openDists[cardIdx] = distIdx;
+  setTimeout(() => panel?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
+}
+
+/* ── Sidebar keyword/category text-search (client-side hide, not filter) ── */
+function filterList(inp, listId) {
+  const v = inp.value.toLowerCase();
+  document.querySelectorAll('#' + listId + ' .chk-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+
+/* ── Keyboard: Escape clears navbar search ─────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const s = document.getElementById('navbarSearch');
+    if (s && s.value) { s.value = ''; }
+  }
+});
+
+/* ── Init ─────────────────────────────────────────────────────────────── */
+loadSchemaData();
+</script>
+{% endblock %}
+

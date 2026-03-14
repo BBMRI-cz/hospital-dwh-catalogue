@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ dataset.title|default:dataset.name }}{% endblock %}
+
+{% block content %}
+{{ schema_json|json_script:"schema-data" }}
+<script id="jsonld-data" type="application/json">{{ jsonld_str|safe }}</script>
+
+<div class="max-w-4xl mx-auto px-6 py-8">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumbs text-sm text-gray-400 font-mono mb-6">
+    <ul>
+      <li><a href="{% url 'warehouse:catalogue' %}" class="hover:text-cyan-600">{% trans "Catalogue" %}</a></li>
+      <li class="text-gray-600">{{ dataset.title|default:dataset.name }}</li>
+    </ul>
+  </div>
+
+  <!-- Hero -->
+  <div class="mb-8 pb-7 border-b border-gray-200">
+    <div class="flex items-start gap-4 flex-wrap">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-2">
+          {% if dataset.source == 'warehouse' %}
+            <span class="badge badge-sm font-mono text-[9px]" style="background:#e0f0fb;color:#007fc8;border:1px solid #9ddcea;">LM</span>
+          {% else %}
+            <span class="badge badge-sm font-mono text-[9px]" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">FG</span>
+          {% endif %}
+          {% if dataset.access_rights %}
+            <span class="badge badge-sm font-mono text-[9px] bg-gray-100 text-gray-500 border border-gray-200">{{ dataset.access_rights }}</span>
+          {% endif %}
+        </div>
+        <h1 class="font-serif text-4xl font-normal text-gray-900 leading-tight">
+          {{ dataset.title|default:dataset.name }}
+        </h1>
+        {% if dataset.description %}
+          <p class="mt-3 text-base text-gray-600 leading-relaxed max-w-2xl">{{ dataset.description }}</p>
+        {% endif %}
+      </div>
+      <div class="flex gap-2 flex-wrap shrink-0">
+        <!-- JSON-LD Download -->
+        <button onclick="downloadJsonLd()" class="btn btn-outline btn-sm gap-2" style="border-color:#007fc8;color:#007fc8;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          {% trans "JSON-LD" %}
+        </button>
+        <!-- Add to cart -->
+        <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block">
+          {% csrf_token %}
+          <input type="hidden" name="source" value="{{ dataset.source }}">
+          <input type="hidden" name="name" value="{{ dataset.name }}">
+          <input type="hidden" name="title" value="{{ dataset.title|default:dataset.name }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="btn btn-sm text-white gap-2" style="background:#f04600;border-color:#f04600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            {% trans "Add to cart" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- DCAT Metadata card -->
+  <div class="card bg-white border border-gray-200 shadow-sm mb-8">
+    <div class="card-body p-0">
+      <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100">
+        <div class="w-0.5 h-4 rounded" style="background:#53c0d7"></div>
+        <span class="font-mono text-[10px] uppercase tracking-wider" style="color:#53c0d7">{% trans "Dataset Metadata" %}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2">
+        {% include "includes/_dcat_row.html" with semantics="dct:title" label="dct:title" value=dataset.title %}
+        {% include "includes/_dcat_row.html" with semantics="dct:accessRights" label="dct:accessRights" value=dataset.access_rights %}
+        {% include "includes/_dcat_row.html" with semantics="dcterms:hasVersion" label="dcterms:hasVersion" value=dataset.version %}
+        {% include "includes/_dcat_row.html" with semantics="dcat:theme" label="dcat:theme" value=dataset.theme %}
+        {% include "includes/_dcat_row.html" with semantics="dct:publisher" label="dct:publisher" value=dataset.publisher %}
+        {% include "includes/_dcat_row.html" with semantics="dct:license" label="dct:license" value=dataset.license %}
+        {% include "includes/_dcat_row.html" with semantics="dcatap:applicableLegislation" label="dcatap:applicableLegislation" value=dataset.applicable_legislation %}
+        {% include "includes/_dcat_row.html" with semantics="healthdcatap:hasHealthCategory" label="healthdcatap:healthCategory" value=dataset.health_category %}
+        {% include "includes/_dcat_row.html" with semantics="healthdcatap:hdab" label="healthdcatap:hdab" value=dataset.hdab %}
+        {% include "includes/_dcat_row.html" with semantics="dct:source" label="dct:source" value=dataset.source_uri %}
+        {% include "includes/_dcat_row.html" with semantics="dct:rightsHolder" label="dct:rightsHolder" value=dataset.rights_holder %}
+        {% include "includes/_dcat_row.html" with semantics="dct:creator" label="dct:creator" value=dataset.creator %}
+        {% include "includes/_dcat_row.html" with semantics="dct:issued" label="dct:issued" value=dataset.issued %}
+        {% include "includes/_dcat_row.html" with semantics="dct:modified" label="dct:modified" value=dataset.modified %}
+        {% include "includes/_dcat_row.html" with semantics="dcat:contactPoint" label="dcat:contactPoint" value=dataset.contact_email %}
+        {% include "includes/_dcat_row.html" with semantics="dct:provenance" label="dct:provenance" value=dataset.provenance %}
+        {% if dataset.keywords %}
+        <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
+          <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+            dcat:keyword
+            <button onclick="showSchemaModal('dcat:keyword')" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold font-mono hover:bg-blue-500 hover:text-white transition-colors">ⓘ</button>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            {% for kw in dataset.keywords %}
+            <span class="badge badge-sm font-mono text-[10px]" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">{{ kw }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% if dataset.description %}
+        <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
+          <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+            dct:description
+            <button onclick="showSchemaModal('dct:description')" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold font-mono hover:bg-blue-500 hover:text-white transition-colors">ⓘ</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed">{{ dataset.description }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Distributions -->
+  {% if distributions %}
+  <div class="mb-8">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-0.5 h-5 rounded" style="background:#f04600"></div>
+      <h2 class="font-mono text-[10px] uppercase tracking-wider" style="color:#f04600">
+        dcat:distribution — {{ distributions|length }} {% trans "distribution(s)" %}
+      </h2>
+      <div class="flex-1 h-px" style="background:#fdeee7"></div>
+    </div>
+
+    {% for dist in distributions %}
+    <div id="dist-{{ dist.name }}" class="card bg-white border border-gray-200 shadow-sm mb-3 overflow-hidden">
+      <!-- Distribution header -->
+      <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100" style="background:linear-gradient(to right, rgba(240,70,0,.04), transparent)">
+        <div class="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style="background:#fdeee7;border:1px solid #f9bfa8">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f04600" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-serif text-[16px] text-gray-900 leading-snug truncate">{{ dist.title|default:dist.name }}</div>
+          <div class="font-mono text-[10px] text-gray-400">healthdcatap:HealthDistribution · {{ dist.name }}</div>
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap justify-end">
+          {% if dist.format %}
+          <span class="badge badge-sm font-mono text-[9px]" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">{{ dist.format }}</span>
+          {% endif %}
+          {% if dist.db_layer %}
+          <span class="badge badge-sm font-mono text-[9px]" style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb;">{{ dist.db_layer }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <!-- Distribution DCAT fields -->
+      <div class="grid grid-cols-1 sm:grid-cols-2">
+        {% include "includes/_dcat_row.html" with semantics="dcat:accessURL" label="dcat:accessURL" value=dist.access_url %}
+        {% include "includes/_dcat_row.html" with semantics="dct:format" label="dct:format" value=dist.format %}
+        {% include "includes/_dcat_row.html" with semantics="dcat:byteSize" label="dcat:byteSize" value=dist.byte_size %}
+        {% include "includes/_dcat_row.html" with semantics="dcatap:applicableLegislation" label="dcatap:applicableLegislation" value=dist.applicable_legislation %}
+        {% include "includes/_dcat_row.html" with semantics="dct:rights" label="dct:rights" value=dist.rights %}
+        {% include "includes/_dcat_row.html" with semantics="dct:conformsTo" label="dct:conformsTo" value=dist.conformed_to %}
+        {% include "includes/_dcat_row.html" with semantics="dct:issued" label="dct:issued" value=dist.issued %}
+        {% include "includes/_dcat_row.html" with semantics="dct:modified" label="dct:modified" value=dist.modified %}
+        {% if dist.description %}
+        <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
+          <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+            dct:description
+            <button onclick="showSchemaModal('dct:description')" class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold font-mono hover:bg-blue-500 hover:text-white transition-colors">ⓘ</button>
+          </div>
+          <div class="text-sm text-gray-700 leading-relaxed">{{ dist.description }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12 text-gray-400 italic text-sm">{% trans "No distributions available for this dataset." %}</div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+loadSchemaData('schema-data');
+
+function downloadJsonLd() {
+  const data = document.getElementById('jsonld-data').textContent;
+  const blob = new Blob([data], { type: 'application/ld+json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'healthdcatap_{{ dataset.source }}_{{ dataset.name }}.jsonld';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Scroll to distribution if hash present
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.hash) {
+    const el = document.querySelector(location.hash);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+</script>
+{% endblock %}

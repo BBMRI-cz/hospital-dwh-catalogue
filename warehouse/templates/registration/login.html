@@ -1,0 +1,98 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="cs" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% trans "Login" %} · MOU Datový katalog</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/dist/full.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cyan:   '#53c0d7',
+              orange: '#f04600',
+              blue:   '#007fc8',
+              yellow: '#fbeebc',
+            },
+          },
+          fontFamily: {
+            serif: ['Instrument Serif', 'Georgia', 'serif'],
+            sans:  ['Instrument Sans', 'system-ui', 'sans-serif'],
+            mono:  ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body::after {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      opacity: .4;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen flex items-center justify-center p-4">
+  <div class="relative z-10 w-full max-w-sm">
+
+    <!-- Logo / Heading -->
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg" style="background:#53c0d7">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+          <path d="M3 3h18v4H3zM3 10h11v4H3zM3 17h7v4H3z"/>
+        </svg>
+      </div>
+      <h1 class="font-serif text-3xl text-gray-900">{% trans "Data Catalogue" %}</h1>
+      <p class="font-mono text-[10px] text-gray-400 uppercase tracking-widest mt-1">Masarykův onkologický ústav</p>
+    </div>
+
+    <!-- Card -->
+    <div class="card bg-white shadow-xl border border-gray-200">
+      <div class="card-body gap-5">
+
+        {% if form.errors %}
+        <div role="alert" class="alert alert-error text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>{% trans "Invalid username or password. Please try again." %}</span>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <div class="form-control gap-1 mb-4">
+            <label class="label py-0">
+              <span class="label-text font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Username" %}</span>
+            </label>
+            <input type="text" name="username" autofocus autocomplete="username"
+              class="input input-bordered w-full focus:border-brand-cyan"
+              value="{{ form.username.value|default:'' }}">
+          </div>
+
+          <div class="form-control gap-1 mb-6">
+            <label class="label py-0">
+              <span class="label-text font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Password" %}</span>
+            </label>
+            <input type="password" name="password" autocomplete="current-password"
+              class="input input-bordered w-full focus:border-brand-cyan">
+          </div>
+
+          <button type="submit" class="btn btn-block text-white font-medium" style="background:#53c0d7;border-color:#53c0d7;">
+            {% trans "Sign in" %}
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <p class="text-center text-[11px] text-gray-400 font-mono mt-6 uppercase tracking-wider">
+      Health DCAT-AP · FAIR Data Register
+    </p>
+  </div>
+</body>
+</html>
