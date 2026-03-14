@@ -15,6 +15,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: hospital_dwh_redis_test
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   web:
     build:
       context: .
@@ -30,8 +40,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=catalogue.settings.test
+      - REDIS_URL=redis://redis:6379/1
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:

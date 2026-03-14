@@ -25,6 +25,13 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# Cache — single-process in-memory; not shared across workers (dev/CI only)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 # Email backend for development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

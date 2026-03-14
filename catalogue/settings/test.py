@@ -41,6 +41,31 @@ if USE_SQLITE:
         },
     }
 
+# Cache — use real Redis when REDIS_URL is provided (server test stack),
+# fall back to LocMemCache for CI where no Redis container is present.
+_REDIS_URL = config('REDIS_URL', default='')
+
+if _REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': _REDIS_URL,
+            'KEY_PREFIX': 'catalogue_test',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'IGNORE_EXCEPTIONS': True,
+            },
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+
 # Fair Genomes API settings (mocked in tests)
 FAIR_GENOMES_FETCH_ON_STARTUP = False
 

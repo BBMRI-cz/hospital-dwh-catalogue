@@ -16,6 +16,24 @@ services:
     networks:
       - hospital_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: hospital_dwh_redis_prod
+    # Persistence is required: sessions are stored in Redis (SESSION_ENGINE=cache).
+    # Disabling --save would log out all users on every Redis restart.
+    # --save 300 1 = snapshot every 5 min if ≥1 key changed (less I/O than default 60s).
+    command: redis-server --save 300 1 --loglevel warning
+    volumes:
+      - redis_data_prod:/data
+    restart: unless-stopped
+    networks:
+      - hospital_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   web:
     build:
       context: .
@@ -32,8 +50,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=catalogue.settings.prod
+      - REDIS_URL=redis://redis:6379/1
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -42,6 +63,8 @@ services:
 volumes:
   postgres_data_prod:
     name: hospital_dwh_postgres_data_prod
+  redis_data_prod:
+    name: hospital_dwh_redis_data_prod
 
 networks:
   hospital_network:

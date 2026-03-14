@@ -314,17 +314,19 @@ class DatasetDetailView(LoginRequiredMixin, View):
 
     def get(self, request, source: str, name: str):
         service = UnifiedCatalogService()
-        ds, dist_objs = service.get_single_dataset(source, name)
+        cache_key = f'dataset:{source}:{name}'
+        ds_dict: dict | None = cache.get(cache_key)
 
-        if ds is None:
-            raise Http404('Dataset not found')
-
-        # Staple distributions onto dataset so _dataset_to_dict picks them up
-        if not ds.distributions:
-            ds.distributions = dist_objs
+        if ds_dict is None:
+            ds, dist_objs = service.get_single_dataset(source, name)
+            if ds is None:
+                raise Http404('Dataset not found')
+            if not ds.distributions:
+                ds.distributions = dist_objs
+            ds_dict = _dataset_to_dict(ds)
+            cache.set(cache_key, ds_dict, _CACHE_TTL)
 
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
-        ds_dict = _dataset_to_dict(ds)
         jsonld = _build_jsonld(ds_dict)
 
         return render(request, self.template_name, {

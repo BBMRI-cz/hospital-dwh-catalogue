@@ -82,8 +82,31 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        'django_redis': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
     },
 }
+
+# Cache — shared Redis backend
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('REDIS_URL', default='redis://redis:6379/1'),
+        'KEY_PREFIX': 'catalogue',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {'max_connections': 20},
+            'IGNORE_EXCEPTIONS': True,  # degrade gracefully if Redis is unavailable
+        },
+    }
+}
+
+# Store sessions in Redis instead of the auth_db PostgreSQL database
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Admin notification on errors
 ADMINS = [
