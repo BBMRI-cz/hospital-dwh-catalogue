@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'warehouse',
     'fair_genomes',
     'ticketing',
+    'schema_registry',
 ]
 
 MIDDLEWARE = [
