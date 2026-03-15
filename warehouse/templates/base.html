@@ -135,7 +135,7 @@
         <select name="language" onchange="this.form.submit()"
           class="select select-ghost select-xs font-mono text-[11px] text-gray-500 border-0 bg-transparent min-h-0 h-7 pr-6 focus:outline-none">
           {% get_available_languages as LANGUAGES_LIST %}
-          {% get_language as CURRENT_LANG %}
+          {% get_current_language as CURRENT_LANG %}
           {% for lang_code, lang_name in LANGUAGES_LIST %}
             <option value="{{ lang_code }}" {% if lang_code == CURRENT_LANG %}selected{% endif %}>
               {{ lang_code|upper }}

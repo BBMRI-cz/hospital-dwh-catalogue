@@ -387,7 +387,7 @@ class DistributionBase(models.Model):
         blank=True,
         verbose_name=_('Conforms To'),
     )
-    byte_size = models.IntegerField(
+    byte_size = models.BigIntegerField(
         null=True,
         blank=True,
         verbose_name=_('Byte Size'),

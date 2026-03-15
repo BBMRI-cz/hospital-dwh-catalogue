@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, null=True, verbose_name='Description')),
                 ('format', models.CharField(blank=True, help_text='dct:format — media type or format URI', max_length=100, null=True, verbose_name='Format')),
                 ('conformed_to', models.CharField(blank=True, max_length=500, null=True, verbose_name='Conforms To')),
-                ('byte_size', models.IntegerField(blank=True, help_text='dcat:byteSize', null=True, verbose_name='Byte Size')),
+                ('byte_size', models.BigIntegerField(blank=True, help_text='dcat:byteSize', null=True, verbose_name='Byte Size')),
                 ('rights', models.CharField(blank=True, help_text='dct:rights', max_length=500, null=True, verbose_name='Rights')),
                 ('issued', models.DateTimeField(blank=True, null=True, verbose_name='Issued')),
                 ('modified', models.DateTimeField(blank=True, null=True, verbose_name='Modified')),
