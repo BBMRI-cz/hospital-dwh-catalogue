@@ -7,16 +7,20 @@
 <div class="max-w-4xl mx-auto px-6 py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
-  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label="Catalogue" bc_current="My Tickets" %}
+  {% trans "Catalogue" as t_catalogue %}
+  {% trans "My Tickets" as t_my_tickets %}
+  {% trans "History of submitted data access requests" as t_history_subtitle %}
+  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_current=t_my_tickets %}
 
-  {% with hero_title="My Tickets" hero_subtitle="History of submitted data access requests" hero_color="#53c0d7" hero_icon="calendar" hero_icon_bg="#e8f7fb" hero_icon_border="#9ddcea" hero_icon_color="#53c0d7" %}
+  {% with hero_title=t_my_tickets hero_subtitle=t_history_subtitle hero_color="#53c0d7" hero_icon="calendar" hero_icon_bg="#e8f7fb" hero_icon_border="#9ddcea" hero_icon_color="#53c0d7" %}
   {% include "includes/_page_hero.html" %}
   {% endwith %}
 
   {% if tickets %}
   <div class="card bg-white border border-gray-200 shadow-sm rounded-lg mb-6 overflow-hidden">
+    {% trans "Submitted tickets" as t_submitted_tickets %}
     {% with tickets_count=tickets.count|stringformat:"s" %}
-    {% with tickets_label="Submitted tickets · "|add:tickets_count %}
+    {% with tickets_label=t_submitted_tickets|add:" · "|add:tickets_count %}
     {% include "includes/_card_section_header.html" with csh_color="#53c0d7" csh_label=tickets_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">
@@ -94,7 +98,10 @@
   {% include "includes/_pagination.html" %}
 
   {% else %}
-  {% with es_icon="calendar" es_icon_bg="#e8f7fb" es_icon_color="#53c0d7" es_heading="No tickets yet" es_subtitle="Your submitted data access requests will appear here." es_btn_href=catalogue_url es_btn_label="Go to catalogue" %}
+  {% trans "No tickets yet" as t_no_tickets %}
+  {% trans "Your submitted data access requests will appear here." as t_no_tickets_sub %}
+  {% trans "Go to catalogue" as t_go_to_catalogue %}
+  {% with es_icon="calendar" es_icon_bg="#e8f7fb" es_icon_color="#53c0d7" es_heading=t_no_tickets es_subtitle=t_no_tickets_sub es_btn_href=catalogue_url es_btn_label=t_go_to_catalogue %}
   {% include "includes/_empty_state.html" %}
   {% endwith %}
   {% endif %}

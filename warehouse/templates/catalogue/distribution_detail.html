@@ -10,7 +10,8 @@
 
   {% url 'warehouse:catalogue' as catalogue_url %}
   {% if dataset %}{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name as bc_mid_url %}{% endif %}
-  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label="Catalogue" bc_mid_url=bc_mid_url bc_mid_label=dataset.title|default:dataset.name bc_current=distribution.title|default:distribution.name %}
+  {% trans "Catalogue" as t_catalogue %}
+  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_mid_url=bc_mid_url bc_mid_label=dataset.title|default:dataset.name bc_current=distribution.title|default:distribution.name %}
 
   <!-- Hero -->
   <div class="mb-8 pb-7 border-b border-gray-200">

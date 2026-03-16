@@ -240,10 +240,3 @@ class Attribute(models.Model):
     def __str__(self) -> str:
         return self.title or self.name
 
-
-# â”€â”€ SENTINEL â€” end of warehouse/models.py â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# All old models (DatasourceList, DatasetList, DataclassList,
-# DataclassTableSchemes, DbTableList, DbTableSchemes) have been replaced.
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-_REMOVED_PLACEHOLDER = True  # keeps file non-empty; remove after first migration

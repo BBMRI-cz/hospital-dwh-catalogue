@@ -14,9 +14,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from shared.dtos import (
-    UnifiedAgent,
-    UnifiedCatalog,
-    UnifiedContactPoint,
     UnifiedDataset,
     UnifiedDistribution,
 )
@@ -35,14 +32,6 @@ def _fk_name(obj: object, fk_attr: str) -> str | None:
     return getattr(related, 'name', None) if related else None
 
 
-def _fk_str(obj: object, fk_attr: str, str_attr: str = '__str__') -> str | None:
-    """Return str(fk.str_attr) or None."""
-    related = getattr(obj, fk_attr, None)
-    if related is None:
-        return None
-    return str(getattr(related, str_attr, related))
-
-
 def _dt_str(obj: object, attr: str) -> str | None:
     """Return isoformat of a DateTimeField or None."""
     value = getattr(obj, attr, None)
@@ -50,36 +39,6 @@ def _dt_str(obj: object, attr: str) -> str | None:
 
 
 # ── Warehouse (Local Metadata) mappers ────────────────────────────────────────
-
-def map_warehouse_contact_point(obj: 'wm.ContactPoint') -> UnifiedContactPoint:
-    return UnifiedContactPoint(
-        source='warehouse',
-        pk=obj.pk,
-        email=obj.email,
-        contact_page=obj.contact_page,
-    )
-
-
-def map_warehouse_agent(obj: 'wm.Agent') -> UnifiedAgent:
-    cp = getattr(obj, 'contact_point', None)
-    return UnifiedAgent(
-        source='warehouse',
-        name=obj.name,
-        contact_point_email=getattr(cp, 'email', None),
-        contact_point_page=getattr(cp, 'contact_page', None),
-    )
-
-
-def map_warehouse_catalog(obj: 'wm.Catalog') -> UnifiedCatalog:
-    return UnifiedCatalog(
-        source='warehouse',
-        name=obj.name,
-        title=obj.title,
-        description=obj.description,
-        publisher_name=_fk_name(obj, 'publisher'),
-        applicable_legislation=obj.applicable_legislation,
-    )
-
 
 def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
@@ -130,36 +89,6 @@ def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
 
 
 # ── FAIR Genomes mappers ───────────────────────────────────────────────────────
-
-def map_fair_contact_point(obj: 'fgm.ContactPoint') -> UnifiedContactPoint:
-    return UnifiedContactPoint(
-        source='fair_genomes',
-        pk=obj.pk,
-        email=obj.email,
-        contact_page=obj.contact_page,
-    )
-
-
-def map_fair_agent(obj: 'fgm.Agent') -> UnifiedAgent:
-    cp = getattr(obj, 'contact_point', None)
-    return UnifiedAgent(
-        source='fair_genomes',
-        name=obj.name,
-        contact_point_email=getattr(cp, 'email', None),
-        contact_point_page=getattr(cp, 'contact_page', None),
-    )
-
-
-def map_fair_catalog(obj: 'fgm.Catalog') -> UnifiedCatalog:
-    return UnifiedCatalog(
-        source='fair_genomes',
-        name=obj.name,
-        title=obj.title,
-        description=obj.description,
-        publisher_name=_fk_name(obj, 'publisher'),
-        applicable_legislation=obj.applicable_legislation,
-    )
-
 
 def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)

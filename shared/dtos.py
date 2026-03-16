@@ -13,36 +13,7 @@ The `source` field on every DTO carries the originating app label
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    pass  # avoid circular imports
-
-
-@dataclass
-class UnifiedContactPoint:
-    source: str
-    pk: Optional[int | str] = None
-    email: Optional[str] = None
-    contact_page: Optional[str] = None
-
-
-@dataclass
-class UnifiedAgent:
-    source: str
-    name: str
-    contact_point_email: Optional[str] = None
-    contact_point_page: Optional[str] = None
-
-
-@dataclass
-class UnifiedCatalog:
-    source: str
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    publisher_name: Optional[str] = None
-    applicable_legislation: Optional[str] = None
+from typing import Optional
 
 
 @dataclass

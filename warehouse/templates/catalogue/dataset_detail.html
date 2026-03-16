@@ -10,7 +10,8 @@
 <div class="max-w-4xl mx-auto px-6 py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
-  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label="Catalogue" bc_current=dataset.title|default:dataset.name %}
+  {% trans "Catalogue" as t_catalogue %}
+  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_current=dataset.title|default:dataset.name %}
 
   <!-- Hero -->
   <div class="mb-8 pb-7 border-b border-gray-200">

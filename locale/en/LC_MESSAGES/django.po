@@ -1,12 +1,12 @@
 # English translation for Hospital DWH Catalogue
 # Copyright (C) 2026
 # This file is distributed under the same license as the catalogue package.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-08 07:48+0100\n"
+"POT-Creation-Date: 2026-03-16 23:27+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -16,252 +16,603 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: catalogue/settings/base.py:228
+#: catalogue/settings/base.py:227
 msgid "Czech"
 msgstr "Czech"
 
-#: catalogue/settings/base.py:229
+#: catalogue/settings/base.py:228
 msgid "English"
 msgstr "English"
-
-#: catalogue/views.py:25 warehouse/templates/catalogue/login.html:5
-msgid "Sign In"
-msgstr "Sign In"
 
 #: fair_genomes/apps.py:15
 msgid "Fair Genomes Integration"
 msgstr "Fair Genomes Integration"
 
-#: fair_genomes/models.py:21
-#: fair_genomes/templates/fair_genomes/personal_detail.html:76
-#: fair_genomes/templates/fair_genomes/personal_list.html:73
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:76
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:76
-msgid "Inserted By"
-msgstr "Inserted By"
+#: fair_genomes/models.py:47 shared/abstract_models.py:92
+#: shared/abstract_models.py:265 warehouse/models.py:49
+msgid "Contact Point"
+msgstr ""
 
-#: fair_genomes/models.py:22
-msgid "User who created this record"
-msgstr "User who created this record"
+#: fair_genomes/models.py:48 warehouse/models.py:50
+msgid "Contact Points"
+msgstr ""
 
-#: fair_genomes/models.py:27
-#: fair_genomes/templates/fair_genomes/personal_detail.html:80
-#: fair_genomes/templates/fair_genomes/personal_list.html:74
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:80
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:77
-msgid "Inserted On"
-msgstr "Inserted On"
+#: fair_genomes/models.py:62 warehouse/models.py:64
+msgid "Agent"
+msgstr ""
 
-#: fair_genomes/models.py:28
-msgid "Timestamp when record was created"
-msgstr "Timestamp when record was created"
+#: fair_genomes/models.py:63 warehouse/models.py:65
+msgid "Agents"
+msgstr ""
 
-#: fair_genomes/models.py:34
-#: fair_genomes/templates/fair_genomes/personal_detail.html:90
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:90
-msgid "Updated By"
-msgstr "Updated By"
+#: fair_genomes/models.py:77 shared/abstract_models.py:285
+#: warehouse/models.py:79
+#, fuzzy
+#| msgid "Catalogue"
+msgid "Catalog"
+msgstr "Catalogue"
 
-#: fair_genomes/models.py:35
-msgid "User who last updated this record"
-msgstr "User who last updated this record"
+#: fair_genomes/models.py:78 warehouse/models.py:80
+#, fuzzy
+#| msgid "Catalogue"
+msgid "Catalogs"
+msgstr "Catalogue"
 
-#: fair_genomes/models.py:40
-#: fair_genomes/templates/fair_genomes/personal_detail.html:94
-#: fair_genomes/templates/fair_genomes/personal_list.html:75
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:94
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:78
-msgid "Updated On"
-msgstr "Updated On"
+#: fair_genomes/models.py:97 shared/abstract_models.py:363
+#: ticketing/models.py:124 warehouse/models.py:98
+msgid "Dataset"
+msgstr "Dataset"
 
-#: fair_genomes/models.py:41
-msgid "Timestamp when record was last updated"
-msgstr "Timestamp when record was last updated"
+#: fair_genomes/models.py:98 warehouse/models.py:99
+#: warehouse/templates/catalogue/components/_stats_bar.html:6
+msgid "Datasets"
+msgstr "Datasets"
 
-#: fair_genomes/models.py:59
-#: fair_genomes/templates/fair_genomes/personal_detail.html:45
-#: fair_genomes/templates/fair_genomes/personal_list.html:71
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:45
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:74
-msgid "Personal Identifier"
-msgstr "Personal Identifier"
+#: fair_genomes/models.py:113 warehouse/models.py:129 warehouse/models.py:161
+#: warehouse/templates/catalogue/distribution_detail.html:4
+#, fuzzy
+#| msgid "Description"
+msgid "Distribution"
+msgstr "Description"
 
-#: fair_genomes/models.py:60
-msgid "Unique identifier for the individual"
-msgstr "Unique identifier for the individual"
+#: fair_genomes/models.py:114 warehouse/models.py:130
+#: warehouse/templates/catalogue/components/_stats_bar.html:10
+#, fuzzy
+#| msgid "Description"
+msgid "Distributions"
+msgstr "Description"
 
-#: fair_genomes/models.py:66
-#: fair_genomes/templates/fair_genomes/personal_detail.html:51
-#: fair_genomes/templates/fair_genomes/personal_list.html:72
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:51
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:75
-msgid "Year of Birth"
-msgstr "Year of Birth"
+#: schema_registry/apps.py:8
+msgid "Schema Registry"
+msgstr ""
 
-#: fair_genomes/models.py:67
-msgid "Year the individual was born"
-msgstr "Year the individual was born"
+#: schema_registry/models.py:54
+msgid "Slug"
+msgstr ""
 
-#: fair_genomes/models.py:72
-msgid "Personal Record"
-msgstr "Personal Record"
+#: schema_registry/models.py:55
+msgid "Short machine-readable identifier, e.g. \"v6\"."
+msgstr ""
 
-#: fair_genomes/models.py:73
-msgid "Personal Records"
-msgstr "Personal Records"
+#: schema_registry/models.py:59
+msgid "Label"
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_detail.html:4
-#: fair_genomes/templates/fair_genomes/personal_detail.html:15
-#: warehouse/templates/layout/navbar.html:13
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:4
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:15
-msgid "Fair Genomes"
-msgstr "Fair Genomes"
+#: schema_registry/models.py:60
+msgid "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_detail.html:26
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:26
-msgid "Personal Record Details"
-msgstr "Personal Record Details"
-
-#: fair_genomes/templates/fair_genomes/personal_detail.html:38
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:38
-msgid "Personal Information"
-msgstr "Personal Information"
-
-#: fair_genomes/templates/fair_genomes/personal_detail.html:56
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:56
-msgid "Not specified"
-msgstr "Not specified"
-
-#: fair_genomes/templates/fair_genomes/personal_detail.html:71
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:71
-msgid "Metadata"
-msgstr "Metadata"
-
-#: fair_genomes/templates/fair_genomes/personal_detail.html:111
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:111
-msgid "Back to List"
-msgstr "Back to List"
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:4
-#: fair_genomes/templates/fair_genomes/personal_list.html:13
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:4
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:13
-msgid "Fair Genomes - Personal Data"
-msgstr "Fair Genomes - Personal Data"
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:23
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:26
-msgid "Total Records"
-msgstr "Total Records"
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:37
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:40
-msgid "Search by identifier or user..."
-msgstr "Search by identifier or user..."
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:42
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:45
-msgid "All Years of Birth"
-msgstr "All Years of Birth"
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:52
-#: warehouse/templates/warehouse/catalogue.html:47
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:55
-msgid "Search"
-msgstr "Search"
-
-#: fair_genomes/templates/fair_genomes/personal_list.html:76
-#: ticketing/templates/ticketing/cart.html:47
-#: ticketing/templates/ticketing/my_tickets.html:41
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:79
-msgid "Actions"
+#: schema_registry/models.py:64
+#, fuzzy
+#| msgid "Actions"
+msgid "Active"
 msgstr "Actions"
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:92
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:95
-msgid "View"
-msgstr "View"
+#: schema_registry/models.py:65
+msgid ""
+"Whether this is the currently active schema version used by the service "
+"layer."
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:108
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:111
-msgid "First"
-msgstr "First"
+#: schema_registry/models.py:67 schema_registry/models.py:108
+#: schema_registry/models.py:208 schema_registry/models.py:296
+#, fuzzy
+#| msgid "Created At"
+msgid "Created at"
+msgstr "Created At"
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:113
-#: ticketing/templates/ticketing/my_tickets.html:83
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:116
-msgid "Previous"
-msgstr "Previous"
+#: schema_registry/models.py:68 schema_registry/models.py:109
+#: schema_registry/models.py:209 schema_registry/models.py:297
+#, fuzzy
+#| msgid "Updated At"
+msgid "Updated at"
+msgstr "Updated At"
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:120
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
-msgid "Page"
-msgstr "Page"
+#: schema_registry/models.py:74 schema_registry/models.py:96
+#: schema_registry/models.py:154 schema_registry/models.py:243
+msgid "Schema Version"
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:120
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:123
-msgid "of"
-msgstr "of"
+#: schema_registry/models.py:75
+msgid "Schema Versions"
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:127
-#: ticketing/templates/ticketing/my_tickets.html:97
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:130
-msgid "Next"
-msgstr "Next"
+#: schema_registry/models.py:100 schema_registry/models.py:169
+msgid "Prefix"
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:132
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:135
-msgid "Last"
-msgstr "Last"
+#: schema_registry/models.py:101
+msgid "Namespace prefix, e.g. \"dct\"."
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:143
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:146
-msgid "No records found matching your search criteria."
-msgstr "No records found matching your search criteria."
+#: schema_registry/models.py:105
+msgid "Base URI"
+msgstr ""
 
-#: fair_genomes/templates/fair_genomes/personal_list.html:145
-msgid "No Fair Genomes data available."
-msgstr "No Fair Genomes data available."
+#: schema_registry/models.py:106
+msgid ""
+"Full namespace URI corresponding to the prefix, e.g. \"http://purl.org/dc/"
+"terms/\"."
+msgstr ""
+
+#: schema_registry/models.py:116
+msgid "Schema Prefix"
+msgstr ""
+
+#: schema_registry/models.py:117
+msgid "Schema Prefixes"
+msgstr ""
+
+#: schema_registry/models.py:144
+msgid "Optional"
+msgstr ""
+
+#: schema_registry/models.py:145
+msgid "Recommended"
+msgstr ""
+
+#: schema_registry/models.py:146
+msgid "Mandatory"
+msgstr "Mandatory"
+
+#: schema_registry/models.py:147
+#, fuzzy
+#| msgid "Created"
+msgid "Deprecated"
+msgstr "Created"
+
+#: schema_registry/models.py:158
+msgid "Term Key"
+msgstr ""
+
+#: schema_registry/models.py:159
+msgid ""
+"Stable snake_case identifier used in gettext msgids and binding references."
+msgstr ""
+
+#: schema_registry/models.py:163
+msgid "Semantics"
+msgstr ""
+
+#: schema_registry/models.py:164
+msgid "Prefixed name, e.g. \"dct:identifier\"."
+msgstr ""
+
+#: schema_registry/models.py:170
+msgid "Namespace prefix extracted from semantics for convenience."
+msgstr ""
+
+#: schema_registry/models.py:174
+#, fuzzy
+#| msgid "Column Name"
+msgid "Local Name"
+msgstr "Column Name"
+
+#: schema_registry/models.py:175
+msgid "Local name extracted from semantics for convenience."
+msgstr ""
+
+#: schema_registry/models.py:179
+msgid "URI"
+msgstr ""
+
+#: schema_registry/models.py:180
+msgid "Full URI constructed from prefix base + local_name."
+msgstr ""
+
+#: schema_registry/models.py:184 schema_registry/models.py:279
+msgid "Label (EN)"
+msgstr ""
+
+#: schema_registry/models.py:185
+msgid "English base label; used as gettext fallback."
+msgstr ""
+
+#: schema_registry/models.py:188 schema_registry/models.py:283
+#, fuzzy
+#| msgid "Description"
+msgid "Description (EN)"
+msgstr "Description"
+
+#: schema_registry/models.py:189
+msgid "English base description; used as gettext fallback."
+msgstr ""
+
+#: schema_registry/models.py:195
+#, fuzzy
+#| msgid "Requester"
+msgid "Requirement"
+msgstr "Requester"
+
+#: schema_registry/models.py:196
+msgid "Requirement level per the HealthDCAT-AP specification."
+msgstr ""
+
+#: schema_registry/models.py:200
+msgid "Levels"
+msgstr ""
+
+#: schema_registry/models.py:201
+msgid ""
+"List of table/entity names where this term is applicable, e.g. [\"Catalog\","
+"\"Dataset\"]."
+msgstr ""
+
+#: schema_registry/models.py:205 schema_registry/models.py:293
+msgid "Display Order"
+msgstr ""
+
+#: schema_registry/models.py:206
+msgid "Controls the order in which terms are listed within a schema version."
+msgstr ""
+
+#: schema_registry/models.py:216 schema_registry/models.py:249
+msgid "Schema Term"
+msgstr ""
+
+#: schema_registry/models.py:217
+msgid "Schema Terms"
+msgstr ""
+
+#: schema_registry/models.py:253
+#, fuzzy
+#| msgid "Variable Name"
+msgid "Table Name"
+msgstr "Variable Name"
+
+#: schema_registry/models.py:254
+msgid "Name of the data model table/entity this binding belongs to."
+msgstr ""
+
+#: schema_registry/models.py:260
+msgid "Column Name"
+msgstr "Column Name"
+
+#: schema_registry/models.py:261
+msgid "Physical column name; NULL for entity (table-level) bindings."
+msgstr ""
+
+#: schema_registry/models.py:267
+#, fuzzy
+#| msgid "Column Name"
+msgid "Column Type"
+msgstr "Column Name"
+
+#: schema_registry/models.py:268
+msgid ""
+"Logical data type (string, text, integer, datetime, ref); NULL for entity "
+"rows."
+msgstr ""
+
+#: schema_registry/models.py:274
+#, fuzzy
+#| msgid "Table"
+msgid "Ref Table"
+msgstr "Table"
+
+#: schema_registry/models.py:275
+msgid "Target entity name for FK-like columns, e.g. \"Agent\"."
+msgstr ""
+
+#: schema_registry/models.py:280
+msgid ""
+"English label for this binding; may differ from the term label in context."
+msgstr ""
+
+#: schema_registry/models.py:284
+msgid "English description for this binding."
+msgstr ""
+
+#: schema_registry/models.py:288
+msgid "Is Entity"
+msgstr ""
+
+#: schema_registry/models.py:289
+msgid "True for table-level (entity) rows; False for column-level rows."
+msgstr ""
+
+#: schema_registry/models.py:294
+msgid "Controls the order in which bindings are listed within a table."
+msgstr ""
+
+#: schema_registry/models.py:304
+msgid "Schema Field Binding"
+msgstr ""
+
+#: schema_registry/models.py:305
+msgid "Schema Field Bindings"
+msgstr ""
+
+#: shared/abstract_models.py:50
+#, fuzzy
+#| msgid "Your Email"
+msgid "Email"
+msgstr "Your Email"
+
+#: shared/abstract_models.py:51
+msgid "Contact e-mail address"
+msgstr ""
+
+#: shared/abstract_models.py:57
+msgid "Contact Page"
+msgstr ""
+
+#: shared/abstract_models.py:58
+msgid "URL of a web page that can be used to reach the contact"
+msgstr ""
+
+#: shared/abstract_models.py:82 shared/abstract_models.py:116
+#: shared/abstract_models.py:180 shared/abstract_models.py:354
+#: warehouse/models.py:152
+msgid "Name"
+msgstr "Name"
+
+#: shared/abstract_models.py:83
+#, fuzzy
+#| msgid "Unique identifier for the individual"
+msgid "Unique identifier / name for this agent"
+msgstr "Unique identifier for the individual"
+
+#: shared/abstract_models.py:93
+msgid "Contact information for this agent"
+msgstr ""
+
+#: shared/abstract_models.py:117
+#, fuzzy
+#| msgid "Unique identifier for the individual"
+msgid "Unique identifier for this catalog"
+msgstr "Unique identifier for the individual"
+
+#: shared/abstract_models.py:123 shared/abstract_models.py:187
+#: shared/abstract_models.py:370 warehouse/models.py:168
+msgid "Title"
+msgstr ""
+
+#: shared/abstract_models.py:128 shared/abstract_models.py:198
+#: shared/abstract_models.py:375 ticketing/models.py:49 warehouse/models.py:174
+#: warehouse/templates/catalogue/components/_dcat_tooltip.html:28
+#: warehouse/templates/includes/schema_modal.html:29
+msgid "Description"
+msgstr "Description"
+
+#: shared/abstract_models.py:137 shared/abstract_models.py:213
+msgid "Publisher"
+msgstr ""
+
+#: shared/abstract_models.py:138
+msgid "Agent responsible for making this catalog available"
+msgstr ""
+
+#: shared/abstract_models.py:143 shared/abstract_models.py:301
+#: shared/abstract_models.py:423
+msgid "Applicable Legislation"
+msgstr ""
+
+#: shared/abstract_models.py:145
+msgid ""
+"Legal basis under which this catalog is published (mandatory per HealthDCAT-"
+"AP v6)"
+msgstr ""
+
+#: shared/abstract_models.py:181
+#, fuzzy
+#| msgid "Unique identifier for the individual"
+msgid "Unique identifier for this dataset"
+msgstr "Unique identifier for the individual"
+
+#: shared/abstract_models.py:193
+msgid "Version"
+msgstr ""
+
+#: shared/abstract_models.py:204
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+msgid "Theme"
+msgstr ""
+
+#: shared/abstract_models.py:205
+msgid "dcat:theme — category from a controlled vocabulary"
+msgstr ""
+
+#: shared/abstract_models.py:219
+msgid "License"
+msgstr ""
+
+#: shared/abstract_models.py:220
+msgid "dct:license — URL or SPDX identifier"
+msgstr ""
+
+#: shared/abstract_models.py:226 shared/abstract_models.py:388
+#, fuzzy
+#| msgid "Confirmed"
+msgid "Conforms To"
+msgstr "Confirmed"
+
+#: shared/abstract_models.py:227
+msgid "dct:conformsTo — standard / specification URI"
+msgstr ""
+
+#: shared/abstract_models.py:232 shared/abstract_models.py:406
+msgid "Issued"
+msgstr ""
+
+#: shared/abstract_models.py:233
+msgid "dct:issued — date of first publication"
+msgstr ""
+
+#: shared/abstract_models.py:238 shared/abstract_models.py:411
+msgid "Modified"
+msgstr ""
+
+#: shared/abstract_models.py:239
+msgid "dct:modified — date of last modification"
+msgstr ""
+
+#: shared/abstract_models.py:244
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+msgid "Keywords"
+msgstr "Keywords"
+
+#: shared/abstract_models.py:245
+msgid "dcat:keyword — comma-separated keywords"
+msgstr ""
+
+#: shared/abstract_models.py:250
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+#, fuzzy
+#| msgid "Data Source"
+msgid "Source"
+msgstr "Data Source"
+
+#: shared/abstract_models.py:251
+msgid "dct:source — URI of the source dataset"
+msgstr ""
+
+#: shared/abstract_models.py:256
+#, fuzzy
+#| msgid "Created"
+msgid "Creator"
+msgstr "Created"
+
+#: shared/abstract_models.py:257
+msgid "dct:creator — name(s) of the dataset creator(s)"
+msgstr ""
+
+#: shared/abstract_models.py:270
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+#, fuzzy
+#| msgid "Rights holder"
+msgid "Rights Holder"
+msgstr "Rights holder"
+
+#: shared/abstract_models.py:271
+#, fuzzy
+#| msgid "Rights holder"
+msgid "dct:rightsHolder"
+msgstr "Rights holder"
+
+#: shared/abstract_models.py:276
+msgid "Provenance"
+msgstr ""
+
+#: shared/abstract_models.py:277
+msgid "dct:provenance"
+msgstr ""
+
+#: shared/abstract_models.py:293
+msgid "Access Rights"
+msgstr ""
+
+#: shared/abstract_models.py:295
+msgid ""
+"dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
+msgstr ""
+
+#: shared/abstract_models.py:302 shared/abstract_models.py:424
+msgid "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
+msgstr ""
+
+#: shared/abstract_models.py:306
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+msgid "Health Category"
+msgstr ""
+
+#: shared/abstract_models.py:307
+msgid "healthdcat:healthCategory (mandatory per HealthDCAT-AP v6)"
+msgstr ""
+
+#: shared/abstract_models.py:313
+msgid "HDAB"
+msgstr ""
+
+#: shared/abstract_models.py:315
+msgid ""
+"healthdcat:hdab — Health Data Access Body responsible for this dataset "
+"(mandatory per HealthDCAT-AP v6)"
+msgstr ""
+
+#: shared/abstract_models.py:333
+msgid "HDAB is mandatory (HealthDCAT-AP v6)."
+msgstr ""
+
+#: shared/abstract_models.py:355
+#, fuzzy
+#| msgid "Unique identifier for the individual"
+msgid "Unique identifier for this distribution"
+msgstr "Unique identifier for the individual"
+
+#: shared/abstract_models.py:364
+msgid "Dataset this distribution belongs to"
+msgstr ""
+
+#: shared/abstract_models.py:381
+msgid "Format"
+msgstr ""
+
+#: shared/abstract_models.py:382
+msgid "dct:format — media type or format URI"
+msgstr ""
+
+#: shared/abstract_models.py:393
+msgid "Byte Size"
+msgstr ""
+
+#: shared/abstract_models.py:394
+msgid "dcat:byteSize"
+msgstr ""
+
+#: shared/abstract_models.py:400
+#, fuzzy
+#| msgid "Rights holder"
+msgid "Rights"
+msgstr "Rights holder"
+
+#: shared/abstract_models.py:401
+msgid "dct:rights"
+msgstr ""
+
+#: shared/abstract_models.py:418
+msgid "Access URL"
+msgstr ""
+
+#: shared/abstract_models.py:419
+msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
+msgstr ""
+
+#: shared/validators.py:34
+#, python-format
+msgid "%(field)s is mandatory (HealthDCAT-AP v6)."
+msgstr ""
 
 # Ticketing / Cart translations
 #: ticketing/apps.py:14
 msgid "Ticketing"
 msgstr "Ticketing"
 
-#: ticketing/forms.py:13 ticketing/models.py:45
-#: ticketing/templates/ticketing/my_tickets.html:37
-msgid "Subject"
-msgstr "Subject"
-
-#: ticketing/forms.py:15 ticketing/views.py:67
-msgid "Data Access Request"
-msgstr "Data Access Request"
-
-#: ticketing/forms.py:19
-msgid "Brief description of your request"
-msgstr "Brief description of your request"
-
-#: ticketing/forms.py:26
-msgid "Additional Notes"
-msgstr "Additional Notes"
-
-#: ticketing/forms.py:33
-msgid ""
-"Please provide any additional information about your data request, such as "
-"purpose of use, timeframe needed, etc."
-msgstr ""
-"Please provide any additional information about your data request, such as "
-"purpose of use, timeframe needed, etc."
-
 #: ticketing/models.py:27
 msgid "Draft"
 msgstr "Draft"
 
-#: ticketing/models.py:28 ticketing/templates/ticketing/my_tickets.html:40
-#: ticketing/templates/ticketing/my_tickets.html:53
-#: ticketing/templates/ticketing/ticket_detail.html:25
-#: ticketing/templates/ticketing/ticket_detail.html:139
+#: ticketing/models.py:28 ticketing/templates/ticketing/history.html:32
 msgid "Submitted"
 msgstr "Submitted"
 
@@ -289,25 +640,23 @@ msgstr "Requester Name"
 msgid "Full name of the requester"
 msgstr "Full name of the requester"
 
+#: ticketing/models.py:45 ticketing/templates/ticketing/history.html:29
+msgid "Subject"
+msgstr "Subject"
+
 #: ticketing/models.py:45
 msgid "Ticket subject/title"
 msgstr "Ticket subject/title"
-
-#: ticketing/models.py:49 ticketing/templates/ticketing/cart.html:46
-#: ticketing/templates/ticketing/ticket_detail.html:37
-msgid "Description"
-msgstr "Description"
 
 #: ticketing/models.py:50
 msgid "Additional details or notes for the request"
 msgstr "Additional details or notes for the request"
 
-#: ticketing/models.py:55 ticketing/templates/ticketing/my_tickets.html:38
-#: ticketing/templates/ticketing/ticket_detail.html:87
+#: ticketing/models.py:55 ticketing/templates/ticketing/history.html:30
 msgid "Status"
 msgstr "Status"
 
-#: ticketing/models.py:63 ticketing/templates/ticketing/ticket_detail.html:132
+#: ticketing/models.py:63
 msgid "Alvao Ticket ID"
 msgstr "Alvao Ticket ID"
 
@@ -351,19 +700,11 @@ msgstr "Ticket Request"
 msgid "Ticket Requests"
 msgstr "Ticket Requests"
 
-#: ticketing/models.py:124 ticketing/templates/ticketing/cart.html:56
-#: ticketing/templates/ticketing/cart.html:74
-#: ticketing/templates/ticketing/ticket_detail.html:57 warehouse/models.py:53
-msgid "Dataset"
-msgstr "Dataset"
-
-#: ticketing/models.py:125 ticketing/templates/ticketing/cart.html:60
-#: ticketing/templates/ticketing/ticket_detail.html:59 warehouse/models.py:126
-#: warehouse/models.py:170
+#: ticketing/models.py:125
 msgid "Data Class"
 msgstr "Data Class"
 
-#: ticketing/models.py:126 warehouse/models.py:238 warehouse/models.py:265
+#: ticketing/models.py:126
 msgid "Database Table"
 msgstr "Database Table"
 
@@ -412,662 +753,2724 @@ msgid "Ticket Request Items"
 msgstr "Ticket Request Items"
 
 #: ticketing/templates/ticketing/cart.html:4
-#: ticketing/templates/ticketing/cart.html:9
+msgid "Cart"
+msgstr ""
+
+#: ticketing/templates/ticketing/cart.html:10
+#: ticketing/templates/ticketing/history.html:10
+#: warehouse/templates/catalogue/dataset_detail.html:13
+#: warehouse/templates/catalogue/distribution_detail.html:13
+#: warehouse/templates/catalogue/index.html:4
+#: warehouse/templates/catalogue/index.html:24
+msgid "Catalogue"
+msgstr "Catalogue"
+
+#: ticketing/templates/ticketing/cart.html:11
 msgid "Data Request Cart"
 msgstr "Data Request Cart"
 
-#: ticketing/templates/ticketing/cart.html:29
-msgid "Selected Items"
+#: ticketing/templates/ticketing/cart.html:12
+msgid "Review selected datasets and submit an Alvao request"
+msgstr ""
+
+#: ticketing/templates/ticketing/cart.html:22
+#, fuzzy
+#| msgid "Selected Items"
+msgid "Selected datasets"
 msgstr "Selected Items"
 
-#: ticketing/templates/ticketing/cart.html:34
-msgid "Clear All"
-msgstr "Clear All"
+#: ticketing/templates/ticketing/cart.html:40
+msgid "Remove"
+msgstr ""
 
-#: ticketing/templates/ticketing/cart.html:44
-#: ticketing/templates/ticketing/ticket_detail.html:47
-msgid "Type"
-msgstr "Type"
-
-#: ticketing/templates/ticketing/cart.html:45
-#: ticketing/templates/ticketing/ticket_detail.html:48
-msgid "Name"
-msgstr "Name"
-
-#: ticketing/templates/ticketing/cart.html:64
-#: ticketing/templates/ticketing/ticket_detail.html:61
-msgid "Table"
-msgstr "Table"
-
-#: ticketing/templates/ticketing/cart.html:87
-#: warehouse/templates/warehouse/catalogue.html:360
-msgid "Remove from cart"
-msgstr "Remove from cart"
-
-#: ticketing/templates/ticketing/cart.html:99 ticketing/views.py:247
-msgid "Your cart is empty."
-msgstr "Your cart is empty."
-
-#: ticketing/templates/ticketing/cart.html:101
-#: ticketing/templates/ticketing/ticket_submitted.html:48
-msgid "Browse Catalogue"
-msgstr "Browse Catalogue"
-
-#: ticketing/templates/ticketing/cart.html:113
-#: ticketing/templates/ticketing/cart.html:141
-msgid "Submit Request"
+#: ticketing/templates/ticketing/cart.html:56
+#, fuzzy
+#| msgid "Submit Request"
+msgid "Submit request"
 msgstr "Submit Request"
 
-#: ticketing/templates/ticketing/cart.html:144
-msgid "Continue Browsing"
-msgstr "Continue Browsing"
+#: ticketing/templates/ticketing/cart.html:68
+#, fuzzy
+#| msgid "Submitted At"
+msgid "Submit to Alvao"
+msgstr "Submitted At"
 
-#: ticketing/templates/ticketing/cart.html:150
-msgid "Add items to your cart to submit a request."
-msgstr "Add items to your cart to submit a request."
+#: ticketing/templates/ticketing/cart.html:75
+#, fuzzy
+#| msgid "Your cart is empty."
+msgid "Your cart is empty"
+msgstr "Your cart is empty."
 
-#: ticketing/templates/ticketing/cart.html:159
-msgid "How it works"
-msgstr "How it works"
-
-#: ticketing/templates/ticketing/cart.html:163
-msgid "Browse the catalogue and add items to your cart"
+#: ticketing/templates/ticketing/cart.html:76
+#, fuzzy
+#| msgid "Browse the catalogue and add items to your cart"
+msgid "Browse the catalogue and click the cart icon to add datasets."
 msgstr "Browse the catalogue and add items to your cart"
 
-#: ticketing/templates/ticketing/cart.html:164
-msgid "Review your selected items"
-msgstr "Review your selected items"
+#: ticketing/templates/ticketing/cart.html:77
+#: ticketing/templates/ticketing/history.html:103
+#, fuzzy
+#| msgid "How to use the catalogue"
+msgid "Go to catalogue"
+msgstr "How to use the catalogue"
 
-#: ticketing/templates/ticketing/cart.html:165
-msgid "Fill in your contact information"
-msgstr "Fill in your contact information"
-
-#: ticketing/templates/ticketing/cart.html:166
-msgid ""
-"Submit your request - a ticket will be created and you'll receive a "
-"confirmation"
-msgstr ""
-"Submit your request - a ticket will be created and you'll receive a "
-"confirmation"
-
-#: ticketing/templates/ticketing/cart.html:215
-msgid "Are you sure you want to clear your cart?"
-msgstr "Are you sure you want to clear your cart?"
-
-#: ticketing/templates/ticketing/my_tickets.html:4
-#: ticketing/templates/ticketing/my_tickets.html:9
-#: warehouse/templates/layout/navbar.html:17
+#: ticketing/templates/ticketing/history.html:4
+#: ticketing/templates/ticketing/history.html:11
+#: warehouse/templates/catalogue/components/_header.html:71
 msgid "My Tickets"
 msgstr "My Tickets"
 
-#: ticketing/templates/ticketing/my_tickets.html:27
-msgid "Your Tickets"
-msgstr "Your Tickets"
+#: ticketing/templates/ticketing/history.html:12
+msgid "History of submitted data access requests"
+msgstr ""
 
-#: ticketing/templates/ticketing/my_tickets.html:36
-msgid "Ticket ID"
-msgstr "Ticket ID"
+#: ticketing/templates/ticketing/history.html:21
+#, fuzzy
+#| msgid "Submitted At"
+msgid "Submitted tickets"
+msgstr "Submitted At"
 
-#: ticketing/templates/ticketing/my_tickets.html:39
+#: ticketing/templates/ticketing/history.html:31
+#, fuzzy
+#| msgid "Alvao Ticket ID"
+msgid "Alvao ID"
+msgstr "Alvao Ticket ID"
+
+#: ticketing/templates/ticketing/history.html:33
 msgid "Items"
 msgstr "Items"
 
-#: ticketing/templates/ticketing/my_tickets.html:55
-#: ticketing/templates/ticketing/ticket_detail.html:27
-msgid "Confirmed"
-msgstr "Confirmed"
-
-#: ticketing/templates/ticketing/my_tickets.html:57
-#: ticketing/templates/ticketing/ticket_detail.html:29
-msgid "Failed"
-msgstr "Failed"
-
-#: ticketing/templates/ticketing/my_tickets.html:67
-msgid "View Details"
-msgstr "View Details"
-
-#: ticketing/templates/ticketing/my_tickets.html:78
-msgid "Page navigation"
-msgstr "Page navigation"
-
-#: ticketing/templates/ticketing/my_tickets.html:108
-msgid "You haven't submitted any tickets yet."
-msgstr "You haven't submitted any tickets yet."
-
-#: ticketing/templates/ticketing/my_tickets.html:115
-msgid "Could not fetch remote ticket status from Alvao."
-msgstr "Could not fetch remote ticket status from Alvao."
-
-#: ticketing/templates/ticketing/ticket_detail.html:4
-msgid "Ticket Details"
-msgstr "Ticket Details"
-
-#: ticketing/templates/ticketing/ticket_detail.html:11
-msgid "Ticket"
-msgstr "Ticket"
-
-#: ticketing/templates/ticketing/ticket_detail.html:14
-msgid "Back to My Tickets"
-msgstr "Back to My Tickets"
-
-#: ticketing/templates/ticketing/ticket_detail.html:42
-msgid "Requested Items"
+#: ticketing/templates/ticketing/history.html:78
+#, fuzzy
+#| msgid "Requested Items"
+msgid "Requested datasets"
 msgstr "Requested Items"
 
-#: ticketing/templates/ticketing/ticket_detail.html:49
-msgid "ID"
-msgstr "ID"
-
-#: ticketing/templates/ticketing/ticket_detail.html:69
+#: ticketing/templates/ticketing/history.html:87
 msgid "No items"
 msgstr "No items"
 
-#: ticketing/templates/ticketing/ticket_detail.html:82
-msgid "Alvao Status"
-msgstr "Alvao Status"
-
-#: ticketing/templates/ticketing/ticket_detail.html:92
-msgid "Ticket Number"
-msgstr "Ticket Number"
-
-#: ticketing/templates/ticketing/ticket_detail.html:99
-msgid "View in Alvao"
-msgstr "View in Alvao"
-
-#: ticketing/templates/ticketing/ticket_detail.html:111
-msgid "Could not fetch current status from Alvao."
-msgstr "Could not fetch current status from Alvao."
-
-#: ticketing/templates/ticketing/ticket_detail.html:121
-msgid "Details"
-msgstr "Details"
-
-#: ticketing/templates/ticketing/ticket_detail.html:125
-msgid "Requester"
-msgstr "Requester"
-
-#: ticketing/templates/ticketing/ticket_detail.html:135
-msgid "Created"
-msgstr "Created"
-
-#: ticketing/templates/ticketing/ticket_detail.html:143
-msgid "Items Count"
-msgstr "Items Count"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:4
-msgid "Request Submitted"
-msgstr "Request Submitted"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:16
-msgid "Request Submitted Successfully!"
-msgstr "Request Submitted Successfully!"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:20
-msgid "Your ticket ID:"
+#: ticketing/templates/ticketing/history.html:101
+#, fuzzy
+#| msgid "Your ticket ID:"
+msgid "No tickets yet"
 msgstr "Your ticket ID:"
 
-#: ticketing/templates/ticketing/ticket_submitted.html:27
-#, python-format
-msgid ""
-"\n"
-"                        A confirmation email will be sent to "
-"<strong>%(email)s</strong>.\n"
-"                        "
+#: ticketing/templates/ticketing/history.html:102
+msgid "Your submitted data access requests will appear here."
 msgstr ""
-"\n"
-"                        A confirmation email will be sent to "
-"<strong>%(email)s</strong>.\n"
-"                        "
 
-#: ticketing/templates/ticketing/ticket_submitted.html:34
-msgid "Request Summary"
-msgstr "Request Summary"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:35
-msgid "Subject:"
-msgstr "Subject:"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:36
-msgid "Items:"
-msgstr "Items:"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:37
-msgid "Submitted:"
-msgstr "Submitted:"
-
-#: ticketing/templates/ticketing/ticket_submitted.html:42
-msgid ""
-"Your data access request has been submitted. You will receive a confirmation "
-"email shortly."
+#: ticketing/views.py:34
+msgid "Notes"
 msgstr ""
-"Your data access request has been submitted. You will receive a confirmation "
-"email shortly."
 
-#: ticketing/templates/ticketing/ticket_submitted.html:51
-msgid "View My Tickets"
-msgstr "View My Tickets"
+#: ticketing/views.py:38
+#, fuzzy
+#| msgid "Brief description of your request"
+msgid "Describe your request…"
+msgstr "Brief description of your request"
 
-#: ticketing/views.py:119
-msgid "Missing item type or ID"
-msgstr "Missing item type or ID"
+#: ticketing/views.py:95
+msgid "Your cart is empty."
+msgstr "Your cart is empty."
 
-#: ticketing/views.py:124
-msgid "Invalid item type"
-msgstr "Invalid item type"
+#: ticketing/views.py:103
+#, fuzzy
+#| msgid "Data Access Request"
+msgid "Data access request"
+msgstr "Data Access Request"
 
-#: ticketing/views.py:138 ticketing/views.py:212
-msgid "Item removed from cart"
-msgstr "Item removed from cart"
-
-#: ticketing/views.py:166
-msgid "Item added to cart"
-msgstr "Item added to cart"
-
-#: ticketing/views.py:218
-msgid "Item not found in cart"
-msgstr "Item not found in cart"
-
-#: ticketing/views.py:232
-msgid "Cart cleared"
-msgstr "Cart cleared"
-
-#: ticketing/views.py:289
-#, python-format
-msgid "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+#: ticketing/views.py:137
+#, fuzzy
+#| msgid ""
+#| "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
+msgid "Your request has been submitted."
 msgstr "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 
-#: ticketing/views.py:303
-#, python-format
-msgid "Failed to submit your request. Please try again later. Error: %(error)s"
+#: ticketing/views.py:142
+msgid ""
+"Submission to the ticketing system failed. Your request has been saved and "
+"our team will follow up."
 msgstr ""
-"Failed to submit your request. Please try again later. Error: %(error)s"
 
-#: ticketing/views.py:310
-msgid "Please correct the errors below."
+#: venv/Lib/python3.12/site-packages/click/_termui_impl.py:613
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/_termui_impl.py:617
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1114
+#: venv/Lib/python3.12/site-packages/click/core.py:1151
+#, python-brace-format
+msgid "{text} {deprecated_message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1170
+#, fuzzy
+#| msgid "Actions"
+msgid "Options"
+msgstr "Actions"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1245
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1264
+msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1448
+msgid "Aborted!"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1822
+msgid "Commands"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1853
+msgid "Missing command."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1931
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2355
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2378
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2567
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3015
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3018
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3082
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:465
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:522
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:548
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:50
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:89
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:81
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:130
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:132
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:190
+msgid "Missing argument"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:192
+msgid "Missing option"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:194
+#, fuzzy
+#| msgid "Missing item type or ID"
+msgid "Missing parameter"
+msgstr "Missing item type or ID"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:196
+#, fuzzy, python-brace-format
+#| msgid "Missing item type or ID"
+msgid "Missing {param_type}"
+msgstr "Missing item type or ID"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:203
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:223
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:235
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:282
+msgid "unknown error"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:289
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:199
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:381
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:444
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/shell_completion.py:332
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/shell_completion.py:339
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:165
+#, fuzzy
+#| msgid "R Transformation"
+msgid "Repeat for confirmation"
+msgstr "R Transformation"
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:181
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:183
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:194
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:253
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:872
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:332
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:369
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:460
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:482
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:538
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:719
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:747
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:937
+msgid "file"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:939
+msgid "directory"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:941
+msgid "path"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:988
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:997
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1005
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1014
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1023
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1032
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1099
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/contrib/messages/apps.py:16
+#: venv/Lib/site-packages/django/contrib/messages/apps.py:16
+msgid "Messages"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/contrib/sitemaps/apps.py:8
+#: venv/Lib/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/contrib/staticfiles/apps.py:9
+#: venv/Lib/site-packages/django/contrib/staticfiles/apps.py:9
+msgid "Static Files"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/contrib/syndication/apps.py:7
+#: venv/Lib/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr ""
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:30
+#: venv/Lib/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:32
+#: venv/Lib/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:33
+#: venv/Lib/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:34
+#: venv/Lib/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:22
+#: venv/Lib/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:70
+#: venv/Lib/site-packages/django/core/validators.py:70
+#, fuzzy
+#| msgid "Enter your domain username"
+msgid "Enter a valid domain name."
+msgstr "Enter your domain username"
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:153
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:775
+#: venv/Lib/site-packages/django/core/validators.py:153
+#: venv/Lib/site-packages/django/forms/fields.py:775
+msgid "Enter a valid URL."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:200
+#: venv/Lib/site-packages/django/core/validators.py:200
+msgid "Enter a valid integer."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:211
+#: venv/Lib/site-packages/django/core/validators.py:211
+msgid "Enter a valid email address."
+msgstr ""
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:289
+#: venv/Lib/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:297
+#: venv/Lib/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:309
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:318
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:332
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2220
+#: venv/Lib/site-packages/django/core/validators.py:309
+#: venv/Lib/site-packages/django/core/validators.py:318
+#: venv/Lib/site-packages/django/core/validators.py:332
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2220
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:311
+#: venv/Lib/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:320
+#: venv/Lib/python3.12/site-packages/django/utils/ipv6.py:43
+#: venv/Lib/site-packages/django/core/validators.py:320
+#: venv/Lib/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:334
+#: venv/Lib/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:375
+#: venv/Lib/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:381
+#: venv/Lib/site-packages/django/core/validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:416
+#: venv/Lib/site-packages/django/core/validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:425
+#: venv/Lib/site-packages/django/core/validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:434
+#: venv/Lib/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:441
+#: venv/Lib/site-packages/django/core/validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:473
+#: venv/Lib/site-packages/django/core/validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:491
+#: venv/Lib/site-packages/django/core/validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:514
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:366
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:405
+#: venv/Lib/site-packages/django/core/validators.py:514
+#: venv/Lib/site-packages/django/forms/fields.py:366
+#: venv/Lib/site-packages/django/forms/fields.py:405
+msgid "Enter a number."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:516
+#: venv/Lib/site-packages/django/core/validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:521
+#: venv/Lib/site-packages/django/core/validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:526
+#: venv/Lib/site-packages/django/core/validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:597
+#: venv/Lib/site-packages/django/core/validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:659
+#: venv/Lib/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/base.py:1600
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:908
+#: venv/Lib/site-packages/django/db/models/base.py:1600
+#: venv/Lib/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/base.py:1602
+#: venv/Lib/site-packages/django/db/models/base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/constraints.py:22
+#: venv/Lib/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:134
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:135
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:136
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:137
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:141
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:180
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1162
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1163
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1165
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1215
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1217
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1217
+msgid "String (unlimited)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1326
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1326
+msgid "Comma-separated integers"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1427
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1566
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1435
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1562
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1570
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1575
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1702
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1704
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1704
+msgid "Decimal number"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1864
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1868
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1868
+#, fuzzy
+#| msgid "Description"
+msgid "Duration"
+msgstr "Description"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1920
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1920
+msgid "Email address"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1945
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1945
+msgid "File path"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2023
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2025
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2025
+msgid "Floating point number"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2065
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2067
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2067
+msgid "Integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2163
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2180
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Small integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2188
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2188
+msgid "IPv4 address"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2219
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2219
+msgid "IP address"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2311
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2313
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2364
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2364
+msgid "Positive big integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2379
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2379
+msgid "Positive integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2394
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2394
+msgid "Positive small integer"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2410
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2446
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2446
+msgid "Text"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2526
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2530
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2534
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2534
+msgid "Time"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2642
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2642
+msgid "URL"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2666
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2666
+#, fuzzy
+#| msgid "Raw data"
+msgid "Raw binary data"
+msgstr "Raw data"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2731
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2733
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2733
+#, fuzzy
+#| msgid "Personal Identifier"
+msgid "Universally unique identifier"
+msgstr "Personal Identifier"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/files.py:244
+#: venv/Lib/site-packages/django/db/models/fields/files.py:244
+msgid "File"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/files.py:420
+#: venv/Lib/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/json.py:24
+#: venv/Lib/site-packages/django/db/models/fields/json.py:24
+#, fuzzy
+#| msgid "Subject"
+msgid "A JSON object"
+msgstr "Subject"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/json.py:26
+#: venv/Lib/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:979
+#: venv/Lib/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:982
+#: venv/Lib/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1276
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1333
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1335
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1383
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/Lib/python3.12/site-packages/django/forms/boundfield.py:185
+#: venv/Lib/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:95
+#: venv/Lib/site-packages/django/forms/fields.py:95
+msgid "This field is required."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:315
+#: venv/Lib/site-packages/django/forms/fields.py:315
+msgid "Enter a whole number."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:486
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1267
+#: venv/Lib/site-packages/django/forms/fields.py:486
+#: venv/Lib/site-packages/django/forms/fields.py:1267
+msgid "Enter a valid date."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:509
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1268
+#: venv/Lib/site-packages/django/forms/fields.py:509
+#: venv/Lib/site-packages/django/forms/fields.py:1268
+msgid "Enter a valid time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:536
+#: venv/Lib/site-packages/django/forms/fields.py:536
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:570
+#: venv/Lib/site-packages/django/forms/fields.py:570
+msgid "Enter a valid duration."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:571
+#: venv/Lib/site-packages/django/forms/fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:640
+#: venv/Lib/site-packages/django/forms/fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:641
+#: venv/Lib/site-packages/django/forms/fields.py:641
+msgid "No file was submitted."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:642
+#: venv/Lib/site-packages/django/forms/fields.py:642
+#, fuzzy
+#| msgid "You haven't submitted any tickets yet."
+msgid "The submitted file is empty."
+msgstr "You haven't submitted any tickets yet."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:644
+#: venv/Lib/site-packages/django/forms/fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:649
+#: venv/Lib/site-packages/django/forms/fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:717
+#: venv/Lib/site-packages/django/forms/fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:889
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:975
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1592
+#: venv/Lib/site-packages/django/forms/fields.py:889
+#: venv/Lib/site-packages/django/forms/fields.py:975
+#: venv/Lib/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:977
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1096
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1590
+#: venv/Lib/site-packages/django/forms/fields.py:977
+#: venv/Lib/site-packages/django/forms/fields.py:1096
+#: venv/Lib/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1097
+#: venv/Lib/site-packages/django/forms/fields.py:1097
+msgid "Enter a complete value."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1339
+#: venv/Lib/site-packages/django/forms/fields.py:1339
+msgid "Enter a valid UUID."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1369
+#: venv/Lib/site-packages/django/forms/fields.py:1369
+msgid "Enter a valid JSON."
+msgstr ""
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/Lib/python3.12/site-packages/django/forms/forms.py:97
+#: venv/Lib/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/forms.py:239
+#: venv/Lib/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:61
+#: venv/Lib/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:65
+#: venv/Lib/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:70
+#: venv/Lib/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:484
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:491
+#: venv/Lib/site-packages/django/forms/formsets.py:484
+#: venv/Lib/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:499
+#: venv/Lib/site-packages/django/forms/formsets.py:499
+msgid "Delete"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:901
+#: venv/Lib/site-packages/django/forms/models.py:901
+#, fuzzy, python-format
+#| msgid "Please correct the errors below."
+msgid "Please correct the duplicate data for %(field)s."
 msgstr "Please correct the errors below."
 
-#: ticketing/views.py:323
-msgid "Requested Data Items:"
-msgstr "Requested Data Items:"
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:906
+#: venv/Lib/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:913
+#: venv/Lib/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:922
+#: venv/Lib/site-packages/django/forms/models.py:922
+#, fuzzy
+#| msgid "Please correct the errors below."
+msgid "Please correct the duplicate values below."
+msgstr "Please correct the errors below."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1359
+#: venv/Lib/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1450
+#: venv/Lib/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1594
+#: venv/Lib/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/utils.py:229
+#: venv/Lib/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:527
+#: venv/Lib/site-packages/django/forms/widgets.py:527
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:47
+#, fuzzy
+#| msgid "Clear All"
+msgid "Clear"
+msgstr "Clear All"
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:528
+#: venv/Lib/site-packages/django/forms/widgets.py:528
+msgid "Currently"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:529
+#: venv/Lib/site-packages/django/forms/widgets.py:529
+msgid "Change"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:866
+#: venv/Lib/site-packages/django/forms/widgets.py:866
+msgid "Unknown"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:867
+#: venv/Lib/site-packages/django/forms/widgets.py:867
+msgid "Yes"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:868
+#: venv/Lib/site-packages/django/forms/widgets.py:868
+msgid "No"
+msgstr ""
+
+#. Translators: Please do not add spaces around commas.
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:873
+#: venv/Lib/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:903
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:920
+#: venv/Lib/site-packages/django/template/defaultfilters.py:903
+#: venv/Lib/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:922
+#: venv/Lib/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:924
+#: venv/Lib/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:926
+#: venv/Lib/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:928
+#: venv/Lib/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:930
+#: venv/Lib/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:74
+#: venv/Lib/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:75
+#: venv/Lib/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:80
+#: venv/Lib/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:81
+#: venv/Lib/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:153
+#: venv/Lib/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:155
+#: venv/Lib/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:7
+#: venv/Lib/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:8
+#: venv/Lib/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:9
+#: venv/Lib/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:10
+#: venv/Lib/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:11
+#: venv/Lib/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:12
+#: venv/Lib/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:13
+#: venv/Lib/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:16
+#: venv/Lib/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:17
+#: venv/Lib/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:18
+#: venv/Lib/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:19
+#: venv/Lib/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:20
+#: venv/Lib/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:21
+#: venv/Lib/site-packages/django/utils/dates.py:21
+#, fuzzy
+#| msgid "Status"
+msgid "Sat"
+msgstr "Status"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:22
+#: venv/Lib/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:25
+#: venv/Lib/site-packages/django/utils/dates.py:25
+msgid "January"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:26
+#: venv/Lib/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:27
+#: venv/Lib/site-packages/django/utils/dates.py:27
+#, fuzzy
+#| msgid "Search"
+msgid "March"
+msgstr "Search"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:28
+#: venv/Lib/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:29
+#: venv/Lib/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:30
+#: venv/Lib/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:31
+#: venv/Lib/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:32
+#: venv/Lib/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:33
+#: venv/Lib/site-packages/django/utils/dates.py:33
+msgid "September"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:34
+#: venv/Lib/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:35
+#: venv/Lib/site-packages/django/utils/dates.py:35
+msgid "November"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:36
+#: venv/Lib/site-packages/django/utils/dates.py:36
+msgid "December"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:39
+#: venv/Lib/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:40
+#: venv/Lib/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:41
+#: venv/Lib/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:42
+#: venv/Lib/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:43
+#: venv/Lib/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:44
+#: venv/Lib/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:45
+#: venv/Lib/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:46
+#: venv/Lib/site-packages/django/utils/dates.py:46
+#, fuzzy
+#| msgid "Tag"
+msgid "aug"
+msgstr "Tag"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:47
+#: venv/Lib/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:48
+#: venv/Lib/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:49
+#: venv/Lib/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:50
+#: venv/Lib/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:53
+#: venv/Lib/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:54
+#: venv/Lib/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:55
+#: venv/Lib/site-packages/django/utils/dates.py:55
+#, fuzzy
+#| msgid "Search"
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Search"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:56
+#: venv/Lib/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:57
+#: venv/Lib/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:58
+#: venv/Lib/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:59
+#: venv/Lib/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:60
+#: venv/Lib/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:61
+#: venv/Lib/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:62
+#: venv/Lib/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:63
+#: venv/Lib/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:64
+#: venv/Lib/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:67
+#: venv/Lib/site-packages/django/utils/dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:68
+#: venv/Lib/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:69
+#: venv/Lib/site-packages/django/utils/dates.py:69
+#, fuzzy
+#| msgid "Search"
+msgctxt "alt. month"
+msgid "March"
+msgstr "Search"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:70
+#: venv/Lib/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:71
+#: venv/Lib/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:72
+#: venv/Lib/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:73
+#: venv/Lib/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:74
+#: venv/Lib/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:75
+#: venv/Lib/site-packages/django/utils/dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:76
+#: venv/Lib/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:77
+#: venv/Lib/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:78
+#: venv/Lib/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/ipv6.py:20
+#: venv/Lib/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:76
+#: venv/Lib/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:287
+#: venv/Lib/site-packages/django/utils/text.py:287
+msgid "or"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:306
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:135
+#: venv/Lib/site-packages/django/utils/text.py:306
+#: venv/Lib/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:8
+#: venv/Lib/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:9
+#: venv/Lib/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:10
+#: venv/Lib/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:11
+#: venv/Lib/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:12
+#: venv/Lib/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:13
+#: venv/Lib/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:29
+#: venv/Lib/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:30
+#: venv/Lib/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:34
+#: venv/Lib/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:40
+#: venv/Lib/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:45
+#: venv/Lib/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:54
+#: venv/Lib/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:60
+#: venv/Lib/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:66
+#: venv/Lib/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:44
+#: venv/Lib/site-packages/django/views/generic/dates.py:44
+#, fuzzy
+#| msgid "Not specified"
+msgid "No year specified"
+msgstr "Not specified"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:64
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:115
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:214
+#: venv/Lib/site-packages/django/views/generic/dates.py:64
+#: venv/Lib/site-packages/django/views/generic/dates.py:115
+#: venv/Lib/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:94
+#: venv/Lib/site-packages/django/views/generic/dates.py:94
+#, fuzzy
+#| msgid "Not specified"
+msgid "No month specified"
+msgstr "Not specified"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:147
+#: venv/Lib/site-packages/django/views/generic/dates.py:147
+#, fuzzy
+#| msgid "Not specified"
+msgid "No day specified"
+msgstr "Not specified"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:194
+#: venv/Lib/site-packages/django/views/generic/dates.py:194
+#, fuzzy
+#| msgid "Not specified"
+msgid "No week specified"
+msgstr "Not specified"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:353
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:384
+#: venv/Lib/site-packages/django/views/generic/dates.py:353
+#: venv/Lib/site-packages/django/views/generic/dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:680
+#: venv/Lib/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:720
+#: venv/Lib/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/detail.py:56
+#: venv/Lib/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:70
+#: venv/Lib/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:77
+#: venv/Lib/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:173
+#: venv/Lib/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:49
+#: venv/Lib/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:51
+#: venv/Lib/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:68
+#: venv/Lib/python3.12/site-packages/django/views/templates/directory_index.html:8
+#: venv/Lib/python3.12/site-packages/django/views/templates/directory_index.html:11
+#: venv/Lib/site-packages/django/views/static.py:68
+#: venv/Lib/site-packages/django/views/templates/directory_index.html:8
+#: venv/Lib/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:204
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:206
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:218
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:226
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:227
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:235
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:236
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/mypy/main.py:440
+#: venv/Lib/site-packages/mypy/main.py:440
+#, python-format
+msgid "%(prog)s: error: %(message)s\n"
+msgstr ""
+
+#: venv/Lib/site-packages/_pytest/config/argparsing.py:474
+#, python-format
+msgid "ambiguous option: %(option)s could match %(matches)s"
+msgstr ""
+
+#: venv/Lib/site-packages/include_by_ajax/apps.py:13
+msgid "Include by Ajax"
+msgstr ""
 
 #: warehouse/apps.py:8
 msgid "Data Warehouse Catalogue"
 msgstr "Data Warehouse Catalogue"
 
-#: warehouse/models.py:16
-msgid "Data Source"
-msgstr "Data Source"
+#: warehouse/models.py:119
+msgid "DB Layer"
+msgstr ""
 
-#: warehouse/models.py:17
-msgid "Data Sources"
-msgstr "Data Sources"
+#: warehouse/models.py:121
+msgid ""
+"Physical DWH layer this distribution resides in (e.g. raw, clean, "
+"analytical). Local Metadata-specific field."
+msgstr ""
 
-#: warehouse/models.py:54
-msgid "Datasets"
-msgstr "Datasets"
+#: warehouse/models.py:153
+msgid "Unique column / variable identifier"
+msgstr ""
 
-#: warehouse/models.py:127
-msgid "Data Classes"
-msgstr "Data Classes"
+#: warehouse/models.py:162
+msgid "Distribution (table) this attribute belongs to"
+msgstr ""
 
-#: warehouse/models.py:172
-msgid "Column Order"
-msgstr "Column Order"
+#: warehouse/models.py:169
+msgid "Human-readable column name"
+msgstr ""
 
-#: warehouse/models.py:174
-msgid "Column Variable"
-msgstr "Column Variable"
-
-#: warehouse/models.py:177
-msgid "Column Name"
-msgstr "Column Name"
-
-#: warehouse/models.py:179
-msgid "Column Description"
-msgstr "Column Description"
-
-#: warehouse/models.py:181
-msgid "R Variable"
-msgstr "R Variable"
-
-#: warehouse/models.py:184
-msgid "R Transformation"
-msgstr "R Transformation"
-
-#: warehouse/models.py:187
-msgid "R Datatype"
+#: warehouse/models.py:180
+#, fuzzy
+#| msgid "R Datatype"
+msgid "Datatype"
 msgstr "R Datatype"
 
-#: warehouse/models.py:190
-msgid "Possible Key"
-msgstr "Possible Key"
+#: warehouse/models.py:181
+msgid "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
+msgstr ""
 
-#: warehouse/models.py:192
-msgid "Tag"
-msgstr "Tag"
+#: warehouse/models.py:187
+msgid "Property URL"
+msgstr ""
 
-#: warehouse/models.py:194
-msgid "Confidentiality Level"
-msgstr "Confidentiality Level"
+#: warehouse/models.py:188
+msgid "Semantic property URI (e.g. from a biomedical ontology)"
+msgstr ""
 
-#: warehouse/models.py:196 warehouse/models.py:280
-msgid "Vocabulary"
-msgstr "Vocabulary"
-
-#: warehouse/models.py:197
-msgid "Calculated"
-msgstr "Calculated"
-
-#: warehouse/models.py:202
-msgid "Mandatory"
-msgstr "Mandatory"
-
-#: warehouse/models.py:204
-msgid "Unit"
-msgstr "Unit"
-
-#: warehouse/models.py:209
-msgid "Data Class Table Schema"
-msgstr "Data Class Table Schema"
-
-#: warehouse/models.py:210
-msgid "Data Class Table Schemas"
-msgstr "Data Class Table Schemas"
-
-#: warehouse/models.py:239
-msgid "Database Tables"
-msgstr "Database Tables"
-
-#: warehouse/models.py:267
+#: warehouse/models.py:193
 msgid "Variable Order"
 msgstr "Variable Order"
 
-#: warehouse/models.py:268
-msgid "Variable"
-msgstr "Variable"
+#: warehouse/models.py:194
+msgid "Position of this column in the source table"
+msgstr ""
 
-#: warehouse/models.py:269
-msgid "Database Key"
-msgstr "Database Key"
+#: warehouse/models.py:200
+msgid "DB Key"
+msgstr ""
 
-#: warehouse/models.py:271
-msgid "Database Type"
-msgstr "Database Type"
+#: warehouse/models.py:201
+msgid "Primary / foreign key indicator from the DB schema"
+msgstr ""
 
-#: warehouse/models.py:273
+#: warehouse/models.py:207
 msgid "R Type"
 msgstr "R Type"
 
-#: warehouse/models.py:275
-msgid "Variable Name"
-msgstr "Variable Name"
+#: warehouse/models.py:208
+msgid "Corresponding R datatype for analytical use"
+msgstr ""
 
-#: warehouse/models.py:278
-msgid "Variable Description"
-msgstr "Variable Description"
+#: warehouse/models.py:213
+msgid "DDL Definition"
+msgstr ""
 
-#: warehouse/models.py:285
-msgid "Database Table Schema"
-msgstr "Database Table Schema"
+#: warehouse/models.py:214
+msgid "Full DDL column definition"
+msgstr ""
 
-#: warehouse/models.py:286
-msgid "Database Table Schemas"
-msgstr "Database Table Schemas"
+#: warehouse/models.py:219
+msgid "PK Definition (helper 1)"
+msgstr ""
 
-#: warehouse/templates/catalogue/login.html:16
-#: warehouse/templates/warehouse/base.html:9
-#: warehouse/templates/warehouse/catalogue.html:4
-#: warehouse/templates/warehouse/catalogue.html:24
-msgid "Data Catalogue MOÚ"
+#: warehouse/models.py:224
+msgid "PK Definition (helper 2)"
+msgstr ""
+
+#: warehouse/models.py:229
+msgid "PK Definition"
+msgstr ""
+
+#: warehouse/models.py:230
+msgid "Primary key definition expression"
+msgstr ""
+
+#: warehouse/models.py:236
+msgid "Attribute"
+msgstr ""
+
+#: warehouse/models.py:237
+msgid "Attributes"
+msgstr ""
+
+#: warehouse/templates/base.html:6
+#: warehouse/templates/catalogue/components/_header.html:14
+#: warehouse/templates/registration/login.html:32
+#, fuzzy
+#| msgid "Data Catalogue MOÚ"
+msgid "Data Catalogue"
 msgstr "MOÚ Data Catalogue"
 
-#: warehouse/templates/catalogue/login.html:20
-msgid "Welcome!"
-msgstr "Welcome!"
-
-#: warehouse/templates/catalogue/login.html:21
-msgid "Please sign in with your Windows domain credentials"
-msgstr "Please sign in with your Windows domain credentials"
-
-#: warehouse/templates/catalogue/login.html:28
-msgid "Invalid username or password. Please try again."
-msgstr "Invalid username or password. Please try again."
-
-#: warehouse/templates/catalogue/login.html:37
-msgid "Username"
-msgstr "Username"
-
-#: warehouse/templates/catalogue/login.html:43
-msgid "Enter your domain username"
-msgstr "Enter your domain username"
-
-#: warehouse/templates/catalogue/login.html:52
-msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
-msgstr "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
-
-#: warehouse/templates/catalogue/login.html:57
-msgid "Password"
-msgstr "Password"
-
-#: warehouse/templates/catalogue/login.html:64
-msgid "Enter your password"
-msgstr "Enter your password"
-
-#: warehouse/templates/catalogue/login.html:78
-msgid "Sign in"
-msgstr "Sign in"
-
-#: warehouse/templates/catalogue/login.html:86
-msgid "Your account will be created automatically on first login."
-msgstr "Your account will be created automatically on first login."
-
-#: warehouse/templates/layout/navbar.html:9
-msgid "Catalogue"
-msgstr "Catalogue"
-
-#: warehouse/templates/layout/navbar.html:40
-msgid "Admin"
-msgstr "Admin"
-
-#: warehouse/templates/layout/navbar.html:42
-msgid "Logout"
-msgstr "Logout"
-
-#: warehouse/templates/warehouse/base.html:10
-msgid "Data warehouse catalogue"
-msgstr "Data warehouse catalogue"
-
-#: warehouse/templates/warehouse/catalogue.html:25
-msgid ""
-"This catalogue serves as a registry of MOÚ data sources for the purpose of "
-"their effective sharing and secondary use. The catalogue includes data "
-"sources managed by the Department of Health Information, which guarantees "
-"the correctness of information, data quality and provides support in their "
-"use."
-msgstr ""
-"This catalogue serves as a registry of MOÚ data sources for the purpose of "
-"their effective sharing and secondary use. The catalogue includes data "
-"sources managed by the Department of Health Information, which guarantees "
-"the correctness of information, data quality and provides support in their "
-"use."
-
-#: warehouse/templates/warehouse/catalogue.html:33
-#: warehouse/templates/warehouse/includes/help_modal.html:7
-msgid "How to use the catalogue"
-msgstr "How to use the catalogue"
-
-#: warehouse/templates/warehouse/catalogue.html:34
-msgid "Click to display the catalogue usage guide."
-msgstr "Click to display the catalogue usage guide."
-
-#: warehouse/templates/warehouse/catalogue.html:53
-msgid "Enter search text"
-msgstr "Enter search text"
-
-#: warehouse/templates/warehouse/catalogue.html:79
-#: warehouse/templates/warehouse/catalogue.html:365
+#: warehouse/templates/catalogue/base_catalogue.html:40
+#: warehouse/templates/catalogue/base_catalogue.html:48
+#: warehouse/templates/catalogue/components/_distribution_card.html:33
+#: warehouse/templates/catalogue/components/_distribution_grid.html:31
+#: warehouse/templates/catalogue/index.html:75
+#: warehouse/templates/includes/_cart_add_btn.html:21
+#: warehouse/templates/includes/_cart_add_btn.html:23
+#: warehouse/templates/includes/_cart_add_btn.html:37
 msgid "Add to cart"
 msgstr "Add to cart"
 
-#: warehouse/templates/warehouse/catalogue.html:95
-#: warehouse/templates/warehouse/includes/filters.html:63
-msgid "Data source"
-msgstr "Data source"
+#: warehouse/templates/catalogue/base_catalogue.html:41
+#: warehouse/templates/catalogue/base_catalogue.html:48
+#: warehouse/templates/catalogue/components/_distribution_card.html:33
+#: warehouse/templates/catalogue/index.html:75
+#: warehouse/templates/includes/_cart_add_btn.html:22
+#: warehouse/templates/includes/_cart_add_btn.html:23
+#: warehouse/templates/includes/_cart_add_btn.html:31
+msgid "Remove from cart"
+msgstr "Remove from cart"
 
-#: warehouse/templates/warehouse/catalogue.html:96
-#: warehouse/templates/warehouse/includes/filters.html:81
-msgid "Rights holder"
-msgstr "Rights holder"
+#: warehouse/templates/catalogue/components/_column_table.html:5
+#, fuzzy
+#| msgid "Column Name"
+msgid "Columns"
+msgstr "Column Name"
 
-#: warehouse/templates/warehouse/catalogue.html:431
-#: warehouse/templates/warehouse/catalogue.html:438
-msgid "Could not update cart"
-msgstr "Could not update cart"
+#: warehouse/templates/catalogue/components/_column_table.html:12
+msgid "Search columns…"
+msgstr ""
 
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:123
-msgid "Data Source:"
-msgstr "Data Source:"
+#: warehouse/templates/catalogue/components/_column_table.html:61
+msgid "View"
+msgstr "View"
 
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:124
-msgid "This data is synced from the Fair Genomes GraphQL API."
-msgstr "This data is synced from the Fair Genomes GraphQL API."
+#: warehouse/templates/catalogue/components/_column_table.html:69
+#, fuzzy
+#| msgid "Column Variable"
+msgid "No columns available."
+msgstr "Column Variable"
 
-#: warehouse/templates/warehouse/fair_genomes_personal_detail.html:125
-msgid "To update, run:"
-msgstr "To update, run:"
+#: warehouse/templates/catalogue/components/_dcat_tooltip.html:32
+msgid "Expected type"
+msgstr ""
 
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:16
-msgid "Patient demographic data synced from Fair Genomes GraphQL API"
-msgstr "Patient demographic data synced from Fair Genomes GraphQL API"
-
-#: warehouse/templates/warehouse/fair_genomes_personal_list.html:148
-msgid "No Fair Genomes data available. Run sync to fetch data:"
-msgstr "No Fair Genomes data available. Run sync to fetch data:"
-
-#: warehouse/templates/warehouse/includes/filters.html:7
-msgid "Filters"
-msgstr "Filters"
-
-#: warehouse/templates/warehouse/includes/filters.html:12
-msgid "Clear filters"
-msgstr "Clear filters"
-
-#: warehouse/templates/warehouse/includes/filters.html:20
-msgid "Data availability"
-msgstr "Data availability"
-
-#: warehouse/templates/warehouse/includes/filters.html:26
-msgid "Tables ready"
-msgstr "Tables ready"
-
-#: warehouse/templates/warehouse/includes/filters.html:32
-msgid "Raw data"
-msgstr "Raw data"
-
-#: warehouse/templates/warehouse/includes/filters.html:38
-msgid "Unavailable data"
-msgstr "Unavailable data"
-
-#: warehouse/templates/warehouse/includes/filters.html:45
-msgid "Keywords"
-msgstr "Keywords"
-
-#: warehouse/templates/warehouse/includes/filters.html:47
-#: warehouse/templates/warehouse/includes/filters.html:65
-#: warehouse/templates/warehouse/includes/filters.html:83
-msgid "Search..."
-msgstr "Search..."
-
-#: warehouse/templates/warehouse/includes/filters.html:55
-msgid "No keywords to display."
-msgstr "No keywords to display."
-
-#: warehouse/templates/warehouse/includes/filters.html:73
-msgid "No data sources to display."
-msgstr "No data sources to display."
-
-#: warehouse/templates/warehouse/includes/filters.html:91
-msgid "No rights holders to display."
-msgstr "No rights holders to display."
-
-#: warehouse/templates/warehouse/includes/help_modal.html:8
+#: warehouse/templates/catalogue/components/_dcat_tooltip.html:51
 msgid "Close"
 msgstr "Close"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:11
-msgid "1. Search:"
-msgstr "1. Search:"
+#: warehouse/templates/catalogue/components/_distribution_card.html:49
+#: warehouse/templates/catalogue/index.html:86
+#, fuzzy
+#| msgid "View Details"
+msgid "View full detail"
+msgstr "View Details"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:13
-msgid ""
-"Enter keywords you are interested in into the \"Search term\" field. The "
-"catalogue will search through dataset names, descriptions and keywords."
+#: warehouse/templates/catalogue/components/_distribution_grid.html:79
+#, fuzzy
+#| msgid "No Fair Genomes data available."
+msgid "No distributions available."
+msgstr "No Fair Genomes data available."
+
+#: warehouse/templates/catalogue/components/_header.html:15
+#: warehouse/templates/registration/login.html:33
+msgid "Masarykův onkologický ústav"
 msgstr ""
-"Enter keywords you are interested in into the \"Search term\" field. The "
-"catalogue will search through dataset names, descriptions and keywords."
 
-#: warehouse/templates/warehouse/includes/help_modal.html:16
-msgid "Press the \"Search\" button (if available)."
-msgstr "Press the \"Search\" button (if available)."
+#: warehouse/templates/catalogue/components/_header.html:26
+#, fuzzy
+#| msgid "View"
+msgid "View cart"
+msgstr "View"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:21
-msgid "2. Filtering:"
-msgstr "2. Filtering:"
+#: warehouse/templates/catalogue/components/_header.html:65
+#, fuzzy
+#| msgid "Admin"
+msgid "Admin Panel"
+msgstr "Admin"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:23
-msgid "Filters are available in the left panel."
-msgstr "Filters are available in the left panel."
+#: warehouse/templates/catalogue/components/_header.html:78
+#, fuzzy
+#| msgid "Sign In"
+msgid "Sign out"
+msgstr "Sign In"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:24
-msgid "You can filter by:"
-msgstr "You can filter by:"
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:11
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:40
+msgid "Search"
+msgstr "Search"
 
-#: warehouse/templates/warehouse/includes/help_modal.html:26
-msgid "Keywords:"
-msgstr "Keywords:"
-
-#: warehouse/templates/warehouse/includes/help_modal.html:26
-msgid ""
-"Check relevant keywords. You can use the search field within each filter "
-"section for faster searching."
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:17
+msgid "Datasets, distributions…"
 msgstr ""
-"Check relevant keywords. You can use the search field within each filter "
-"section for faster searching."
 
-#: warehouse/templates/warehouse/includes/help_modal.html:29
-msgid "Data source:"
-msgstr "Data source:"
-
-#: warehouse/templates/warehouse/includes/help_modal.html:29
-msgid "Select which source the data comes from."
-msgstr "Select which source the data comes from."
-
-#: warehouse/templates/warehouse/includes/help_modal.html:30
-msgid "Rights holder:"
-msgstr "Rights holder:"
-
-#: warehouse/templates/warehouse/includes/help_modal.html:30
-msgid "Display datasets managed by a specific rights holder."
-msgstr "Display datasets managed by a specific rights holder."
-
-#: warehouse/templates/warehouse/includes/help_modal.html:33
-msgid ""
-"After checking the filters, the corresponding datasets will be automatically "
-"displayed."
+#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
+msgid "Distribution Columns"
 msgstr ""
-"After checking the filters, the corresponding datasets will be automatically "
-"displayed."
 
-#: warehouse/templates/warehouse/includes/help_modal.html:34
-msgid "To clear all set filters, click the \"Clear filters\" button."
-msgstr "To clear all set filters, click the \"Clear filters\" button."
+#: warehouse/templates/catalogue/dataset_detail.html:37
+msgid "JSON-LD"
+msgstr ""
 
-#: warehouse/templates/warehouse/includes/help_modal.html:39
-msgid "3. Browsing datasets:"
-msgstr "3. Browsing datasets:"
+#: warehouse/templates/catalogue/dataset_detail.html:50
+#, fuzzy
+#| msgid "Metadata"
+msgid "Dataset Metadata"
+msgstr "Metadata"
 
-#~ msgid "Your Email"
-#~ msgstr "Your Email"
+#: warehouse/templates/catalogue/dataset_detail.html:94
+msgid "distribution(s)"
+msgstr ""
+
+#: warehouse/templates/catalogue/dataset_detail.html:103
+#: warehouse/templates/catalogue/dataset_detail.html:108
+msgid "No distributions available for this dataset."
+msgstr ""
+
+#: warehouse/templates/catalogue/distribution_detail.html:31
+msgid "Adds the entire dataset"
+msgstr ""
+
+#: warehouse/templates/catalogue/distribution_detail.html:44
+msgid "Distribution Metadata"
+msgstr ""
+
+#: warehouse/templates/catalogue/distribution_detail.html:68
+msgid "column(s)"
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:24
+#, fuzzy
+#| msgid "Dataset"
+msgid "Data"
+msgstr "Dataset"
+
+#: warehouse/templates/catalogue/index.html:27
+msgid ""
+"Evidence and description of data sources of Masaryk Oncology Institute for "
+"secondary use. Each record is based on the Health DCAT-AP schema — click"
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:27
+msgid "to display the field definition and ontology link."
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:37
+msgid "datasets matching filters"
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:44
+msgid "page"
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:44
+msgid "of"
+msgstr "of"
+
+#: warehouse/templates/catalogue/index.html:176
+#: warehouse/templates/catalogue/index.html:218
+msgid "No datasets found"
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:177
+msgid "Try a different query or adjust the sidebar filters."
+msgstr ""
+
+#: warehouse/templates/catalogue/index.html:219
+#, fuzzy
+#| msgid "Clear filters"
+msgid "Clear all filters"
+msgstr "Clear filters"
+
+#: warehouse/templates/includes/_filter_group.html:10
+#, fuzzy
+#| msgid "Filters"
+msgid "Filter…"
+msgstr "Filters"
+
+#: warehouse/templates/includes/schema_modal.html:12
+msgid "DCAT-AP term"
+msgstr ""
+
+#: warehouse/templates/registration/login.html:6
+msgid "Login"
+msgstr ""
+
+#: warehouse/templates/registration/login.html:6
+#, fuzzy
+#| msgid "Data Catalogue MOÚ"
+msgid "MOU Data Catalogue"
+msgstr "MOÚ Data Catalogue"
+
+#: warehouse/templates/registration/login.html:42
+msgid "Invalid username or password. Please try again."
+msgstr "Invalid username or password. Please try again."
+
+#: warehouse/templates/registration/login.html:51
+msgid "Username"
+msgstr "Username"
+
+#: warehouse/templates/registration/login.html:58
+msgid "Password"
+msgstr "Password"
+
+#: warehouse/templates/registration/login.html:64
+msgid "Sign in"
+msgstr "Sign in"
+
+#: warehouse/templates/registration/login.html:71
+msgid "Health DCAT-AP · FAIR Data Register"
+msgstr ""
+
+#~ msgid "Inserted By"
+#~ msgstr "Inserted By"
+
+#~ msgid "User who created this record"
+#~ msgstr "User who created this record"
+
+#~ msgid "Inserted On"
+#~ msgstr "Inserted On"
+
+#~ msgid "Timestamp when record was created"
+#~ msgstr "Timestamp when record was created"
+
+#~ msgid "Updated By"
+#~ msgstr "Updated By"
+
+#~ msgid "User who last updated this record"
+#~ msgstr "User who last updated this record"
+
+#~ msgid "Updated On"
+#~ msgstr "Updated On"
+
+#~ msgid "Timestamp when record was last updated"
+#~ msgstr "Timestamp when record was last updated"
+
+#~ msgid "Year of Birth"
+#~ msgstr "Year of Birth"
+
+#~ msgid "Year the individual was born"
+#~ msgstr "Year the individual was born"
+
+#~ msgid "Personal Record"
+#~ msgstr "Personal Record"
+
+#~ msgid "Personal Records"
+#~ msgstr "Personal Records"
+
+#~ msgid "Fair Genomes"
+#~ msgstr "Fair Genomes"
+
+#~ msgid "Personal Record Details"
+#~ msgstr "Personal Record Details"
+
+#~ msgid "Personal Information"
+#~ msgstr "Personal Information"
+
+#~ msgid "Back to List"
+#~ msgstr "Back to List"
+
+#~ msgid "Fair Genomes - Personal Data"
+#~ msgstr "Fair Genomes - Personal Data"
+
+#~ msgid "Total Records"
+#~ msgstr "Total Records"
+
+#~ msgid "Search by identifier or user..."
+#~ msgstr "Search by identifier or user..."
+
+#~ msgid "All Years of Birth"
+#~ msgstr "All Years of Birth"
+
+#~ msgid "First"
+#~ msgstr "First"
+
+#~ msgid "Previous"
+#~ msgstr "Previous"
+
+#~ msgid "Page"
+#~ msgstr "Page"
+
+#~ msgid "Next"
+#~ msgstr "Next"
+
+#~ msgid "Last"
+#~ msgstr "Last"
+
+#~ msgid "No records found matching your search criteria."
+#~ msgstr "No records found matching your search criteria."
+
+#~ msgid "Additional Notes"
+#~ msgstr "Additional Notes"
+
+#~ msgid ""
+#~ "Please provide any additional information about your data request, such "
+#~ "as purpose of use, timeframe needed, etc."
+#~ msgstr ""
+#~ "Please provide any additional information about your data request, such "
+#~ "as purpose of use, timeframe needed, etc."
+
+#~ msgid "Type"
+#~ msgstr "Type"
+
+#~ msgid "Browse Catalogue"
+#~ msgstr "Browse Catalogue"
+
+#~ msgid "Continue Browsing"
+#~ msgstr "Continue Browsing"
+
+#~ msgid "Add items to your cart to submit a request."
+#~ msgstr "Add items to your cart to submit a request."
+
+#~ msgid "How it works"
+#~ msgstr "How it works"
+
+#~ msgid "Review your selected items"
+#~ msgstr "Review your selected items"
+
+#~ msgid "Fill in your contact information"
+#~ msgstr "Fill in your contact information"
+
+#~ msgid ""
+#~ "Submit your request - a ticket will be created and you'll receive a "
+#~ "confirmation"
+#~ msgstr ""
+#~ "Submit your request - a ticket will be created and you'll receive a "
+#~ "confirmation"
+
+#~ msgid "Are you sure you want to clear your cart?"
+#~ msgstr "Are you sure you want to clear your cart?"
+
+#~ msgid "Your Tickets"
+#~ msgstr "Your Tickets"
+
+#~ msgid "Ticket ID"
+#~ msgstr "Ticket ID"
+
+#~ msgid "Failed"
+#~ msgstr "Failed"
+
+#~ msgid "Page navigation"
+#~ msgstr "Page navigation"
+
+#~ msgid "Could not fetch remote ticket status from Alvao."
+#~ msgstr "Could not fetch remote ticket status from Alvao."
+
+#~ msgid "Ticket Details"
+#~ msgstr "Ticket Details"
+
+#~ msgid "Ticket"
+#~ msgstr "Ticket"
+
+#~ msgid "Back to My Tickets"
+#~ msgstr "Back to My Tickets"
+
+#~ msgid "ID"
+#~ msgstr "ID"
+
+#~ msgid "Alvao Status"
+#~ msgstr "Alvao Status"
+
+#~ msgid "Ticket Number"
+#~ msgstr "Ticket Number"
+
+#~ msgid "View in Alvao"
+#~ msgstr "View in Alvao"
+
+#~ msgid "Could not fetch current status from Alvao."
+#~ msgstr "Could not fetch current status from Alvao."
+
+#~ msgid "Details"
+#~ msgstr "Details"
+
+#~ msgid "Items Count"
+#~ msgstr "Items Count"
+
+#~ msgid "Request Submitted"
+#~ msgstr "Request Submitted"
+
+#~ msgid "Request Submitted Successfully!"
+#~ msgstr "Request Submitted Successfully!"
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "                        A confirmation email will be sent to "
+#~ "<strong>%(email)s</strong>.\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                        A confirmation email will be sent to "
+#~ "<strong>%(email)s</strong>.\n"
+#~ "                        "
+
+#~ msgid "Request Summary"
+#~ msgstr "Request Summary"
+
+#~ msgid "Subject:"
+#~ msgstr "Subject:"
+
+#~ msgid "Items:"
+#~ msgstr "Items:"
+
+#~ msgid "Submitted:"
+#~ msgstr "Submitted:"
+
+#~ msgid ""
+#~ "Your data access request has been submitted. You will receive a "
+#~ "confirmation email shortly."
+#~ msgstr ""
+#~ "Your data access request has been submitted. You will receive a "
+#~ "confirmation email shortly."
+
+#~ msgid "View My Tickets"
+#~ msgstr "View My Tickets"
+
+#~ msgid "Invalid item type"
+#~ msgstr "Invalid item type"
+
+#~ msgid "Item removed from cart"
+#~ msgstr "Item removed from cart"
+
+#~ msgid "Item added to cart"
+#~ msgstr "Item added to cart"
+
+#~ msgid "Item not found in cart"
+#~ msgstr "Item not found in cart"
+
+#~ msgid "Cart cleared"
+#~ msgstr "Cart cleared"
+
+#, python-format
+#~ msgid ""
+#~ "Failed to submit your request. Please try again later. Error: %(error)s"
+#~ msgstr ""
+#~ "Failed to submit your request. Please try again later. Error: %(error)s"
+
+#~ msgid "Requested Data Items:"
+#~ msgstr "Requested Data Items:"
+
+#~ msgid "Data Sources"
+#~ msgstr "Data Sources"
+
+#~ msgid "Data Classes"
+#~ msgstr "Data Classes"
+
+#~ msgid "Column Order"
+#~ msgstr "Column Order"
+
+#~ msgid "Column Description"
+#~ msgstr "Column Description"
+
+#~ msgid "R Variable"
+#~ msgstr "R Variable"
+
+#~ msgid "Possible Key"
+#~ msgstr "Possible Key"
+
+#~ msgid "Confidentiality Level"
+#~ msgstr "Confidentiality Level"
+
+#~ msgid "Vocabulary"
+#~ msgstr "Vocabulary"
+
+#~ msgid "Calculated"
+#~ msgstr "Calculated"
+
+#~ msgid "Unit"
+#~ msgstr "Unit"
+
+#~ msgid "Data Class Table Schema"
+#~ msgstr "Data Class Table Schema"
+
+#~ msgid "Data Class Table Schemas"
+#~ msgstr "Data Class Table Schemas"
+
+#~ msgid "Database Tables"
+#~ msgstr "Database Tables"
+
+#~ msgid "Variable"
+#~ msgstr "Variable"
+
+#~ msgid "Database Key"
+#~ msgstr "Database Key"
+
+#~ msgid "Database Type"
+#~ msgstr "Database Type"
+
+#~ msgid "Variable Description"
+#~ msgstr "Variable Description"
+
+#~ msgid "Database Table Schema"
+#~ msgstr "Database Table Schema"
+
+#~ msgid "Database Table Schemas"
+#~ msgstr "Database Table Schemas"
+
+#~ msgid "Welcome!"
+#~ msgstr "Welcome!"
+
+#~ msgid "Please sign in with your Windows domain credentials"
+#~ msgstr "Please sign in with your Windows domain credentials"
+
+#~ msgid "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
+#~ msgstr "Use your Windows domain username (e.g., jnovak or DOMAIN\\\\jnovak)"
+
+#~ msgid "Enter your password"
+#~ msgstr "Enter your password"
+
+#~ msgid "Your account will be created automatically on first login."
+#~ msgstr "Your account will be created automatically on first login."
+
+#~ msgid "Logout"
+#~ msgstr "Logout"
+
+#~ msgid "Data warehouse catalogue"
+#~ msgstr "Data warehouse catalogue"
+
+#~ msgid ""
+#~ "This catalogue serves as a registry of MOÚ data sources for the purpose "
+#~ "of their effective sharing and secondary use. The catalogue includes data "
+#~ "sources managed by the Department of Health Information, which guarantees "
+#~ "the correctness of information, data quality and provides support in "
+#~ "their use."
+#~ msgstr ""
+#~ "This catalogue serves as a registry of MOÚ data sources for the purpose "
+#~ "of their effective sharing and secondary use. The catalogue includes data "
+#~ "sources managed by the Department of Health Information, which guarantees "
+#~ "the correctness of information, data quality and provides support in "
+#~ "their use."
+
+#~ msgid "Click to display the catalogue usage guide."
+#~ msgstr "Click to display the catalogue usage guide."
+
+#~ msgid "Enter search text"
+#~ msgstr "Enter search text"
+
+#~ msgid "Data source"
+#~ msgstr "Data source"
+
+#~ msgid "Could not update cart"
+#~ msgstr "Could not update cart"
+
+#~ msgid "Data Source:"
+#~ msgstr "Data Source:"
+
+#~ msgid "This data is synced from the Fair Genomes GraphQL API."
+#~ msgstr "This data is synced from the Fair Genomes GraphQL API."
+
+#~ msgid "To update, run:"
+#~ msgstr "To update, run:"
+
+#~ msgid "Patient demographic data synced from Fair Genomes GraphQL API"
+#~ msgstr "Patient demographic data synced from Fair Genomes GraphQL API"
+
+#~ msgid "No Fair Genomes data available. Run sync to fetch data:"
+#~ msgstr "No Fair Genomes data available. Run sync to fetch data:"
+
+#~ msgid "Data availability"
+#~ msgstr "Data availability"
+
+#~ msgid "Tables ready"
+#~ msgstr "Tables ready"
+
+#~ msgid "Unavailable data"
+#~ msgstr "Unavailable data"
+
+#~ msgid "Search..."
+#~ msgstr "Search..."
+
+#~ msgid "No keywords to display."
+#~ msgstr "No keywords to display."
+
+#~ msgid "No data sources to display."
+#~ msgstr "No data sources to display."
+
+#~ msgid "No rights holders to display."
+#~ msgstr "No rights holders to display."
+
+#~ msgid "1. Search:"
+#~ msgstr "1. Search:"
+
+#~ msgid ""
+#~ "Enter keywords you are interested in into the \"Search term\" field. The "
+#~ "catalogue will search through dataset names, descriptions and keywords."
+#~ msgstr ""
+#~ "Enter keywords you are interested in into the \"Search term\" field. The "
+#~ "catalogue will search through dataset names, descriptions and keywords."
+
+#~ msgid "Press the \"Search\" button (if available)."
+#~ msgstr "Press the \"Search\" button (if available)."
+
+#~ msgid "2. Filtering:"
+#~ msgstr "2. Filtering:"
+
+#~ msgid "Filters are available in the left panel."
+#~ msgstr "Filters are available in the left panel."
+
+#~ msgid "You can filter by:"
+#~ msgstr "You can filter by:"
+
+#~ msgid "Keywords:"
+#~ msgstr "Keywords:"
+
+#~ msgid ""
+#~ "Check relevant keywords. You can use the search field within each filter "
+#~ "section for faster searching."
+#~ msgstr ""
+#~ "Check relevant keywords. You can use the search field within each filter "
+#~ "section for faster searching."
+
+#~ msgid "Data source:"
+#~ msgstr "Data source:"
+
+#~ msgid "Select which source the data comes from."
+#~ msgstr "Select which source the data comes from."
+
+#~ msgid "Rights holder:"
+#~ msgstr "Rights holder:"
+
+#~ msgid "Display datasets managed by a specific rights holder."
+#~ msgstr "Display datasets managed by a specific rights holder."
+
+#~ msgid ""
+#~ "After checking the filters, the corresponding datasets will be "
+#~ "automatically displayed."
+#~ msgstr ""
+#~ "After checking the filters, the corresponding datasets will be "
+#~ "automatically displayed."
+
+#~ msgid "To clear all set filters, click the \"Clear filters\" button."
+#~ msgstr "To clear all set filters, click the \"Clear filters\" button."
+
+#~ msgid "3. Browsing datasets:"
+#~ msgstr "3. Browsing datasets:"
 
 #~ msgid "We will use this email to contact you about your request."
 #~ msgstr "We will use this email to contact you about your request."

@@ -100,7 +100,7 @@ class CartView(LoginRequiredMixin, View):
 
         # Create TicketRequest
         dataset_names = ', '.join(item['title'] for item in cart)
-        auto_subject = f"Data access request — {dataset_names}"[:500]
+        auto_subject = (str(_("Data access request")) + f" — {dataset_names}")[:500]
         ticket = TicketRequest.objects.create(
             requester_email=request.user.email,
             requester_name=request.user.get_full_name() or request.user.username,

@@ -7,17 +7,21 @@
 <div class="max-w-4xl mx-auto px-6 py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
-  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label="Catalogue" bc_current="Data Request Cart" %}
+  {% trans "Catalogue" as t_catalogue %}
+  {% trans "Data Request Cart" as t_cart_title %}
+  {% trans "Review selected datasets and submit an Alvao request" as t_cart_subtitle %}
+  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_current=t_cart_title %}
 
-  {% with hero_title="Data Request Cart" hero_subtitle="Review selected datasets and submit an Alvao request" hero_color="#f04600" hero_icon="cart" hero_icon_bg="#fdeee7" hero_icon_border="#f9bfa8" hero_icon_color="#f04600" %}
+  {% with hero_title=t_cart_title hero_subtitle=t_cart_subtitle hero_color="#f04600" hero_icon="cart" hero_icon_bg="#fdeee7" hero_icon_border="#f9bfa8" hero_icon_color="#f04600" %}
   {% include "includes/_page_hero.html" %}
   {% endwith %}
 
   {% if cart %}
   <!-- Cart items table -->
   <div class="card bg-white border border-gray-200 shadow-sm rounded-lg mb-6 overflow-hidden">
+    {% trans "Selected datasets" as t_selected_datasets %}
     {% with cart_count_str=cart|length|stringformat:"s" %}
-    {% with cart_label="Selected datasets · "|add:cart_count_str %}
+    {% with cart_label=t_selected_datasets|add:" · "|add:cart_count_str %}
     {% include "includes/_card_section_header.html" with csh_color="#53c0d7" csh_label=cart_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">
@@ -49,7 +53,8 @@
 
   <!-- Submit form -->
   <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
-    {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label="Submit request" %}
+    {% trans "Submit request" as t_submit_request %}
+    {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_submit_request %}
     <div class="px-5 pt-3 pb-5 flex flex-col gap-3">
       <form method="post" action="{% url 'ticketing:cart' %}">
         {% csrf_token %}
@@ -67,7 +72,10 @@
   </div>
 
   {% else %}
-  {% with es_icon="cart" es_icon_bg="#fdeee7" es_icon_color="#f04600" es_heading="Your cart is empty" es_subtitle="Browse the catalogue and click the cart icon to add datasets." es_btn_href=catalogue_url es_btn_label="Go to catalogue" %}
+  {% trans "Your cart is empty" as t_cart_empty %}
+  {% trans "Browse the catalogue and click the cart icon to add datasets." as t_cart_empty_sub %}
+  {% trans "Go to catalogue" as t_go_to_catalogue %}
+  {% with es_icon="cart" es_icon_bg="#fdeee7" es_icon_color="#f04600" es_heading=t_cart_empty es_subtitle=t_cart_empty_sub es_btn_href=catalogue_url es_btn_label=t_go_to_catalogue %}
   {% include "includes/_empty_state.html" %}
   {% endwith %}
   {% endif %}

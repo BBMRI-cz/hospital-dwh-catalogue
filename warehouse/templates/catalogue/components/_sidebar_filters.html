@@ -19,12 +19,13 @@
       </div>
     </div>
 
-    {% include "includes/_filter_group.html" with title="Keywords" items=sidebar_keywords list_id='kw-list' field_name='keywords' only %}
-    {% include "includes/_filter_group.html" with title="Rights Holder" items=sidebar_rights_holders list_id='rh-list' field_name='rights_holder' only %}
-    {% include "includes/_filter_group.html" with title="Health Category" items=sidebar_health_categories list_id='hc-list' field_name='health_category' only %}
-    {% include "includes/_filter_group.html" with title="Source" items=sidebar_sources list_id='src-list' field_name='source' only %}
-    {% include "includes/_filter_group.html" with title="Theme" items=sidebar_themes list_id='theme-list' field_name='theme' only %}
-    {% include "includes/_filter_group.html" with title="Distribution Columns" items=sidebar_columns list_id='col-list' field_name='column' only %}
+    {% trans "Keywords" as t_kw %}{% trans "Rights Holder" as t_rh %}{% trans "Health Category" as t_hc %}{% trans "Source" as t_src %}{% trans "Theme" as t_theme %}{% trans "Distribution Columns" as t_cols %}
+    {% include "includes/_filter_group.html" with title=t_kw items=sidebar_keywords list_id='kw-list' field_name='keywords' only %}
+    {% include "includes/_filter_group.html" with title=t_rh items=sidebar_rights_holders list_id='rh-list' field_name='rights_holder' only %}
+    {% include "includes/_filter_group.html" with title=t_hc items=sidebar_health_categories list_id='hc-list' field_name='health_category' only %}
+    {% include "includes/_filter_group.html" with title=t_src items=sidebar_sources list_id='src-list' field_name='source' only %}
+    {% include "includes/_filter_group.html" with title=t_theme items=sidebar_themes list_id='theme-list' field_name='theme' only %}
+    {% include "includes/_filter_group.html" with title=t_cols items=sidebar_columns list_id='col-list' field_name='column' only %}
 
   </div>{# /scrollable filters #}
 

@@ -119,20 +119,3 @@ def start_scheduler(interval_hours: int | None = None):
     _scheduler.start()
 
 
-def stop_scheduler(timeout: int = 5):
-    """
-    Stop the global scheduler instance.
-
-    Args:
-        timeout: Seconds to wait for shutdown
-    """
-    global _scheduler
-
-    if _scheduler is not None:
-        _scheduler.stop(timeout=timeout)
-        _scheduler = None
-
-
-def get_scheduler() -> FairGenomesScheduler | None:
-    """Get the global scheduler instance."""
-    return _scheduler
