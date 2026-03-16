@@ -1,0 +1,94 @@
+{% load i18n %}
+{# Expects: distributions list of dicts, dataset dict #}
+<div class="space-y-2 mb-6">
+  {% for dist in distributions %}
+  <article class="dist-tile card card-compact bg-base-100 border border-site-border shadow-sm hover:shadow-md transition-all"
+    id="dtile-det-{{ forloop.counter }}">
+    <div class="card-body p-0">
+
+      {# Compact header #}
+      <div class="flex items-center gap-3 px-4 py-3 cursor-pointer"
+        onclick="toggleDistTile({{ forloop.counter }})">
+        <div class="w-6 h-6 rounded flex items-center justify-center shrink-0" style="background:#fdeee7;border:1px solid #f9bfa8">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f04600" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+        </div>
+        <span class="font-serif text-[15px] text-gray-900 flex-1 leading-snug" style="color:#f04600">{{ dist.title|default:dist.name }}</span>
+        <div class="flex items-center gap-1 flex-wrap shrink-0">
+          {% if dist.format %}<span class="badge badge-xs font-mono" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">{{ dist.format }}</span>{% endif %}
+          {% if dist.db_layer %}<span class="badge badge-xs font-mono" style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb;">{{ dist.db_layer }}</span>{% endif %}
+        </div>
+        <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block" onclick="event.stopPropagation()">
+          {% csrf_token %}
+          <input type="hidden" name="source" value="{{ dataset.source }}">
+          <input type="hidden" name="name" value="{{ dataset.name }}">
+          <input type="hidden" name="title" value="{{ dist.title|default:dist.name }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" title="{% trans 'Add to cart' %}" class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-orange-500">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </button>
+        </form>
+        <svg class="expand-icon text-gray-300 shrink-0 transition-transform" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+
+      {# Expandable details #}
+      <div class="dist-details hidden border-t border-gray-100 px-4 pb-4 pt-3" id="distbody-{{ forloop.counter }}">
+        {% if dist.description %}
+        <p class="text-sm text-gray-600 leading-relaxed mb-3">{{ dist.description }}</p>
+        {% endif %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {% if dist.access_url %}
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dcat:accessURL</span>
+            <span class="text-xs text-gray-700 break-all">{{ dist.access_url }}</span>
+          </div>
+          {% endif %}
+          {% if dist.issued %}
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dct:issued</span>
+            <span class="text-xs text-gray-700">{{ dist.issued }}</span>
+          </div>
+          {% endif %}
+          {% if dist.modified %}
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dct:modified</span>
+            <span class="text-xs text-gray-700">{{ dist.modified }}</span>
+          </div>
+          {% endif %}
+          {% if dist.byte_size %}
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dcat:byteSize</span>
+            <span class="text-xs font-mono text-gray-700">{{ dist.byte_size }} B</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </article>
+  {% empty %}
+  <div class="text-center py-10 text-gray-400 italic text-sm">{% trans "No distributions available." %}</div>
+  {% endfor %}
+</div>
+
+<script>
+function toggleDistTile(idx) {
+  const body  = document.getElementById('distbody-' + idx);
+  const tile  = document.getElementById('dtile-det-' + idx);
+  if (!body) return;
+  const isOpen = !body.classList.contains('hidden');
+  if (isOpen) {
+    body.classList.add('hidden');
+    tile?.classList.remove('expanded');
+  } else {
+    body.classList.remove('hidden');
+    tile?.classList.add('expanded');
+  }
+}
+</script>

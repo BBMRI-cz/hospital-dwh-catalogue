@@ -1,0 +1,12 @@
+{% load i18n %}
+{# Expects: total_count, dist_count #}
+<div class="flex gap-4 mb-6">
+  <div class="flex-1 bg-base-100 border border-site-border shadow-sm rounded-lg px-5 py-3">
+    <div class="text-2xl font-serif text-gray-700">{{ total_count }}</div>
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-500 mt-0.5">{% trans "Datasets" %}</div>
+  </div>
+  <div class="flex-1 bg-base-100 border border-site-border shadow-sm rounded-lg px-5 py-3">
+    <div class="text-2xl font-serif" style="color:#f04600">{{ dist_count }}</div>
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-500 mt-0.5">{% trans "Distributions" %}</div>
+  </div>
+</div>

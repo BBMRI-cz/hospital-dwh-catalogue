@@ -1,0 +1,83 @@
+{% load i18n %}
+{# Expects: columns list of dicts with name, title, datatype, is_primary_key, property_url #}
+<div class="card bg-base-100 border border-site-border shadow-sm overflow-hidden">
+  <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+    <h3 class="font-serif text-base text-gray-800">{% trans "Columns" %}
+      <span class="badge badge-sm font-mono text-[10px] ml-1.5 border text-gray-500 bg-white border-gray-200">{{ columns|length }}</span>
+    </h3>
+    <div class="relative">
+      <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="column-search" placeholder="{% trans 'Search columns…' %}"
+        oninput="filterColumns(this)"
+        class="input input-sm input-bordered pl-8 w-56 bg-white text-sm">
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="table table-xs table-zebra w-full" id="column-table">
+      <thead>
+        <tr class="text-gray-500 bg-gray-50/40">
+          <th class="font-mono text-[10px] uppercase tracking-wider">
+            <span class="flex items-center gap-1">
+              csvw:name
+              {% include "includes/_info_btn.html" with semantics="csvw:name" %}
+            </span>
+          </th>
+          <th class="font-mono text-[10px] uppercase tracking-wider">
+            <span class="flex items-center gap-1">
+              dct:title
+              {% include "includes/_info_btn.html" with semantics="dct:title" %}
+            </span>
+          </th>
+          <th class="font-mono text-[10px] uppercase tracking-wider text-center">PK</th>
+          <th class="font-mono text-[10px] uppercase tracking-wider hidden md:table-cell">
+            <span class="flex items-center gap-1">
+              csvw:datatype
+              {% include "includes/_info_btn.html" with semantics="csvw:datatype" %}
+            </span>
+          </th>
+          <th class="font-mono text-[10px] uppercase tracking-wider hidden lg:table-cell">skos:inScheme</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col in columns %}
+        <tr class="col-row hover:bg-mou-blue-light/20 transition-colors" data-col="{{ col.name|lower }}">
+          <td class="font-mono text-[12px]" style="color:#007fc8">{{ col.name }}</td>
+          <td class="text-sm text-gray-700">{{ col.title|default:"—" }}</td>
+          <td class="text-center">
+            {% if col.is_primary_key %}
+            <span class="badge badge-xs font-mono" style="background:#fbeebc;color:#92400e;border:1px solid #fcd34d;">PK</span>
+            {% else %}
+            <span class="text-gray-300 text-xs">—</span>
+            {% endif %}
+          </td>
+          <td class="font-mono text-[11px] text-gray-500 hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
+          <td class="hidden lg:table-cell">
+            {% if col.property_url %}
+            <a href="{{ col.property_url }}" target="_blank" rel="noopener"
+              class="inline-flex items-center gap-1 font-mono text-[11px] no-underline transition-colors" style="color:#53c0d7">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              {% trans "View" %}
+            </a>
+            {% else %}
+            <span class="text-gray-300 text-xs">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center py-8 text-sm text-gray-400 italic">{% trans "No columns available." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterColumns(inp) {
+  const v = inp.value.toLowerCase();
+  inp.closest('.card').querySelectorAll('.col-row').forEach(row => {
+    row.style.display = row.dataset.col.includes(v) ? '' : 'none';
+  });
+}
+</script>

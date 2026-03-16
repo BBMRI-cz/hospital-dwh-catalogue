@@ -322,6 +322,24 @@ TERMS: list[dict] = [
         'levels': ['Dataset'],
         'display_order': 66,
     },
+    {
+        'term_key': 'issued',
+        'semantics': 'dct:issued',
+        'base_label_en': 'Date Issued',
+        'base_description_en': 'The date of formal issuance (e.g., publication) of the resource.',
+        'requirement': 'optional',
+        'levels': ['Dataset', 'Distribution'],
+        'display_order': 67,
+    },
+    {
+        'term_key': 'modified',
+        'semantics': 'dct:modified',
+        'base_label_en': 'Date Modified',
+        'base_description_en': 'The most recent date on which the resource was changed or modified.',
+        'requirement': 'optional',
+        'levels': ['Dataset', 'Distribution'],
+        'display_order': 68,
+    },
     # ── Distribution-specific ─────────────────────────────────────────────────
     {
         'term_key': 'distribution_entity',

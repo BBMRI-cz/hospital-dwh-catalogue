@@ -11,6 +11,7 @@ import logging
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -50,8 +51,18 @@ class CartAddView(LoginRequiredMixin, View):
         source = request.POST.get('source', '')
         name = request.POST.get('name', '')
         title = request.POST.get('title', '')
+        in_cart = False
         if source and name:
-            CartService.add(request.session, source, name, title)
+            cart = CartService.get(request.session)
+            already_in = any(i['source'] == source and i['name'] == name for i in cart)
+            if already_in:
+                CartService.remove(request.session, source, name)
+                in_cart = False
+            else:
+                CartService.add(request.session, source, name, title)
+                in_cart = True
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'in_cart': in_cart, 'cart_count': CartService.count(request.session)})
         next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
         return redirect(next_url)
 

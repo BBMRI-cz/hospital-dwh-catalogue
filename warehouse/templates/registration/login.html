@@ -1,33 +1,16 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n static %}<!DOCTYPE html>
 <html lang="cs" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% trans "Login" %} · MOU Datový katalog</title>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5/dist/full.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link href="{% static 'css/custom-fonts.css' %}" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              cyan:   '#53c0d7',
-              orange: '#f04600',
-              blue:   '#007fc8',
-              yellow: '#fbeebc',
-            },
-          },
-          fontFamily: {
-            serif: ['Instrument Serif', 'Georgia', 'serif'],
-            sans:  ['Instrument Sans', 'system-ui', 'sans-serif'],
-            mono:  ['JetBrains Mono', 'monospace'],
-          },
-        },
-      },
-    };
-  </script>
+  {% include "includes/_tailwind_config.html" %}
   <style>
     body::after {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -36,7 +19,7 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 font-sans min-h-screen flex items-center justify-center p-4">
+<body class="bg-page-bg font-sans min-h-screen flex items-center justify-center p-4">
   <div class="relative z-10 w-full max-w-sm">
 
     <!-- Logo / Heading -->
@@ -51,43 +34,37 @@
     </div>
 
     <!-- Card -->
-    <div class="card bg-white shadow-xl border border-gray-200">
-      <div class="card-body gap-5">
+    <div class="bg-white rounded-xl shadow-xl border border-gray-200 p-6">
 
-        {% if form.errors %}
-        <div role="alert" class="alert alert-error text-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span>{% trans "Invalid username or password. Please try again." %}</span>
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'login' %}">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ next }}">
-
-          <div class="form-control gap-1 mb-4">
-            <label class="label py-0">
-              <span class="label-text font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Username" %}</span>
-            </label>
-            <input type="text" name="username" autofocus autocomplete="username"
-              class="input input-bordered w-full focus:border-brand-cyan"
-              value="{{ form.username.value|default:'' }}">
-          </div>
-
-          <div class="form-control gap-1 mb-6">
-            <label class="label py-0">
-              <span class="label-text font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Password" %}</span>
-            </label>
-            <input type="password" name="password" autocomplete="current-password"
-              class="input input-bordered w-full focus:border-brand-cyan">
-          </div>
-
-          <button type="submit" class="btn btn-block text-white font-medium" style="background:#53c0d7;border-color:#53c0d7;">
-            {% trans "Sign in" %}
-          </button>
-        </form>
-
+      {% if form.errors %}
+      <div class="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-5">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>{% trans "Invalid username or password. Please try again." %}</span>
       </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}" class="flex flex-col gap-4">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div class="flex flex-col gap-1">
+          <label class="font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Username" %}</label>
+          <input type="text" name="username" autofocus autocomplete="username"
+            class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:border-[#53c0d7] focus:bg-white transition-colors"
+            value="{{ form.username.value|default:'' }}">
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="font-mono text-[11px] uppercase tracking-wider text-gray-500">{% trans "Password" %}</label>
+          <input type="password" name="password" autocomplete="current-password"
+            class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:border-[#53c0d7] focus:bg-white transition-colors">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-lg text-white font-medium text-sm transition-opacity hover:opacity-90 mt-1" style="background:#53c0d7;">
+          {% trans "Sign in" %}
+        </button>
+      </form>
+
     </div>
 
     <p class="text-center text-[11px] text-gray-400 font-mono mt-6 uppercase tracking-wider">

@@ -17,11 +17,12 @@ from django.views.generic import View
 from django.shortcuts import render
 
 from shared.services import UnifiedCatalogService
+from ticketing.cart import CartService as CartService
+from warehouse.models import Attribute, Distribution
 
 PAGE_SIZE = 20
 _CACHE_TTL = 300          # 5 minutes
 _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
-_CACHE_KEY_COUNTERS = 'catalogue_counters'
 _CACHE_KEY_SCHEMA   = 'catalogue_schema_json'
 
 
@@ -149,19 +150,38 @@ def _filter_datasets(datasets: list, get_params) -> list:
     source_filter  = set(get_params.getlist('source'))
     rights_filter  = set(get_params.getlist('rights_holder'))
     cat_filter     = set(get_params.getlist('health_category'))
+    theme_filter   = set(get_params.getlist('theme'))
+    column_filter  = set(get_params.getlist('column'))
 
     # Default: all statuses active when none selected
     all_statuses = {'ready', 'raw', 'unavailable'}
     if not status_filter:
         status_filter = all_statuses
 
+    # Resolve column filter → matching dataset names via Attribute + Distribution
+    matching_dataset_names: frozenset | None = None
+    if column_filter:
+        dist_names = (
+            Attribute.objects.using('metadata_db')
+            .filter(title__in=column_filter)
+            .values_list('distribution_name', flat=True)
+            .distinct()
+        )
+        dataset_names = (
+            Distribution.objects.using('metadata_db')
+            .filter(name__in=dist_names)
+            .values_list('dataset_name', flat=True)
+            .distinct()
+        )
+        matching_dataset_names = frozenset(dataset_names)
+
     result = []
     for ds in datasets:
         # Status
         if ds['status'] not in status_filter:
             continue
-        # Source
-        if source_filter and ds.get('source') not in source_filter:
+        # Source (dct:source URI)
+        if source_filter and ds.get('source_uri') not in source_filter:
             continue
         # Keywords (ANY match)
         if keyword_filter:
@@ -173,6 +193,12 @@ def _filter_datasets(datasets: list, get_params) -> list:
             continue
         # Health category
         if cat_filter and ds.get('health_category') not in cat_filter:
+            continue
+        # Theme
+        if theme_filter and ds.get('theme') not in theme_filter:
+            continue
+        # Distribution columns
+        if matching_dataset_names is not None and ds.get('name') not in matching_dataset_names:
             continue
         # Text search
         if q:
@@ -210,47 +236,12 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         service = UnifiedCatalogService()
 
         all_datasets: list[dict] = cache.get(_CACHE_KEY_DATASETS)
-        counters: dict | None = cache.get(_CACHE_KEY_COUNTERS)
 
-        if all_datasets is None or counters is None:
+        if all_datasets is None:
             all_datasets = [
                 _dataset_to_dict(ds) for ds in service.get_datasets_with_distributions()
             ]
-
-            kw_counter:     Counter = Counter()
-            src_counter:    Counter = Counter()
-            rh_counter:     Counter = Counter()
-            hc_counter:     Counter = Counter()
-            status_counter: Counter = Counter()
-
-            for ds in all_datasets:
-                for kw in ds.get('keywords', []):
-                    if kw:
-                        kw_counter[kw] += 1
-                if ds.get('source'):
-                    src_counter[ds['source']] += 1
-                if ds.get('rights_holder'):
-                    rh_counter[ds['rights_holder']] += 1
-                if ds.get('health_category'):
-                    hc_counter[ds['health_category']] += 1
-                status_counter[ds['status']] += 1
-
-            counters = {
-                'kw':     kw_counter,
-                'src':    src_counter,
-                'rh':     rh_counter,
-                'hc':     hc_counter,
-                'status': status_counter,
-            }
-
             cache.set(_CACHE_KEY_DATASETS, all_datasets, _CACHE_TTL)
-            cache.set(_CACHE_KEY_COUNTERS, counters, _CACHE_TTL)
-        else:
-            kw_counter     = counters['kw']
-            src_counter    = counters['src']
-            rh_counter     = counters['rh']
-            hc_counter     = counters['hc']
-            status_counter = counters['status']
 
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
 
@@ -262,6 +253,8 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         active_sources  = set(get.getlist('source'))
         active_rights   = set(get.getlist('rights_holder'))
         active_cats     = set(get.getlist('health_category'))
+        active_themes   = set(get.getlist('theme'))
+        active_columns  = set(get.getlist('column'))
 
         filter_params = {
             'q':               q,
@@ -270,6 +263,8 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             'source':          active_sources,
             'rights_holder':   active_rights,
             'health_category': active_cats,
+            'theme':           active_themes,
+            'column':          active_columns,
         }
 
         # ── Filter + paginate ────────────────────────────────────────────────
@@ -277,11 +272,59 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         paginator = Paginator(filtered, PAGE_SIZE)
         page_obj  = paginator.get_page(get.get('page', 1))
 
-        # ── Global stats ─────────────────────────────────────────────────────
-        total_count   = len(all_datasets)
-        active_count  = sum(1 for ds in all_datasets if ds['status'] != 'unavailable')
-        unavail_count = status_counter.get('unavailable', 0)
-        dist_count    = sum(len(ds.get('distributions', [])) for ds in all_datasets)
+        # ── Global stats (unfiltered) ─────────────────────────────────────────
+        total_count = len(all_datasets)
+        dist_count  = sum(len(ds.get('distributions', [])) for ds in all_datasets)
+
+        # ── Sidebar counters (computed from filtered results) ─────────────────
+        kw_counter:     Counter = Counter()
+        src_counter:    Counter = Counter()
+        rh_counter:     Counter = Counter()
+        hc_counter:     Counter = Counter()
+        theme_counter:  Counter = Counter()
+        status_counter: Counter = Counter()
+
+        for ds in filtered:
+            for kw in ds.get('keywords', []):
+                if kw:
+                    kw_counter[kw] += 1
+            if ds.get('source_uri'):
+                src_counter[ds['source_uri']] += 1
+            if ds.get('rights_holder'):
+                rh_counter[ds['rights_holder']] += 1
+            if ds.get('health_category'):
+                hc_counter[ds['health_category']] += 1
+            if ds.get('theme'):
+                theme_counter[ds['theme']] += 1
+            status_counter[ds['status']] += 1
+
+        # ── Distribution column counter (from filtered datasets) ──────────────
+        col_counter: Counter = Counter()
+        filtered_dist_names = [
+            d['name']
+            for ds in filtered if ds.get('source') == 'warehouse'
+            for d in ds.get('distributions', [])
+        ]
+        if filtered_dist_names:
+            dist_to_dataset: dict[str, str] = {
+                d['name']: ds['name']
+                for ds in filtered
+                for d in ds.get('distributions', [])
+            }
+            seen_col_ds: set[tuple] = set()
+            attr_rows = (
+                Attribute.objects.using('metadata_db')
+                .filter(distribution_name__in=filtered_dist_names)
+                .exclude(title='')
+                .filter(title__isnull=False)
+                .values_list('title', 'distribution_name')
+                .distinct()
+            )
+            for title, dist_name in attr_rows:
+                ds_name = dist_to_dataset.get(dist_name)
+                if ds_name and (title, ds_name) not in seen_col_ds:
+                    col_counter[title] += 1
+                    seen_col_ds.add((title, ds_name))
 
         return render(request, 'catalogue/index.html', {
             'page_obj':      page_obj,
@@ -291,6 +334,8 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             'sidebar_sources':           _make_sidebar_items(src_counter, active_sources),
             'sidebar_rights_holders':    _make_sidebar_items(rh_counter, active_rights),
             'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats),
+            'sidebar_themes':            _make_sidebar_items(theme_counter, active_themes),
+            'sidebar_columns':           _make_sidebar_items(col_counter, active_columns),
             # Status bar counts
             'sidebar_counts': {
                 'ready':       status_counter.get('ready', 0),
@@ -299,11 +344,11 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             },
             # Hero stats
             'total_count':   total_count,
-            'active_count':  active_count,
-            'unavail_count': unavail_count,
             'dist_count':    dist_count,
             # Schema modal
-            'schema_json':   json.dumps(schema_json),
+            'schema_json':   schema_json,
+            # Cart state
+            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
 
 
@@ -332,8 +377,48 @@ class DatasetDetailView(LoginRequiredMixin, View):
         return render(request, self.template_name, {
             'dataset':      ds_dict,
             'distributions': ds_dict['distributions'],
-            'schema_json':  json.dumps(schema_json),
+            'schema_json':  schema_json,
             'jsonld_str':   json.dumps(jsonld, indent=2, ensure_ascii=False),
+            'source':       source,
+        })
+
+
+class DistributionDetailView(LoginRequiredMixin, View):
+    """Detail page for a single distribution."""
+
+    template_name = 'catalogue/distribution_detail.html'
+
+    def get(self, request, source: str, name: str):
+        service = UnifiedCatalogService()
+
+        all_datasets: list[dict] | None = cache.get(_CACHE_KEY_DATASETS)
+        if all_datasets is None:
+            all_datasets = [
+                _dataset_to_dict(ds) for ds in service.get_datasets_with_distributions()
+            ]
+            cache.set(_CACHE_KEY_DATASETS, all_datasets, _CACHE_TTL)
+
+        distribution: dict | None = None
+        dataset: dict | None = None
+        for ds in all_datasets:
+            for dist in ds.get('distributions', []):
+                if dist['source'] == source and dist['name'] == name:
+                    distribution = dist
+                    dataset = ds
+                    break
+            if distribution:
+                break
+
+        if distribution is None:
+            raise Http404('Distribution not found')
+
+        schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
+
+        return render(request, self.template_name, {
+            'distribution': distribution,
+            'dataset':      dataset,
+            'columns':      [],   # Column model not yet implemented
+            'schema_json':  schema_json,
             'source':       source,
         })
 
