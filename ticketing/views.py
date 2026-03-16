@@ -29,15 +29,14 @@ logger = logging.getLogger(__name__)
 
 
 class TicketSubmitForm(forms.Form):
-    subject = forms.CharField(
-        max_length=500,
-        label=_('Subject'),
-        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': _('Data access request subject')}),
-    )
     description = forms.CharField(
         required=False,
-        label=_('Additional notes'),
-        widget=forms.Textarea(attrs={'class': 'textarea textarea-bordered w-full', 'rows': 4, 'placeholder': _('Optional context or requirements…')}),
+        label=_('Notes'),
+        widget=forms.Textarea(attrs={
+            'class': 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-[#53c0d7] focus:outline-none focus:ring-2 focus:ring-[#53c0d7]/20 transition resize-none',
+            'rows': 4,
+            'placeholder': _('Describe your request…'),
+        }),
     )
 
 
@@ -100,10 +99,12 @@ class CartView(LoginRequiredMixin, View):
             return render(request, self.template_name, {'cart': cart, 'form': form})
 
         # Create TicketRequest
+        dataset_names = ', '.join(item['title'] for item in cart)
+        auto_subject = f"Data access request — {dataset_names}"[:500]
         ticket = TicketRequest.objects.create(
             requester_email=request.user.email,
             requester_name=request.user.get_full_name() or request.user.username,
-            subject=form.cleaned_data['subject'],
+            subject=auto_subject,
             description=form.cleaned_data.get('description', ''),
             status=TicketRequest.Status.DRAFT,
             session_key=request.session.session_key,
