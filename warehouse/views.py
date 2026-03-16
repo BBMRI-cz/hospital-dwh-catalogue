@@ -380,6 +380,7 @@ class DatasetDetailView(LoginRequiredMixin, View):
             'schema_json':  schema_json,
             'jsonld_str':   json.dumps(jsonld, indent=2, ensure_ascii=False),
             'source':       source,
+            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
 
 
@@ -420,5 +421,6 @@ class DistributionDetailView(LoginRequiredMixin, View):
             'columns':      [],   # Column model not yet implemented
             'schema_json':  schema_json,
             'source':       source,
+            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
 

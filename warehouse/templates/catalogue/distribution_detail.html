@@ -6,63 +6,44 @@
 {% block content %}
 {{ schema_json|json_script:"schema-data" }}
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto px-6 py-8">
 
   <!-- Breadcrumb -->
-  <div class="breadcrumbs text-sm text-gray-400 font-mono mb-6">
-    <ul>
-      <li><a href="{% url 'warehouse:catalogue' %}" class="hover:text-cyan-600">{% trans "Catalogue" %}</a></li>
-      {% if dataset %}
-      <li><a href="{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name %}" class="hover:text-cyan-600">{{ dataset.title|default:dataset.name }}</a></li>
-      {% endif %}
-      <li class="text-gray-600">{{ distribution.title|default:distribution.name }}</li>
-    </ul>
-  </div>
+  <nav class="flex items-center gap-1.5 font-mono text-xs mb-6 flex-wrap">
+    <a href="{% url 'warehouse:catalogue' %}" class="text-mou-cyan hover:underline">{% trans "Catalogue" %}</a>
+    {% if dataset %}
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-300 shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+    <a href="{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name %}" class="text-mou-cyan hover:underline truncate max-w-xs">{{ dataset.title|default:dataset.name }}</a>
+    {% endif %}
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-300 shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="text-gray-500 truncate max-w-xs">{{ distribution.title|default:distribution.name }}</span>
+  </nav>
 
   <!-- Hero -->
   <div class="mb-8 pb-7 border-b border-gray-200">
     <div class="flex items-start gap-4 flex-wrap">
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-2 flex-wrap">
-          <span class="badge badge-sm font-mono text-[9px]" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">healthdcatap:HealthDistribution</span>
-          {% if distribution.format %}
-          <span class="badge badge-sm font-mono text-[9px]" style="background:#fdeee7;color:#f04600;border:1px solid #f9bfa8;">{{ distribution.format }}</span>
-          {% endif %}
-          {% if distribution.db_layer %}
-          <span class="badge badge-sm font-mono text-[9px]" style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb;">{{ distribution.db_layer }}</span>
-          {% endif %}
-        </div>
         <h1 class="font-serif text-4xl font-normal text-gray-900 leading-tight" style="color:#f04600">
           {{ distribution.title|default:distribution.name }}
         </h1>
-        <p class="font-mono text-[11px] text-gray-400 mt-1">{{ distribution.name }}</p>
         {% if distribution.description %}
         <p class="mt-3 text-base text-gray-600 leading-relaxed max-w-2xl">{{ distribution.description }}</p>
         {% endif %}
       </div>
       {% if dataset %}
-      <div class="flex gap-2 flex-wrap shrink-0">
-        <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block">
-          {% csrf_token %}
-          <input type="hidden" name="source" value="{{ distribution.source }}">
-          <input type="hidden" name="name" value="{{ dataset.name }}">
-          <input type="hidden" name="title" value="{{ distribution.title|default:distribution.name }}">
-          <input type="hidden" name="next" value="{{ request.path }}">
-          <button type="submit" class="btn btn-sm text-white gap-2" style="background:#f04600;border-color:#f04600;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-            {% trans "Add to cart" %}
-          </button>
-        </form>
+      <div class="flex flex-col gap-2 shrink-0 w-44">
+        {% include "includes/_cart_add_btn.html" with cart_source=distribution.source cart_name=dataset.name cart_title=distribution.title|default:distribution.name cart_next=request.path %}
+        <p class="text-[10px] text-gray-400 text-center leading-snug">
+          {% trans "Adds the entire dataset" %}<br>
+          <span class="font-medium text-gray-500">{{ dataset.title|default:dataset.name }}</span>
+        </p>
       </div>
       {% endif %}
     </div>
   </div>
 
   <!-- DCAT Metadata card -->
-  <div class="card bg-white border border-gray-200 shadow-sm mb-8">
+  <div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
     <div class="card-body p-0">
       <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100">
         <div class="w-0.5 h-4 rounded" style="background:#f04600"></div>
@@ -78,6 +59,7 @@
         {% include "includes/_dcat_row.html" with semantics="dcatap:applicableLegislation" label="dcatap:applicableLegislation" value=distribution.applicable_legislation only %}
         {% include "includes/_dcat_row.html" with semantics="dct:issued" label="dct:issued" value=distribution.issued only %}
         {% include "includes/_dcat_row.html" with semantics="dct:modified" label="dct:modified" value=distribution.modified only %}
+        {% include "includes/_dcat_row.html" with semantics="healthdcatap:dbLayer" label="healthdcatap:dbLayer" value=distribution.db_layer only %}
         {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=distribution.description only %}
       </div>
     </div>
@@ -97,23 +79,11 @@
   </div>
   {% endif %}
 
-  <!-- Back link -->
-  {% if dataset %}
-  <div class="mt-8">
-    <a href="{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name %}"
-      class="btn btn-ghost btn-sm gap-2 text-gray-500">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-      {% trans "Back to dataset" %}
-    </a>
-  </div>
-  {% endif %}
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{{ block.super }}
 <script>
 document.addEventListener('DOMContentLoaded', () => loadSchemaData('schema-data'));
 </script>

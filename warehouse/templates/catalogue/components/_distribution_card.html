@@ -1,0 +1,74 @@
+{% load i18n %}
+{% comment %}
+  Distribution accordion card — mirrors the index page dataset card pattern.
+  Used inside a for loop on dataset_detail.html.
+
+  Required variables:
+    dist         – distribution dict (title, name, source, format, db_layer, description)
+    dataset      – parent dataset dict (name, source)
+    loop_id      – unique id string for this card within the page (e.g. forloop.counter)
+    cart_dataset_ids – set of item names currently in the session cart
+{% endcomment %}
+<div class="bg-white border rounded-lg overflow-hidden transition-shadow hover:shadow-md"
+  id="dist-card-{{ loop_id }}"
+  style="border-color:#e5e7eb"
+  data-dist-card>
+
+  {# ── Card header — click to expand ── #}
+  <div class="flex items-center gap-3 px-5 py-3.5 cursor-pointer select-none"
+    onclick="toggleDistCard('{{ loop_id }}')">
+
+    {# Title #}
+    <span class="font-serif text-[16px] flex-1 leading-snug" style="color:#f04600">
+      {{ dist.title|default:dist.name }}
+    </span>
+
+    {# AJAX cart toggle #}
+    <button type="button"
+      onclick="ajaxCartToggle(this, event)"
+      data-source="{{ dist.source }}"
+      data-name="{{ dist.name }}"
+      data-title="{{ dist.title|default:dist.name }}"
+      data-in-cart="{% if dist.name in cart_dataset_ids %}true{% else %}false{% endif %}"
+      title="{% if dist.name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
+      class="btn btn-ghost btn-xs px-1.5 transition-colors {% if dist.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
+      {% if dist.name in cart_dataset_ids %}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      {% else %}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      {% endif %}
+    </button>
+
+    {# Eye / detail link #}
+    <a href="{% url 'warehouse:distribution_detail' source=dist.source name=dist.name %}"
+      title="{% trans 'View full detail' %}"
+      class="btn btn-ghost btn-xs px-1.5 text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+      onclick="event.stopPropagation()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </a>
+
+    {# Chevron #}
+    <svg class="dist-chev-icon text-gray-300 shrink-0 transition-transform" id="dist-chev-{{ loop_id }}"
+      width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+
+  {# ── Expandable body ── #}
+  <div class="hidden" id="dist-body-{{ loop_id }}">
+    <div class="border-t border-gray-100">
+      <div class="grid grid-cols-1">
+        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=dist.description only %}
+      </div>
+    </div>
+  </div>
+
+</div>

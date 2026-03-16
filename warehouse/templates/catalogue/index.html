@@ -73,7 +73,7 @@
             data-title="{{ dataset.title|default:dataset.name }}"
             data-in-cart="{% if dataset.name in cart_dataset_ids %}true{% else %}false{% endif %}"
             title="{% if dataset.name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
-            class="btn btn-ghost btn-xs px-1.5 transition-colors {% if dataset.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-gray-400 hover:text-orange-500 hover:bg-orange-50{% endif %}">
+            class="btn btn-ghost btn-xs px-1.5 transition-colors {% if dataset.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
             {% if dataset.name in cart_dataset_ids %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             {% else %}
@@ -84,7 +84,7 @@
           {# Eye / detail link #}
           <a href="{% url 'warehouse:dataset_detail' source=dataset.source name=dataset.name %}"
             title="{% trans 'View full detail' %}"
-            class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+            class="btn btn-ghost btn-xs px-1.5 text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
             onclick="event.stopPropagation()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -226,64 +226,13 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{{ block.super }}
 <script>
 'use strict';
 
 /* ── Schema modal ─────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => loadSchemaData('schema-data'));
 // showSchemaModal() is defined in includes/schema_modal.html (loaded via base_catalogue.html)
-
-/* ── AJAX cart toggle ─────────────────────────────────────────────────── */
-const CART_ADD_URL = '{% url "ticketing:cart_add" %}';
-const CART_ICON_ADD  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
-const CART_ICON_REMOVE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-
-function getCsrf() {
-  const m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
-  return m ? decodeURIComponent(m[1]) : '';
-}
-
-function ajaxCartToggle(btn, event) {
-  event.stopPropagation();
-  const source  = btn.dataset.source;
-  const name    = btn.dataset.name;
-  const title   = btn.dataset.title;
-  const inCart  = btn.dataset.inCart === 'true';
-  const body    = new URLSearchParams({source, name, title});
-  btn.disabled  = true;
-  fetch(CART_ADD_URL, {
-    method: 'POST',
-    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  })
-  .then(r => r.json())
-  .then(json => {
-    if (!json.success) return;
-    const nowInCart = json.in_cart;
-    // Update all cart-toggle buttons for the same dataset (header + distribution-level)
-    document.querySelectorAll(`button[data-name="${name}"]`).forEach(b => {
-      b.dataset.inCart = nowInCart ? 'true' : 'false';
-      b.innerHTML = nowInCart ? CART_ICON_REMOVE : CART_ICON_ADD;
-      b.title = nowInCart ? '{% trans "Remove from cart" %}' : '{% trans "Add to cart" %}';
-      b.className = b.className
-        .replace(/text-(gray|red)-\S+ hover:text-(orange|red)-\S+ hover:bg-(orange|red)-\S+/g, '')
-        .trim();
-      if (nowInCart) {
-        b.classList.add('text-red-400', 'hover:text-red-600', 'hover:bg-red-50');
-      } else {
-        b.classList.add('text-gray-400', 'hover:text-orange-500', 'hover:bg-orange-50');
-      }
-    });
-    const badge = document.getElementById('cart-badge');
-    if (badge) {
-      badge.textContent = json.cart_count;
-      if (json.cart_count > 0) badge.classList.remove('hidden');
-      else badge.classList.add('hidden');
-    }
-  })
-  .catch(() => {})
-  .finally(() => { btn.disabled = false; });
-}
 
 /* Legacy wrapper used by remaining distribution forms */
 function ajaxCartAdd(form, event) {
