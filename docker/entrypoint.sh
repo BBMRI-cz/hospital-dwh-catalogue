@@ -9,7 +9,6 @@ python manage.py migrate --database=auth_db --noinput
 python manage.py migrate --noinput
 
 # fair_genomes_db: fair_genomes app
-python manage.py makemigrations fair_genomes --noinput || true
 python manage.py migrate --database=fair_genomes_db --noinput
 
 # metadata_db: warehouse app
@@ -24,5 +23,10 @@ fi
 
 # Compile translation messages (cs and en only)
 python manage.py compilemessages -l cs -l en
+
+# Collect static files so nginx can serve them directly (skip in dev to speed up restarts)
+if [ "${DJANGO_SETTINGS_MODULE}" != "catalogue.settings.dev" ]; then
+    python manage.py collectstatic --noinput
+fi
 
 exec "$@"
