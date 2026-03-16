@@ -8,16 +8,9 @@
 
 <div class="max-w-4xl mx-auto px-6 py-8">
 
-  <!-- Breadcrumb -->
-  <nav class="flex items-center gap-1.5 font-mono text-xs mb-6 flex-wrap">
-    <a href="{% url 'warehouse:catalogue' %}" class="text-mou-cyan hover:underline">{% trans "Catalogue" %}</a>
-    {% if dataset %}
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-300 shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
-    <a href="{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name %}" class="text-mou-cyan hover:underline truncate max-w-xs">{{ dataset.title|default:dataset.name }}</a>
-    {% endif %}
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-300 shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
-    <span class="text-gray-500 truncate max-w-xs">{{ distribution.title|default:distribution.name }}</span>
-  </nav>
+  {% url 'warehouse:catalogue' as catalogue_url %}
+  {% if dataset %}{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name as bc_mid_url %}{% endif %}
+  {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label="Catalogue" bc_mid_url=bc_mid_url bc_mid_label=dataset.title|default:dataset.name bc_current=distribution.title|default:distribution.name %}
 
   <!-- Hero -->
   <div class="mb-8 pb-7 border-b border-gray-200">
