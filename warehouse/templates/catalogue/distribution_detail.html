@@ -39,10 +39,8 @@
   <!-- DCAT Metadata card -->
   <div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
     <div class="card-body p-0">
-      <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100">
-        <div class="w-0.5 h-4 rounded" style="background:#f04600"></div>
-        <span class="font-mono text-[10px] uppercase tracking-wider" style="color:#f04600">{% trans "Distribution Metadata" %}</span>
-      </div>
+      {% trans "Distribution Metadata" as t_dist_meta %}
+      {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_dist_meta %}
       <div class="grid grid-cols-1 sm:grid-cols-2">
         {% include "includes/_dcat_row.html" with semantics="dct:title" label="dct:title" value=distribution.title only %}
         {% include "includes/_dcat_row.html" with semantics="dcat:accessURL" label="dcat:accessURL" value=distribution.access_url only %}
@@ -59,16 +57,9 @@
     </div>
   </div>
 
-  <!-- Column table (if columns are available from the model) -->
+  <!-- Column table -->
   {% if columns %}
   <div class="mb-8">
-    <div class="flex items-center gap-2 mb-4">
-      <div class="w-0.5 h-5 rounded" style="background:#007fc8"></div>
-      <h2 class="font-mono text-[10px] uppercase tracking-wider" style="color:#007fc8">
-        csvw:column — {{ columns|length }} {% trans "column(s)" %}
-      </h2>
-      <div class="flex-1 h-px" style="background:#e0f0fb"></div>
-    </div>
     {% include 'catalogue/components/_column_table.html' with columns=columns %}
   </div>
   {% endif %}

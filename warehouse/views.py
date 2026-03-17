@@ -415,10 +415,26 @@ class DistributionDetailView(LoginRequiredMixin, View):
 
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
 
+        attrs = Attribute.objects.using('metadata_db').filter(
+            distribution_name=name
+        ).order_by('var_order', 'name')
+        columns = [
+            {
+                'name':         a.name,
+                'title':        a.title,
+                'description':  a.description,
+                'datatype':     a.datatype,
+                'type_r':       a.type_r,
+                'key_db':       a.key_db,
+                'property_url': a.property_url,
+            }
+            for a in attrs
+        ]
+
         return render(request, self.template_name, {
             'distribution': distribution,
             'dataset':      dataset,
-            'columns':      [],   # Column model not yet implemented
+            'columns':      columns,
             'schema_json':  schema_json,
             'source':       source,
             'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
