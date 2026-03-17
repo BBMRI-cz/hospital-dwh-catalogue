@@ -20,7 +20,7 @@ from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService as CartService
 from warehouse.models import Attribute, Distribution
 
-PAGE_SIZE = 20
+PAGE_SIZE = 15
 _CACHE_TTL = 300          # 5 minutes
 _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
 _CACHE_KEY_SCHEMA   = 'catalogue_schema_json'

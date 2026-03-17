@@ -15,7 +15,7 @@
   data-dist-card>
 
   {# ── Card header — click to expand ── #}
-  <div class="flex items-center gap-3 px-5 py-3.5 cursor-pointer select-none"
+  <div class="flex items-center gap-3 px-5 py-2 cursor-pointer select-none"
     onclick="toggleDistCard('{{ loop_id }}')">
 
     {# Title #}
@@ -31,7 +31,7 @@
       data-title="{{ dist.title|default:dist.name }}"
       data-in-cart="{% if dist.name in cart_dataset_ids %}true{% else %}false{% endif %}"
       title="{% if dist.name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
-      class="btn btn-ghost btn-xs px-1.5 transition-colors {% if dist.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
+      class="btn btn-ghost btn-xs px-1.5 py-2 rounded transition-colors {% if dist.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
       {% if dist.name in cart_dataset_ids %}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -47,7 +47,7 @@
     {# Eye / detail link #}
     <a href="{% url 'warehouse:distribution_detail' source=dist.source name=dist.name %}"
       title="{% trans 'View full detail' %}"
-      class="btn btn-ghost btn-xs px-1.5 text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+      class="btn btn-ghost btn-xs px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
       onclick="event.stopPropagation()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>

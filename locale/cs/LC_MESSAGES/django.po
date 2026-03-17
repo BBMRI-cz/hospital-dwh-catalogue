@@ -31,32 +31,28 @@ msgstr "Integrace Fair Genomes"
 #: fair_genomes/models.py:47 shared/abstract_models.py:92
 #: shared/abstract_models.py:265 warehouse/models.py:49
 msgid "Contact Point"
-msgstr ""
+msgstr "Kontaktní bod"
 
 #: fair_genomes/models.py:48 warehouse/models.py:50
 msgid "Contact Points"
-msgstr ""
+msgstr "Kontaktní body"
 
 #: fair_genomes/models.py:62 warehouse/models.py:64
 msgid "Agent"
-msgstr ""
+msgstr "Agent"
 
 #: fair_genomes/models.py:63 warehouse/models.py:65
 msgid "Agents"
-msgstr ""
+msgstr "Agenti"
 
 #: fair_genomes/models.py:77 shared/abstract_models.py:285
 #: warehouse/models.py:79
-#, fuzzy
-#| msgid "Catalogue"
 msgid "Catalog"
 msgstr "Katalog"
 
 #: fair_genomes/models.py:78 warehouse/models.py:80
-#, fuzzy
-#| msgid "Catalogue"
 msgid "Catalogs"
-msgstr "Katalog"
+msgstr "Katalogy"
 
 #: fair_genomes/models.py:97 shared/abstract_models.py:363
 #: ticketing/models.py:124 warehouse/models.py:98
@@ -70,219 +66,199 @@ msgstr "Datové sady"
 
 #: fair_genomes/models.py:113 warehouse/models.py:129 warehouse/models.py:161
 #: warehouse/templates/catalogue/distribution_detail.html:4
-#, fuzzy
-#| msgid "Description"
 msgid "Distribution"
-msgstr "Popis"
+msgstr "Distribuce"
 
 #: fair_genomes/models.py:114 warehouse/models.py:130
 #: warehouse/templates/catalogue/components/_stats_bar.html:10
-#, fuzzy
-#| msgid "Description"
 msgid "Distributions"
-msgstr "Popis"
+msgstr "Distribuce"
 
 #: schema_registry/apps.py:8
 msgid "Schema Registry"
-msgstr ""
+msgstr "Registr schémat"
 
 #: schema_registry/models.py:54
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 #: schema_registry/models.py:55
 msgid "Short machine-readable identifier, e.g. \"v6\"."
-msgstr ""
+msgstr "Krátký strojově čitelný identifikátor, např. \"v6\"."
 
 #: schema_registry/models.py:59
 msgid "Label"
-msgstr ""
+msgstr "Popisek"
 
 #: schema_registry/models.py:60
 msgid "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
-msgstr ""
+msgstr "Lidsky čitelný popisek verze, např. \"Health DCAT-AP v6\"."
 
 #: schema_registry/models.py:64
-#, fuzzy
-#| msgid "Actions"
 msgid "Active"
-msgstr "Akce"
+msgstr "Aktivní"
 
 #: schema_registry/models.py:65
 msgid ""
 "Whether this is the currently active schema version used by the service "
 "layer."
-msgstr ""
+msgstr "Určuje, zda se jedná o aktuálně aktivní verzi schématu používanou servisní vrstvou."
 
 #: schema_registry/models.py:67 schema_registry/models.py:108
 #: schema_registry/models.py:208 schema_registry/models.py:296
-#, fuzzy
-#| msgid "Created At"
 msgid "Created at"
 msgstr "Vytvořeno"
 
 #: schema_registry/models.py:68 schema_registry/models.py:109
 #: schema_registry/models.py:209 schema_registry/models.py:297
-#, fuzzy
-#| msgid "Updated At"
 msgid "Updated at"
 msgstr "Aktualizováno"
 
 #: schema_registry/models.py:74 schema_registry/models.py:96
 #: schema_registry/models.py:154 schema_registry/models.py:243
 msgid "Schema Version"
-msgstr ""
+msgstr "Verze schématu"
 
 #: schema_registry/models.py:75
 msgid "Schema Versions"
-msgstr ""
+msgstr "Verze schémat"
 
 #: schema_registry/models.py:100 schema_registry/models.py:169
 msgid "Prefix"
-msgstr ""
+msgstr "Prefix"
 
 #: schema_registry/models.py:101
 msgid "Namespace prefix, e.g. \"dct\"."
-msgstr ""
+msgstr "Prefix jmenného prostoru, např. \"dct\"."
 
 #: schema_registry/models.py:105
 msgid "Base URI"
-msgstr ""
+msgstr "Základní URI"
 
 #: schema_registry/models.py:106
 msgid ""
 "Full namespace URI corresponding to the prefix, e.g. \"http://purl.org/dc/"
 "terms/\"."
-msgstr ""
+msgstr "Plné URI jmenného prostoru odpovídající prefixu, např. \"http://purl.org/dc/terms/\"."
 
 #: schema_registry/models.py:116
 msgid "Schema Prefix"
-msgstr ""
+msgstr "Prefix schématu"
 
 #: schema_registry/models.py:117
 msgid "Schema Prefixes"
-msgstr ""
+msgstr "Prefixy schématu"
 
 #: schema_registry/models.py:144
 msgid "Optional"
-msgstr ""
+msgstr "Volitelné"
 
 #: schema_registry/models.py:145
 msgid "Recommended"
-msgstr ""
+msgstr "Doporučené"
 
 #: schema_registry/models.py:146
 msgid "Mandatory"
 msgstr "Povinné"
 
 #: schema_registry/models.py:147
-#, fuzzy
-#| msgid "Created"
 msgid "Deprecated"
-msgstr "Vytvořeno"
+msgstr "Zastaralé"
 
 #: schema_registry/models.py:158
 msgid "Term Key"
-msgstr ""
+msgstr "Klíč termínu"
 
 #: schema_registry/models.py:159
 msgid ""
 "Stable snake_case identifier used in gettext msgids and binding references."
-msgstr ""
+msgstr "Stabilní identifikátor snake_case používaný v gettext msgids a odkazech na vazby."
 
 #: schema_registry/models.py:163
 msgid "Semantics"
-msgstr ""
+msgstr "Sémantika"
 
 #: schema_registry/models.py:164
 msgid "Prefixed name, e.g. \"dct:identifier\"."
-msgstr ""
+msgstr "Prefixovaný název, např. \"dct:identifier\"."
 
 #: schema_registry/models.py:170
 msgid "Namespace prefix extracted from semantics for convenience."
-msgstr ""
+msgstr "Prefix jmenného prostoru extrahovaný ze sémantiky."
 
 #: schema_registry/models.py:174
-#, fuzzy
-#| msgid "Column Name"
 msgid "Local Name"
-msgstr "Název sloupce"
+msgstr "Lokální název"
 
 #: schema_registry/models.py:175
 msgid "Local name extracted from semantics for convenience."
-msgstr ""
+msgstr "Lokální název extrahovaný ze sémantiky."
 
 #: schema_registry/models.py:179
 msgid "URI"
-msgstr ""
+msgstr "URI"
 
 #: schema_registry/models.py:180
 msgid "Full URI constructed from prefix base + local_name."
-msgstr ""
+msgstr "Plné URI sestavené z báze prefixu a local_name."
 
 #: schema_registry/models.py:184 schema_registry/models.py:279
 msgid "Label (EN)"
-msgstr ""
+msgstr "Popisek (EN)"
 
 #: schema_registry/models.py:185
 msgid "English base label; used as gettext fallback."
-msgstr ""
+msgstr "Anglický základní popisek; slouží jako záloha překladu."
 
 #: schema_registry/models.py:188 schema_registry/models.py:283
-#, fuzzy
-#| msgid "Description"
 msgid "Description (EN)"
-msgstr "Popis"
+msgstr "Popis (EN)"
 
 #: schema_registry/models.py:189
 msgid "English base description; used as gettext fallback."
-msgstr ""
+msgstr "Anglický základní popis; slouží jako záloha překladu."
 
 #: schema_registry/models.py:195
-#, fuzzy
-#| msgid "Requester"
 msgid "Requirement"
-msgstr "Žadatel"
+msgstr "Požadavek"
 
 #: schema_registry/models.py:196
 msgid "Requirement level per the HealthDCAT-AP specification."
-msgstr ""
+msgstr "Úroveň požadavku dle specifikace HealthDCAT-AP."
 
 #: schema_registry/models.py:200
 msgid "Levels"
-msgstr ""
+msgstr "Úrovně"
 
 #: schema_registry/models.py:201
 msgid ""
 "List of table/entity names where this term is applicable, e.g. [\"Catalog\","
 "\"Dataset\"]."
-msgstr ""
+msgstr "Seznam názvů tabulek/entit, kde je termín použitelný, např. [\"Catalog\", \"Dataset\"]."
 
 #: schema_registry/models.py:205 schema_registry/models.py:293
 msgid "Display Order"
-msgstr ""
+msgstr "Pořadí zobrazení"
 
 #: schema_registry/models.py:206
 msgid "Controls the order in which terms are listed within a schema version."
-msgstr ""
+msgstr "Řídí pořadí zobrazení termínů v rámci verze schématu."
 
 #: schema_registry/models.py:216 schema_registry/models.py:249
 msgid "Schema Term"
-msgstr ""
+msgstr "Termín schématu"
 
 #: schema_registry/models.py:217
 msgid "Schema Terms"
-msgstr ""
+msgstr "Termíny schématu"
 
 #: schema_registry/models.py:253
-#, fuzzy
-#| msgid "Variable Name"
 msgid "Table Name"
-msgstr "Název proměnné"
+msgstr "Název tabulky"
 
 #: schema_registry/models.py:254
 msgid "Name of the data model table/entity this binding belongs to."
-msgstr ""
+msgstr "Název tabulky/entity datového modelu, ke které tato vazba patří."
 
 #: schema_registry/models.py:260
 msgid "Column Name"
@@ -290,76 +266,70 @@ msgstr "Název sloupce"
 
 #: schema_registry/models.py:261
 msgid "Physical column name; NULL for entity (table-level) bindings."
-msgstr ""
+msgstr "Fyzický název sloupce; NULL pro vazby na úrovni entity."
 
 #: schema_registry/models.py:267
-#, fuzzy
-#| msgid "Column Name"
 msgid "Column Type"
-msgstr "Název sloupce"
+msgstr "Typ sloupce"
 
 #: schema_registry/models.py:268
 msgid ""
 "Logical data type (string, text, integer, datetime, ref); NULL for entity "
 "rows."
-msgstr ""
+msgstr "Logický datový typ (string, text, integer, datetime, ref); NULL pro řádky entit."
 
 #: schema_registry/models.py:274
-#, fuzzy
-#| msgid "Table"
 msgid "Ref Table"
-msgstr "Tabulka"
+msgstr "Referenční tabulka"
 
 #: schema_registry/models.py:275
 msgid "Target entity name for FK-like columns, e.g. \"Agent\"."
-msgstr ""
+msgstr "Název cílové entity pro sloupce typu FK, např. \"Agent\"."
 
 #: schema_registry/models.py:280
 msgid ""
 "English label for this binding; may differ from the term label in context."
-msgstr ""
+msgstr "Anglický popisek pro tuto vazbu; může se lišit od popisku termínu v kontextu."
 
 #: schema_registry/models.py:284
 msgid "English description for this binding."
-msgstr ""
+msgstr "Anglický popis pro tuto vazbu."
 
 #: schema_registry/models.py:288
 msgid "Is Entity"
-msgstr ""
+msgstr "Je entita"
 
 #: schema_registry/models.py:289
 msgid "True for table-level (entity) rows; False for column-level rows."
-msgstr ""
+msgstr "Pravda pro řádky na úrovni entity; Nepravda pro řádky na úrovni sloupce."
 
 #: schema_registry/models.py:294
 msgid "Controls the order in which bindings are listed within a table."
-msgstr ""
+msgstr "Řídí pořadí zobrazení vazeb v rámci tabulky."
 
 #: schema_registry/models.py:304
 msgid "Schema Field Binding"
-msgstr ""
+msgstr "Vazba pole schématu"
 
 #: schema_registry/models.py:305
 msgid "Schema Field Bindings"
-msgstr ""
+msgstr "Vazby polí schématu"
 
 #: shared/abstract_models.py:50
-#, fuzzy
-#| msgid "Your Email"
 msgid "Email"
-msgstr "Váš email"
+msgstr "E-mail"
 
 #: shared/abstract_models.py:51
 msgid "Contact e-mail address"
-msgstr ""
+msgstr "Kontaktní e-mailová adresa"
 
 #: shared/abstract_models.py:57
 msgid "Contact Page"
-msgstr ""
+msgstr "Kontaktní stránka"
 
 #: shared/abstract_models.py:58
 msgid "URL of a web page that can be used to reach the contact"
-msgstr ""
+msgstr "URL webové stránky pro kontaktování"
 
 #: shared/abstract_models.py:82 shared/abstract_models.py:116
 #: shared/abstract_models.py:180 shared/abstract_models.py:354
@@ -368,25 +338,21 @@ msgid "Name"
 msgstr "Název"
 
 #: shared/abstract_models.py:83
-#, fuzzy
-#| msgid "Unique identifier for the individual"
 msgid "Unique identifier / name for this agent"
-msgstr "Jedinečný identifikátor osoby"
+msgstr "Jedinečný identifikátor / jméno tohoto agenta"
 
 #: shared/abstract_models.py:93
 msgid "Contact information for this agent"
-msgstr ""
+msgstr "Kontaktní informace tohoto agenta"
 
 #: shared/abstract_models.py:117
-#, fuzzy
-#| msgid "Unique identifier for the individual"
 msgid "Unique identifier for this catalog"
-msgstr "Jedinečný identifikátor osoby"
+msgstr "Jedinečný identifikátor tohoto katalogu"
 
 #: shared/abstract_models.py:123 shared/abstract_models.py:187
 #: shared/abstract_models.py:370 warehouse/models.py:168
 msgid "Title"
-msgstr ""
+msgstr "Název"
 
 #: shared/abstract_models.py:128 shared/abstract_models.py:198
 #: shared/abstract_models.py:375 ticketing/models.py:49 warehouse/models.py:174
@@ -397,75 +363,71 @@ msgstr "Popis"
 
 #: shared/abstract_models.py:137 shared/abstract_models.py:213
 msgid "Publisher"
-msgstr ""
+msgstr "Vydavatel"
 
 #: shared/abstract_models.py:138
 msgid "Agent responsible for making this catalog available"
-msgstr ""
+msgstr "Agent zodpovědný za zpřístupnění tohoto katalogu"
 
 #: shared/abstract_models.py:143 shared/abstract_models.py:301
 #: shared/abstract_models.py:423
 msgid "Applicable Legislation"
-msgstr ""
+msgstr "Příslušné právní předpisy"
 
 #: shared/abstract_models.py:145
 msgid ""
 "Legal basis under which this catalog is published (mandatory per HealthDCAT-"
 "AP v6)"
-msgstr ""
+msgstr "Právní základ pro zveřejnění katalogu (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:181
-#, fuzzy
-#| msgid "Unique identifier for the individual"
 msgid "Unique identifier for this dataset"
-msgstr "Jedinečný identifikátor osoby"
+msgstr "Jedinečný identifikátor tohoto souboru dat"
 
 #: shared/abstract_models.py:193
 msgid "Version"
-msgstr ""
+msgstr "Verze"
 
 #: shared/abstract_models.py:204
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 msgid "Theme"
-msgstr ""
+msgstr "Téma"
 
 #: shared/abstract_models.py:205
 msgid "dcat:theme — category from a controlled vocabulary"
-msgstr ""
+msgstr "dcat:theme — kategorie z řízeného slovníku"
 
 #: shared/abstract_models.py:219
 msgid "License"
-msgstr ""
+msgstr "Licence"
 
 #: shared/abstract_models.py:220
 msgid "dct:license — URL or SPDX identifier"
-msgstr ""
+msgstr "dct:license — URL nebo identifikátor SPDX"
 
 #: shared/abstract_models.py:226 shared/abstract_models.py:388
-#, fuzzy
-#| msgid "Confirmed"
 msgid "Conforms To"
-msgstr "Potvrzeno"
+msgstr "Vyhovuje specifikaci"
 
 #: shared/abstract_models.py:227
 msgid "dct:conformsTo — standard / specification URI"
-msgstr ""
+msgstr "dct:conformsTo — URI standardu / specifikace"
 
 #: shared/abstract_models.py:232 shared/abstract_models.py:406
 msgid "Issued"
-msgstr ""
+msgstr "Vydáno"
 
 #: shared/abstract_models.py:233
 msgid "dct:issued — date of first publication"
-msgstr ""
+msgstr "dct:issued — datum prvního zveřejnění"
 
 #: shared/abstract_models.py:238 shared/abstract_models.py:411
 msgid "Modified"
-msgstr ""
+msgstr "Upraveno"
 
 #: shared/abstract_models.py:239
 msgid "dct:modified — date of last modification"
-msgstr ""
+msgstr "dct:modified — datum poslední úpravy"
 
 #: shared/abstract_models.py:244
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
@@ -474,134 +436,122 @@ msgstr "Klíčová slova"
 
 #: shared/abstract_models.py:245
 msgid "dcat:keyword — comma-separated keywords"
-msgstr ""
+msgstr "dcat:keyword — klíčová slova oddělená čárkou"
 
 #: shared/abstract_models.py:250
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#, fuzzy
-#| msgid "Data Source"
 msgid "Source"
-msgstr "Datový zdroj"
+msgstr "Zdroj"
 
 #: shared/abstract_models.py:251
 msgid "dct:source — URI of the source dataset"
-msgstr ""
+msgstr "dct:source — URI zdrojového souboru dat"
 
 #: shared/abstract_models.py:256
-#, fuzzy
-#| msgid "Created"
 msgid "Creator"
-msgstr "Vytvořeno"
+msgstr "Autor"
 
 #: shared/abstract_models.py:257
 msgid "dct:creator — name(s) of the dataset creator(s)"
-msgstr ""
+msgstr "dct:creator — jméno/jména autora/autorů souboru dat"
 
 #: shared/abstract_models.py:270
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#, fuzzy
-#| msgid "Rights holder"
 msgid "Rights Holder"
 msgstr "Držitel práv"
 
 #: shared/abstract_models.py:271
-#, fuzzy
-#| msgid "Rights holder"
 msgid "dct:rightsHolder"
-msgstr "Držitel práv"
+msgstr "dct:rightsHolder"
 
 #: shared/abstract_models.py:276
 msgid "Provenance"
-msgstr ""
+msgstr "Původ"
 
 #: shared/abstract_models.py:277
 msgid "dct:provenance"
-msgstr ""
+msgstr "dct:provenance"
 
 #: shared/abstract_models.py:293
 msgid "Access Rights"
-msgstr ""
+msgstr "Přístupová práva"
 
 #: shared/abstract_models.py:295
 msgid ""
 "dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
-msgstr ""
+msgstr "dct:accessRights — URI řízeného slovníku (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:302 shared/abstract_models.py:424
 msgid "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
-msgstr ""
+msgstr "dct:applicableLegislation (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:306
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 msgid "Health Category"
-msgstr ""
+msgstr "Zdravotní kategorie"
 
 #: shared/abstract_models.py:307
 msgid "healthdcat:healthCategory (mandatory per HealthDCAT-AP v6)"
-msgstr ""
+msgstr "healthdcat:healthCategory (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:313
 msgid "HDAB"
-msgstr ""
+msgstr "HDAB"
 
 #: shared/abstract_models.py:315
 msgid ""
 "healthdcat:hdab — Health Data Access Body responsible for this dataset "
 "(mandatory per HealthDCAT-AP v6)"
-msgstr ""
+msgstr "healthdcat:hdab — Orgán pro přístup ke zdravotním datům zodpovědný za tento soubor dat (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:333
 msgid "HDAB is mandatory (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "HDAB je povinné (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:355
-#, fuzzy
-#| msgid "Unique identifier for the individual"
 msgid "Unique identifier for this distribution"
-msgstr "Jedinečný identifikátor osoby"
+msgstr "Jedinečný identifikátor této distribuce"
 
 #: shared/abstract_models.py:364
 msgid "Dataset this distribution belongs to"
-msgstr ""
+msgstr "Soubor dat, ke kterému tato distribuce patří"
 
 #: shared/abstract_models.py:381
 msgid "Format"
-msgstr ""
+msgstr "Formát"
 
 #: shared/abstract_models.py:382
 msgid "dct:format — media type or format URI"
-msgstr ""
+msgstr "dct:format — typ média nebo URI formátu"
 
 #: shared/abstract_models.py:393
 msgid "Byte Size"
-msgstr ""
+msgstr "Velikost v bajtech"
 
 #: shared/abstract_models.py:394
 msgid "dcat:byteSize"
-msgstr ""
+msgstr "dcat:byteSize"
 
 #: shared/abstract_models.py:400
-#, fuzzy
-#| msgid "Rights holder"
 msgid "Rights"
-msgstr "Držitel práv"
+msgstr "Práva"
 
 #: shared/abstract_models.py:401
 msgid "dct:rights"
-msgstr ""
+msgstr "dct:rights"
 
 #: shared/abstract_models.py:418
 msgid "Access URL"
-msgstr ""
+msgstr "Přístupová URL"
 
 #: shared/abstract_models.py:419
 msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
-msgstr ""
+msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
 
 #: shared/validators.py:34
 #, python-format
 msgid "%(field)s is mandatory (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "%(field)s je povinné (HealthDCAT-AP v6)."
 
 # Ticketing / Cart translations
 #: ticketing/apps.py:14
@@ -754,7 +704,7 @@ msgstr "Položky požadavku"
 
 #: ticketing/templates/ticketing/cart.html:4
 msgid "Cart"
-msgstr ""
+msgstr "Košík"
 
 #: ticketing/templates/ticketing/cart.html:10
 #: ticketing/templates/ticketing/history.html:10
@@ -771,48 +721,36 @@ msgstr "Košík požadavků na data"
 
 #: ticketing/templates/ticketing/cart.html:12
 msgid "Review selected datasets and submit an Alvao request"
-msgstr ""
+msgstr "Zkontrolujte vybrané datové sady a odešlete požadavek do Alvao"
 
 #: ticketing/templates/ticketing/cart.html:22
-#, fuzzy
-#| msgid "Selected Items"
 msgid "Selected datasets"
-msgstr "Vybrané položky"
+msgstr "Vybrané datové sady"
 
 #: ticketing/templates/ticketing/cart.html:40
 msgid "Remove"
-msgstr ""
+msgstr "Odebrat"
 
 #: ticketing/templates/ticketing/cart.html:56
-#, fuzzy
-#| msgid "Submit Request"
 msgid "Submit request"
 msgstr "Odeslat požadavek"
 
 #: ticketing/templates/ticketing/cart.html:68
-#, fuzzy
-#| msgid "Submitted At"
 msgid "Submit to Alvao"
-msgstr "Odesláno"
+msgstr "Odeslat do Alvao"
 
 #: ticketing/templates/ticketing/cart.html:75
-#, fuzzy
-#| msgid "Your cart is empty."
 msgid "Your cart is empty"
-msgstr "Váš košík je prázdný."
+msgstr "Váš košík je prázdný"
 
 #: ticketing/templates/ticketing/cart.html:76
-#, fuzzy
-#| msgid "Browse the catalogue and add items to your cart"
 msgid "Browse the catalogue and click the cart icon to add datasets."
-msgstr "Procházejte katalog a přidávejte položky do košíku"
+msgstr "Procházejte katalog a klikněte na ikonu košíku pro přidání datových sad."
 
 #: ticketing/templates/ticketing/cart.html:77
 #: ticketing/templates/ticketing/history.html:103
-#, fuzzy
-#| msgid "How to use the catalogue"
 msgid "Go to catalogue"
-msgstr "Jak používat katalog"
+msgstr "Přejít do katalogu"
 
 #: ticketing/templates/ticketing/history.html:4
 #: ticketing/templates/ticketing/history.html:11
@@ -822,76 +760,61 @@ msgstr "Moje tickety"
 
 #: ticketing/templates/ticketing/history.html:12
 msgid "History of submitted data access requests"
-msgstr ""
+msgstr "Historie odeslaných žádostí o přístup k datům"
 
 #: ticketing/templates/ticketing/history.html:21
-#, fuzzy
-#| msgid "Submitted At"
 msgid "Submitted tickets"
-msgstr "Odesláno"
+msgstr "Odeslané tikety"
 
 #: ticketing/templates/ticketing/history.html:31
-#, fuzzy
-#| msgid "Alvao Ticket ID"
 msgid "Alvao ID"
-msgstr "ID ticketu v Alvao"
+msgstr "Alvao ID"
 
 #: ticketing/templates/ticketing/history.html:33
 msgid "Items"
 msgstr "Položky"
 
 #: ticketing/templates/ticketing/history.html:78
-#, fuzzy
-#| msgid "Requested Items"
 msgid "Requested datasets"
-msgstr "Požadované položky"
+msgstr "Požadované datové sady"
 
 #: ticketing/templates/ticketing/history.html:87
 msgid "No items"
 msgstr "Žádné položky"
 
 #: ticketing/templates/ticketing/history.html:101
-#, fuzzy
-#| msgid "Your ticket ID:"
 msgid "No tickets yet"
-msgstr "ID vašeho ticketu:"
+msgstr "Zatím žádné tikety"
 
 #: ticketing/templates/ticketing/history.html:102
 msgid "Your submitted data access requests will appear here."
-msgstr ""
+msgstr "Zde se zobrazí vaše odeslané žádosti o přístup k datům."
 
 #: ticketing/views.py:34
 msgid "Notes"
-msgstr ""
+msgstr "Poznámky"
 
 #: ticketing/views.py:38
-#, fuzzy
-#| msgid "Brief description of your request"
 msgid "Describe your request…"
-msgstr "Stručný popis vašeho požadavku"
+msgstr "Popište váš požadavek…"
 
 #: ticketing/views.py:95
 msgid "Your cart is empty."
 msgstr "Váš košík je prázdný."
 
 #: ticketing/views.py:103
-#, fuzzy
-#| msgid "Data Access Request"
 msgid "Data access request"
 msgstr "Žádost o přístup k datům"
 
 #: ticketing/views.py:137
-#, fuzzy
-#| msgid ""
-#| "Your request has been submitted successfully. Ticket ID: %(ticket_id)s"
 msgid "Your request has been submitted."
-msgstr "Váš požadavek byl úspěšně odeslán. ID ticketu: %(ticket_id)s"
+msgstr "Váš požadavek byl odeslán."
 
 #: ticketing/views.py:142
 msgid ""
 "Submission to the ticketing system failed. Your request has been saved and "
 "our team will follow up."
-msgstr ""
+msgstr "Odeslání do ticketovacího systému se nezdařilo. Váš požadavek byl uložen a náš tým se vám ozve."
 
 #: venv/Lib/python3.12/site-packages/click/_termui_impl.py:613
 #, python-brace-format
@@ -2756,43 +2679,41 @@ msgstr "Katalog datového skladu"
 
 #: warehouse/models.py:119
 msgid "DB Layer"
-msgstr ""
+msgstr "Vrstva DB"
 
 #: warehouse/models.py:121
 msgid ""
 "Physical DWH layer this distribution resides in (e.g. raw, clean, "
 "analytical). Local Metadata-specific field."
-msgstr ""
+msgstr "Fyzická vrstva DWH, ve které se tato distribuce nachází (např. raw, clean, analytical). Pole specifické pro lokální metadata."
 
 #: warehouse/models.py:153
 msgid "Unique column / variable identifier"
-msgstr ""
+msgstr "Jedinečný identifikátor sloupce / proměnné"
 
 #: warehouse/models.py:162
 msgid "Distribution (table) this attribute belongs to"
-msgstr ""
+msgstr "Distribuce (tabulka), ke které tento atribut patří"
 
 #: warehouse/models.py:169
 msgid "Human-readable column name"
-msgstr ""
+msgstr "Lidsky čitelný název sloupce"
 
 #: warehouse/models.py:180
-#, fuzzy
-#| msgid "R Datatype"
 msgid "Datatype"
-msgstr "R datový typ"
+msgstr "Datový typ"
 
 #: warehouse/models.py:181
 msgid "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
-msgstr ""
+msgstr "Datový typ sloupce (např. VARCHAR, INTEGER, DATE)"
 
 #: warehouse/models.py:187
 msgid "Property URL"
-msgstr ""
+msgstr "URL vlastnosti"
 
 #: warehouse/models.py:188
 msgid "Semantic property URI (e.g. from a biomedical ontology)"
-msgstr ""
+msgstr "Sémantické URI vlastnosti (např. z biomedicínské ontologie)"
 
 #: warehouse/models.py:193
 msgid "Variable Order"
@@ -2800,15 +2721,15 @@ msgstr "Pořadí proměnné"
 
 #: warehouse/models.py:194
 msgid "Position of this column in the source table"
-msgstr ""
+msgstr "Pozice sloupce ve zdrojové tabulce"
 
 #: warehouse/models.py:200
 msgid "DB Key"
-msgstr ""
+msgstr "Klíč DB"
 
 #: warehouse/models.py:201
 msgid "Primary / foreign key indicator from the DB schema"
-msgstr ""
+msgstr "Indikátor primárního / cizího klíče z DB schématu"
 
 #: warehouse/models.py:207
 msgid "R Type"
@@ -2816,47 +2737,45 @@ msgstr "R typ"
 
 #: warehouse/models.py:208
 msgid "Corresponding R datatype for analytical use"
-msgstr ""
+msgstr "Odpovídající datový typ R pro analytické použití"
 
 #: warehouse/models.py:213
 msgid "DDL Definition"
-msgstr ""
+msgstr "Definice DDL"
 
 #: warehouse/models.py:214
 msgid "Full DDL column definition"
-msgstr ""
+msgstr "Úplná DDL definice sloupce"
 
 #: warehouse/models.py:219
 msgid "PK Definition (helper 1)"
-msgstr ""
+msgstr "Definice PK (pomocník 1)"
 
 #: warehouse/models.py:224
 msgid "PK Definition (helper 2)"
-msgstr ""
+msgstr "Definice PK (pomocník 2)"
 
 #: warehouse/models.py:229
 msgid "PK Definition"
-msgstr ""
+msgstr "Definice PK"
 
 #: warehouse/models.py:230
 msgid "Primary key definition expression"
-msgstr ""
+msgstr "Výraz definice primárního klíče"
 
 #: warehouse/models.py:236
 msgid "Attribute"
-msgstr ""
+msgstr "Atribut"
 
 #: warehouse/models.py:237
 msgid "Attributes"
-msgstr ""
+msgstr "Atributy"
 
 #: warehouse/templates/base.html:6
 #: warehouse/templates/catalogue/components/_header.html:14
 #: warehouse/templates/registration/login.html:32
-#, fuzzy
-#| msgid "Data Catalogue MOÚ"
 msgid "Data Catalogue"
-msgstr "Katalog dat MOÚ"
+msgstr "Katalog Metadat"
 
 #: warehouse/templates/catalogue/base_catalogue.html:40
 #: warehouse/templates/catalogue/base_catalogue.html:48
@@ -2880,28 +2799,24 @@ msgid "Remove from cart"
 msgstr "Odebrat z košíku"
 
 #: warehouse/templates/catalogue/components/_column_table.html:5
-#, fuzzy
-#| msgid "Column Name"
 msgid "Columns"
-msgstr "Název sloupce"
+msgstr "Sloupce"
 
 #: warehouse/templates/catalogue/components/_column_table.html:12
 msgid "Search columns…"
-msgstr ""
+msgstr "Hledat ve sloupcích…"
 
 #: warehouse/templates/catalogue/components/_column_table.html:61
 msgid "View"
 msgstr "Zobrazit"
 
 #: warehouse/templates/catalogue/components/_column_table.html:69
-#, fuzzy
-#| msgid "Column Variable"
 msgid "No columns available."
-msgstr "Proměnná sloupce"
+msgstr "Žádné sloupce k dispozici."
 
 #: warehouse/templates/catalogue/components/_dcat_tooltip.html:32
 msgid "Expected type"
-msgstr ""
+msgstr "Očekávaný typ"
 
 #: warehouse/templates/catalogue/components/_dcat_tooltip.html:51
 msgid "Close"
@@ -2909,39 +2824,29 @@ msgstr "Zavřít"
 
 #: warehouse/templates/catalogue/components/_distribution_card.html:49
 #: warehouse/templates/catalogue/index.html:86
-#, fuzzy
-#| msgid "View Details"
 msgid "View full detail"
-msgstr "Zobrazit detaily"
+msgstr "Zobrazit celý detail"
 
 #: warehouse/templates/catalogue/components/_distribution_grid.html:79
-#, fuzzy
-#| msgid "No Fair Genomes data available."
 msgid "No distributions available."
-msgstr "Nejsou dostupná žádná data Fair Genomes."
+msgstr "Žádné distribuce k dispozici."
 
 #: warehouse/templates/catalogue/components/_header.html:15
 #: warehouse/templates/registration/login.html:33
 msgid "Masarykův onkologický ústav"
-msgstr ""
+msgstr "Masarykův onkologický ústav"
 
 #: warehouse/templates/catalogue/components/_header.html:26
-#, fuzzy
-#| msgid "View"
 msgid "View cart"
-msgstr "Zobrazit"
+msgstr "Zobrazit košík"
 
 #: warehouse/templates/catalogue/components/_header.html:65
-#, fuzzy
-#| msgid "Admin"
 msgid "Admin Panel"
-msgstr "Administrace"
+msgstr "Administrační panel"
 
 #: warehouse/templates/catalogue/components/_header.html:78
-#, fuzzy
-#| msgid "Sign In"
 msgid "Sign out"
-msgstr "Přihlásit se"
+msgstr "Odhlásit se"
 
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:11
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:40
@@ -2950,66 +2855,62 @@ msgstr "Vyhledávání"
 
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:17
 msgid "Datasets, distributions…"
-msgstr ""
+msgstr "Datové sady, distribuce…"
 
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 msgid "Distribution Columns"
-msgstr ""
+msgstr "Sloupce distribuce"
 
 #: warehouse/templates/catalogue/dataset_detail.html:37
 msgid "JSON-LD"
-msgstr ""
+msgstr "JSON-LD"
 
 #: warehouse/templates/catalogue/dataset_detail.html:50
-#, fuzzy
-#| msgid "Metadata"
 msgid "Dataset Metadata"
-msgstr "Metadata"
+msgstr "Metadata datové sady"
 
 #: warehouse/templates/catalogue/dataset_detail.html:94
 msgid "distribution(s)"
-msgstr ""
+msgstr "distribuce"
 
 #: warehouse/templates/catalogue/dataset_detail.html:103
 #: warehouse/templates/catalogue/dataset_detail.html:108
 msgid "No distributions available for this dataset."
-msgstr ""
+msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
 
 #: warehouse/templates/catalogue/distribution_detail.html:31
 msgid "Adds the entire dataset"
-msgstr ""
+msgstr "Přidá celou datovou sadu"
 
 #: warehouse/templates/catalogue/distribution_detail.html:44
 msgid "Distribution Metadata"
-msgstr ""
+msgstr "Metadata distribuce"
 
 #: warehouse/templates/catalogue/distribution_detail.html:68
 msgid "column(s)"
-msgstr ""
+msgstr "sloupec/sloupce"
 
 #: warehouse/templates/catalogue/index.html:24
-#, fuzzy
-#| msgid "Dataset"
 msgid "Data"
-msgstr "Datová sada"
+msgstr "Metadatový"
 
 #: warehouse/templates/catalogue/index.html:27
 msgid ""
 "Evidence and description of data sources of Masaryk Oncology Institute for "
 "secondary use. Each record is based on the Health DCAT-AP schema — click"
-msgstr ""
+msgstr "Přehled a popis datových zdrojů Masarykova onkologického ústavu pro sekundární využití. Každý záznam vychází ze schématu Health DCAT-AP — klikněte"
 
 #: warehouse/templates/catalogue/index.html:27
 msgid "to display the field definition and ontology link."
-msgstr ""
+msgstr "pro zobrazení definice pole a odkazu na ontologii."
 
 #: warehouse/templates/catalogue/index.html:37
 msgid "datasets matching filters"
-msgstr ""
+msgstr "datových sad odpovídá filtrům"
 
 #: warehouse/templates/catalogue/index.html:44
 msgid "page"
-msgstr ""
+msgstr "stránka"
 
 #: warehouse/templates/catalogue/index.html:44
 msgid "of"
@@ -3018,35 +2919,29 @@ msgstr "z"
 #: warehouse/templates/catalogue/index.html:176
 #: warehouse/templates/catalogue/index.html:218
 msgid "No datasets found"
-msgstr ""
+msgstr "Žádné datové sady nenalezeny"
 
 #: warehouse/templates/catalogue/index.html:177
 msgid "Try a different query or adjust the sidebar filters."
-msgstr ""
+msgstr "Zkuste jiný dotaz nebo upravte filtry v postranním panelu."
 
 #: warehouse/templates/catalogue/index.html:219
-#, fuzzy
-#| msgid "Clear filters"
 msgid "Clear all filters"
-msgstr "Vymazat filtry"
+msgstr "Vymazat všechny filtry"
 
 #: warehouse/templates/includes/_filter_group.html:10
-#, fuzzy
-#| msgid "Filters"
 msgid "Filter…"
-msgstr "Filtry"
+msgstr "Filtrovat…"
 
 #: warehouse/templates/includes/schema_modal.html:12
 msgid "DCAT-AP term"
-msgstr ""
+msgstr "Termín DCAT-AP"
 
 #: warehouse/templates/registration/login.html:6
 msgid "Login"
-msgstr ""
+msgstr "Přihlášení"
 
 #: warehouse/templates/registration/login.html:6
-#, fuzzy
-#| msgid "Data Catalogue MOÚ"
 msgid "MOU Data Catalogue"
 msgstr "Katalog dat MOÚ"
 
@@ -3068,7 +2963,7 @@ msgstr "Přihlásit se"
 
 #: warehouse/templates/registration/login.html:71
 msgid "Health DCAT-AP · FAIR Data Register"
-msgstr ""
+msgstr "Health DCAT-AP · Registr FAIR dat"
 
 #~ msgid "Inserted By"
 #~ msgstr "Vložil"

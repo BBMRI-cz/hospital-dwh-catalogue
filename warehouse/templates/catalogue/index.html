@@ -46,7 +46,7 @@
 
     {# Dataset list #}
     {% if page_obj.object_list %}
-    <div id="ds-list" class="flex flex-col gap-2.5">
+    <div id="ds-list" class="flex flex-col gap-1.5">
       {% for dataset in page_obj %}
       {% with status=dataset.status source=dataset.source %}
 
@@ -56,12 +56,12 @@
         data-card>
 
         {# Card header — click to expand #}
-        <div class="flex items-center gap-3 px-5 py-3.5 cursor-pointer select-none"
+        <div class="flex items-center gap-3 px-5 py-2 cursor-pointer select-none"
           onclick="toggleCard({{ forloop.counter }})">
           <span class="font-serif text-[17px] flex-1 leading-snug" style="color:#53c0d7">{{ dataset.title|default:dataset.name }}</span>
 
           {# Dist count #}
-          <span class="badge badge-sm font-mono text-[10px] border text-gray-500 bg-gray-50 border-gray-200">
+          <span class="badge badge-sm font-mono text-[10px] border text-gray-500 bg-gray-50 border-gray-200 px-2">
             {{ dataset.distributions|length }} dist.
           </span>
 
@@ -73,7 +73,7 @@
             data-title="{{ dataset.title|default:dataset.name }}"
             data-in-cart="{% if dataset.name in cart_dataset_ids %}true{% else %}false{% endif %}"
             title="{% if dataset.name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
-            class="btn btn-ghost btn-xs px-1.5 transition-colors {% if dataset.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
+            class="btn btn-ghost btn-xs px-1.5 py-2 rounded transition-colors {% if dataset.name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
             {% if dataset.name in cart_dataset_ids %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             {% else %}
@@ -84,7 +84,7 @@
           {# Eye / detail link #}
           <a href="{% url 'warehouse:dataset_detail' source=dataset.source name=dataset.name %}"
             title="{% trans 'View full detail' %}"
-            class="btn btn-ghost btn-xs px-1.5 text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+            class="btn btn-ghost btn-xs px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
             onclick="event.stopPropagation()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -182,28 +182,54 @@
     {# Pagination #}
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="flex justify-center mt-8">
-      <div class="join">
+      <div class="flex gap-1 items-center">
         {% if page_obj.has_previous %}
         <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
-          class="join-item btn btn-sm">«</a>
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">«</a>
         {% else %}
-        <button class="join-item btn btn-sm btn-disabled">«</button>
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">«</span>
         {% endif %}
 
+        {# Always show page 1 #}
+        {% if page_obj.number == 1 %}
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white" style="background:#53c0d7;">1</span>
+        {% else %}
+        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">1</a>
+        {% endif %}
+
+        {# Leading ellipsis if window doesn't start at page 2 #}
+        {% if page_obj.number|add:"-3" > 2 %}
+        <span class="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
+        {% endif %}
+
+        {# Numbered window: pages 2 .. num_pages-1 that fall within ±3 of current #}
         {% for p in page_obj.paginator.page_range %}
-          {% if p == page_obj.number %}
-          <button class="join-item btn btn-sm btn-active" style="background:#53c0d7;border-color:#53c0d7;color:#fff;">{{ p }}</button>
-          {% elif p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
-          <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}"
-            class="join-item btn btn-sm">{{ p }}</a>
+          {% if p > 1 and p < page_obj.paginator.num_pages %}
+            {% if p == page_obj.number %}
+            <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white" style="background:#53c0d7;">{{ p }}</span>
+            {% elif p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
+            <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ p }}</a>
+            {% endif %}
           {% endif %}
         {% endfor %}
 
+        {# Trailing ellipsis if window doesn't reach second-to-last page #}
+        {% if page_obj.number|add:"3" < page_obj.paginator.num_pages|add:"-1" %}
+        <span class="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
+        {% endif %}
+
+        {# Always show last page (only if num_pages > 1) #}
+        {% if page_obj.number == page_obj.paginator.num_pages %}
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white" style="background:#53c0d7;">{{ page_obj.paginator.num_pages }}</span>
+        {% else %}
+        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+
         {% if page_obj.has_next %}
         <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
-          class="join-item btn btn-sm">»</a>
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">»</a>
         {% else %}
-        <button class="join-item btn btn-sm btn-disabled">»</button>
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">»</span>
         {% endif %}
       </div>
     </div>
