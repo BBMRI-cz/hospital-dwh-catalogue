@@ -16,10 +16,10 @@
   {% include "includes/_page_hero.html" %}
   {% endwith %}
 
-  {% if tickets %}
+  {% if paginator.count %}
   <div class="card bg-white border border-gray-200 shadow-sm rounded-lg mb-6 overflow-hidden">
     {% trans "Submitted tickets" as t_submitted_tickets %}
-    {% with tickets_count=tickets.count|stringformat:"s" %}
+    {% with tickets_count=paginator.count|stringformat:"s" %}
     {% with tickets_label=t_submitted_tickets|add:" · "|add:tickets_count %}
     {% include "includes/_card_section_header.html" with csh_color="#53c0d7" csh_label=tickets_label %}
     {% endwith %}{% endwith %}
@@ -27,74 +27,18 @@
       <thead>
         <tr class="border-b border-gray-100">
           <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Subject" %}</th>
-          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Status" %}</th>
-          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Alvao ID" %}</th>
-          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Submitted" %}</th>
           <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Items" %}</th>
           <th class="w-6"></th>
         </tr>
       </thead>
       <tbody>
         {% for ticket in tickets %}
-        <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="toggleTicket('{{ ticket.pk }}')">
-          <td class="px-5 py-3">
-            <div class="font-medium text-gray-800 text-sm max-w-xs truncate">{{ ticket.subject }}</div>
-            <div class="font-mono text-[10px] text-gray-400 mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
-          </td>
-          <td class="px-5 py-3">
-            {% if ticket.status == 'submitted' or ticket.status == 'confirmed' %}
-              <span class="badge badge-sm font-mono text-[9px]" style="background:#dcfce7;color:#16a34a;border:1px solid #86efac;">{{ ticket.get_status_display }}</span>
-            {% elif ticket.status == 'failed' %}
-              <span class="badge badge-sm font-mono text-[9px]" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">{{ ticket.get_status_display }}</span>
-            {% else %}
-              <span class="badge badge-sm font-mono text-[9px] bg-gray-100 text-gray-500 border border-gray-200">{{ ticket.get_status_display }}</span>
-            {% endif %}
-          </td>
-          <td class="px-5 py-3">
-            {% if ticket.alvao_ticket_id %}
-              <span class="font-mono text-xs" style="color:#007fc8">#{{ ticket.alvao_ticket_id }}</span>
-            {% else %}
-              <span class="text-gray-300 text-sm">—</span>
-            {% endif %}
-          </td>
-          <td class="px-5 py-3">
-            {% if ticket.submitted_at %}
-              <span class="font-mono text-xs text-gray-500">{{ ticket.submitted_at|date:"Y-m-d" }}</span>
-            {% else %}
-              <span class="text-gray-300 text-sm">—</span>
-            {% endif %}
-          </td>
-          <td class="px-5 py-3">
-            <span class="badge badge-sm font-mono text-[9px]" style="background:#e8f7fb;color:#53c0d7;border:1px solid #9ddcea;">{{ ticket.item_count }}</span>
-          </td>
-          <td class="pr-5">
-            <svg id="chev-{{ ticket.pk }}" class="text-gray-300 transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </td>
-        </tr>
-        <tr id="items-{{ ticket.pk }}" class="hidden bg-gray-50">
-          <td colspan="6" class="px-5 py-3">
-            <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-2">{% trans "Requested datasets" %}</div>
-            <div class="flex flex-col gap-1">
-              {% for item in ticket.items.all %}
-              <div class="flex items-center gap-2 text-sm text-gray-700">
-                <span class="badge badge-xs font-mono" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">{{ item.item_type }}</span>
-                <span>{{ item.item_name }}</span>
-                <span class="font-mono text-[10px] text-gray-400">({{ item.item_id }})</span>
-              </div>
-              {% empty %}
-              <span class="text-sm text-gray-400 italic">{% trans "No items" %}</span>
-              {% endfor %}
-            </div>
-          </td>
-        </tr>
+        {% include "ticketing/_ticket_row.html" with ticket=ticket %}
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <!-- Pagination -->
   {% include "includes/_pagination.html" %}
 
   {% else %}

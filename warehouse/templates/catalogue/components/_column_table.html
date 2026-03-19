@@ -39,9 +39,9 @@
           data-col="{{ col.name|lower }} {{ col.title|lower }}"
           {% if col.description %}onclick="toggleColDesc('col-desc-{{ forloop.counter }}')"{% endif %}>
         <td class="px-5 py-3">
-          <div class="font-medium text-gray-800 text-sm">{{ col.title|default:"—" }}</div>
+          <div class="font-medium text-sm" style="color:#53c0d7">{{ col.title|default:"—" }}</div>
         </td>
-        <td class="px-5 py-3 font-mono text-xs hidden sm:table-cell" style="color:#007fc8">{{ col.name }}</td>
+        <td class="px-5 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">{{ col.name }}</td>
         <td class="px-5 py-3">
           {% if col.key_db == 'PK' %}
           <span class="badge badge-sm font-mono text-[9px]" style="background:#fbeebc;color:#92400e;border:1px solid #fcd34d;">PK</span>

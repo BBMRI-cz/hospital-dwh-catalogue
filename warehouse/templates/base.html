@@ -74,17 +74,8 @@
 {% include 'catalogue/components/_header.html' %}
 
 <!-- ══════════════════════ MESSAGES ══════════════════════ -->
-{% if messages %}
-<div class="site-content fixed top-16 right-4 z-50 flex flex-col gap-2" id="toast-container">
-  {% for message in messages %}
-  <div role="alert" class="alert shadow-lg max-w-sm {% if message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}">
-    <span class="text-sm">{{ message }}</span>
-    <button onclick="this.parentElement.remove()" class="ml-auto shrink-0 flex items-center justify-center w-6 h-6 rounded text-current opacity-60 hover:opacity-100 transition-opacity">✕</button>
-  </div>
-  {% endfor %}
-</div>
-<script>setTimeout(()=>{ const c=document.getElementById('toast-container'); if(c)c.remove(); }, 5000);</script>
-{% endif %}
+<!-- ══════════════════════ MESSAGES ══════════════════════ -->
+{% include "includes/_toast_messages.html" %}
 
 <!-- ══════════════════════ CONTENT ══════════════════════ -->
 {% block sidebar %}

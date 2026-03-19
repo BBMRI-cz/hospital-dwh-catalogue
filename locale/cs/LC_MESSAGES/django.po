@@ -717,7 +717,7 @@ msgstr "Katalog"
 
 #: ticketing/templates/ticketing/cart.html:11
 msgid "Data Request Cart"
-msgstr "Košík požadavků na data"
+msgstr "Košík žádosti na data"
 
 #: ticketing/templates/ticketing/cart.html:12
 msgid "Review selected datasets and submit an Alvao request"
@@ -733,7 +733,7 @@ msgstr "Odebrat"
 
 #: ticketing/templates/ticketing/cart.html:56
 msgid "Submit request"
-msgstr "Odeslat požadavek"
+msgstr "Odeslat žádost"
 
 #: ticketing/templates/ticketing/cart.html:68
 msgid "Submit to Alvao"
@@ -754,9 +754,12 @@ msgstr "Přejít do katalogu"
 
 #: ticketing/templates/ticketing/history.html:4
 #: ticketing/templates/ticketing/history.html:11
-#: warehouse/templates/catalogue/components/_header.html:71
 msgid "My Tickets"
-msgstr "Moje tickety"
+msgstr "Moje žádosti"
+
+#: warehouse/templates/catalogue/components/_header.html:71
+msgid "Request history"
+msgstr "Historie žádostí"
 
 #: ticketing/templates/ticketing/history.html:12
 msgid "History of submitted data access requests"
@@ -791,12 +794,12 @@ msgid "Your submitted data access requests will appear here."
 msgstr "Zde se zobrazí vaše odeslané žádosti o přístup k datům."
 
 #: ticketing/views.py:34
-msgid "Notes"
-msgstr "Poznámky"
+msgid "Request description"
+msgstr "Popis žádosti"
 
 #: ticketing/views.py:38
 msgid "Describe your request…"
-msgstr "Popište váš požadavek…"
+msgstr "Popište vaši žádost…"
 
 #: ticketing/views.py:95
 msgid "Your cart is empty."

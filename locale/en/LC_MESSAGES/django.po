@@ -754,9 +754,12 @@ msgstr "Go to catalogue"
 
 #: ticketing/templates/ticketing/history.html:4
 #: ticketing/templates/ticketing/history.html:11
-#: warehouse/templates/catalogue/components/_header.html:71
 msgid "My Tickets"
-msgstr "My Tickets"
+msgstr "My Requests"
+
+#: warehouse/templates/catalogue/components/_header.html:71
+msgid "Request history"
+msgstr "Request history"
 
 #: ticketing/templates/ticketing/history.html:12
 msgid "History of submitted data access requests"
@@ -791,8 +794,8 @@ msgid "Your submitted data access requests will appear here."
 msgstr "Your submitted data access requests will appear here."
 
 #: ticketing/views.py:34
-msgid "Notes"
-msgstr "Notes"
+msgid "Request description"
+msgstr "Request description"
 
 #: ticketing/views.py:38
 msgid "Describe your request…"

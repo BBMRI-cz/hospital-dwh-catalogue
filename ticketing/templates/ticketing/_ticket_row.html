@@ -1,0 +1,35 @@
+{% load i18n %}
+{# Ticket summary row + collapsible detail row. Expects: ticket #}
+<tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="toggleTicket('{{ ticket.pk }}')">
+  <td class="px-5 py-3">
+    <div class="font-medium text-sm max-w-xs truncate" style="color:#53c0d7">{{ ticket.subject }}</div>
+    <div class="font-mono text-[10px] text-gray-400 mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
+  </td>
+  <td class="px-5 py-3">
+    <span class="badge badge-sm font-mono text-[10px] border text-gray-500 bg-gray-50 border-gray-200">{{ ticket.item_count }}</span>
+  </td>
+  <td class="pr-5">
+    <svg id="chev-{{ ticket.pk }}" class="chevron-icon text-gray-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </td>
+</tr>
+<tr id="items-{{ ticket.pk }}" class="hidden bg-gray-50">
+  <td colspan="3" class="px-5 py-3">
+    {% if ticket.description %}
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-1">{% trans "Description" %}</div>
+    <p class="text-sm text-gray-600 mb-3 whitespace-pre-wrap">{{ ticket.description }}</p>
+    {% endif %}
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-2">{% trans "Requested datasets" %}</div>
+    <div class="flex flex-col divide-y divide-gray-100">
+      {% for item in ticket.items.all %}
+      <div class="py-1.5 first:pt-0 last:pb-0">
+        <div class="font-medium text-gray-800 text-sm">{{ item.item_name }}</div>
+        {% if item.parent_dataset %}<div class="font-mono text-[10px] text-gray-400 mt-0.5">{{ item.parent_dataset }}</div>{% endif %}
+      </div>
+      {% empty %}
+      <span class="text-sm text-gray-400 italic">{% trans "No items" %}</span>
+      {% endfor %}
+    </div>
+  </td>
+</tr>

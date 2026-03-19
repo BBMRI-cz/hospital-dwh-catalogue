@@ -29,8 +29,11 @@
         {% for item in cart %}
         <tr class="border-t border-gray-100 hover:bg-gray-50">
           <td class="px-5 py-3">
-            <div class="font-medium text-gray-800 text-sm">{{ item.title }}</div>
-            <div class="font-mono text-[10px] text-gray-400">{{ item.name }}</div>
+            <a href="{% url 'warehouse:dataset_detail' item.source item.name %}" target="_blank" rel="noopener noreferrer"
+               class="group block hover:text-[#53c0d7] transition-colors">
+              <div class="font-medium text-gray-800 text-sm group-hover:text-[#53c0d7]">{{ item.title }}</div>
+              <div class="font-mono text-[10px] text-gray-400 group-hover:text-[#53c0d7]/70">{{ item.name }}</div>
+            </a>
           </td>
           <td class="pr-5 text-right">
             <form method="post" action="{% url 'ticketing:cart_remove' %}">
@@ -50,9 +53,10 @@
       </tbody>
     </table>
   </div>
+  {% endif %}
 
-  <!-- Submit form -->
-  <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+  <!-- Submit form — always visible -->
+  <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mt-6">
     {% trans "Submit request" as t_submit_request %}
     {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_submit_request %}
     <div class="px-5 pt-3 pb-5 flex flex-col gap-3">
@@ -70,15 +74,6 @@
       </form>
     </div>
   </div>
-
-  {% else %}
-  {% trans "Your cart is empty" as t_cart_empty %}
-  {% trans "Browse the catalogue and click the cart icon to add datasets." as t_cart_empty_sub %}
-  {% trans "Go to catalogue" as t_go_to_catalogue %}
-  {% with es_icon="cart" es_icon_bg="#fdeee7" es_icon_color="#f04600" es_heading=t_cart_empty es_subtitle=t_cart_empty_sub es_btn_href=catalogue_url es_btn_label=t_go_to_catalogue %}
-  {% include "includes/_empty_state.html" %}
-  {% endwith %}
-  {% endif %}
 
 </div>
 {% endblock %}

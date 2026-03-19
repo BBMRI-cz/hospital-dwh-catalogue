@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 class TicketSubmitForm(forms.Form):
     description = forms.CharField(
-        required=False,
-        label=_('Notes'),
+        required=True,
+        label=_('Request description'),
         widget=forms.Textarea(attrs={
             'class': 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-[#53c0d7] focus:outline-none focus:ring-2 focus:ring-[#53c0d7]/20 transition resize-none',
             'rows': 4,
@@ -91,16 +91,15 @@ class CartView(LoginRequiredMixin, View):
         cart = CartService.get(request.session)
         form = TicketSubmitForm(request.POST)
 
-        if not cart:
-            messages.error(request, _('Your cart is empty.'))
-            return render(request, self.template_name, {'cart': cart, 'form': form})
-
         if not form.is_valid():
             return render(request, self.template_name, {'cart': cart, 'form': form})
 
         # Create TicketRequest
         dataset_names = ', '.join(item['title'] for item in cart)
-        auto_subject = (str(_("Data access request")) + f" — {dataset_names}")[:500]
+        auto_subject = (
+            (str(_('Data access request')) + f' \u2014 {dataset_names}') if dataset_names
+            else str(_('Data access request'))
+        )[:500]
         ticket = TicketRequest.objects.create(
             requester_email=request.user.email,
             requester_name=request.user.get_full_name() or request.user.username,
@@ -134,7 +133,11 @@ class CartView(LoginRequiredMixin, View):
             ticket.submitted_at = timezone.now()
             ticket.save()
             CartService.clear(request.session)
-            messages.success(request, _('Your request has been submitted.'))
+            ticket_id = response.ticket_id or ''
+            if ticket_id:
+                messages.success(request, str(_('Your request has been submitted \u2014 ticket #%(ticket_id)s')) % {'ticket_id': ticket_id})
+            else:
+                messages.success(request, _('Your request has been submitted.'))
         except Exception:
             logger.exception('Ticket submission failed for ticket pk=%s user=%s', ticket.pk, request.user)
             ticket.status = TicketRequest.Status.FAILED
@@ -145,9 +148,11 @@ class CartView(LoginRequiredMixin, View):
 
 
 def _build_ticket_description(ticket: TicketRequest, cart: list[dict]) -> str:
-    lines = [ticket.description, '', '--- Requested datasets ---']
-    for item in cart:
-        lines.append(f"  [{item['source']}] {item['title']} ({item['name']})")
+    lines = [ticket.description]
+    if cart:
+        lines += ['', '--- Requested datasets ---']
+        for item in cart:
+            lines.append(f"  [{item['source']}] {item['title']} ({item['name']})")
     return '\n'.join(lines)
 
 
