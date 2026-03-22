@@ -62,7 +62,7 @@ def _dataset_to_dict(ds) -> dict:
     return {
         'title':                  ds.title or ds.name,
         'access_rights':          ds.access_rights,
-        'has_version':            ds.has_version,
+        'version':                ds.version,
         'conforms_to':            ds.conforms_to,
         'theme':                  ds.theme,
         'publisher':              ds.publisher,

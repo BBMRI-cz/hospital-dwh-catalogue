@@ -25,7 +25,7 @@ class UnifiedDataset:
     # can look them up automatically without a separate mapping table.
     title: Optional[str] = None
     access_rights: Optional[str] = None
-    has_version: Optional[str] = None
+    version: Optional[str] = None
     conforms_to: Optional[str] = None
     theme: Optional[str] = None
     publisher: Optional[str] = None
@@ -43,6 +43,9 @@ class UnifiedDataset:
     description: Optional[str] = None
     keyword: Optional[str] = None
     catalog_name: Optional[str] = None
+    # HealthDCAT-AP v6 — new mandatory fields
+    identifier: Optional[str] = None   # dct:identifier
+    type: Optional[str] = None         # dct:type — EU Dataset-type vocabulary URI(s)
     distributions: list[UnifiedDistribution] = field(default_factory=list)
 
 

@@ -48,14 +48,14 @@ class ContactPointBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Email'),
-        help_text=_('Contact e-mail address'),
+        help_text=_('Contact e-mail address (vcard:hasEmail)'),
     )
     contact_page = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Contact Page'),
-        help_text=_('URL of a web page that can be used to reach the contact'),
+        help_text=_('URL of a web page that can be used to reach the contact (vcard:hasURL)'),
     )
 
     class Meta:
@@ -81,6 +81,12 @@ class AgentBase(models.Model):
         primary_key=True,
         verbose_name=_('Name'),
         help_text=_('Unique identifier / name for this agent'),
+    )
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Description'),
+        help_text=_('dct:description — description of the agent\'s activities (0..*)'),
     )
     # FK resolved at concrete-model level; string reference keeps base portable.
     contact_point = models.ForeignKey(
@@ -201,12 +207,33 @@ class DatasetBase(models.Model):
         verbose_name=_('Description'),
         help_text=_('dct:description — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
+    identifier = models.CharField(
+        max_length=500,
+        verbose_name=_('Identifier'),
+        help_text=_(
+            'dct:identifier — canonical URI of this dataset from the origin system '
+            '(mandatory per HealthDCAT-AP v6, 1..*)'
+        ),
+    )
+    type = models.CharField(
+        max_length=500,
+        verbose_name=_('Type'),
+        help_text=_(
+            'dct:type — dataset type URI from EU Dataset-type vocabulary; '
+            'comma-separated when multiple, e.g. '
+            'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL '
+            '(mandatory per HealthDCAT-AP v6, 1..*)'
+        ),
+    )
     theme = models.CharField(
         max_length=500,
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Theme'),
-        help_text=_('dcat:theme — category from a controlled vocabulary'),
+        help_text=_(
+            'dcat:theme — EU data-theme vocabulary URI; mandatory per HealthDCAT-AP v6 (1..*), '
+            'e.g. http://publications.europa.eu/resource/authority/data-theme/HEAL'
+        ),
     )
     publisher = models.ForeignKey(
         'Agent',
@@ -237,9 +264,9 @@ class DatasetBase(models.Model):
     )
     keyword = models.TextField(
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Keywords'),
-        help_text=_('dcat:keyword — comma-separated keywords'),
+        help_text=_('dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'),
     )
     source = models.TextField(
         null=True,
@@ -257,9 +284,10 @@ class DatasetBase(models.Model):
         'ContactPoint',
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
+        blank=False,
         related_name='datasets',
         verbose_name=_('Contact Point'),
+        help_text=_('dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     rights_holder = models.TextField(
         null=True,
@@ -269,9 +297,9 @@ class DatasetBase(models.Model):
     )
     provenance = models.TextField(
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Provenance'),
-        help_text=_('dct:provenance'),
+        help_text=_('dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     catalog = models.ForeignKey(
         'Catalog',
@@ -324,10 +352,25 @@ class DatasetBase(models.Model):
         super().clean()
         validate_mandatory_fields(
             self,
-            ['access_rights', 'applicable_legislation', 'health_category', 'title', 'description'],
+            [
+                'access_rights',
+                'applicable_legislation',
+                'health_category',
+                'title',
+                'description',
+                'identifier',
+                'type',
+                'keyword',
+                'theme',
+                'provenance',
+            ],
         )
         if not self.hdab_id:
             raise ValidationError({'hdab': _('HDAB is mandatory (HealthDCAT-AP v6).')})
+        if not self.contact_point_id:
+            raise ValidationError(
+                {'contact_point': _('contact_point is mandatory (HealthDCAT-AP v6).')}
+            )
 
 
 class DistributionBase(models.Model):

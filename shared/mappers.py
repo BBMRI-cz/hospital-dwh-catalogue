@@ -46,7 +46,7 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
         app='warehouse',
         name=obj.name,
         title=obj.title,
-        has_version=obj.version,
+        version=obj.version,
         description=obj.description,
         theme=obj.theme,
         publisher=_fk_name(obj, 'publisher'),
@@ -64,15 +64,16 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
         applicable_legislation=obj.applicable_legislation,
         health_category=obj.health_category,
         hdab=_fk_name(obj, 'hdab'),
+        identifier=getattr(obj, 'identifier', None),
+        type=getattr(obj, 'type', None),
     )
 
 
 def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
-    ds = getattr(obj, 'dataset_name', None)
     return UnifiedDistribution(
         app='warehouse',
         name=obj.name,
-        dataset_name=getattr(ds, 'name', None),
+        dataset_name=_fk_name(obj, 'dataset_name'),
         title=obj.title,
         description=obj.description,
         access_url=obj.access_url,
@@ -96,7 +97,7 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
         app='fair_genomes',
         name=obj.name,
         title=obj.title,
-        has_version=obj.version,
+        version=obj.version,
         description=obj.description,
         theme=obj.theme,
         publisher=_fk_name(obj, 'publisher'),
@@ -114,15 +115,16 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
         applicable_legislation=obj.applicable_legislation,
         health_category=obj.health_category,
         hdab=_fk_name(obj, 'hdab'),
+        identifier=obj.identifier,
+        type=obj.type,
     )
 
 
 def map_fair_distribution(obj: 'fgm.Distribution') -> UnifiedDistribution:
-    ds = getattr(obj, 'dataset_name', None)
     return UnifiedDistribution(
         app='fair_genomes',
         name=obj.name,
-        dataset_name=getattr(ds, 'name', None),
+        dataset_name=_fk_name(obj, 'dataset_name'),
         title=obj.title,
         description=obj.description,
         access_url=obj.access_url,

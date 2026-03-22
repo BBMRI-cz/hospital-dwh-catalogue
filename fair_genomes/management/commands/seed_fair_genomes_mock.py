@@ -49,7 +49,10 @@ class Command(BaseCommand):
         # ── ContactPoints ──────────────────────────────────────────────────
         contact_points = [
             # email + page
-            {'email': 'fg-data@hospital.cz', 'contact_page': 'https://hospital.cz/fairgenomes'},
+            {
+                'email': 'fg-data@hospital.cz',
+                'contact_page': 'https://hospital.cz/fairgenomes',
+            },
             # email only
             {'email': 'fg-admin@hospital.cz', 'contact_page': None},
             # page only
@@ -71,11 +74,20 @@ class Command(BaseCommand):
         # ── Agents ─────────────────────────────────────────────────────────
         agent_data = [
             # with email+page contact
-            {'name': 'FG_AGENT_DWH',        'contact_point': cp_both},
+            {
+                'name': 'FG_AGENT_DWH',
+                'contact_point': cp_both,
+            },
             # with email-only contact
-            {'name': 'FG_AGENT_MOLGENIS',   'contact_point': cp_email_only},
+            {
+                'name': 'FG_AGENT_MOLGENIS',
+                'contact_point': cp_email_only,
+            },
             # with page-only contact — used as HDAB
-            {'name': 'FG_AGENT_HDAB',       'contact_point': cp_page_only},
+            {
+                'name': 'FG_AGENT_HDAB',
+                'contact_point': cp_page_only,
+            },
             # no contact at all
             {'name': 'FG_AGENT_NO_CONTACT', 'contact_point': None},
         ]
@@ -85,7 +97,9 @@ class Command(BaseCommand):
             name = data['name']
             obj, created = Agent.objects.using(DB).get_or_create(
                 name=name,
-                defaults={'contact_point': data['contact_point']},
+                defaults={
+                    'contact_point': data['contact_point'],
+                },
             )
             agent_objects[name] = obj
             if created:
@@ -120,17 +134,19 @@ class Command(BaseCommand):
         now = timezone.now()
 
         dataset_specs: list[dict[str, Any]] = [
-            # DS_FG_COHORT: ALL optional fields filled; NON_PUBLIC; GDPR;EHDS; patient_data
+            # DS_FG_COHORT: NON_PUBLIC; GDPR;EHDS; patient_data
             {
                 'name': 'DS_FG_COHORT',
                 'defaults': {
+                    'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_COHORT',
+                    'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
                     'title': 'Genomická kohorta pacientů',
                     'version': '2.0.0',
                     'description': (
                         'Kohortová studie genomických dat pacientů: WGS, RNA-seq, '
                         'klinické fenotypy a biobankovací metadata.'
                     ),
-                    'theme': 'http://www.ebi.ac.uk/efo/EFO_0004784',
+                    'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
                     'publisher': agent_dwh,
                     'conforms_to': 'https://fairgenomes.org/spec/v2',
                     'issued': now,
@@ -154,9 +170,13 @@ class Command(BaseCommand):
             {
                 'name': 'DS_FG_VARIANTS',
                 'defaults': {
+                    'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_VARIANTS',
+                    'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
                     'title': 'Varianty genomické sekvence',
                     'description': 'VCF soubory s variantami identifikovanými v kohortě (SNP, InDel, CNV).',
                     'keyword': 'VCF,SNP,InDel,CNV,varianty',
+                    'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                    'provenance': 'Variant calling pipeline GATK4 na sekvenačních datech kohorty.',
                     'contact_point': cp_email_only,
                     'access_rights': (
                         'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'
@@ -170,10 +190,17 @@ class Command(BaseCommand):
             {
                 'name': 'DS_FG_CLINICAL',
                 'defaults': {
+                    'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_CLINICAL',
+                    'type': 'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
                     'title': 'Klinická fenotypová data',
+                    'description': 'Fenotypová a klinická data z elektronické zdravotní dokumentace.',
+                    'keyword': 'fenotyp,klinika,EHR,diagnóza',
+                    'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                    'provenance': 'Export z nemocničního informačního systému, pseudonymizován před předáním.',
                     'source': 'https://fairgenomes.hospital.cz/api/phenotypes',
                     'rights_holder': 'Genomická biobanková komise',
                     'publisher': agent_molgenis,
+                    'contact_point': cp_both,
                     'access_rights': (
                         'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
                     ),
@@ -182,10 +209,18 @@ class Command(BaseCommand):
                     'hdab': hdab,
                 },
             },
-            # DS_FG_BIOBANK: catalog=staging; research_data; EHDS only; no optional fields
+            # DS_FG_BIOBANK: catalog=staging; research_data; EHDS only; minimal optional
             {
                 'name': 'DS_FG_BIOBANK',
                 'defaults': {
+                    'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_BIOBANK',
+                    'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                    'title': 'Biobanková metadata',
+                    'description': 'Metadata biobankových vzorků v nemocniční biorepozitáři.',
+                    'keyword': 'biobanka,vzorky,tkáně',
+                    'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                    'provenance': 'Záznamy z biobankového systému LIMS.',
+                    'contact_point': cp_page_only,
                     'catalog': cat_min,
                     'access_rights': (
                         'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'
@@ -195,10 +230,18 @@ class Command(BaseCommand):
                     'hdab': hdab,
                 },
             },
-            # DS_FG_ADMIN: administrative_data; GDPR; NON_PUBLIC; no optional fields; AGENT_NO_CONTACT as hdab
+            # DS_FG_ADMIN: administrative_data; GDPR; NON_PUBLIC; minimal optional
             {
                 'name': 'DS_FG_ADMIN',
                 'defaults': {
+                    'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_ADMIN',
+                    'type': 'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
+                    'title': 'Administrativní data',
+                    'description': 'Administrativní záznamy o přístupu k datům a žádostech.',
+                    'keyword': 'administrace,přístup,žádosti',
+                    'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                    'provenance': 'Generováno ze systému správy žádostí HDAB.',
+                    'contact_point': cp_email_only,
                     'access_rights': (
                         'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC'
                     ),
