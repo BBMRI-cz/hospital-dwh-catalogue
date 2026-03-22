@@ -24,7 +24,7 @@
         </div>
         <form method="post" action="{% url 'ticketing:cart_add' %}" class="inline-block" onclick="event.stopPropagation()">
           {% csrf_token %}
-          <input type="hidden" name="source" value="{{ dataset.source }}">
+          <input type="hidden" name="app" value="{{ dataset.app }}">
           <input type="hidden" name="name" value="{{ dataset.name }}">
           <input type="hidden" name="title" value="{{ dist.title|default:dist.name }}">
           <input type="hidden" name="next" value="{{ request.path }}">

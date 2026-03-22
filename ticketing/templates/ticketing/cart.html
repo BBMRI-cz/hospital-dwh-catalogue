@@ -29,7 +29,7 @@
         {% for item in cart %}
         <tr class="border-t border-gray-100 hover:bg-gray-50">
           <td class="px-5 py-3">
-            <a href="{% url 'warehouse:dataset_detail' item.source item.name %}" target="_blank" rel="noopener noreferrer"
+            <a href="{% url 'warehouse:dataset_detail' item.app item.name %}" target="_blank" rel="noopener noreferrer"
                class="group block hover:text-[#53c0d7] transition-colors">
               <div class="font-medium text-gray-800 text-sm group-hover:text-[#53c0d7]">{{ item.title }}</div>
               <div class="font-mono text-[10px] text-gray-400 group-hover:text-[#53c0d7]/70">{{ item.name }}</div>
@@ -38,7 +38,7 @@
           <td class="pr-5 text-right">
             <form method="post" action="{% url 'ticketing:cart_remove' %}">
               {% csrf_token %}
-              <input type="hidden" name="source" value="{{ item.source }}">
+              <input type="hidden" name="app" value="{{ item.app }}">
               <input type="hidden" name="name" value="{{ item.name }}">
               <button type="submit" class="btn btn-ghost btn-xs text-red-400 hover:text-red-600 hover:bg-red-50" title="{% trans 'Remove' %}">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

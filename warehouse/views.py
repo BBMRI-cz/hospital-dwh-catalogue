@@ -19,7 +19,7 @@ from django.views.generic import View
 from django.shortcuts import render
 
 from shared.services import UnifiedCatalogService
-from shared.dtos import UnifiedDataset
+from shared.dtos import UnifiedDataset, UnifiedDistribution
 from ticketing.cart import CartService as CartService
 from warehouse.models import Attribute, Distribution
 
@@ -27,12 +27,6 @@ PAGE_SIZE = 15
 _CACHE_TTL = 300          # 5 minutes
 _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
 _CACHE_KEY_SCHEMA   = 'catalogue_schema_json'
-
-# DTO field name → DCAT term, for fields whose name doesn't match snake_case(local_name):
-#   'version'    ← dcterms:hasVersion  (local 'hasVersion' → snake 'has_version', not 'version')
-#   'source_uri' ← dct:source          (local 'source' conflicts with the app-identifier field)
-_DCAT_EXCEPTIONS = {'version': 'dcterms:hasVersion', 'source_uri': 'dct:source'}
-
 
 def _to_snake(camel: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()
@@ -68,15 +62,14 @@ def _dataset_to_dict(ds) -> dict:
     return {
         'title':                  ds.title or ds.name,
         'access_rights':          ds.access_rights,
-        'version':                ds.version,
+        'has_version':            ds.has_version,
         'conforms_to':            ds.conforms_to,
         'theme':                  ds.theme,
         'publisher':              ds.publisher,
-        'license':                ds.license,
         'applicable_legislation': ds.applicable_legislation,
         'health_category':        ds.health_category,
         'hdab':                   ds.hdab,
-        'source_uri':             ds.source_uri,
+        'source':                 ds.source,
         'rights_holder':          ds.rights_holder,
         'creator':                ds.creator,
         'issued':                 ds.issued,
@@ -84,7 +77,7 @@ def _dataset_to_dict(ds) -> dict:
         'contact_point':          ds.contact_point,
         'provenance':             ds.provenance,
         # Non-DCAT fields needed elsewhere (routing, filtering, display)
-        'source':      ds.source,
+        'app':         ds.app,
         'name':        ds.name,
         'description': ds.description,
         'keywords':    _parse_keywords(ds.keyword),
@@ -92,18 +85,19 @@ def _dataset_to_dict(ds) -> dict:
         'status':      _derive_status(ds.access_rights),
         'distributions': [
             {
-                'source': d.source,
+                'app': d.app,
                 'name': d.name,
                 'title': d.title or d.name,
                 'description': d.description,
                 'access_url': d.access_url,
                 'applicable_legislation': d.applicable_legislation,
                 'format': d.format,
-                'conformed_to': d.conformed_to,
+                'conforms_to': d.conforms_to,
                 'byte_size': d.byte_size,
                 'rights': d.rights,
                 'issued': d.issued,
                 'modified': d.modified,
+                'licence': d.licence,
                 'db_layer': getattr(d, 'db_layer', None),
             }
             for d in dists
@@ -127,7 +121,7 @@ def _build_jsonld(ds_dict: dict) -> dict:
             'org':          'http://www.w3.org/ns/org#',
         },
         '@type': ['dcat:Dataset', 'healthdcatap:HealthDataset'],
-        '@id': f"{base}/dataset/{ds_dict['source']}/{ds_dict['name']}",
+        '@id': f"{base}/dataset/{ds_dict['app']}/{ds_dict['name']}",
         'dct:title': [{'@language': 'cs', '@value': ds_dict['title']}],
         'dct:description': [{'@language': 'cs', '@value': ds_dict.get('description') or ''}],
         'dcat:keyword': ds_dict.get('keywords', []),
@@ -159,7 +153,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
     q              = get_params.get('q', '').strip().lower()
     status_filter  = set(get_params.getlist('status'))
     keyword_filter = {k.lower() for k in get_params.getlist('keywords')}
-    source_filter  = set(get_params.getlist('source'))
+    source_filter  = set(get_params.getlist('source'))  # dct:source URI filter
     rights_filter  = set(get_params.getlist('rights_holder'))
     cat_filter     = set(get_params.getlist('health_category'))
     theme_filter   = set(get_params.getlist('theme'))
@@ -193,7 +187,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
         if ds['status'] not in status_filter:
             continue
         # Source (dct:source URI)
-        if source_filter and ds.get('source_uri') not in source_filter:
+        if source_filter and ds.get('source') not in source_filter:
             continue
         # Keywords (ANY match)
         if keyword_filter:
@@ -218,7 +212,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
                 ds.get('title') or '',
                 ds.get('description') or '',
                 ds.get('rights_holder') or '',
-                ds.get('source_uri') or '',
+                ds.get('source') or '',
                 ds.get('health_category') or '',
                 ' '.join(ds.get('keywords', [])),
                 ' '.join(d.get('title', '') for d in ds.get('distributions', [])),
@@ -300,8 +294,8 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             for kw in ds.get('keywords', []):
                 if kw:
                     kw_counter[kw] += 1
-            if ds.get('source_uri'):
-                src_counter[ds['source_uri']] += 1
+            if ds.get('source'):
+                src_counter[ds['source']] += 1
             if ds.get('rights_holder'):
                 rh_counter[ds['rights_holder']] += 1
             if ds.get('health_category'):
@@ -314,7 +308,7 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         col_counter: Counter = Counter()
         filtered_dist_names = [
             d['name']
-            for ds in filtered if ds.get('source') == 'warehouse'
+            for ds in filtered if ds.get('app') == 'warehouse'
             for d in ds.get('distributions', [])
         ]
         if filtered_dist_names:
@@ -369,13 +363,13 @@ class DatasetDetailView(LoginRequiredMixin, View):
 
     template_name = 'catalogue/dataset_detail.html'
 
-    def get(self, request, source: str, name: str):
+    def get(self, request, app: str, name: str):
         service = UnifiedCatalogService()
-        cache_key = f'dataset:{source}:{name}'
+        cache_key = f'dataset:{app}:{name}'
         ds_dict: dict | None = cache.get(cache_key)
 
         if ds_dict is None:
-            ds, dist_objs = service.get_single_dataset(source, name)
+            ds, dist_objs = service.get_single_dataset(app, name)
             if ds is None:
                 raise Http404('Dataset not found')
             if not ds.distributions:
@@ -389,7 +383,6 @@ class DatasetDetailView(LoginRequiredMixin, View):
         # Build an inverse schema map: DTO field name → DCAT term.
         # DTO fields are declared in display order, so iteration order IS display order.
         _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
-        _inverse.update(_DCAT_EXCEPTIONS)
 
         dcat_rows = [
             (_inverse[f.name], ds_dict.get(f.name))
@@ -402,7 +395,7 @@ class DatasetDetailView(LoginRequiredMixin, View):
             'distributions': ds_dict['distributions'],
             'schema_json':  schema_json,
             'jsonld_str':   json.dumps(jsonld, indent=2, ensure_ascii=False),
-            'source':       source,
+            'app':          app,
             'dcat_rows':    dcat_rows,
             'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
@@ -413,7 +406,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
 
     template_name = 'catalogue/distribution_detail.html'
 
-    def get(self, request, source: str, name: str):
+    def get(self, request, app: str, name: str):
         service = UnifiedCatalogService()
 
         all_datasets: list[dict] | None = cache.get(_CACHE_KEY_DATASETS)
@@ -427,7 +420,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
         dataset: dict | None = None
         for ds in all_datasets:
             for dist in ds.get('distributions', []):
-                if dist['source'] == source and dist['name'] == name:
+                if dist['app'] == app and dist['name'] == name:
                     distribution = dist
                     dataset = ds
                     break
@@ -438,6 +431,15 @@ class DistributionDetailView(LoginRequiredMixin, View):
             raise Http404('Distribution not found')
 
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
+
+        # Build an inverse schema map: DTO field name → DCAT term.
+        _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
+
+        dcat_rows = [
+            (_inverse[f.name], distribution.get(f.name))
+            for f in dataclasses.fields(UnifiedDistribution)
+            if f.name in _inverse
+        ]
 
         attrs = Attribute.objects.using('metadata_db').filter(
             distribution_name=name
@@ -460,7 +462,8 @@ class DistributionDetailView(LoginRequiredMixin, View):
             'dataset':      dataset,
             'columns':      columns,
             'schema_json':  schema_json,
-            'source':       source,
+            'app':          app,
+            'dcat_rows':    dcat_rows,
             'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
 

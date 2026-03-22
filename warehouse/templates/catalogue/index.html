@@ -48,7 +48,7 @@
     {% if page_obj.object_list %}
     <div id="ds-list" class="flex flex-col gap-1.5">
       {% for dataset in page_obj %}
-      {% with status=dataset.status source=dataset.source %}
+      {% with status=dataset.status %}
 
       <div class="bg-white border rounded-lg overflow-hidden transition-shadow hover:shadow-md"
         id="card-{{ forloop.counter }}"
@@ -68,7 +68,7 @@
           {# Cart toggle #}
           <button type="button"
             onclick="ajaxCartToggle(this, event)"
-            data-source="{{ dataset.source }}"
+            data-app="{{ dataset.app }}"
             data-name="{{ dataset.name }}"
             data-title="{{ dataset.title|default:dataset.name }}"
             data-in-cart="{% if dataset.name in cart_dataset_ids %}true{% else %}false{% endif %}"
@@ -82,7 +82,7 @@
           </button>
 
           {# Eye / detail link #}
-          <a href="{% url 'warehouse:dataset_detail' source=dataset.source name=dataset.name %}"
+          <a href="{% url 'warehouse:dataset_detail' app=dataset.app name=dataset.name %}"
             title="{% trans 'View full detail' %}"
             class="btn btn-ghost btn-xs px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
             onclick="event.stopPropagation()">
@@ -126,12 +126,12 @@
               </div>
               {% endif %}
 
-              {% if dataset.source_uri %}
+              {% if dataset.source %}
               <div class="flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
                 <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
                   dct:source {% include "includes/_info_btn.html" with semantics="dct:source" stop=1 %}
                 </div>
-                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.source_uri }}</div>
+                <div class="text-[13.5px] text-gray-800 leading-snug">{{ dataset.source }}</div>
               </div>
               {% endif %}
 

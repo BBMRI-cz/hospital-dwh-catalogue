@@ -59,6 +59,12 @@ class CatalogModelTest(TestCase):
     def test_meta_managed_true(self):
         self.assertTrue(Catalog._meta.managed)
 
+    def test_mandatory_fields_not_blank(self):
+        """title, description and applicable_legislation are mandatory per HealthDCAT-AP v6."""
+        for field_name in ('title', 'description', 'applicable_legislation'):
+            field = Catalog._meta.get_field(field_name)
+            self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
+
 
 class DatasetModelTest(TestCase):
     """Tests for the FG Dataset model."""
@@ -80,7 +86,8 @@ class DatasetModelTest(TestCase):
         self.assertEqual(Dataset._meta.db_table, 'fair_genomes_dataset')
 
     def test_mandatory_fields_not_blank(self):
-        for field_name in ('access_rights', 'applicable_legislation', 'health_category'):
+        for field_name in ('access_rights', 'applicable_legislation', 'health_category',
+                           'title', 'description'):
             field = Dataset._meta.get_field(field_name)
             self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
 

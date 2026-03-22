@@ -43,19 +43,18 @@ def _dt_str(obj: object, attr: str) -> str | None:
 def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
     return UnifiedDataset(
-        source='warehouse',
+        app='warehouse',
         name=obj.name,
         title=obj.title,
-        version=obj.version,
+        has_version=obj.version,
         description=obj.description,
         theme=obj.theme,
         publisher=_fk_name(obj, 'publisher'),
-        license=obj.license,
-        conforms_to=obj.conformed_to,
+        conforms_to=obj.conforms_to,
         issued=_dt_str(obj, 'issued'),
         modified=_dt_str(obj, 'modified'),
         keyword=obj.keyword,
-        source_uri=obj.source,
+        source=obj.source,
         creator=obj.creator,
         contact_point=getattr(cp, 'email', None),
         rights_holder=obj.rights_holder,
@@ -71,7 +70,7 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
 def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
     ds = getattr(obj, 'dataset_name', None)
     return UnifiedDistribution(
-        source='warehouse',
+        app='warehouse',
         name=obj.name,
         dataset_name=getattr(ds, 'name', None),
         title=obj.title,
@@ -79,11 +78,12 @@ def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
         access_url=obj.access_url,
         applicable_legislation=obj.applicable_legislation,
         format=obj.format,
-        conformed_to=obj.conformed_to,
+        conforms_to=obj.conforms_to,
         byte_size=obj.byte_size,
         rights=obj.rights,
         issued=_dt_str(obj, 'issued'),
         modified=_dt_str(obj, 'modified'),
+        licence=obj.licence,
         db_layer=getattr(obj, 'db_layer', None),
     )
 
@@ -93,19 +93,18 @@ def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
 def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
     return UnifiedDataset(
-        source='fair_genomes',
+        app='fair_genomes',
         name=obj.name,
         title=obj.title,
-        version=obj.version,
+        has_version=obj.version,
         description=obj.description,
         theme=obj.theme,
         publisher=_fk_name(obj, 'publisher'),
-        license=obj.license,
-        conforms_to=obj.conformed_to,
+        conforms_to=obj.conforms_to,
         issued=_dt_str(obj, 'issued'),
         modified=_dt_str(obj, 'modified'),
         keyword=obj.keyword,
-        source_uri=obj.source,
+        source=obj.source,
         creator=obj.creator,
         contact_point=getattr(cp, 'email', None),
         rights_holder=obj.rights_holder,
@@ -121,7 +120,7 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
 def map_fair_distribution(obj: 'fgm.Distribution') -> UnifiedDistribution:
     ds = getattr(obj, 'dataset_name', None)
     return UnifiedDistribution(
-        source='fair_genomes',
+        app='fair_genomes',
         name=obj.name,
         dataset_name=getattr(ds, 'name', None),
         title=obj.title,
@@ -129,9 +128,10 @@ def map_fair_distribution(obj: 'fgm.Distribution') -> UnifiedDistribution:
         access_url=obj.access_url,
         applicable_legislation=obj.applicable_legislation,
         format=obj.format,
-        conformed_to=obj.conformed_to,
+        conforms_to=obj.conforms_to,
         byte_size=obj.byte_size,
         rights=obj.rights,
         issued=_dt_str(obj, 'issued'),
         modified=_dt_str(obj, 'modified'),
+        licence=obj.licence,
     )

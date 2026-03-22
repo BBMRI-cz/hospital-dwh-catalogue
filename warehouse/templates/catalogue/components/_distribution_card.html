@@ -26,7 +26,7 @@
     {# AJAX cart toggle #}
     <button type="button"
       onclick="ajaxCartToggle(this, event)"
-      data-source="{{ dist.source }}"
+      data-app="{{ dist.app }}"
       data-name="{{ dist.name }}"
       data-title="{{ dist.title|default:dist.name }}"
       data-in-cart="{% if dist.name in cart_dataset_ids %}true{% else %}false{% endif %}"
@@ -45,7 +45,7 @@
     </button>
 
     {# Eye / detail link #}
-    <a href="{% url 'warehouse:distribution_detail' source=dist.source name=dist.name %}"
+    <a href="{% url 'warehouse:distribution_detail' app=dist.app name=dist.name %}"
       title="{% trans 'View full detail' %}"
       class="btn btn-ghost btn-xs px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
       onclick="event.stopPropagation()">

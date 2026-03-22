@@ -132,8 +132,7 @@ class Command(BaseCommand):
                     ),
                     'theme': 'http://www.ebi.ac.uk/efo/EFO_0004784',
                     'publisher': agent_dwh,
-                    'license': 'https://creativecommons.org/licenses/by/4.0/',
-                    'conformed_to': 'https://fairgenomes.org/spec/v2',
+                    'conforms_to': 'https://fairgenomes.org/spec/v2',
                     'issued': now,
                     'modified': now,
                     'keyword': 'genomika,WGS,RNA-seq,kohorta,biobanka',
@@ -235,7 +234,7 @@ class Command(BaseCommand):
                     'title': 'Distribucia VCF (kohorta)',
                     'description': 'Komprimované VCF soubory pro celou kohortu.',
                     'format': 'VCF',
-                    'conformed_to': 'https://samtools.github.io/hts-specs/VCFv4.3.pdf',
+                    'conforms_to': 'https://samtools.github.io/hts-specs/VCFv4.3.pdf',
                     'byte_size': 10737418240,  # 10 GB
                     'rights': 'internal',
                     'issued': now,

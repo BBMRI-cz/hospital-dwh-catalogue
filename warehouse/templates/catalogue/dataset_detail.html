@@ -37,7 +37,7 @@
           {% trans "JSON-LD" %}
         </button>
         <!-- Add to cart -->
-        {% include "includes/_cart_add_btn.html" with cart_source=dataset.source cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
+        {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
       </div>
     </div>
   </div>
@@ -126,7 +126,7 @@ function downloadJsonLd() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = 'healthdcatap_{{ dataset.source }}_{{ dataset.name }}.jsonld';
+  a.download = 'healthdcatap_{{ dataset.app }}_{{ dataset.name }}.jsonld';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

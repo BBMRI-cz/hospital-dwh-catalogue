@@ -119,13 +119,15 @@ class CatalogBase(models.Model):
     title = models.CharField(
         max_length=500,
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Title'),
+        help_text=_('dct:title — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     description = models.TextField(
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Description'),
+        help_text=_('dct:description — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     # Nullable FK: a catalog can temporarily lack a publisher record.
     publisher = models.ForeignKey(
@@ -155,7 +157,7 @@ class CatalogBase(models.Model):
 
     def clean(self) -> None:
         super().clean()
-        validate_mandatory_fields(self, ['applicable_legislation'])
+        validate_mandatory_fields(self, ['applicable_legislation', 'title', 'description'])
 
 
 class DatasetBase(models.Model):
@@ -183,8 +185,9 @@ class DatasetBase(models.Model):
     title = models.CharField(
         max_length=500,
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Title'),
+        help_text=_('dct:title — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     version = models.CharField(
         max_length=100,
@@ -194,8 +197,9 @@ class DatasetBase(models.Model):
     )
     description = models.TextField(
         null=True,
-        blank=True,
+        blank=False,
         verbose_name=_('Description'),
+        help_text=_('dct:description — mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     theme = models.CharField(
         max_length=500,
@@ -212,14 +216,7 @@ class DatasetBase(models.Model):
         related_name='published_datasets',
         verbose_name=_('Publisher'),
     )
-    license = models.CharField(
-        max_length=500,
-        null=True,
-        blank=True,
-        verbose_name=_('License'),
-        help_text=_('dct:license — URL or SPDX identifier'),
-    )
-    conformed_to = models.CharField(
+    conforms_to = models.CharField(
         max_length=500,
         null=True,
         blank=True,
@@ -327,7 +324,7 @@ class DatasetBase(models.Model):
         super().clean()
         validate_mandatory_fields(
             self,
-            ['access_rights', 'applicable_legislation', 'health_category'],
+            ['access_rights', 'applicable_legislation', 'health_category', 'title', 'description'],
         )
         if not self.hdab_id:
             raise ValidationError({'hdab': _('HDAB is mandatory (HealthDCAT-AP v6).')})
@@ -381,7 +378,7 @@ class DistributionBase(models.Model):
         verbose_name=_('Format'),
         help_text=_('dct:format — media type or format URI'),
     )
-    conformed_to = models.CharField(
+    conforms_to = models.CharField(
         max_length=500,
         null=True,
         blank=True,
@@ -422,6 +419,13 @@ class DistributionBase(models.Model):
         max_length=500,
         verbose_name=_('Applicable Legislation'),
         help_text=_('dct:applicableLegislation (mandatory per HealthDCAT-AP v6)'),
+    )
+    licence = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        verbose_name=_('Licence'),
+        help_text=_('dct:license — licence under which this distribution is made available'),
     )
 
     class Meta:

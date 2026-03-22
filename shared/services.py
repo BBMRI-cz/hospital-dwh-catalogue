@@ -117,19 +117,19 @@ class UnifiedCatalogService:
         datasets = self.get_datasets()
         all_dists = self.get_distributions()
 
-        # Group distributions by (source, dataset_name)
+        # Group distributions by (app, dataset_name)
         dist_map: dict[tuple[str, str], list[UnifiedDistribution]] = defaultdict(list)
         for d in all_dists:
             if d.dataset_name:
-                dist_map[(d.source, d.dataset_name)].append(d)
+                dist_map[(d.app, d.dataset_name)].append(d)
 
         for ds in datasets:
-            ds.distributions = dist_map.get((ds.source, ds.name), [])
+            ds.distributions = dist_map.get((ds.app, ds.name), [])
 
         return datasets
 
     def get_single_dataset(
-        self, source: str, name: str
+        self, app: str, name: str
     ) -> tuple[UnifiedDataset, list[UnifiedDistribution]] | tuple[None, list]:
         """
         Return a (UnifiedDataset, distributions) tuple for a single dataset.
@@ -138,7 +138,7 @@ class UnifiedCatalogService:
         """
         datasets = self.get_datasets_with_distributions()
         for ds in datasets:
-            if ds.source == source and ds.name == name:
+            if ds.app == app and ds.name == name:
                 return ds, ds.distributions
         return None, []
 

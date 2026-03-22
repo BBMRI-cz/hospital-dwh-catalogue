@@ -13,7 +13,7 @@
 {% endcomment %}
 <button type="button"
   onclick="ajaxCartToggle(this, event)"
-  data-source="{{ cart_source }}"
+  data-app="{{ cart_source }}"
   data-name="{{ cart_name }}"
   data-title="{{ cart_title }}"
   data-in-cart="{% if cart_name in cart_dataset_ids %}true{% else %}false{% endif %}"

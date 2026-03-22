@@ -9,7 +9,7 @@
 <div class="max-w-4xl mx-auto px-6 py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
-  {% if dataset %}{% url 'warehouse:dataset_detail' source=distribution.source name=dataset.name as bc_mid_url %}{% endif %}
+  {% if dataset %}{% url 'warehouse:dataset_detail' app=distribution.app name=dataset.name as bc_mid_url %}{% endif %}
   {% trans "Catalogue" as t_catalogue %}
   {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_mid_url=bc_mid_url bc_mid_label=dataset.title|default:dataset.name bc_current=distribution.title|default:distribution.name %}
 
@@ -26,7 +26,7 @@
       </div>
       {% if dataset %}
       <div class="flex flex-col gap-2 shrink-0 w-44">
-        {% include "includes/_cart_add_btn.html" with cart_source=distribution.source cart_name=dataset.name cart_title=distribution.title|default:distribution.name cart_next=request.path %}
+        {% include "includes/_cart_add_btn.html" with cart_source=distribution.app cart_name=dataset.name cart_title=distribution.title|default:distribution.name cart_next=request.path %}
         <p class="text-[10px] text-gray-400 text-center leading-snug">
           {% trans "Adds the entire dataset" %}<br>
           <span class="font-medium text-gray-500">{{ dataset.title|default:dataset.name }}</span>
@@ -43,15 +43,9 @@
       {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_dist_meta %}
       <div class="grid grid-cols-1 sm:grid-cols-2">
         {% include "includes/_dcat_row.html" with semantics="dct:title" label="dct:title" value=distribution.title only %}
-        {% include "includes/_dcat_row.html" with semantics="dcat:accessURL" label="dcat:accessURL" value=distribution.access_url only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:format" label="dct:format" value=distribution.format only %}
-        {% include "includes/_dcat_row.html" with semantics="dcat:byteSize" label="dcat:byteSize" value=distribution.byte_size only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:rights" label="dct:rights" value=distribution.rights only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:conformsTo" label="dct:conformsTo" value=distribution.conformed_to only %}
-        {% include "includes/_dcat_row.html" with semantics="dcatap:applicableLegislation" label="dcatap:applicableLegislation" value=distribution.applicable_legislation only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:issued" label="dct:issued" value=distribution.issued only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:modified" label="dct:modified" value=distribution.modified only %}
-        {% include "includes/_dcat_row.html" with semantics="healthdcatap:dbLayer" label="healthdcatap:dbLayer" value=distribution.db_layer only %}
+        {% for semantics, value in dcat_rows %}
+        {% include "includes/_dcat_row.html" with semantics=semantics label=semantics value=value only %}
+        {% endfor %}
         {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=distribution.description only %}
       </div>
     </div>

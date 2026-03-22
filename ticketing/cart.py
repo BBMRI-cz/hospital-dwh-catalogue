@@ -3,7 +3,7 @@ Cart helper for the ticketing app.
 
 Cart items are stored in the session as a list of dicts:
     session['cart'] = [
-        {'source': 'warehouse', 'name': 'my_dataset', 'title': 'My Dataset'},
+        {'app': 'warehouse', 'name': 'my_dataset', 'title': 'My Dataset'},
         ...
     ]
 """
@@ -28,11 +28,11 @@ class CartService:
         return list(session.get(CART_SESSION_KEY, []))
 
     @staticmethod
-    def add(session: 'SessionBase', source: str, name: str, title: str) -> bool:
+    def add(session: 'SessionBase', app: str, name: str, title: str) -> bool:
         """
         Add a dataset to the cart.
 
-        Idempotent — adding the same (source, name) twice is a no-op.
+        Idempotent — adding the same (app, name) twice is a no-op.
         Returns True if the item was added, False if it was already present
         or the cart is full.
         """
@@ -40,26 +40,26 @@ class CartService:
 
         # Already present — idempotent
         for item in cart:
-            if item['source'] == source and item['name'] == name:
+            if item['app'] == app and item['name'] == name:
                 return False
 
         if len(cart) >= CART_MAX_ITEMS:
             return False
 
-        cart.append({'source': source, 'name': name, 'title': title})
+        cart.append({'app': app, 'name': name, 'title': title})
         session[CART_SESSION_KEY] = cart
         session.modified = True
         return True
 
     @staticmethod
-    def remove(session: 'SessionBase', source: str, name: str) -> bool:
+    def remove(session: 'SessionBase', app: str, name: str) -> bool:
         """
         Remove a dataset from the cart.
 
         Returns True if removed, False if it was not in the cart.
         """
         cart: list[dict] = list(session.get(CART_SESSION_KEY, []))
-        new_cart = [i for i in cart if not (i['source'] == source and i['name'] == name)]
+        new_cart = [i for i in cart if not (i['app'] == app and i['name'] == name)]
         if len(new_cart) == len(cart):
             return False
         session[CART_SESSION_KEY] = new_cart

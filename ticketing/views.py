@@ -47,18 +47,18 @@ class CartAddView(LoginRequiredMixin, View):
     """POST: add a dataset to the session cart."""
 
     def post(self, request):
-        source = request.POST.get('source', '')
+        app = request.POST.get('app', '')
         name = request.POST.get('name', '')
         title = request.POST.get('title', '')
         in_cart = False
-        if source and name:
+        if app and name:
             cart = CartService.get(request.session)
-            already_in = any(i['source'] == source and i['name'] == name for i in cart)
+            already_in = any(i['app'] == app and i['name'] == name for i in cart)
             if already_in:
-                CartService.remove(request.session, source, name)
+                CartService.remove(request.session, app, name)
                 in_cart = False
             else:
-                CartService.add(request.session, source, name, title)
+                CartService.add(request.session, app, name, title)
                 in_cart = True
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'in_cart': in_cart, 'cart_count': CartService.count(request.session)})
@@ -70,10 +70,10 @@ class CartRemoveView(LoginRequiredMixin, View):
     """POST: remove a dataset from the session cart."""
 
     def post(self, request):
-        source = request.POST.get('source', '')
+        app = request.POST.get('app', '')
         name = request.POST.get('name', '')
-        if source and name:
-            CartService.remove(request.session, source, name)
+        if app and name:
+            CartService.remove(request.session, app, name)
         return redirect('ticketing:cart')
 
 
@@ -113,7 +113,7 @@ class CartView(LoginRequiredMixin, View):
             TicketRequestItem.objects.create(
                 ticket_request=ticket,
                 item_type=TicketRequestItem.ItemType.DATASET,
-                item_id=f"{item['source']}/{item['name']}",
+                item_id=f"{item['app']}/{item['name']}",
                 item_name=item['title'],
                 parent_dataset=item['name'],
             )
@@ -152,7 +152,7 @@ def _build_ticket_description(ticket: TicketRequest, cart: list[dict]) -> str:
     if cart:
         lines += ['', '--- Requested datasets ---']
         for item in cart:
-            lines.append(f"  [{item['source']}] {item['title']} ({item['name']})")
+            lines.append(f"  [{item['app']}] {item['title']} ({item['name']})")
     return '\n'.join(lines)
 
 
