@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'warehouse',
     'fair_genomes',
     'ticketing',
-    'schema_registry',
+    'schema_registry',  # kept for app registry / admin; no DB models
 ]
 
 MIDDLEWARE = [
@@ -307,3 +307,8 @@ ALVAO_DEFAULT_SERVICE_ID = config(
 # Mock Data Settings
 # Set MOCK_FAIR_GENOMES=True to seed sample data into fair_genomes_db on startup
 MOCK_FAIR_GENOMES = config('MOCK_FAIR_GENOMES', default=False, cast=bool)
+
+# HealthDCAT-AP Schema Registry
+# Directory name inside the health_dcat_ap/ git submodule (e.g. 'release-6').
+# Run ./deploy.sh --update to fetch a newer version of the submodule.
+HEALTH_DCAT_VERSION = config('HEALTH_DCAT_VERSION', default='release-6')

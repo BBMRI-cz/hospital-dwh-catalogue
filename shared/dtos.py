@@ -18,28 +18,32 @@ from typing import Optional
 
 @dataclass
 class UnifiedDataset:
+    # Required identity fields (no default — must stay first)
     source: str
     name: str
+    # DCAT fields — named to match snake_case(schema local_name) so the view
+    # can look them up automatically without a separate mapping table.
     title: Optional[str] = None
-    version: Optional[str] = None
-    description: Optional[str] = None
-    theme: Optional[str] = None
-    publisher_name: Optional[str] = None
-    license: Optional[str] = None
-    conformed_to: Optional[str] = None
-    issued: Optional[str] = None
-    modified: Optional[str] = None
-    keyword: Optional[str] = None
-    source_uri: Optional[str] = None
-    creator: Optional[str] = None
-    contact_point_email: Optional[str] = None
-    rights_holder: Optional[str] = None
-    provenance: Optional[str] = None
-    catalog_name: Optional[str] = None
     access_rights: Optional[str] = None
+    version: Optional[str] = None       # schema: hasVersion → has_version (exception)
+    conforms_to: Optional[str] = None
+    theme: Optional[str] = None
+    publisher: Optional[str] = None
+    license: Optional[str] = None
     applicable_legislation: Optional[str] = None
     health_category: Optional[str] = None
-    hdab_name: Optional[str] = None
+    hdab: Optional[str] = None
+    source_uri: Optional[str] = None    # schema: source → conflicts with app identifier
+    rights_holder: Optional[str] = None
+    creator: Optional[str] = None
+    issued: Optional[str] = None
+    modified: Optional[str] = None
+    contact_point: Optional[str] = None
+    provenance: Optional[str] = None
+    # Non-DCAT fields
+    description: Optional[str] = None
+    keyword: Optional[str] = None
+    catalog_name: Optional[str] = None
     distributions: list[UnifiedDistribution] = field(default_factory=list)
 
 

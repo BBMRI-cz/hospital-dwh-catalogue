@@ -72,6 +72,22 @@ else
     echo -e "${YELLOW}Skipping git pull for dev environment${NC}"
 fi
 
+# ── Submodule handling ───────────────────────────────────────────────────────
+echo -e "${GREEN}Fetching latest submodule commits...${NC}"
+git submodule update --init --remote
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to update submodules${NC}"
+    exit 1
+fi
+# Verify the configured release directory exists after fetch
+HEALTH_DCAT_RELEASE_DIR="health_dcat_ap/public/releases/${HEALTH_DCAT_VERSION:-release-6}"
+if [ ! -d "$HEALTH_DCAT_RELEASE_DIR" ]; then
+    echo -e "${YELLOW}Warning: HEALTH_DCAT_VERSION '${HEALTH_DCAT_VERSION:-release-6}' not found in submodule.${NC}"
+    echo -e "${YELLOW}Available releases:${NC}"
+    ls health_dcat_ap/public/releases/ 2>/dev/null || echo -e "${YELLOW}  (submodule directory missing)${NC}"
+fi
+echo -e "${GREEN}Submodule updated. Using release: ${YELLOW}${HEALTH_DCAT_VERSION:-release-6}${NC}"
+
 # Stop existing containers
 echo -e "${GREEN}Stopping existing containers...${NC}"
 docker compose -f "$COMPOSE_FILE" down

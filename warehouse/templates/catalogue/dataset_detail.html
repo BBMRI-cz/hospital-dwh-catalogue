@@ -50,23 +50,9 @@
         <span class="font-mono text-[10px] uppercase tracking-wider" style="color:#53c0d7">{% trans "Dataset Metadata" %}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2">
-        {% include "includes/_dcat_row.html" with semantics="dct:title" label="dct:title" value=dataset.title only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:accessRights" label="dct:accessRights" value=dataset.access_rights only %}
-        {% include "includes/_dcat_row.html" with semantics="dcterms:hasVersion" label="dcterms:hasVersion" value=dataset.version only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:conformsTo" label="dct:conformsTo" value=dataset.conformed_to only %}
-        {% include "includes/_dcat_row.html" with semantics="dcat:theme" label="dcat:theme" value=dataset.theme only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:publisher" label="dct:publisher" value=dataset.publisher only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:license" label="dct:license" value=dataset.license only %}
-        {% include "includes/_dcat_row.html" with semantics="dcatap:applicableLegislation" label="dcatap:applicableLegislation" value=dataset.applicable_legislation only %}
-        {% include "includes/_dcat_row.html" with semantics="healthdcatap:healthCategory" label="healthdcatap:healthCategory" value=dataset.health_category only %}
-        {% include "includes/_dcat_row.html" with semantics="healthdcatap:healthDataAccessBody" label="healthdcatap:hdab" value=dataset.hdab only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:source" label="dct:source" value=dataset.source_uri only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:rightsHolder" label="dct:rightsHolder" value=dataset.rights_holder only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:creator" label="dct:creator" value=dataset.creator only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:issued" label="dct:issued" value=dataset.issued only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:modified" label="dct:modified" value=dataset.modified only %}
-        {% include "includes/_dcat_row.html" with semantics="dcat:contactPoint" label="dcat:contactPoint" value=dataset.contact_email only %}
-        {% include "includes/_dcat_row.html" with semantics="dct:provenance" label="dct:provenance" value=dataset.provenance only %}
+        {% for semantics, value in dcat_rows %}
+        {% include "includes/_dcat_row.html" with semantics=semantics label=semantics value=value only %}
+        {% endfor %}
         {% if dataset.keywords %}
         <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
           <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">

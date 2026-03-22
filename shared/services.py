@@ -145,26 +145,16 @@ class UnifiedCatalogService:
     def get_schema_json(self) -> dict:
         """
         Return a dict keyed by semantics string (e.g. "dct:title") with term
-        metadata from the active schema registry version.
+        metadata loaded from the HealthDCAT-AP submodule.
 
         Used to populate the schema info modal JS in templates.
-        Falls back to an empty dict if the schema registry has no active version.
+        Falls back to an empty dict if the submodule release directory is
+        missing or rdflib is not installed.
         """
         try:
-            from schema_registry.services import list_terms
+            from schema_registry.services import get_schema_dict
 
-            terms = list_terms()
-            return {
-                t.semantics: {
-                    'prefix': t.prefix,
-                    'local_name': t.local_name,
-                    'uri': t.uri,
-                    'requirement': t.requirement,
-                    'label': t.base_label_en,
-                    'description': t.base_description_en,
-                }
-                for t in terms
-            }
+            return get_schema_dict()
         except Exception:
-            logger.exception('Failed to load schema registry terms')
+            logger.exception('Failed to load schema registry')
             return {}

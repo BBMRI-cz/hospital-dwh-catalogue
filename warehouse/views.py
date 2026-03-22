@@ -6,7 +6,9 @@ Class-based views for the warehouse catalogue application.
 
 from __future__ import annotations
 
+import dataclasses
 import json
+import re
 from collections import Counter
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +19,7 @@ from django.views.generic import View
 from django.shortcuts import render
 
 from shared.services import UnifiedCatalogService
+from shared.dtos import UnifiedDataset
 from ticketing.cart import CartService as CartService
 from warehouse.models import Attribute, Distribution
 
@@ -25,6 +28,14 @@ _CACHE_TTL = 300          # 5 minutes
 _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
 _CACHE_KEY_SCHEMA   = 'catalogue_schema_json'
 
+# DTO field name → DCAT term, for fields whose name doesn't match snake_case(local_name):
+#   'version'    ← dcterms:hasVersion  (local 'hasVersion' → snake 'has_version', not 'version')
+#   'source_uri' ← dct:source          (local 'source' conflicts with the app-identifier field)
+_DCAT_EXCEPTIONS = {'version': 'dcterms:hasVersion', 'source_uri': 'dct:source'}
+
+
+def _to_snake(camel: str) -> str:
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -55,29 +66,30 @@ def _dataset_to_dict(ds) -> dict:
     """Serialise a UnifiedDataset DTO (with .distributions) to a plain dict."""
     dists = getattr(ds, 'distributions', [])
     return {
-        'source': ds.source,
-        'name': ds.name,
-        'title': ds.title or ds.name,
-        'version': ds.version,
-        'description': ds.description,
-        'theme': ds.theme,
-        'publisher': ds.publisher_name,
-        'license': ds.license,
-        'conformed_to': ds.conformed_to,
-        'issued': ds.issued,
-        'modified': ds.modified,
-        'keywords': _parse_keywords(ds.keyword),
-        'source_uri': ds.source_uri,
-        'creator': ds.creator,
-        'contact_email': ds.contact_point_email,
-        'rights_holder': ds.rights_holder,
-        'provenance': ds.provenance,
-        'catalog': ds.catalog_name,
-        'access_rights': ds.access_rights,
+        'title':                  ds.title or ds.name,
+        'access_rights':          ds.access_rights,
+        'version':                ds.version,
+        'conforms_to':            ds.conforms_to,
+        'theme':                  ds.theme,
+        'publisher':              ds.publisher,
+        'license':                ds.license,
         'applicable_legislation': ds.applicable_legislation,
-        'health_category': ds.health_category,
-        'hdab': ds.hdab_name,
-        'status': _derive_status(ds.access_rights),
+        'health_category':        ds.health_category,
+        'hdab':                   ds.hdab,
+        'source_uri':             ds.source_uri,
+        'rights_holder':          ds.rights_holder,
+        'creator':                ds.creator,
+        'issued':                 ds.issued,
+        'modified':               ds.modified,
+        'contact_point':          ds.contact_point,
+        'provenance':             ds.provenance,
+        # Non-DCAT fields needed elsewhere (routing, filtering, display)
+        'source':      ds.source,
+        'name':        ds.name,
+        'description': ds.description,
+        'keywords':    _parse_keywords(ds.keyword),
+        'catalog':     ds.catalog_name,
+        'status':      _derive_status(ds.access_rights),
         'distributions': [
             {
                 'source': d.source,
@@ -374,12 +386,24 @@ class DatasetDetailView(LoginRequiredMixin, View):
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
         jsonld = _build_jsonld(ds_dict)
 
+        # Build an inverse schema map: DTO field name → DCAT term.
+        # DTO fields are declared in display order, so iteration order IS display order.
+        _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
+        _inverse.update(_DCAT_EXCEPTIONS)
+
+        dcat_rows = [
+            (_inverse[f.name], ds_dict.get(f.name))
+            for f in dataclasses.fields(UnifiedDataset)
+            if f.name in _inverse
+        ]
+
         return render(request, self.template_name, {
             'dataset':      ds_dict,
             'distributions': ds_dict['distributions'],
             'schema_json':  schema_json,
             'jsonld_str':   json.dumps(jsonld, indent=2, ensure_ascii=False),
             'source':       source,
+            'dcat_rows':    dcat_rows,
             'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
         })
 
