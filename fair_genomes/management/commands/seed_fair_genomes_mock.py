@@ -73,23 +73,26 @@ class Command(BaseCommand):
 
         # ── Agents ─────────────────────────────────────────────────────────
         agent_data = [
-            # with email+page contact
+            # with email+page contact + description
             {
                 'name': 'FG_AGENT_DWH',
                 'contact_point': cp_both,
+                'description': 'DWH team responsible for FAIR Genomes data management and pipeline.',
             },
-            # with email-only contact
+            # with email-only contact + description
             {
                 'name': 'FG_AGENT_MOLGENIS',
                 'contact_point': cp_email_only,
+                'description': 'MOLGENIS platform operator providing FAIR Genomes API access.',
             },
-            # with page-only contact — used as HDAB
+            # with page-only contact — used as HDAB; has description
             {
                 'name': 'FG_AGENT_HDAB',
                 'contact_point': cp_page_only,
+                'description': 'Health Data Access Body overseeing access to genomic datasets.',
             },
-            # no contact at all
-            {'name': 'FG_AGENT_NO_CONTACT', 'contact_point': None},
+            # no contact, no description
+            {'name': 'FG_AGENT_NO_CONTACT', 'contact_point': None, 'description': None},
         ]
         agent_objects: dict[str, Agent] = {}
         ag_created = 0
@@ -99,6 +102,7 @@ class Command(BaseCommand):
                 name=name,
                 defaults={
                     'contact_point': data['contact_point'],
+                    'description': data.get('description'),
                 },
             )
             agent_objects[name] = obj
@@ -164,6 +168,7 @@ class Command(BaseCommand):
                     'applicable_legislation': 'GDPR;EHDS',
                     'health_category': 'patient_data',
                     'hdab': hdab,
+                    'custodian': agent_dwh,
                 },
             },
             # DS_FG_VARIANTS: partial optionals; RESTRICTED; GDPR only; diagnostic_data
@@ -207,6 +212,7 @@ class Command(BaseCommand):
                     'applicable_legislation': 'GDPR;EHDS;NIS2',
                     'health_category': 'medication_data',
                     'hdab': hdab,
+                    'custodian': agent_molgenis,
                 },
             },
             # DS_FG_BIOBANK: catalog=staging; research_data; EHDS only; minimal optional
@@ -250,6 +256,292 @@ class Command(BaseCommand):
                     'hdab': agent_objects['FG_AGENT_NO_CONTACT'],
                 },
             },
+        # DS_FG_PHENOTYPES: detailed phenotype ontology; RESTRICTED; GDPR;EHDS; patient_data
+        {
+            'name': 'DS_FG_PHENOTYPES',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_PHENOTYPES',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Detailní fenotypová data (HPO)',
+                'description': 'Klinické fenotypy kódované pomocí Human Phenotype Ontology (HPO) pro všechny subjekty kohorty.',
+                'keyword': 'fenotyp,HPO,ontologie,klinické znaky',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Kódováno klinickými genetiky z EHR záznamů dle HPO standardu.',
+                'contact_point': cp_both,
+                'catalog': cat_full,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'patient_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_CONSENT: informed consent records; NON_PUBLIC; GDPR;EHDS;NIS2; administrative_data
+        {
+            'name': 'DS_FG_CONSENT',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_CONSENT',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
+                'title': 'Záznamy informovaného souhlasu',
+                'description': 'Digitalizované záznamy informovaného souhlasu subjektů studie s podmínkami zpracování.',
+                'keyword': 'souhlas,informovaný souhlas,GDPR,podmínky zpracování',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Skenované a strukturované souhlasy z biobankového systému.',
+                'contact_point': cp_email_only,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+                'health_category': 'administrative_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_SAMPLES: biobank sample metadata; RESTRICTED; EHDS; research_data
+        {
+            'name': 'DS_FG_SAMPLES',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_SAMPLES',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Biobankové vzorky – metadata',
+                'description': 'Metadata biobankových vzorků: typ tkáně, odběr, uchování, dostupnost a kvalita.',
+                'keyword': 'biobanka,vzorky,tkáně,uchování,kvalita',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Záznamy z LIMS biobankového systému, synchronizovány denně.',
+                'publisher': agent_molgenis,
+                'contact_point': cp_page_only,
+                'catalog': cat_full,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'EHDS',
+                'health_category': 'research_data',
+                'hdab': hdab,
+                'custodian': agent_dwh,
+            },
+        },
+        # DS_FG_FAMILY_HISTORY: family history data; RESTRICTED; GDPR; patient_data
+        {
+            'name': 'DS_FG_FAMILY_HISTORY',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_FAMILY_HISTORY',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Rodinná anamnéza',
+                'description': 'Strukturovaná rodinná anamnéza zahrnující dědičná onemocnění prvního a druhého stupně.',
+                'keyword': 'rodinná anamnéza,dědičnost,příbuzní,genetická rizika',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Sbíráno v rámci genetické poradny, strukturováno dle HL7 FHIR FamilyMemberHistory.',
+                'contact_point': cp_both,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR',
+                'health_category': 'patient_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_WES: whole exome sequencing; NON_PUBLIC; GDPR;EHDS; research_data
+        {
+            'name': 'DS_FG_WES',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_WES',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                'title': 'Celogenomová exomová sekvenace (WES)',
+                'description': 'WES data ve formátu FASTQ/BAM pro diagnostiku vzácných Mendelovských chorob.',
+                'keyword': 'WES,exom,sekvenace,vzácné choroby,Mendelovské',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Sekvenováno na Illumina HiSeq X, pipeline BWA-GATK4.',
+                'publisher': agent_dwh,
+                'catalog': cat_full,
+                'contact_point': cp_both,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'research_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_RNA_SEQ: RNA-seq transcriptomics; NON_PUBLIC; GDPR;EHDS;NIS2; research_data
+        {
+            'name': 'DS_FG_RNA_SEQ',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_RNA_SEQ',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                'title': 'RNA-seq transkriptomika',
+                'description': 'Bulk a single-cell RNA-seq data z nádorových a kontrolních vzorků kohorty.',
+                'keyword': 'RNA-seq,transkriptomika,single-cell,nádor,genová exprese',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Sekvenováno 10X Genomics Chromium, zpracováno Seurat pipeline.',
+                'contact_point': cp_email_only,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+                'health_category': 'research_data',
+                'hdab': hdab,
+                'custodian': agent_dwh,
+            },
+        },
+        # DS_FG_PROTEOMICS: proteomics data; RESTRICTED; GDPR;EHDS; research_data
+        {
+            'name': 'DS_FG_PROTEOMICS',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_PROTEOMICS',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Proteomická data (LC-MS/MS)',
+                'description': 'Kvantitativní proteomika krevní plazmy pomocí LC-MS/MS hmotnostní spektrometrie.',
+                'keyword': 'proteomika,LC-MS,hmotnostní spektrometrie,plazma,proteiny',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Analýza na Orbitrap Eclipse, databáze UniProt, MaxQuant pipeline.',
+                'contact_point': cp_page_only,
+                'catalog': cat_min,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'research_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_METABOLOMICS: metabolomics; RESTRICTED; GDPR;EHDS; research_data
+        {
+            'name': 'DS_FG_METABOLOMICS',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_METABOLOMICS',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Metabolomická data (NMR/MS)',
+                'description': 'Metabolomické profily séra a moče měřené NMR spektroskopií a kapilární elektroforézou.',
+                'keyword': 'metabolomika,NMR,metabolity,sérum,moč',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Měření na Bruker 600 MHz NMR, normalizace PQN metodou.',
+                'contact_point': cp_email_only,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'research_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_MICROBIOME: microbiome sequencing; RESTRICTED; GDPR; research_data
+        {
+            'name': 'DS_FG_MICROBIOME',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_MICROBIOME',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': '16S rRNA mikrobiomová sekvenace',
+                'description': 'Střevní mikrobiom kohorty: 16S rRNA amplikonové sekvenování V3-V4 oblasti.',
+                'keyword': 'mikrobiom,16S rRNA,střevo,mikrobiota,diverzita',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Výstup QIIME2 pipeline, taxonomie dle SILVA 138 databáze.',
+                'contact_point': cp_both,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR',
+                'health_category': 'research_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_EPIGENOMICS: epigenomics; NON_PUBLIC; GDPR;EHDS;NIS2; research_data
+        {
+            'name': 'DS_FG_EPIGENOMICS',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_EPIGENOMICS',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                'title': 'Epigenomická data (WGBS)',
+                'description': 'Celogenomová bisulfitová sekvenace (WGBS) pro profily methylace DNA.',
+                'keyword': 'epigenomika,methylace,WGBS,bisulfitová sekvenace,CpG',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Sekvenováno Illumina NovaSeq, pipeline Bismark+DESeq2.',
+                'publisher': agent_dwh,
+                'contact_point': cp_both,
+                'catalog': cat_full,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+                'health_category': 'research_data',
+                'hdab': hdab,
+                'custodian': agent_molgenis,
+            },
+        },
+        # DS_FG_PHARMACOGENOMICS: pharmacogenomics; RESTRICTED; GDPR;EHDS; medication_data
+        {
+            'name': 'DS_FG_PHARMACOGENOMICS',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_PHARMACOGENOMICS',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Farmakogenomická data (PGx)',
+                'description': 'Genotypy farmakogenomicky relevantních variant (CYP450, TPMT, DPYD) pro personalizovanou medikaci.',
+                'keyword': 'farmakogenomika,PGx,CYP450,lékové interakce,personalizovaná medicína',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Genotypování SNP polem Affymetrix PharmacoScan, anotace PharmGKB.',
+                'contact_point': cp_email_only,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'medication_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_RARE_DISEASES: rare disease registry; NON_PUBLIC; GDPR;EHDS;NIS2; research_data
+        {
+            'name': 'DS_FG_RARE_DISEASES',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_RARE_DISEASES',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                'title': 'Registr vzácných onemocnění (ORPHA)',
+                'description': 'Klinická a genomická data pacientů s vzácnými onemocněními dle Orphanet klasifikace.',
+                'keyword': 'vzácná onemocnění,Orphanet,ORPHA,registr,genomika',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Kombinace klinických dat a genomických nálezů, manuálně kurátováno.',
+                'publisher': agent_molgenis,
+                'contact_point': cp_both,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+                'health_category': 'research_data',
+                'hdab': hdab,
+                'custodian': agent_dwh,
+            },
+        },
+        # DS_FG_IMAGING_MRI: MRI metadata; RESTRICTED; GDPR;EHDS; diagnostic_data
+        {
+            'name': 'DS_FG_IMAGING_MRI',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_IMAGING_MRI',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'MRI zobrazovací metadata (DICOM)',
+                'description': 'DICOM metadata MRI vyšetření mozkových struktur kohorty jako multimodální biomarkery.',
+                'keyword': 'MRI,DICOM,zobrazování,mozek,neuroimaging',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Extrahováno z PACS systému, anonymizováno dle DICOM PS3.15.',
+                'contact_point': cp_page_only,
+                'catalog': cat_full,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'diagnostic_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_SURVIVAL: survival and outcomes; PUBLIC; EHDS; research_data
+        {
+            'name': 'DS_FG_SURVIVAL',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_SURVIVAL',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                'title': 'Přežití a klinické výstupy',
+                'description': 'Anonymizovaná data přežití, remise a relapsů pro epidemiologické studie kohort.',
+                'keyword': 'přežití,výstupy,remise,relaps,epidemiologie',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Agregované anonymizované statistiky, dostupné pro akademické využití.',
+                'contact_point': cp_both,
+                'catalog': cat_min,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+                'applicable_legislation': 'EHDS',
+                'health_category': 'research_data',
+                'hdab': hdab,
+            },
+        },
+        # DS_FG_TREATMENT: treatment and interventions; RESTRICTED; GDPR;EHDS; medication_data
+        {
+            'name': 'DS_FG_TREATMENT',
+            'defaults': {
+                'identifier': 'https://fairgenomes.hospital.cz/dataset/DS_FG_TREATMENT',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
+                'title': 'Léčebné intervence a protokoly',
+                'description': 'Záznamy léčebných protokolů, klinických studií a intervencí pro subjekty kohorty.',
+                'keyword': 'léčba,intervence,protokoly,klinické studie,chemoterapie',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'provenance': 'Export z onkologického informačního systému ONCOSYS.',
+                'publisher': agent_molgenis,
+                'contact_point': cp_email_only,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+                'applicable_legislation': 'GDPR;EHDS',
+                'health_category': 'medication_data',
+                'hdab': hdab,
+            },
+        },
         ]
 
         ds_created = 0
@@ -284,9 +576,10 @@ class Command(BaseCommand):
                     'modified': now,
                     'access_url': 'https://fairgenomes.hospital.cz/api/files/cohort.vcf.gz',
                     'applicable_legislation': 'GDPR;EHDS',
+                    'licence': 'https://creativecommons.org/licenses/by/4.0/',
                 },
             },
-            # Partial optional; PARQUET format; restricted; no byte_size
+            # Partial optional; PARQUET format; restricted; no byte_size; with licence
             {
                 'name': 'DIST_FG_COHORT_PARQUET',
                 'defaults': {
@@ -296,6 +589,7 @@ class Command(BaseCommand):
                     'rights': 'restricted',
                     'access_url': 'jdbc:postgresql://dwh-db:5432/fair_genomes/cohort_parquet',
                     'applicable_legislation': 'GDPR;EHDS',
+                    'licence': 'https://creativecommons.org/licenses/by-nc/4.0/',
                 },
             },
             # Minimal mandatory only; no optional; TSV format; public
@@ -321,6 +615,7 @@ class Command(BaseCommand):
                     'issued': now,
                     'access_url': 'https://fairgenomes.hospital.cz/api/phenotypes.jsonld',
                     'applicable_legislation': 'GDPR;EHDS;NIS2',
+                    'licence': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
                 },
             },
             # No optional fields at all; NULL format; NULL rights; NULL byte_size
@@ -332,6 +627,213 @@ class Command(BaseCommand):
                     'applicable_legislation': 'EHDS',
                 },
             },
+        # DIST_FG_PHENOTYPES_JSON: HPO JSON-LD export
+        {
+            'name': 'DIST_FG_PHENOTYPES_JSON',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_PHENOTYPES'],
+                'title': 'HPO fenotypy ve formátu JSON-LD',
+                'format': 'JSON',
+                'conforms_to': 'https://hpo.jax.org/app/',
+                'byte_size': 52428800,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/phenotypes/hpo.jsonld',
+                'applicable_legislation': 'GDPR;EHDS',
+                'licence': 'https://hpo.jax.org/app/license',
+            },
+        },
+        # DIST_FG_CONSENT_CSV: consent status export
+        {
+            'name': 'DIST_FG_CONSENT_CSV',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_CONSENT'],
+                'title': 'Záznamy souhlasu (CSV export)',
+                'format': 'CSV',
+                'rights': 'internal',
+                'access_url': 'https://fairgenomes.hospital.cz/api/consent/export.csv',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+            },
+        },
+        # DIST_FG_SAMPLES_JSON: sample catalogue JSON
+        {
+            'name': 'DIST_FG_SAMPLES_JSON',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_SAMPLES'],
+                'title': 'Katalog vzorků (JSON)',
+                'format': 'JSON',
+                'conforms_to': 'https://fairgenomes.org/sample-schema/v1',
+                'byte_size': 10485760,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/samples/catalogue.json',
+                'applicable_legislation': 'EHDS',
+                'licence': 'https://creativecommons.org/licenses/by/4.0/',
+            },
+        },
+        # DIST_FG_FAMILY_HISTORY_TSV
+        {
+            'name': 'DIST_FG_FAMILY_HISTORY_TSV',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_FAMILY_HISTORY'],
+                'title': 'Rodinná anamnéza (TSV)',
+                'format': 'TSV',
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/family/history.tsv',
+                'applicable_legislation': 'GDPR',
+            },
+        },
+        # DIST_FG_WES_BAM: aligned BAM files
+        {
+            'name': 'DIST_FG_WES_BAM',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_WES'],
+                'title': 'WES sekvenace — zarovnané BAM soubory',
+                'format': 'BAM',
+                'conforms_to': 'https://samtools.github.io/hts-specs/SAMv1.pdf',
+                'byte_size': 107374182400,
+                'rights': 'internal',
+                'access_url': 'https://fairgenomes.hospital.cz/api/files/wes_bam',
+                'applicable_legislation': 'GDPR;EHDS',
+            },
+        },
+        # DIST_FG_RNA_SEQ_FASTQ: raw FASTQ files
+        {
+            'name': 'DIST_FG_RNA_SEQ_FASTQ',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_RNA_SEQ'],
+                'title': 'RNA-seq surová FASTQ data',
+                'format': 'FASTQ',
+                'byte_size': 53687091200,
+                'rights': 'internal',
+                'access_url': 'https://fairgenomes.hospital.cz/api/files/rnaseq_fastq',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+            },
+        },
+        # DIST_FG_PROTEOMICS_TSV: MaxQuant output TSV
+        {
+            'name': 'DIST_FG_PROTEOMICS_TSV',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_PROTEOMICS'],
+                'title': 'Proteomická kvantifikace (TSV)',
+                'format': 'TSV',
+                'conforms_to': 'https://www.uniprot.org/',
+                'byte_size': 209715200,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/proteomics/maxquant.tsv',
+                'applicable_legislation': 'GDPR;EHDS',
+            },
+        },
+        # DIST_FG_METABOLOMICS_CSV: NMR spectral data CSV
+        {
+            'name': 'DIST_FG_METABOLOMICS_CSV',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_METABOLOMICS'],
+                'title': 'Metabolomická data (CSV)',
+                'format': 'CSV',
+                'byte_size': 104857600,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/metabolomics/nmr.csv',
+                'applicable_legislation': 'GDPR;EHDS',
+                'licence': 'https://creativecommons.org/licenses/by-nc/4.0/',
+            },
+        },
+        # DIST_FG_MICROBIOME_BIOM: QIIME2 BIOM table
+        {
+            'name': 'DIST_FG_MICROBIOME_BIOM',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_MICROBIOME'],
+                'title': 'Mikrobiomová BIOM tabulka',
+                'format': 'BIOM',
+                'conforms_to': 'https://biom-format.org/',
+                'byte_size': 31457280,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/microbiome/otu_table.biom',
+                'applicable_legislation': 'GDPR',
+            },
+        },
+        # DIST_FG_EPIGENOMICS_BEDGRAPH: methylation BedGraph
+        {
+            'name': 'DIST_FG_EPIGENOMICS_BEDGRAPH',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_EPIGENOMICS'],
+                'title': 'Methylační profily (BedGraph)',
+                'format': 'BEDGRAPH',
+                'conforms_to': 'https://genome.ucsc.edu/goldenPath/help/bedgraph.html',
+                'byte_size': 21474836480,
+                'rights': 'internal',
+                'access_url': 'https://fairgenomes.hospital.cz/api/epigenomics/methylation.bedgraph',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+            },
+        },
+        # DIST_FG_PHARMACOGENOMICS_VCF: PGx annotated VCF
+        {
+            'name': 'DIST_FG_PHARMACOGENOMICS_VCF',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_PHARMACOGENOMICS'],
+                'title': 'Farmakogenomické varianty (VCF)',
+                'format': 'VCF',
+                'conforms_to': 'https://cpicpgx.org/guidelines/',
+                'byte_size': 524288000,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/pharmacogenomics/pgx_variants.vcf',
+                'applicable_legislation': 'GDPR;EHDS',
+                'licence': 'https://creativecommons.org/licenses/by/4.0/',
+            },
+        },
+        # DIST_FG_RARE_DISEASES_JSON: Orphanet JSON-LD
+        {
+            'name': 'DIST_FG_RARE_DISEASES_JSON',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_RARE_DISEASES'],
+                'title': 'Vzácná onemocnění (JSON-LD)',
+                'format': 'JSON',
+                'conforms_to': 'https://www.orphadata.com/ordo/',
+                'byte_size': 20971520,
+                'rights': 'internal',
+                'access_url': 'https://fairgenomes.hospital.cz/api/rare-diseases/ordo.jsonld',
+                'applicable_legislation': 'GDPR;EHDS;NIS2',
+            },
+        },
+        # DIST_FG_IMAGING_MRI_PARQUET: MRI DICOM metadata PARQUET
+        {
+            'name': 'DIST_FG_IMAGING_MRI_PARQUET',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_IMAGING_MRI'],
+                'title': 'MRI DICOM metadata (Parquet)',
+                'format': 'PARQUET',
+                'conforms_to': 'https://dicom.nema.org/medical/dicom/current/output/html/part03.html',
+                'byte_size': 2684354560,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/imaging/mri_metadata.parquet',
+                'applicable_legislation': 'GDPR;EHDS',
+            },
+        },
+        # DIST_FG_SURVIVAL_CSV: anonymised survival data CSV
+        {
+            'name': 'DIST_FG_SURVIVAL_CSV',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_SURVIVAL'],
+                'title': 'Anonymizovaná data přežití (CSV)',
+                'format': 'CSV',
+                'byte_size': 5242880,
+                'rights': 'public',
+                'access_url': 'https://fairgenomes.hospital.cz/api/survival/cohort_survival.csv',
+                'applicable_legislation': 'EHDS',
+                'licence': 'https://creativecommons.org/licenses/by/4.0/',
+            },
+        },
+        # DIST_FG_TREATMENT_JSON: treatment protocol JSON
+        {
+            'name': 'DIST_FG_TREATMENT_JSON',
+            'defaults': {
+                'dataset_name': dataset_objects['DS_FG_TREATMENT'],
+                'title': 'Léčebné protokoly (JSON)',
+                'format': 'JSON',
+                'byte_size': 41943040,
+                'rights': 'restricted',
+                'access_url': 'https://fairgenomes.hospital.cz/api/treatment/protocols.json',
+                'applicable_legislation': 'GDPR;EHDS',
+            },
+        },
         ]
 
         dist_created = 0

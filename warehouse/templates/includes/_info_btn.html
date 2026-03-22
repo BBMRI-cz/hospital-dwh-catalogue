@@ -1,4 +1,5 @@
-{# Expects: semantics, optional stop #}
+﻿{# Expects: semantics, optional stop #}
+{% if semantics in schema_json %}
 <button type="button"
   onclick="showSchemaModal('{{ semantics }}'){% if stop %};event.stopPropagation(){% endif %}"
   class="inline-flex items-center justify-center w-4 h-4 rounded-full border border-[#9ddcea] bg-[#e8f7fb] text-[#007fc8] hover:bg-[#53c0d7] hover:text-white hover:border-[#53c0d7] transition-colors shrink-0 cursor-pointer"
@@ -9,3 +10,4 @@
     <line x1="12" y1="8" x2="12.01" y2="8" stroke-width="3.5"/>
   </svg>
 </button>
+{% endif %}
