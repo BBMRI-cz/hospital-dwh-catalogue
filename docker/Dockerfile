@@ -10,6 +10,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     gettext \
+    cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages

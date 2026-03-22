@@ -287,7 +287,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Fair Genomes GraphQL API Configuration
 FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')
 FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN', default='')
-FAIR_GENOMES_FETCH_ON_STARTUP = config('FAIR_GENOMES_FETCH_ON_STARTUP', default=False, cast=bool)
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
 
 

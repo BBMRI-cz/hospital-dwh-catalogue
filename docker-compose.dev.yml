@@ -40,6 +40,22 @@ services:
       retries: 15
       start_period: 30s
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: hospital_dwh_scheduler_dev
+    entrypoint: ["/bin/sh", "/app/docker/scheduler-entrypoint.sh"]
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=catalogue.settings.dev
+    depends_on:
+      web:
+        condition: service_healthy
+
   nginx:
     image: nginx:1.27-alpine
     container_name: hospital_dwh_nginx_dev

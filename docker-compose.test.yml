@@ -54,6 +54,24 @@ services:
       retries: 15
       start_period: 30s
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: hospital_dwh_scheduler_test
+    entrypoint: ["/bin/sh", "/app/docker/scheduler-entrypoint.sh"]
+    volumes:
+      - .:/app
+      - staticfiles_test:/app/staticfiles
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=catalogue.settings.test
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      web:
+        condition: service_healthy
+
   nginx:
     image: nginx:1.27-alpine
     container_name: hospital_dwh_nginx_test
