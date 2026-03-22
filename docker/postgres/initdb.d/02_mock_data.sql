@@ -38,15 +38,15 @@ OVERRIDING SYSTEM VALUE VALUES
 SELECT setval(pg_get_serial_sequence('metadata."lm_contact_point"', 'id'), 4);
 
 -- ── Agents ───────────────────────────────────────────────────
-INSERT INTO metadata."lm_agent" (name, contact_point_id) VALUES
+INSERT INTO metadata."lm_agent" (name, contact_point_id, description) VALUES
 -- with contact (email+page)
-('AGENT_DWH',        1),
+('AGENT_DWH',        1, 'DWH team responsible for local metadata management and ETL pipelines.'),
 -- with contact (email only)
-('AGENT_LABS',       2),
+('AGENT_LABS',       2, 'Laboratory information system team managing diagnostic data.'),
 -- with contact (page only)  — used as HDAB in several datasets
-('AGENT_HDAB',       3),
+('AGENT_HDAB',       3, 'Health Data Access Body overseeing access to hospital datasets.'),
 -- no contact at all
-('AGENT_NO_CONTACT', NULL);
+('AGENT_NO_CONTACT', NULL, NULL);
 
 -- ── Catalog ──────────────────────────────────────────────────
 INSERT INTO metadata."lm_catalog" (name, title, description, publisher_id, applicable_legislation) VALUES
@@ -61,10 +61,11 @@ INSERT INTO metadata."lm_catalog" (name, title, description, publisher_id, appli
 -- ── Datasets ─────────────────────────────────────────────────
 -- DS_PATIENTS: ALL optional fields filled
 INSERT INTO metadata."lm_dataset" (
-    name, title, version, description, theme, publisher_id, license, conformed_to,
+    name, title, version, description, theme, publisher_id, conforms_to,
     issued, modified, keyword, source, creator, contact_point_id, rights_holder,
     provenance, catalog_id,
-    access_rights, applicable_legislation, health_category, hdab_id
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id, custodian_id
 ) VALUES (
     'DS_PATIENTS',
     'Demografická data pacientů',
@@ -72,7 +73,6 @@ INSERT INTO metadata."lm_dataset" (
     'Základní demografické údaje pacientů: jméno, rodné číslo, pohlaví, datum narození, adresa, kontaktní informace a pojistné údaje.',
     'http://purl.bioontology.org/ontology/MESH/D000293',
     'AGENT_DWH',
-    'https://creativecommons.org/licenses/by/4.0/',
     'https://healthdcat-ap.eu/spec/v6',
     '2020-01-15 00:00:00+01',
     '2025-06-01 00:00:00+02',
@@ -83,15 +83,19 @@ INSERT INTO metadata."lm_dataset" (
     'Nemocnice a.s.',
     'Data pocházejí z nemocničního informačního systému NEMIS. ETL pipeline spouštěn denně.',
     'CAT_LM',
+    'https://nemis.hospital.cz/dataset/DS_PATIENTS',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
     'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
     'GDPR;EHDS',
     'patient_data',
-    'AGENT_HDAB'
+    'AGENT_HDAB',
+    'AGENT_DWH'
 );
 
 -- DS_LABS: partial optionals (title + description + keyword + contact_point only)
 INSERT INTO metadata."lm_dataset" (
     name, title, description, keyword, contact_point_id,
+    identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
     'DS_LABS',
@@ -99,6 +103,8 @@ INSERT INTO metadata."lm_dataset" (
     'Výsledky laboratorních vyšetření: krevní obraz, biochemie, mikrobiologie, koagulace.',
     'laboratoř,výsledky,krevní obraz,biochemie,mikrobiologie',
     2,
+    'https://nemis.hospital.cz/dataset/DS_LABS',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
     'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
     'GDPR;EHDS',
     'diagnostic_data',
@@ -108,11 +114,14 @@ INSERT INTO metadata."lm_dataset" (
 -- DS_RADIOLOGY: description only; different access_rights + legislation
 INSERT INTO metadata."lm_dataset" (
     name, title, description,
+    identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
     'DS_RADIOLOGY',
     'Radiologické zobrazování',
     'DICOM metadata, zprávy a závěry z CT, MRI, RTG a ultrazvuku.',
+    'https://nemis.hospital.cz/dataset/DS_RADIOLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
     'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
     'GDPR',
     'diagnostic_data',
@@ -122,6 +131,7 @@ INSERT INTO metadata."lm_dataset" (
 -- DS_PHARMACY: source + keyword; PUBLIC access; EHDS only legislation
 INSERT INTO metadata."lm_dataset" (
     name, title, keyword, source, publisher_id,
+    identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
     'DS_PHARMACY',
@@ -129,6 +139,8 @@ INSERT INTO metadata."lm_dataset" (
     'léky,předpisy,ATC kódy,dávkování,aplikace',
     'https://lekarna.hospital.cz/api',
     'AGENT_LABS',
+    'https://nemis.hospital.cz/dataset/DS_PHARMACY',
+    'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
     'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
     'EHDS',
     'medication_data',
@@ -138,9 +150,12 @@ INSERT INTO metadata."lm_dataset" (
 -- DS_ONCOLOGY: NO optional fields whatsoever; minimal dataset
 INSERT INTO metadata."lm_dataset" (
     name,
+    identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
     'DS_ONCOLOGY',
+    'https://nemis.hospital.cz/dataset/DS_ONCOLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
     'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
     'GDPR;EHDS;NIS2',
     'research_data',
@@ -150,16 +165,281 @@ INSERT INTO metadata."lm_dataset" (
 -- DS_ADMIN: administrative_data health_category; all mandatory + creator + rights_holder
 INSERT INTO metadata."lm_dataset" (
     name, title, creator, rights_holder,
+    identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
     'DS_ADMIN',
     'Administrativní a fakturační data',
     'Ekonomické oddělení; IT oddělení',
     'Nemocnice a.s. — Ekonomický úsek',
+    'https://nemis.hospital.cz/dataset/DS_ADMIN',
+    'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
     'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
     'GDPR',
     'administrative_data',
     'AGENT_NO_CONTACT'
+);
+
+-- DS_ICU: intensive care; NON_PUBLIC; GDPR;EHDS; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, contact_point_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id, custodian_id
+) VALUES (
+    'DS_ICU',
+    'Data jednotky intenzivní péče',
+    'Monitorovací data z JIP: vitální funkce, ventilace, hemodynamika, léčiva.',
+    'JIP,intenzivní péče,ventilace,vitální funkce,hemodynamika',
+    1,
+    'https://nemis.hospital.cz/dataset/DS_ICU',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS',
+    'patient_data',
+    'AGENT_HDAB',
+    'AGENT_DWH'
+);
+
+-- DS_SURGERY: surgical records; NON_PUBLIC; GDPR;EHDS; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, publisher_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_SURGERY',
+    'Chirurgické výkony a operační záznamy',
+    'Data o chirurgických výkonech: kódy výkonů, délka operace, anestézie, komplikace.',
+    'chirurgie,operace,výkony,anestézie,komplikace',
+    'AGENT_DWH',
+    'https://nemis.hospital.cz/dataset/DS_SURGERY',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_CARDIOLOGY: ECG + cardiology; RESTRICTED; GDPR; diagnostic_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, contact_point_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_CARDIOLOGY',
+    'Kardiologická data a EKG',
+    'EKG záznamy, echokardiografie, Holter monitorování a katetrizační nálezy.',
+    'kardiologie,EKG,echo,Holter,katetrizace',
+    3,
+    'https://nemis.hospital.cz/dataset/DS_CARDIOLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR',
+    'diagnostic_data',
+    'AGENT_HDAB'
+);
+
+-- DS_NEUROLOGY: neurological data; RESTRICTED; GDPR;EHDS; diagnostic_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_NEUROLOGY',
+    'Neurologická klinická data',
+    'EEG, EMG, CT mozkové skeny, MRI mozku, neurologické nálezy a diagnózy.',
+    'neurologie,EEG,EMG,mozkový sken,MRI',
+    'https://nemis.hospital.cz/dataset/DS_NEUROLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR;EHDS',
+    'diagnostic_data',
+    'AGENT_HDAB'
+);
+
+-- DS_PATHOLOGY: pathology results; NON_PUBLIC; GDPR;EHDS; diagnostic_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, publisher_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_PATHOLOGY',
+    'Patologicko-anatomické nálezy',
+    'Histologické, cytologické a molekulárně-patologické nálezy z biopsií a pitvání.',
+    'patologie,histologie,cytologie,biopsie,pitva',
+    'AGENT_LABS',
+    'https://nemis.hospital.cz/dataset/DS_PATHOLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS',
+    'diagnostic_data',
+    'AGENT_HDAB'
+);
+
+-- DS_MICROBIOLOGY: cultures + antibiograms; RESTRICTED; GDPR;EHDS; diagnostic_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_MICROBIOLOGY',
+    'Mikrobiologické kultivace a antibiogramy',
+    'Výsledky kultivací, citlivosti na antibiotika, PCR průkazy patogenů.',
+    'mikrobiologie,kultivace,antibiogram,PCR,patogeny',
+    'https://nemis.hospital.cz/dataset/DS_MICROBIOLOGY',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR;EHDS',
+    'diagnostic_data',
+    'AGENT_HDAB'
+);
+
+-- DS_EMERGENCY: emergency department; RESTRICTED; GDPR;EHDS; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, contact_point_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_EMERGENCY',
+    'Data urgentního příjmu',
+    'Triáž, diagnózy, doby ošetření a výsledky léčby na urgentním příjmu.',
+    'urgence,příjem,triáž,diagnóza,ošetření',
+    2,
+    'https://nemis.hospital.cz/dataset/DS_EMERGENCY',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR;EHDS',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_PSYCHIATRY: mental health; NON_PUBLIC; GDPR;EHDS;NIS2; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_PSYCHIATRY',
+    'Psychiatrická a psychologická data',
+    'Psychiatrické diagnózy, psychologická vyšetření, medikace a průběhy hospitalizací.',
+    'psychiatrie,psychologie,diagnózy,medikace,hospitalizace',
+    'https://nemis.hospital.cz/dataset/DS_PSYCHIATRY',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS;NIS2',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_PEDIATRICS: pediatric patient data; NON_PUBLIC; GDPR;EHDS; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, publisher_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_PEDIATRICS',
+    'Pediatrická data pacientů',
+    'Dětská demografie, růstové parametry, očkování, diagnózy a hospitalizace.',
+    'pediatrie,děti,očkování,růst,diagnózy',
+    'AGENT_DWH',
+    'https://nemis.hospital.cz/dataset/DS_PEDIATRICS',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_VITAL_SIGNS: continuous monitoring; RESTRICTED; GDPR;EHDS; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id, custodian_id
+) VALUES (
+    'DS_VITAL_SIGNS',
+    'Kontinuální monitorování vitálních funkcí',
+    'Pulz, SpO2, krevní tlak, teplota, dechová frekvence — měření každých 5 minut.',
+    'vitální funkce,pulz,SpO2,tlak,teplota,monitoring',
+    'https://nemis.hospital.cz/dataset/DS_VITAL_SIGNS',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR;EHDS',
+    'patient_data',
+    'AGENT_HDAB',
+    'AGENT_DWH'
+);
+
+-- DS_GENOMICS: clinical genomics; NON_PUBLIC; GDPR;EHDS;NIS2; research_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, contact_point_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_GENOMICS',
+    'Klinická genomická data',
+    'WGS, WES a panelové sekvenování pro diagnostiku dědičných chorob a onkogenomiku.',
+    'genomika,WGS,WES,sekvenování,dědičné choroby,onkogenomika',
+    1,
+    'https://nemis.hospital.cz/dataset/DS_GENOMICS',
+    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+    'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+    'GDPR;EHDS;NIS2',
+    'research_data',
+    'AGENT_HDAB'
+);
+
+-- DS_REHABILITATION: rehabilitation & physio; RESTRICTED; GDPR; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_REHABILITATION',
+    'Rehabilitace a fyzioterapie',
+    'Funkční hodnocení, rehabilitační plány, fyzioterapeutické záznamy a výsledky.',
+    'rehabilitace,fyzioterapie,funkční hodnocení,plány,výsledky',
+    'https://nemis.hospital.cz/dataset/DS_REHABILITATION',
+    'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_DIET_NUTRITION: nutrition assessments; RESTRICTED; GDPR; patient_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword, publisher_id,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_DIET_NUTRITION',
+    'Nutriční hnodnocení a dietetika',
+    'Nutriční screening, BMI, dietetické plány, enterální a parenterální výživa.',
+    'výživa,dieta,BMI,nutriční screening,parenterální výživa',
+    'AGENT_LABS',
+    'https://nemis.hospital.cz/dataset/DS_DIET_NUTRITION',
+    'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR',
+    'patient_data',
+    'AGENT_HDAB'
+);
+
+-- DS_IMAGING_CT: CT imaging metadata; RESTRICTED; GDPR;EHDS; diagnostic_data
+INSERT INTO metadata."lm_dataset" (
+    name, title, description, keyword,
+    identifier, type,
+    access_rights, applicable_legislation, health_category, hdab_id
+) VALUES (
+    'DS_IMAGING_CT',
+    'CT zobrazovací metadata (DICOM)',
+    'DICOM metadata CT vyšetření: modalita, protokol, ozáření, závěry radiologa.',
+    'CT,DICOM,zobrazování,radiologie,ozáření',
+    'https://nemis.hospital.cz/dataset/DS_IMAGING_CT',
+    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+    'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
+    'GDPR;EHDS',
+    'diagnostic_data',
+    'AGENT_HDAB'
 );
 
 -- ── Distributions ────────────────────────────────────────────
@@ -170,8 +450,8 @@ INSERT INTO metadata."lm_dataset" (
 
 -- DS_PATIENTS – raw: all optional filled; format PARQUET; rights internal
 INSERT INTO metadata."lm_distribution" (
-    name, dataset_name, title, description, format, conformed_to, byte_size,
-    rights, issued, modified, access_url, applicable_legislation, db_layer
+    name, dataset_name, title, description, format, conforms_to, byte_size,
+    rights, issued, modified, access_url, applicable_legislation, licence, db_layer
 ) VALUES (
     'DIST_PATIENTS_RAW',
     'DS_PATIENTS',
@@ -185,6 +465,7 @@ INSERT INTO metadata."lm_distribution" (
     '2025-06-01 00:00:00+02',
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.patients_raw',
     'GDPR;EHDS',
+    'https://creativecommons.org/licenses/by/4.0/',
     'raw'
 );
 
@@ -219,7 +500,7 @@ INSERT INTO metadata."lm_distribution" (
 
 -- DS_LABS – raw: format CSV; rights internal; conformed_to filled
 INSERT INTO metadata."lm_distribution" (
-    name, dataset_name, title, format, conformed_to, rights,
+    name, dataset_name, title, format, conforms_to, rights,
     access_url, applicable_legislation, db_layer
 ) VALUES (
     'DIST_LABS_RAW',
@@ -265,7 +546,7 @@ INSERT INTO metadata."lm_distribution" (
 -- DS_PHARMACY – analytical; format PARQUET; rights public
 INSERT INTO metadata."lm_distribution" (
     name, dataset_name, title, description, format, rights,
-    access_url, applicable_legislation, db_layer
+    access_url, applicable_legislation, licence, db_layer
 ) VALUES (
     'DIST_PHARMACY_ANALYTICAL',
     'DS_PHARMACY',
@@ -275,6 +556,7 @@ INSERT INTO metadata."lm_distribution" (
     'public',
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.dim_medication',
     'EHDS',
+    'https://creativecommons.org/licenses/by/4.0/',
     'analytical'
 );
 
@@ -304,6 +586,257 @@ INSERT INTO metadata."lm_distribution" (
     '2019-09-01 00:00:00+02',
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.billing_raw',
     'GDPR',
+    'raw'
+);
+
+-- DS_ICU – raw; PARQUET; all vitals data
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_ICU_RAW',
+    'DS_ICU',
+    'Surová JIP data (Raw)',
+    'PARQUET',
+    2147483648,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.icu_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_ICU – clean; DELTA; clean layer
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_ICU_CLEAN',
+    'DS_ICU',
+    'Čistá JIP data (Clean)',
+    'DELTA',
+    'restricted',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.icu_clean',
+    'GDPR;EHDS',
+    'clean'
+);
+
+-- DS_SURGERY – raw; CSV; all surgical records
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_SURGERY_RAW',
+    'DS_SURGERY',
+    'Surová chirurgická data (Raw)',
+    'CSV',
+    314572800,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.surgery_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_CARDIOLOGY – raw; PARQUET; ECG signals
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, conforms_to, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_CARDIOLOGY_RAW',
+    'DS_CARDIOLOGY',
+    'Surová kardiologická data (Raw)',
+    'PARQUET',
+    'https://dicom.nema.org/medical/dicom/current/output/html/part03.html',
+    1073741824,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.cardiology_raw',
+    'GDPR',
+    'raw'
+);
+
+-- DS_CARDIOLOGY – analytical; PARQUET; aggregated
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_CARDIOLOGY_ANALYTICAL',
+    'DS_CARDIOLOGY',
+    'Analytická kardiologická data',
+    'PARQUET',
+    'restricted',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.dim_cardiology',
+    'GDPR',
+    'analytical'
+);
+
+-- DS_NEUROLOGY – raw; JSON; EEG/EMG data
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_NEUROLOGY_RAW',
+    'DS_NEUROLOGY',
+    'Surová neurologická data (Raw)',
+    'JSON',
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.neurology_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_PATHOLOGY – raw; CSV; biopsy results
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_PATHOLOGY_RAW',
+    'DS_PATHOLOGY',
+    'Surová patologická data (Raw)',
+    'CSV',
+    52428800,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.pathology_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_MICROBIOLOGY – raw; CSV; culture results
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, conforms_to, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_MICROBIOLOGY_RAW',
+    'DS_MICROBIOLOGY',
+    'Surová mikrobiologická data (Raw)',
+    'CSV',
+    'https://www.whonet.org/',
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.microbiology_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_EMERGENCY – raw; DELTA; all ER records
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_EMERGENCY_RAW',
+    'DS_EMERGENCY',
+    'Surová data urgentního příjmu (Raw)',
+    'DELTA',
+    419430400,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.emergency_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_PSYCHIATRY – clean; PARQUET; pseudonymised
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_PSYCHIATRY_CLEAN',
+    'DS_PSYCHIATRY',
+    'Čistá psychiatrická data (Clean)',
+    'PARQUET',
+    'restricted',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.psychiatry_clean',
+    'GDPR;EHDS;NIS2',
+    'clean'
+);
+
+-- DS_PEDIATRICS – raw; PARQUET; minimal optional
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_PEDIATRICS_RAW',
+    'DS_PEDIATRICS',
+    'Surová pediatrická data (Raw)',
+    'PARQUET',
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.pediatrics_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_VITAL_SIGNS – raw; ORC; time-series data; large
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_VITAL_SIGNS_RAW',
+    'DS_VITAL_SIGNS',
+    'Surová data vitálních funkcí (Raw)',
+    'ORC',
+    10737418240,
+    'restricted',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.vital_signs_raw',
+    'GDPR;EHDS',
+    'raw'
+);
+
+-- DS_GENOMICS – raw; VCF; minimal optional; large file
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_GENOMICS_RAW',
+    'DS_GENOMICS',
+    'Surová genomická data (Raw VCF)',
+    'VCF',
+    21474836480,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.genomics_raw',
+    'GDPR;EHDS;NIS2',
+    'raw'
+);
+
+-- DS_REHABILITATION – clean; CSV; outcome measures
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_REHABILITATION_CLEAN',
+    'DS_REHABILITATION',
+    'Čistá rehabilitační data (Clean)',
+    'CSV',
+    'restricted',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.rehabilitation_clean',
+    'GDPR',
+    'clean'
+);
+
+-- DS_DIET_NUTRITION – analytical; PARQUET
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_DIET_NUTRITION_ANALYTICAL',
+    'DS_DIET_NUTRITION',
+    'Analytická nutriční data',
+    'PARQUET',
+    'public',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.nutrition_analytical',
+    'GDPR',
+    'analytical'
+);
+
+-- DS_IMAGING_CT – raw; PARQUET; DICOM metadata only
+INSERT INTO metadata."lm_distribution" (
+    name, dataset_name, title, format, conforms_to, byte_size, rights,
+    access_url, applicable_legislation, db_layer
+) VALUES (
+    'DIST_IMAGING_CT_RAW',
+    'DS_IMAGING_CT',
+    'Surová CT DICOM metadata (Raw)',
+    'PARQUET',
+    'https://dicom.nema.org/medical/dicom/current/output/html/part03.html',
+    5368709120,
+    'internal',
+    'jdbc:postgresql://dwh-db:5432/dwh/metadata.imaging_ct_raw',
+    'GDPR;EHDS',
     'raw'
 );
 

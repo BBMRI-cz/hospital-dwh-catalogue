@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS metadata."lm_contact_point" (
 CREATE TABLE IF NOT EXISTS metadata."lm_agent" (
     name              VARCHAR(255) PRIMARY KEY,
     contact_point_id  BIGINT REFERENCES metadata."lm_contact_point"(id)
-                           ON DELETE SET NULL
+                           ON DELETE SET NULL,
+    description       TEXT                    -- dct:description (optional)
 );
 
 -- ── 3. Catalog ───────────────────────────────────────────────
@@ -54,8 +55,9 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
     theme                  VARCHAR(500),           -- dcat:theme URI
     publisher_id           VARCHAR(255) REFERENCES metadata."lm_agent"(name)
                                ON DELETE SET NULL,
-    license                VARCHAR(500),           -- dct:license URI / SPDX
-    conformed_to           VARCHAR(500),           -- dct:conformsTo URI
+    identifier             VARCHAR(500) NOT NULL DEFAULT '',  -- dct:identifier URI
+    type                   VARCHAR(500) NOT NULL DEFAULT '',  -- dct:type URI
+    conforms_to            VARCHAR(500),           -- dct:conformsTo URI
     issued                 TIMESTAMPTZ,            -- dct:issued
     modified               TIMESTAMPTZ,            -- dct:modified
     keyword                TEXT,                   -- dcat:keyword (comma-sep)
@@ -73,7 +75,10 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
     health_category        VARCHAR(500) NOT NULL,  -- healthdcat:healthCategory
     hdab_id                VARCHAR(255) NOT NULL   -- healthdcat:hdab
                                REFERENCES metadata."lm_agent"(name)
-                               ON DELETE RESTRICT
+                               ON DELETE RESTRICT,
+    custodian_id           VARCHAR(255)            -- geodcatap:custodian (optional)
+                               REFERENCES metadata."lm_agent"(name)
+                               ON DELETE SET NULL
 );
 
 -- ── 5. Distribution ──────────────────────────────────────────
@@ -88,7 +93,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
     title                  VARCHAR(500),
     description            TEXT,
     format                 VARCHAR(100),            -- dct:format
-    conformed_to           VARCHAR(500),
+    conforms_to            VARCHAR(500),
     byte_size              INTEGER,                 -- dcat:byteSize
     rights                 VARCHAR(500),            -- dct:rights
     issued                 TIMESTAMPTZ,
@@ -96,6 +101,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
     -- Mandatory HealthDCAT-AP v6
     access_url             VARCHAR(500) NOT NULL,  -- dcat:accessURL
     applicable_legislation VARCHAR(500) NOT NULL,
+    licence                VARCHAR(500),           -- dct:license URI
     -- LM-specific
     db_layer               VARCHAR(100)            -- DWH layer (raw/clean/analytical)
 );
