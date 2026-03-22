@@ -1,0 +1,3 @@
+[submodule "health_dcat_ap"]
+	path = health_dcat_ap
+	url = https://code.europa.eu/healthdataeu/healthdcat-ap
