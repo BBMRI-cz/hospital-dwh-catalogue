@@ -32,6 +32,7 @@ class UnifiedDataset:
     applicable_legislation: Optional[str] = None
     health_category: Optional[str] = None
     hdab: Optional[str] = None
+    custodian: Optional[str] = None    # geodcatap:custodian (Release 6, optional)
     source: Optional[str] = None       # dct:source — URI of the origin dataset
     rights_holder: Optional[str] = None
     creator: Optional[str] = None

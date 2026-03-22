@@ -62,13 +62,15 @@ _NS_URI_TO_CANONICAL_PREFIX: dict[str, str] = {
     'http://purl.org/dc/terms/': 'dct',  # always exposed as dct: in the UI
 }
 
-# Base URI for the healthdcatap: namespace (sourced from official example TTLs
-# in the submodule: @prefix healthdcatap: <http://healthdataportal.eu/ns/health#>)
+# URI for the healthdcatap: namespace — used by _merge_healthdcat_terms to build
+# term URIs from the cardinality JSON (which only carries local names, not full URIs).
 _HEALTHDCAT_PREFIX = 'healthdcatap'
 _HEALTHDCAT_BASE_URI = 'http://healthdataportal.eu/ns/health#'
 
 # Module-level cache: populated on first call to get_registry()
-_registry_cache: dict[str, Any] | None = None
+# Stored as a tuple (term_dict, prefix_map) so both can be returned without
+# re-parsing the TTL.
+_registry_cache: tuple[dict[str, Any], dict[str, str]] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +97,24 @@ def get_registry(release_dir: Path) -> dict[str, Any]:
     global _registry_cache
     if _registry_cache is None:
         _registry_cache = _load(release_dir)
-    return _registry_cache
+    return _registry_cache[0]
+
+
+def get_namespace_prefixes(release_dir: Path) -> dict[str, str]:
+    """
+    Return the namespace prefix map parsed from the SHACL TTL for *release_dir*.
+
+    Keys are canonical prefix names (e.g. ``"dct"``), values are namespace
+    base URIs (e.g. ``"http://purl.org/dc/terms/"``).
+
+    The map is derived from the ``@prefix`` declarations in the SHACL TTL,
+    with URI-based normalisation applied (see ``_NS_URI_TO_CANONICAL_PREFIX``).
+    Returns an empty dict if the submodule or rdflib is unavailable.
+    """
+    global _registry_cache
+    if _registry_cache is None:
+        _registry_cache = _load(release_dir)
+    return _registry_cache[1]
 
 
 def invalidate_cache() -> None:
@@ -109,7 +128,7 @@ def invalidate_cache() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _load(release_dir: Path) -> dict[str, Any]:
+def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
     shacl_ttl = release_dir / 'shacl' / 'dcat-ap-SHACL.ttl'
     cardinality_json = release_dir / 'context' / 'healthdcat-cardinality-rules.json'
 
@@ -118,14 +137,14 @@ def _load(release_dir: Path) -> dict[str, Any]:
             'HealthDCAT-AP release directory not found: %s — schema registry unavailable.',
             release_dir,
         )
-        return {}
+        return {}, {}
 
     if not shacl_ttl.exists():
         logger.warning(
             'SHACL TTL not found: %s — schema registry unavailable.',
             shacl_ttl,
         )
-        return {}
+        return {}, {}
 
     try:
         from rdflib import Graph  # type: ignore[import-untyped]
@@ -135,14 +154,14 @@ def _load(release_dir: Path) -> dict[str, Any]:
         logger.error(
             'rdflib is not installed. Install it with: pip install rdflib>=7.0.0'
         )
-        return {}
+        return {}, {}
 
     try:
         g = Graph()
         g.parse(str(shacl_ttl), format='turtle')
     except Exception:
         logger.exception('Failed to parse SHACL TTL: %s', shacl_ttl)
-        return {}
+        return {}, {}
 
     # Build prefix map: normalise to canonical prefix names by namespace URI.
     # This handles TTL files that declare the same namespace under different
@@ -155,8 +174,26 @@ def _load(release_dir: Path) -> dict[str, Any]:
             canonical = _NS_URI_TO_CANONICAL_PREFIX.get(ns_str, pfx_str)
             prefix_map[canonical] = ns_str
 
-    # Always ensure healthdcatap base is registered (not in base SHACL)
-    prefix_map.setdefault(_HEALTHDCAT_PREFIX, _HEALTHDCAT_BASE_URI)
+    # Also harvest prefixes from the HealthDCAT-AP public shapes TTL.
+    # This file declares HealthDCAT-AP specific namespaces that are absent
+    # from the base DCAT-AP SHACL TTL: healthdcatap, geodcatap, dcatap,
+    # dpv, org, csvw, and others.
+    health_shapes_ttl = release_dir / 'html' / 'shacl' / 'public-shapes.ttl'
+    if health_shapes_ttl.exists():
+        try:
+            g2 = Graph()
+            g2.parse(str(health_shapes_ttl), format='turtle')
+            for pfx, ns in g2.namespaces():
+                pfx_str = str(pfx)
+                ns_str = str(ns)
+                if pfx_str and pfx_str not in prefix_map:
+                    canonical = _NS_URI_TO_CANONICAL_PREFIX.get(ns_str, pfx_str)
+                    prefix_map[canonical] = ns_str
+        except Exception:
+            logger.warning(
+                'Could not parse HealthDCAT-AP shapes TTL for namespace prefixes: %s',
+                health_shapes_ttl,
+            )
 
     # Collect term data grouped by path URI
     # path_uri → {label, description, mandatory}
@@ -230,7 +267,7 @@ def _load(release_dir: Path) -> dict[str, Any]:
         len(result),
         release_dir,
     )
-    return result
+    return result, prefix_map
 
 
 def _uri_to_prefixed(uri: str, prefix_map: dict[str, str]) -> str | None:

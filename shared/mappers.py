@@ -64,6 +64,7 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
         applicable_legislation=obj.applicable_legislation,
         health_category=obj.health_category,
         hdab=_fk_name(obj, 'hdab'),
+        custodian=_fk_name(obj, 'custodian'),
         identifier=getattr(obj, 'identifier', None),
         type=getattr(obj, 'type', None),
     )
@@ -115,6 +116,7 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
         applicable_legislation=obj.applicable_legislation,
         health_category=obj.health_category,
         hdab=_fk_name(obj, 'hdab'),
+        custodian=_fk_name(obj, 'custodian'),
         identifier=obj.identifier,
         type=obj.type,
     )

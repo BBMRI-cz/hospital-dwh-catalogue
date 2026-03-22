@@ -21,6 +21,10 @@ ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
+# Public base URL used for building absolute URIs in JSON-LD export.
+# Set SITE_URL in the environment (.env / docker-compose) for each deployment.
+SITE_URL = config('SITE_URL')
+
 
 # Application definition
 

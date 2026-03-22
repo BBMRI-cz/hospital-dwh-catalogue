@@ -33,7 +33,8 @@ class RegistryParserTest(TestCase):
         invalidate_cache()
 
     def _load_release6(self) -> dict:
-        return _load(_RELEASE_6)
+        term_dict, _prefix_map = _load(_RELEASE_6)
+        return term_dict
 
     #  Basic structure 
 
@@ -122,11 +123,26 @@ class RegistryParserTest(TestCase):
         entry = registry["healthdcatap:hdab"]
         self.assertEqual(entry["requirement"], "optional")
 
+    #  Namespace prefix map 
+
+    def test_namespace_prefixes_include_healthdcat_specific(self) -> None:
+        """
+        Prefixes declared only in html/shacl/public-shapes.ttl (not in the base
+        DCAT-AP SHACL TTL) must be present in the returned prefix map.
+        """
+        from schema_registry.registry import get_namespace_prefixes
+        prefixes = get_namespace_prefixes(_RELEASE_6)
+        for expected in ('healthdcatap', 'geodcatap', 'dcatap', 'dpv', 'org', 'csvw'):
+            with self.subTest(prefix=expected):
+                self.assertIn(expected, prefixes, f'Prefix "{expected}" missing from namespace map')
+                self.assertTrue(prefixes[expected].startswith('http'))
+
     #  Edge cases 
 
     def test_missing_release_dir_returns_empty_dict(self) -> None:
-        result = _load(Path("/nonexistent/path/release-99"))
-        self.assertEqual(result, {})
+        term_dict, prefix_map = _load(Path("/nonexistent/path/release-99"))
+        self.assertEqual(term_dict, {})
+        self.assertEqual(prefix_map, {})
 
     def test_result_is_json_serialisable(self) -> None:
         registry = self._load_release6()

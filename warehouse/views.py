@@ -18,6 +18,7 @@ from django.http import Http404
 from django.views.generic import View
 from django.shortcuts import render
 
+from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
 from shared.dtos import UnifiedDataset, UnifiedDistribution
 from ticketing.cart import CartService as CartService
@@ -75,6 +76,7 @@ def _dataset_to_dict(ds) -> dict:
         'issued':                 ds.issued,
         'modified':               ds.modified,
         'contact_point':          ds.contact_point,
+        'custodian':              ds.custodian,
         'provenance':             ds.provenance,
         # Non-DCAT fields needed elsewhere (routing, filtering, display)
         'app':         ds.app,
@@ -101,49 +103,6 @@ def _dataset_to_dict(ds) -> dict:
                 'db_layer': getattr(d, 'db_layer', None),
             }
             for d in dists
-        ],
-    }
-
-
-def _build_jsonld(ds_dict: dict) -> dict:
-    """Build a Health DCAT-AP JSON-LD document from a serialised dataset dict."""
-    base = 'https://katalog.mou.cz'
-    return {
-        '@context': {
-            'dcat':         'http://www.w3.org/ns/dcat#',
-            'dct':          'http://purl.org/dc/terms/',
-            'healthdcatap': 'https://healthdataportal.eu/ns/health-dcat-ap#',
-            'dpv':          'https://w3id.org/dpv#',
-            'skos':         'http://www.w3.org/2004/02/skos/core#',
-            'csvw':         'http://www.w3.org/ns/csvw#',
-            'xsd':          'http://www.w3.org/2001/XMLSchema#',
-            'foaf':         'http://xmlns.com/foaf/0.1/',
-            'org':          'http://www.w3.org/ns/org#',
-        },
-        '@type': ['dcat:Dataset', 'healthdcatap:HealthDataset'],
-        '@id': f"{base}/dataset/{ds_dict['app']}/{ds_dict['name']}",
-        'dct:title': [{'@language': 'cs', '@value': ds_dict['title']}],
-        'dct:description': [{'@language': 'cs', '@value': ds_dict.get('description') or ''}],
-        'dcat:keyword': ds_dict.get('keywords', []),
-        'dct:rightsHolder': {'@type': 'org:Organization', 'foaf:name': ds_dict.get('rights_holder') or ''},
-        'dct:publisher': {'@type': 'org:Organization', 'foaf:name': ds_dict.get('publisher') or ''},
-        'dct:accessRights': {'@id': ds_dict.get('access_rights') or ''},
-        'healthdcatap:hasHealthCategory': {'@id': ds_dict.get('health_category') or ''},
-        'dcatap:applicableLegislation': {'@id': ds_dict.get('applicable_legislation') or ''},
-        'dcat:distribution': [
-            {
-                '@type': ['dcat:Distribution', 'healthdcatap:HealthDistribution'],
-                '@id': f"{base}/distribution/{d['name']}",
-                'dct:title': [{'@language': 'cs', '@value': d['title']}],
-                'dcat:accessURL': {'@id': d.get('access_url') or ''},
-                'dct:format': d.get('format') or '',
-                'dcatap:applicableLegislation': {'@id': d.get('applicable_legislation') or ''},
-                **(
-                    {'healthdcatap:dbLayer': d['db_layer']}
-                    if d.get('db_layer') else {}
-                ),
-            }
-            for d in ds_dict.get('distributions', [])
         ],
     }
 
@@ -377,8 +336,11 @@ class DatasetDetailView(LoginRequiredMixin, View):
             ds_dict = _dataset_to_dict(ds)
             cache.set(cache_key, ds_dict, _CACHE_TTL)
 
+        if not has_distributions(ds_dict):
+            raise Http404('Dataset has no distributions')
+
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
-        jsonld = _build_jsonld(ds_dict)
+        jsonld = build_jsonld(ds_dict)
 
         # Build an inverse schema map: DTO field name → DCAT term.
         # DTO fields are declared in display order, so iteration order IS display order.

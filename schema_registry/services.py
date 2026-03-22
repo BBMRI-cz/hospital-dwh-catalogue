@@ -32,7 +32,7 @@ from typing import Any
 
 from django.conf import settings
 
-from schema_registry.registry import get_registry
+from schema_registry.registry import get_registry, get_namespace_prefixes
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +55,19 @@ def get_schema_dict() -> dict[str, Any]:
     base_dir: Path = settings.BASE_DIR
     release_dir = base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
     return get_registry(release_dir)
+
+
+def get_context_prefixes() -> dict[str, str]:
+    """
+    Return the namespace prefix map parsed from the HealthDCAT-AP SHACL TTL.
+
+    Keys are canonical prefix names (e.g. ``"dct"``), values are namespace
+    base URIs.  Derived from the ``@prefix`` declarations in the TTL so the
+    mapping stays in sync with whatever version of the submodule is checked out.
+
+    Returns an empty dict if the submodule or rdflib is unavailable.
+    """
+    version: str = getattr(settings, 'HEALTH_DCAT_VERSION', 'release-6')
+    base_dir: Path = settings.BASE_DIR
+    release_dir = base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
+    return get_namespace_prefixes(release_dir)

@@ -48,14 +48,22 @@ class ContactPointBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Email'),
-        help_text=_('Contact e-mail address (vcard:hasEmail)'),
+        help_text=_(
+            'Contact e-mail address (vcard:hasEmail). '
+            'Store as plain email (e.g. user@example.org); exported as mailto: URI on RDF output. '
+            'At least one of email or contact_page is required.'
+        ),
     )
     contact_page = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Contact Page'),
-        help_text=_('URL of a web page that can be used to reach the contact (vcard:hasURL)'),
+        help_text=_(
+            'URL of a web page that can be used to reach the contact (vcard:hasURL). '
+            'Must be a URI/IRI. '
+            'At least one of email or contact_page is required.'
+        ),
     )
 
     class Meta:
@@ -63,6 +71,16 @@ class ContactPointBase(models.Model):
 
     def __str__(self) -> str:
         return self.email or self.contact_page or f'ContactPoint #{self.pk}'
+
+    def clean(self) -> None:
+        super().clean()
+        if not self.email and not self.contact_page:
+            raise ValidationError(
+                _(
+                    'A contact point must have at least one of email or contact page '
+                    '(HealthDCAT-AP v6 vcard:hasEmail / vcard:hasURL).'
+                )
+            )
 
 
 class AgentBase(models.Model):
@@ -150,8 +168,8 @@ class CatalogBase(models.Model):
         max_length=500,
         verbose_name=_('Applicable Legislation'),
         help_text=_(
-            'Legal basis under which this catalog is published '
-            '(mandatory per HealthDCAT-AP v6)'
+            'Legal basis under which this catalog is published — must be a URI/IRI '
+            '(mandatory per HealthDCAT-AP v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
         ),
     )
 
@@ -231,7 +249,8 @@ class DatasetBase(models.Model):
         blank=False,
         verbose_name=_('Theme'),
         help_text=_(
-            'dcat:theme — EU data-theme vocabulary URI; mandatory per HealthDCAT-AP v6 (1..*), '
+            'dcat:theme — must be a URI/IRI from the EU data-theme vocabulary; '
+            'mandatory per HealthDCAT-AP v6 (1..*), '
             'e.g. http://publications.europa.eu/resource/authority/data-theme/HEAL'
         ),
     )
@@ -324,12 +343,18 @@ class DatasetBase(models.Model):
     applicable_legislation = models.CharField(
         max_length=500,
         verbose_name=_('Applicable Legislation'),
-        help_text=_('dct:applicableLegislation (mandatory per HealthDCAT-AP v6)'),
+        help_text=_(
+            'dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
+        ),
     )
     health_category = models.CharField(
         max_length=500,
         verbose_name=_('Health Category'),
-        help_text=_('healthdcat:healthCategory (mandatory per HealthDCAT-AP v6)'),
+        help_text=_(
+            'healthdcat:healthCategory — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'e.g. https://healthdataportal.eu/categorisation/Health-care-delivery)'
+        ),
     )
     hdab = models.ForeignKey(
         'Agent',
@@ -339,6 +364,18 @@ class DatasetBase(models.Model):
         help_text=_(
             'healthdcat:hdab — Health Data Access Body responsible for '
             'this dataset (mandatory per HealthDCAT-AP v6)'
+        ),
+    )
+    custodian = models.ForeignKey(
+        'Agent',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='custodian_datasets',
+        verbose_name=_('Custodian'),
+        help_text=_(
+            'geodcatap:custodian — agent responsible for maintaining this dataset '
+            '(HealthDCAT-AP Release 6, optional)'
         ),
     )
 
@@ -370,6 +407,16 @@ class DatasetBase(models.Model):
         if not self.contact_point_id:
             raise ValidationError(
                 {'contact_point': _('contact_point is mandatory (HealthDCAT-AP v6).')}
+            )
+        # Change 3: HDAB must have a contact point
+        if self.hdab_id and self.hdab.contact_point_id is None:
+            raise ValidationError(
+                {'hdab': _('The HDAB agent must have a contact point (HealthDCAT-AP v6).')}
+            )
+        # Change 4: publisher, if present, must have a contact point
+        if self.publisher_id and self.publisher.contact_point_id is None:
+            raise ValidationError(
+                {'publisher': _('The publisher agent must have a contact point (HealthDCAT-AP v6).')}
             )
 
 
@@ -461,7 +508,10 @@ class DistributionBase(models.Model):
     applicable_legislation = models.CharField(
         max_length=500,
         verbose_name=_('Applicable Legislation'),
-        help_text=_('dct:applicableLegislation (mandatory per HealthDCAT-AP v6)'),
+        help_text=_(
+            'dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
+        ),
     )
     licence = models.CharField(
         max_length=500,
