@@ -186,11 +186,16 @@ def _filter_datasets(datasets: list, get_params) -> list:
 # ── Views ─────────────────────────────────────────────────────────────────────
 
 def _make_sidebar_items(counter: Counter, active: set) -> list[dict]:
-    """Build [{value, count, checked}] dicts for sidebar checkbox groups."""
+    """Build [{value, count, checked}] dicts for sidebar checkbox groups.
+
+    Active (checked) values are always included even when their count drops to
+    zero after another filter narrows the result set, and they are sorted to the
+    top so the user never loses track of what they selected.
+    """
+    all_values = (set(counter) | active) - {''}
     return [
-        {'value': v, 'count': counter[v], 'checked': v in active}
-        for v in sorted(counter)
-        if v
+        {'value': v, 'count': counter.get(v, 0), 'checked': v in active}
+        for v in sorted(all_values, key=lambda v: (v not in active, v.lower()))
     ]
 
 

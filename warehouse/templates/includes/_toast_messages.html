@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% if messages %}
 <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-3 pointer-events-none">
   {% for message in messages %}
@@ -64,12 +64,5 @@
   {% endif %}
   {% endfor %}
 </div>
-<script>
-  setTimeout(() => {
-    const c = document.getElementById('toast-container');
-    if (c) c.style.transition = 'opacity .4s ease';
-    if (c) c.style.opacity = '0';
-    setTimeout(() => { if (c) c.remove(); }, 400);
-  }, 5000);
-</script>
+<script src="{% static 'js/toast.js' %}"></script>
 {% endif %}

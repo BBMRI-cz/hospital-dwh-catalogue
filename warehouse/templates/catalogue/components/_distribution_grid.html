@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {# Superseded by _distribution_card.html — kept for legacy use only.
    New code should use _distribution_card.html which mirrors the index page
    accordion card pattern with AJAX cart toggle and eye-icon detail link. #}
@@ -80,18 +80,4 @@
   {% endfor %}
 </div>
 
-<script>
-function toggleDistTile(idx) {
-  const body  = document.getElementById('distbody-' + idx);
-  const tile  = document.getElementById('dtile-det-' + idx);
-  if (!body) return;
-  const isOpen = !body.classList.contains('hidden');
-  if (isOpen) {
-    body.classList.add('hidden');
-    tile?.classList.remove('expanded');
-  } else {
-    body.classList.remove('hidden');
-    tile?.classList.add('expanded');
-  }
-}
-</script>
+<script src="{% static 'js/distribution-grid.js' %}"></script>

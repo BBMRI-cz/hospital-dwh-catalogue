@@ -1,0 +1,109 @@
+'use strict';
+
+/* ── Active filter chips ───────────────────────────────────────────────── */
+(function () {
+  const SKIP = new Set(['page']);
+
+  function getLabels() {
+    try {
+      const el = document.getElementById('chip-labels');
+      return el ? JSON.parse(el.textContent) : {};
+    } catch (e) { return {}; }
+  }
+
+  function removeFilter(key, val) {
+    const params   = new URLSearchParams(window.location.search);
+    const existing = params.getAll(key).filter(v => v !== val);
+    params.delete(key);
+    existing.forEach(v => params.append(key, v));
+    params.set('page', '1');
+    window.location.search = params.toString();
+  }
+
+  function buildChips() {
+    const container = document.getElementById('active-chips');
+    if (!container) return;
+    const LABELS = getLabels();
+    const params  = new URLSearchParams(window.location.search);
+    container.innerHTML = '';
+    let count = 0;
+    params.forEach(function (val, key) {
+      if (SKIP.has(key) || !val) return;
+      const label = LABELS[key] || key;
+      const chip  = document.createElement('span');
+      chip.className  = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium';
+      chip.style.cssText = 'background:#e0f5fa;color:#0e7490;border-color:#a5dce8;';
+      const text = document.createElement('span');
+      text.textContent = label + ': ' + val;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-key', key);
+      btn.setAttribute('data-val', val);
+      btn.setAttribute('aria-label', 'Remove filter');
+      btn.className  = 'ml-0.5 hover:opacity-70 transition-opacity cursor-pointer';
+      btn.innerHTML  = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      btn.addEventListener('click', function () {
+        removeFilter(this.dataset.key, this.dataset.val);
+      });
+      chip.appendChild(text);
+      chip.appendChild(btn);
+      container.appendChild(chip);
+      count++;
+    });
+    if (count > 0) {
+      container.classList.remove('hidden');
+      container.classList.add('flex');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', buildChips);
+})();
+
+/* ── Card expand / collapse ───────────────────────────────────────────── */
+const openCards = new Set();
+function toggleCard(idx) {
+  const body = document.getElementById('body-' + idx);
+  const chev = document.getElementById('chev-' + idx);
+  const card = body?.closest('[data-card]');
+  if (!body) return;
+  const isOpen = !body.classList.contains('hidden');
+  if (isOpen) {
+    body.classList.add('hidden');
+    chev?.classList.remove('rotate-180');
+    card?.style.setProperty('border-color', '#e5e7eb');
+    openCards.delete(idx);
+  } else {
+    body.classList.remove('hidden');
+    chev?.classList.add('rotate-180');
+    card?.style.setProperty('border-color', '#53c0d7');
+    openCards.add(idx);
+  }
+}
+
+/* ── Distribution tile expand / collapse ─────────────────────────────── */
+const openDists = {};
+function toggleDist(cardIdx, distIdx) {
+  const current = openDists[cardIdx];
+  if (current) {
+    const oldPanel = document.getElementById('dpanel-' + cardIdx + '-' + current);
+    const oldTile  = document.getElementById('dtile-'  + cardIdx + '-' + current);
+    if (oldPanel) oldPanel.classList.add('hidden');
+    if (oldTile)  { oldTile.style.borderColor = '#e5e7eb'; oldTile.style.background = ''; }
+    openDists[cardIdx] = null;
+    if (current === distIdx) return;
+  }
+  const panel = document.getElementById('dpanel-' + cardIdx + '-' + distIdx);
+  const tile  = document.getElementById('dtile-'  + cardIdx + '-' + distIdx);
+  if (panel) panel.classList.remove('hidden');
+  if (tile)  { tile.style.borderColor = '#f04600'; tile.style.background = '#fdeee7'; }
+  openDists[cardIdx] = distIdx;
+  setTimeout(() => panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+}
+
+/* ── Sidebar keyword/category text-search (client-side hide) ──────────── */
+function filterList(inp, listId) {
+  const v = inp.value.toLowerCase();
+  document.querySelectorAll('#' + listId + ' .chk-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}

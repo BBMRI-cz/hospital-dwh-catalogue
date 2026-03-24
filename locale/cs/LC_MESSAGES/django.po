@@ -2932,9 +2932,21 @@ msgstr "Zkuste jiný dotaz nebo upravte filtry v postranním panelu."
 msgid "Clear all filters"
 msgstr "Vymazat všechny filtry"
 
+#: warehouse/templates/catalogue/index.html:50
+msgid "Keyword"
+msgstr "Klíčové slovo"
+
+#: warehouse/templates/catalogue/index.html:55
+msgid "Column"
+msgstr "Sloupec"
+
 #: warehouse/templates/includes/_filter_group.html:10
 msgid "Filter…"
 msgstr "Filtrovat…"
+
+#: warehouse/templates/includes/_filter_group.html:23
+msgid "No options"
+msgstr "Žádné možnosti"
 
 #: warehouse/templates/includes/schema_modal.html:12
 msgid "DCAT-AP term"

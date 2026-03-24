@@ -1,8 +1,8 @@
 {% load i18n %}
 {# Expects: title, items, list_id, field_name #}
-{% if items %}
 <div>
   <div class="font-mono text-[9.5px] font-medium uppercase tracking-[1.5px] text-gray-500 mb-2">{{ title }}</div>
+  {% if items %}
   <div class="relative mb-1.5">
     <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -10,15 +10,17 @@
     <input type="text" placeholder="{% trans 'Filter…' %}" oninput="filterList(this,'{{ list_id }}')"
       class="input input-sm input-bordered w-full pl-8 text-sm bg-gray-50 focus:bg-white">
   </div>
+  {% endif %}
   <div class="flex flex-col gap-0.5 max-h-[130px] overflow-y-auto" id="{{ list_id }}">
     {% for item in items %}
-    <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-50 transition-colors cursor-pointer" title="{{ item.value }}">
+    <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md transition-colors cursor-pointer {% if item.checked %}bg-sky-50 hover:bg-sky-100{% else %}hover:bg-gray-50{% endif %}" title="{{ item.value }}">
       <input type="checkbox" name="{{ field_name }}" value="{{ item.value }}" class="checkbox checkbox-xs shrink-0" style="accent-color:#53c0d7"
         {% if item.checked %}checked{% endif %}>
-      <span class="text-xs text-gray-600 truncate min-w-0 flex-1">{{ item.value }}</span>
-      <span class="font-mono text-[10px] text-gray-400 shrink-0 pl-1">{{ item.count }}</span>
+      <span class="text-xs {% if item.checked %}text-sky-700 font-medium{% else %}text-gray-600{% endif %} truncate min-w-0 flex-1">{{ item.value }}</span>
+      <span class="font-mono text-[10px] {% if item.checked %}text-sky-500{% else %}text-gray-400{% endif %} shrink-0 pl-1">{{ item.count }}</span>
     </label>
+    {% empty %}
+    <span class="px-2 py-1.5 text-xs italic text-gray-300">{% trans "No options" %}</span>
     {% endfor %}
   </div>
 </div>
-{% endif %}

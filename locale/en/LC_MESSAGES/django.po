@@ -2910,9 +2910,21 @@ msgstr "Try a different query or adjust the sidebar filters."
 msgid "Clear all filters"
 msgstr "Clear all filters"
 
+#: warehouse/templates/catalogue/index.html:50
+msgid "Keyword"
+msgstr "Keyword"
+
+#: warehouse/templates/catalogue/index.html:55
+msgid "Column"
+msgstr "Column"
+
 #: warehouse/templates/includes/_filter_group.html:10
 msgid "Filter…"
 msgstr "Filter…"
+
+#: warehouse/templates/includes/_filter_group.html:23
+msgid "No options"
+msgstr "No options"
 
 #: warehouse/templates/includes/schema_modal.html:12
 msgid "DCAT-AP term"

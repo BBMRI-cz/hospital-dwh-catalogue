@@ -1,5 +1,5 @@
 {% extends "catalogue/base_catalogue.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Catalogue" %}{% endblock %}
 
@@ -43,6 +43,19 @@
       {% endif %}
       <div class="flex-1 h-px bg-gray-200"></div>
       <span>{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
+    </div>
+
+    {# Active filter chips #}
+    {% trans "Search" as chip_label_q %}
+    {% trans "Keyword" as chip_label_keywords %}
+    {% trans "Rights Holder" as chip_label_rights_holder %}
+    {% trans "Health Category" as chip_label_health_category %}
+    {% trans "Source" as chip_label_source %}
+    {% trans "Theme" as chip_label_theme %}
+    {% trans "Column" as chip_label_column %}
+    <script id="chip-labels" type="application/json">{"q":"{{ chip_label_q|escapejs }}","keywords":"{{ chip_label_keywords|escapejs }}","rights_holder":"{{ chip_label_rights_holder|escapejs }}","health_category":"{{ chip_label_health_category|escapejs }}","source":"{{ chip_label_source|escapejs }}","theme":"{{ chip_label_theme|escapejs }}","column":"{{ chip_label_column|escapejs }}"}</script>
+    <div id="active-chips" class="hidden flex flex-wrap gap-1.5 mb-4">
+      {# Populated by catalogue-index.js #}
     </div>
 
     {# Dataset list #}
@@ -255,98 +268,6 @@
 
 {% block extra_scripts %}
 {{ block.super }}
-<script>
-'use strict';
-
-/* ── Schema modal ─────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => loadSchemaData('schema-data'));
-// showSchemaModal() is defined in includes/schema_modal.html (loaded via base_catalogue.html)
-
-/* Legacy wrapper used by remaining distribution forms */
-function ajaxCartAdd(form, event) {
-  event.preventDefault();
-  event.stopPropagation();
-  const data = new FormData(form);
-  fetch(form.action, {
-    method: 'POST',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    body: data,
-  })
-  .then(r => r.json())
-  .then(json => {
-    if (!json.success) return;
-    const badge = document.getElementById('cart-badge');
-    if (badge) {
-      badge.textContent = json.cart_count;
-      if (json.cart_count > 0) badge.classList.remove('hidden');
-      else badge.classList.add('hidden');
-    }
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) {
-      btn.classList.add('text-orange-500');
-      setTimeout(() => btn.classList.remove('text-orange-500'), 800);
-    }
-  })
-  .catch(() => {});
-  return false;
-}
-
-/* ── Card expand / collapse ───────────────────────────────────────────── */
-const openCards = new Set();
-function toggleCard(idx) {
-  const body  = document.getElementById('body-' + idx);
-  const chev  = document.getElementById('chev-' + idx);
-  const card  = body?.closest('[data-card]');
-  if (!body) return;
-  const isOpen = !body.classList.contains('hidden');
-  if (isOpen) {
-    body.classList.add('hidden');
-    chev?.classList.remove('rotate-180');
-    card?.style.setProperty('border-color', '#e5e7eb');
-    openCards.delete(idx);
-  } else {
-    body.classList.remove('hidden');
-    chev?.classList.add('rotate-180');
-    card?.style.setProperty('border-color', '#53c0d7');
-    openCards.add(idx);
-  }
-}
-
-/* ── Distribution tile expand / collapse ─────────────────────────────── */
-const openDists = {};   // { cardIdx: distIdx | null }
-function toggleDist(cardIdx, distIdx) {
-  const panelId = 'dpanel-' + cardIdx + '-' + distIdx;
-  const tileId  = 'dtile-'  + cardIdx + '-' + distIdx;
-  const current = openDists[cardIdx];
-
-  // Close currently open panel for this card
-  if (current) {
-    const oldPanel = document.getElementById('dpanel-' + cardIdx + '-' + current);
-    const oldTile  = document.getElementById('dtile-'  + cardIdx + '-' + current);
-    if (oldPanel) oldPanel.classList.add('hidden');
-    if (oldTile)  { oldTile.style.borderColor='#e5e7eb'; oldTile.style.background=''; }
-    openDists[cardIdx] = null;
-    if (current === distIdx) return;   // toggled same → just close
-  }
-
-  const panel = document.getElementById(panelId);
-  const tile  = document.getElementById(tileId);
-  if (panel) panel.classList.remove('hidden');
-  if (tile)  { tile.style.borderColor='#f04600'; tile.style.background='#fdeee7'; }
-  openDists[cardIdx] = distIdx;
-  setTimeout(() => panel?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
-}
-
-/* ── Sidebar keyword/category text-search (client-side hide, not filter) ── */
-function filterList(inp, listId) {
-  const v = inp.value.toLowerCase();
-  document.querySelectorAll('#' + listId + ' .chk-item').forEach(el => {
-    el.style.display = el.textContent.toLowerCase().includes(v) ? '' : 'none';
-  });
-}
-
-/* ── Init ─────────────────────────────────────────────────────────────── */
-// loadSchemaData called on DOMContentLoaded above
-</script>
+<script src="{% static 'js/catalogue-index.js' %}"></script>
 {% endblock %}
 
