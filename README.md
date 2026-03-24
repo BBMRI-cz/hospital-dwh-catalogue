@@ -2,7 +2,7 @@
 
 A Django-based web application for browsing and managing hospital data warehouse metadata.
 
-## Quick Start
+## Quick Start (Local Deployment)
 
 1. **Setup environment:**
    ```bash
@@ -19,8 +19,7 @@ A Django-based web application for browsing and managing hospital data warehouse
    ```
 
 3. **Access the application:**
-   - Main app: http://localhost:8080/
-   - Admin panel: http://localhost:8080/admin/
+   - Main app: http://localhost
 
 4. **Creating users:**
    - First login into the app will create a superuser.
