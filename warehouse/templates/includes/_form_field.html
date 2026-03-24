@@ -11,7 +11,7 @@
 {% endcomment %}
 <div class="flex flex-col gap-1.5 {{ mb|default:'mb-4' }} {{ extra_class }}">
   <label for="{{ field.id_for_label }}">
-    <span class="block font-mono text-[11px] uppercase tracking-wider font-semibold text-gray-600">
+    <span class="block font-mono text-[11px] uppercase tracking-wider font-semibold text-txt">
       {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
     </span>
   </label>

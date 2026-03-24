@@ -48,13 +48,13 @@
           {% elif col.key_db == 'FK' %}
           <span class="badge badge-sm font-mono text-[9px]" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">FK</span>
           {% elif col.key_db %}
-          <span class="badge badge-sm font-mono text-[9px] bg-gray-100 text-gray-500 border border-gray-200">{{ col.key_db }}</span>
+          <span class="badge badge-sm font-mono text-[9px] bg-gray-100 text-txt-muted border border-gray-200">{{ col.key_db }}</span>
           {% else %}
           <span class="text-gray-300 text-xs">—</span>
           {% endif %}
         </td>
-        <td class="px-5 py-3 font-mono text-xs text-gray-500 hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
-        <td class="px-5 py-3 font-mono text-xs text-gray-500 hidden lg:table-cell">{{ col.type_r|default:"—" }}</td>
+        <td class="px-5 py-3 font-mono text-xs text-txt-muted hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
+        <td class="px-5 py-3 font-mono text-xs text-txt-muted hidden lg:table-cell">{{ col.type_r|default:"—" }}</td>
         <td class="px-5 py-3 hidden lg:table-cell">
           {% if col.property_url %}
           <a href="{{ col.property_url }}" target="_blank" rel="noopener"
@@ -81,7 +81,7 @@
             dct:description
             {% include "includes/_info_btn.html" with semantics="dct:description" stop=1 %}
           </div>
-          <p class="text-sm text-gray-600 leading-relaxed">{{ col.description }}</p>
+          <p class="text-sm text-txt leading-relaxed">{{ col.description }}</p>
         </td>
       </tr>
       {% endif %}

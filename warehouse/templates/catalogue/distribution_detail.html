@@ -21,7 +21,7 @@
           {{ distribution.title|default:distribution.name }}
         </h1>
         {% if distribution.description %}
-        <p class="mt-3 text-base text-gray-600 leading-relaxed max-w-2xl">{{ distribution.description }}</p>
+        <p class="mt-3 text-base text-txt leading-relaxed max-w-2xl">{{ distribution.description }}</p>
         {% endif %}
       </div>
       {% if dataset %}
@@ -29,7 +29,7 @@
         {% include "includes/_cart_add_btn.html" with cart_source=distribution.app cart_name=dataset.name cart_title=distribution.title|default:distribution.name cart_next=request.path %}
         <p class="text-[10px] text-gray-400 text-center leading-snug">
           {% trans "Adds the entire dataset" %}<br>
-          <span class="font-medium text-gray-500">{{ dataset.title|default:dataset.name }}</span>
+          <span class="font-medium text-txt-muted">{{ dataset.title|default:dataset.name }}</span>
         </p>
       </div>
       {% endif %}
