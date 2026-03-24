@@ -352,7 +352,7 @@ class DatasetDetailView(LoginRequiredMixin, View):
         _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
 
         dcat_rows = [
-            (_inverse[f.name], ds_dict.get(f.name))
+            (_inverse[f.name], schema_json[_inverse[f.name]].get('label', _inverse[f.name]), ds_dict.get(f.name))
             for f in dataclasses.fields(UnifiedDataset)
             if f.name in _inverse
         ]
@@ -403,7 +403,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
         _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
 
         dcat_rows = [
-            (_inverse[f.name], distribution.get(f.name))
+            (_inverse[f.name], schema_json[_inverse[f.name]].get('label', _inverse[f.name]), distribution.get(f.name))
             for f in dataclasses.fields(UnifiedDistribution)
             if f.name in _inverse
         ]

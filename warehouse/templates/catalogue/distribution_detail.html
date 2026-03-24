@@ -42,11 +42,11 @@
       {% trans "Distribution Metadata" as t_dist_meta %}
       {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_dist_meta %}
       <div class="grid grid-cols-1 sm:grid-cols-2">
-        {% include "includes/_dcat_row.html" with semantics="dct:title" label="dct:title" value=distribution.title only %}
-        {% for semantics, value in dcat_rows %}
-        {% include "includes/_dcat_row.html" with semantics=semantics label=semantics value=value only %}
+        {% include "includes/_dcat_row.html" with semantics="dct:title" label="Title" value=distribution.title schema_json=schema_json only %}
+        {% for semantics, label, value in dcat_rows %}
+        {% include "includes/_dcat_row.html" with semantics=semantics label=label value=value schema_json=schema_json only %}
         {% endfor %}
-        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=distribution.description only %}
+        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="Description" value=distribution.description schema_json=schema_json only %}
       </div>
     </div>
   </div>

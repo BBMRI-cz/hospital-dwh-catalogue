@@ -51,14 +51,14 @@
         <span class="font-mono text-[10px] uppercase tracking-wider" style="color:#53c0d7">{% trans "Dataset Metadata" %}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2">
-        {% for semantics, value in dcat_rows %}
-        {% include "includes/_dcat_row.html" with semantics=semantics label=semantics value=value only %}
+        {% for semantics, label, value in dcat_rows %}
+        {% include "includes/_dcat_row.html" with semantics=semantics label=label value=value schema_json=schema_json only %}
         {% endfor %}
         {% if dataset.keywords %}
         <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
           <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
-            dcat:keyword
-            {% include "includes/_info_btn.html" with semantics="dcat:keyword" %}
+            Keyword
+            {% include "includes/_info_btn.html" with semantics="dcat:keyword" schema_json=schema_json %}
           </div>
           <div class="flex flex-wrap gap-1.5">
             {% for kw in dataset.keywords %}
@@ -67,7 +67,7 @@
           </div>
         </div>
         {% endif %}
-        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=dataset.description only %}
+        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="Description" value=dataset.description schema_json=schema_json only %}
       </div>
     </div>
   </div>
@@ -85,7 +85,7 @@
 
     <div class="flex flex-col gap-2.5">
       {% for dist in distributions %}
-      {% include "catalogue/components/_distribution_card.html" with dist=dist dataset=dataset loop_id=forloop.counter cart_dataset_ids=cart_dataset_ids only %}
+      {% include "catalogue/components/_distribution_card.html" with dist=dist dataset=dataset loop_id=forloop.counter cart_dataset_ids=cart_dataset_ids schema_json=schema_json only %}
       {% empty %}
       <div class="text-center py-12 text-gray-400 italic text-sm">{% trans "No distributions available for this dataset." %}</div>
       {% endfor %}

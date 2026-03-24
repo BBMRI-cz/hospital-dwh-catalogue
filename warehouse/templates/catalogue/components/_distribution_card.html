@@ -66,7 +66,7 @@
   <div class="hidden" id="dist-body-{{ loop_id }}">
     <div class="border-t border-gray-100">
       <div class="grid grid-cols-1">
-        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="dct:description" value=dist.description only %}
+        {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="Description" value=dist.description schema_json=schema_json only %}
       </div>
     </div>
   </div>
