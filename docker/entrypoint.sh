@@ -11,6 +11,14 @@ python manage.py migrate --noinput
 # fair_genomes_db: fair_genomes app
 python manage.py migrate --database=fair_genomes_db --noinput
 
+# Repair drifted fair_genomes_db migration state where 0001 is marked applied
+# but core tables are missing (legacy schema leftovers, manual DB changes).
+if ! python manage.py shell -c "from django.db import connections; print(int('fair_genomes_contact_point' in connections['fair_genomes_db'].introspection.table_names()))" | grep -q '^1$'; then
+    echo "fair_genomes_db migration drift detected (missing fair_genomes_contact_point). Repairing migration state..."
+    python manage.py migrate fair_genomes zero --database=fair_genomes_db --fake --noinput
+    python manage.py migrate fair_genomes --database=fair_genomes_db --noinput
+fi
+
 # metadata_db: warehouse app
 python manage.py migrate --database=metadata_db --noinput
 

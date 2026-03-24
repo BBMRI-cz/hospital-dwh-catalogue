@@ -19,10 +19,10 @@ function getCsrf() {
 
 function ajaxCartToggle(btn, event) {
   event.stopPropagation();
-  const source = btn.dataset.app;
+  const app    = btn.dataset.app;
   const name   = btn.dataset.name;
   const title  = btn.dataset.title;
-  const body   = new URLSearchParams({source, name, title});
+  const body   = new URLSearchParams({app, name, title});
   btn.disabled = true;
   fetch(CART_ADD_URL, {
     method: 'POST',

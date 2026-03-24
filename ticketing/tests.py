@@ -5,6 +5,8 @@ Covers models, forms, views, services, and cart functionality.
 """
 
 from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from .models import TicketRequest, TicketRequestItem
 from .services.base import TicketData, TicketResponse
@@ -288,3 +290,78 @@ class GetTicketServiceTest(TestCase):
 
             service = get_ticket_service()
             self.assertIsInstance(service, AlvaoService)
+
+
+class CartAddViewTest(TestCase):
+    """Regression tests for cart add/toggle AJAX behavior."""
+
+    databases = {'default', 'auth_db'}
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='cart-user',
+            email='cart@example.com',
+            password='secret123',
+        )
+        self.client.force_login(self.user)
+        self.url = reverse('ticketing:cart_add')
+
+    def test_ajax_add_stores_item_and_returns_count(self):
+        """AJAX add stores the cart item and reports in_cart/count."""
+        response = self.client.post(
+            self.url,
+            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload['success'])
+        self.assertTrue(payload['in_cart'])
+        self.assertEqual(payload['cart_count'], 1)
+
+        cart = self.client.session.get('cart', [])
+        self.assertEqual(len(cart), 1)
+        self.assertEqual(cart[0]['app'], 'warehouse')
+        self.assertEqual(cart[0]['name'], 'dataset-1')
+        self.assertEqual(cart[0]['title'], 'Dataset 1')
+
+    def test_ajax_toggle_same_item_removes_from_cart(self):
+        """Posting the same item twice toggles it out of the cart."""
+        data = {'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'}
+
+        first_response = self.client.post(
+            self.url,
+            data=data,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        second_response = self.client.post(
+            self.url,
+            data=data,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertTrue(first_response.json()['in_cart'])
+
+        payload = second_response.json()
+        self.assertTrue(payload['success'])
+        self.assertFalse(payload['in_cart'])
+        self.assertEqual(payload['cart_count'], 0)
+        self.assertEqual(self.client.session.get('cart', []), [])
+
+    def test_ajax_missing_required_param_is_noop_with_json_shape(self):
+        """Missing app/name keeps cart unchanged and still returns expected JSON keys."""
+        response = self.client.post(
+            self.url,
+            data={'source': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(set(payload.keys()), {'success', 'in_cart', 'cart_count'})
+        self.assertTrue(payload['success'])
+        self.assertFalse(payload['in_cart'])
+        self.assertEqual(payload['cart_count'], 0)
+        self.assertEqual(self.client.session.get('cart', []), [])
