@@ -1,30 +1,22 @@
 {% load i18n static %}
 {% get_current_language as LANGUAGE_CODE %}
 <header class="cat-header sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
-  <div class="max-w-screen-2xl mx-auto px-4 h-14 flex items-center gap-4">
+  <div class="max-w-screen-2xl mx-auto px-4 h-20 flex items-center gap-4">
 
   <!-- Logo -->
-  <a href="{% url 'warehouse:catalogue' %}" class="flex items-center gap-2.5 no-underline text-inherit shrink-0">
-    <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:#53c0d7">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-        <path d="M3 3h18v4H3zM3 10h11v4H3zM3 17h7v4H3z"/>
-      </svg>
-    </div>
-    <div class="leading-tight hidden sm:block">
-      <div class="font-serif text-[17px] text-gray-900">{% trans "Data Catalogue" %}</div>
-      <div class="font-mono text-[9px] text-gray-400 uppercase tracking-widest">{% trans "Masarykův onkologický ústav" %}</div>
-    </div>
+  <a href="{% url 'warehouse:catalogue' %}" class="shrink-0 flex items-center py-2" title="{% trans 'Data Catalogue' %}">
+    <img src="{% static 'img/mmci_logo.svg' %}" alt="MMCI logo" class="max-h-full w-auto">
   </a>
 
   <div class="flex-1"></div>
 
   <!-- Right side -->
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-3">
     {% if user.is_authenticated %}
 
     <!-- Cart -->
-    <a href="{% url 'ticketing:cart' %}" class="relative flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:bg-gray-100 transition-colors" title="{% trans 'View cart' %}">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <a href="{% url 'ticketing:cart' %}" class="relative flex items-center justify-center w-10 h-10 rounded-md text-gray-500 hover:bg-gray-100 transition-colors" title="{% trans 'View cart' %}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
       </svg>
@@ -33,26 +25,26 @@
     </a>
 
     <!-- Language switcher -->
-    <div class="flex items-center rounded-md border border-gray-200 overflow-hidden text-[11px] font-mono">
+    <div class="flex items-center rounded-md border border-gray-200 overflow-hidden text-[13px] font-mono">
       <button type="button" onclick="switchLang('cs')"
-        class="px-2.5 py-1 transition-colors {% if LANGUAGE_CODE == 'cs' %}text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}"
+        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'cs' %}text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}"
         {% if LANGUAGE_CODE == 'cs' %}style="background:#53c0d7;"{% endif %}>CZ</button>
-      <span class="w-px h-4 bg-gray-200 shrink-0"></span>
+      <span class="w-px h-5 bg-gray-200 shrink-0"></span>
       <button type="button" onclick="switchLang('en')"
-        class="px-2.5 py-1 transition-colors {% if LANGUAGE_CODE == 'en' %}text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}"
+        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'en' %}text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}"
         {% if LANGUAGE_CODE == 'en' %}style="background:#53c0d7;"{% endif %}>EN</button>
     </div>
 
     <!-- User dropdown -->
     <div class="relative" id="cat-user-menu">
       <button type="button" onclick="toggleCatMenu()"
-        class="flex items-center gap-1.5 px-2 h-8 rounded-md text-gray-600 hover:bg-gray-100 transition-colors text-[12px]">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        class="flex items-center gap-2 px-3 h-10 rounded-md text-gray-600 hover:bg-gray-100 transition-colors text-[14px]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
-        <span class="max-w-24 truncate hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="max-w-28 truncate hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="cat-user-panel" class="hidden absolute right-0 top-full mt-1 w-52 bg-white rounded-lg border border-gray-200 shadow-xl z-50 py-1 text-sm">
         <div class="px-3 py-1.5">

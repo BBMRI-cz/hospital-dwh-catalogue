@@ -6,10 +6,10 @@
 {% block sidebar %}
 {{ schema_json|json_script:"schema-data" }}
 
-<div class="cat-content flex" style="min-height:calc(100vh - 56px)">
+<div class="cat-content flex" style="min-height:calc(100vh - 80px)">
 
   {# ══ SIDEBAR ══ #}
-  <aside class="w-60 shrink-0 bg-white border-r border-site-border sticky top-14 self-start flex flex-col" style="height:calc(100vh - 56px)">
+  <aside class="w-60 shrink-0 bg-white border-r border-site-border sticky top-20 self-start flex flex-col" style="height:calc(100vh - 80px)">
     <div class="flex-1 flex flex-col min-h-0 px-3">
       {% include 'catalogue/components/_sidebar_filters.html' %}
     </div>
