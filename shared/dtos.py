@@ -13,7 +13,6 @@ The `app` field on every DTO carries the originating app label
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -23,30 +22,29 @@ class UnifiedDataset:
     name: str
     # DCAT fields — named to match snake_case(schema local_name) so the view
     # can look them up automatically without a separate mapping table.
-    title: Optional[str] = None
-    access_rights: Optional[str] = None
-    version: Optional[str] = None
-    conforms_to: Optional[str] = None
-    theme: Optional[str] = None
-    publisher: Optional[str] = None
-    applicable_legislation: Optional[str] = None
-    health_category: Optional[str] = None
-    hdab: Optional[str] = None
-    custodian: Optional[str] = None    # geodcatap:custodian (Release 6, optional)
-    source: Optional[str] = None       # dct:source — URI of the origin dataset
-    rights_holder: Optional[str] = None
-    creator: Optional[str] = None
-    issued: Optional[str] = None
-    modified: Optional[str] = None
-    contact_point: Optional[str] = None
-    provenance: Optional[str] = None
+    title: str | None = None
+    access_rights: str | None = None
+    version: str | None = None
+    conforms_to: str | None = None
+    theme: str | None = None
+    publisher: str | None = None
+    applicable_legislation: str | None = None
+    health_category: str | None = None
+    hdab: str | None = None
+    custodian: str | None = None  # geodcatap:custodian (Release 6, optional)
+    source: str | None = None  # dct:source — URI of the origin dataset
+    creator: str | None = None
+    issued: str | None = None
+    modified: str | None = None
+    contact_point: str | None = None
+    provenance: str | None = None
     # Non-DCAT fields
-    description: Optional[str] = None
-    keyword: Optional[str] = None
-    catalog_name: Optional[str] = None
+    description: str | None = None
+    keyword: str | None = None
+    catalog_name: str | None = None
     # HealthDCAT-AP v6 — new mandatory fields
-    identifier: Optional[str] = None   # dct:identifier
-    type: Optional[str] = None         # dct:type — EU Dataset-type vocabulary URI(s)
+    identifier: str | None = None  # dct:identifier
+    type: str | None = None  # dct:type — EU Dataset-type vocabulary URI(s)
     distributions: list[UnifiedDistribution] = field(default_factory=list)
 
 
@@ -54,17 +52,17 @@ class UnifiedDataset:
 class UnifiedDistribution:
     app: str
     name: str
-    dataset_name: Optional[str] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-    access_url: Optional[str] = None
-    applicable_legislation: Optional[str] = None
-    format: Optional[str] = None
-    conforms_to: Optional[str] = None
-    byte_size: Optional[int] = None
-    rights: Optional[str] = None
-    issued: Optional[str] = None
-    modified: Optional[str] = None
-    licence: Optional[str] = None
+    dataset_name: str | None = None
+    title: str | None = None
+    description: str | None = None
+    access_url: str | None = None
+    applicable_legislation: str | None = None
+    format: str | None = None
+    conforms_to: str | None = None
+    byte_size: int | None = None
+    rights: str | None = None
+    issued: str | None = None
+    modified: str | None = None
+    licence: str | None = None
     # Warehouse-specific; None for FAIR Genomes distributions
-    db_layer: Optional[str] = None
+    db_layer: str | None = None

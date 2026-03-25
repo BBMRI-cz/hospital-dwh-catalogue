@@ -20,11 +20,12 @@ from shared.dtos import (
 
 if TYPE_CHECKING:
     # Import only for type hints — avoids import-time coupling.
-    from warehouse import models as wm
     from fair_genomes import models as fgm
+    from warehouse import models as wm
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _fk_name(obj: object, fk_attr: str) -> str | None:
     """Return the .name of a FK object, or None if the FK is not set."""
@@ -40,7 +41,8 @@ def _dt_str(obj: object, attr: str) -> str | None:
 
 # ── Warehouse (Local Metadata) mappers ────────────────────────────────────────
 
-def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
+
+def map_warehouse_dataset(obj: wm.Dataset) -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
     return UnifiedDataset(
         app='warehouse',
@@ -57,7 +59,6 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
         source=obj.source,
         creator=obj.creator,
         contact_point=getattr(cp, 'email', None),
-        rights_holder=obj.rights_holder,
         provenance=obj.provenance,
         catalog_name=_fk_name(obj, 'catalog'),
         access_rights=obj.access_rights,
@@ -70,7 +71,7 @@ def map_warehouse_dataset(obj: 'wm.Dataset') -> UnifiedDataset:
     )
 
 
-def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
+def map_warehouse_distribution(obj: wm.Distribution) -> UnifiedDistribution:
     return UnifiedDistribution(
         app='warehouse',
         name=obj.name,
@@ -92,7 +93,8 @@ def map_warehouse_distribution(obj: 'wm.Distribution') -> UnifiedDistribution:
 
 # ── FAIR Genomes mappers ───────────────────────────────────────────────────────
 
-def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
+
+def map_fair_dataset(obj: fgm.Dataset) -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
     return UnifiedDataset(
         app='fair_genomes',
@@ -109,7 +111,6 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
         source=obj.source,
         creator=obj.creator,
         contact_point=getattr(cp, 'email', None),
-        rights_holder=obj.rights_holder,
         provenance=obj.provenance,
         catalog_name=_fk_name(obj, 'catalog'),
         access_rights=obj.access_rights,
@@ -122,7 +123,7 @@ def map_fair_dataset(obj: 'fgm.Dataset') -> UnifiedDataset:
     )
 
 
-def map_fair_distribution(obj: 'fgm.Distribution') -> UnifiedDistribution:
+def map_fair_distribution(obj: fgm.Distribution) -> UnifiedDistribution:
     return UnifiedDistribution(
         app='fair_genomes',
         name=obj.name,

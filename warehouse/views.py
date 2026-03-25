@@ -15,24 +15,27 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import Http404
-from django.views.generic import View
 from django.shortcuts import render
+from django.views.generic import View
 
+from shared.dtos import UnifiedDataset, UnifiedDistribution
 from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
-from shared.dtos import UnifiedDataset, UnifiedDistribution
 from ticketing.cart import CartService as CartService
-from warehouse.models import Attribute, Distribution
+from warehouse.models import Column, Distribution
 
 PAGE_SIZE = 15
-_CACHE_TTL = 300          # 5 minutes
+_CACHE_TTL = 300  # 5 minutes
 _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
-_CACHE_KEY_SCHEMA   = 'catalogue_schema_json'
+_CACHE_KEY_SCHEMA = 'catalogue_schema_json'
+
 
 def _to_snake(camel: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()
 
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def _parse_keywords(keyword_str: str | None) -> list[str]:
     """Parse a comma-separated keyword string into a clean list."""
@@ -61,30 +64,29 @@ def _dataset_to_dict(ds) -> dict:
     """Serialise a UnifiedDataset DTO (with .distributions) to a plain dict."""
     dists = getattr(ds, 'distributions', [])
     return {
-        'title':                  ds.title or ds.name,
-        'access_rights':          ds.access_rights,
-        'version':                ds.version,
-        'conforms_to':            ds.conforms_to,
-        'theme':                  ds.theme,
-        'publisher':              ds.publisher,
+        'title': ds.title or ds.name,
+        'access_rights': ds.access_rights,
+        'version': ds.version,
+        'conforms_to': ds.conforms_to,
+        'theme': ds.theme,
+        'publisher': ds.publisher,
         'applicable_legislation': ds.applicable_legislation,
-        'health_category':        ds.health_category,
-        'hdab':                   ds.hdab,
-        'source':                 ds.source,
-        'rights_holder':          ds.rights_holder,
-        'creator':                ds.creator,
-        'issued':                 ds.issued,
-        'modified':               ds.modified,
-        'contact_point':          ds.contact_point,
-        'custodian':              ds.custodian,
-        'provenance':             ds.provenance,
+        'health_category': ds.health_category,
+        'hdab': ds.hdab,
+        'source': ds.source,
+        'creator': ds.creator,
+        'issued': ds.issued,
+        'modified': ds.modified,
+        'contact_point': ds.contact_point,
+        'custodian': ds.custodian,
+        'provenance': ds.provenance,
         # Non-DCAT fields needed elsewhere (routing, filtering, display)
-        'app':         ds.app,
-        'name':        ds.name,
+        'app': ds.app,
+        'name': ds.name,
         'description': ds.description,
-        'keywords':    _parse_keywords(ds.keyword),
-        'catalog':     ds.catalog_name,
-        'status':      _derive_status(ds.access_rights),
+        'keywords': _parse_keywords(ds.keyword),
+        'catalog': ds.catalog_name,
+        'status': _derive_status(ds.access_rights),
         'distributions': [
             {
                 'app': d.app,
@@ -109,27 +111,27 @@ def _dataset_to_dict(ds) -> dict:
 
 def _filter_datasets(datasets: list, get_params) -> list:
     """Apply server-side filters from GET params to a list of dataset dicts."""
-    q              = get_params.get('q', '').strip().lower()
-    status_filter  = set(get_params.getlist('status'))
+    q = get_params.get('q', '').strip().lower()
+    status_filter = set(get_params.getlist('status'))
     keyword_filter = {k.lower() for k in get_params.getlist('keywords')}
-    source_filter  = set(get_params.getlist('source'))  # dct:source URI filter
-    rights_filter  = set(get_params.getlist('rights_holder'))
-    cat_filter     = set(get_params.getlist('health_category'))
-    theme_filter   = set(get_params.getlist('theme'))
-    column_filter  = set(get_params.getlist('column'))
+    source_filter = set(get_params.getlist('source'))  # dct:source URI filter
+    custodian_filter = set(get_params.getlist('custodian'))
+    cat_filter = set(get_params.getlist('health_category'))
+    theme_filter = set(get_params.getlist('theme'))
+    column_filter = set(get_params.getlist('column'))
 
     # Default: all statuses active when none selected
     all_statuses = {'ready', 'raw', 'unavailable'}
     if not status_filter:
         status_filter = all_statuses
 
-    # Resolve column filter → matching dataset names via Attribute + Distribution
+    # Resolve column filter → matching dataset names via Column + Distribution
     matching_dataset_names: frozenset | None = None
     if column_filter:
         dist_names = (
-            Attribute.objects.using('metadata_db')
+            Column.objects.using('metadata_db')
             .filter(title__in=column_filter)
-            .values_list('distribution_name', flat=True)
+            .values_list('table__distribution_name', flat=True)
             .distinct()
         )
         dataset_names = (
@@ -153,8 +155,8 @@ def _filter_datasets(datasets: list, get_params) -> list:
             ds_kws = {k.lower() for k in ds.get('keywords', [])}
             if not keyword_filter.intersection(ds_kws):
                 continue
-        # Rights holder
-        if rights_filter and ds.get('rights_holder') not in rights_filter:
+        # Custodian
+        if custodian_filter and ds.get('custodian') not in custodian_filter:
             continue
         # Health category
         if cat_filter and ds.get('health_category') not in cat_filter:
@@ -167,15 +169,17 @@ def _filter_datasets(datasets: list, get_params) -> list:
             continue
         # Text search
         if q:
-            haystack = ' '.join([
-                ds.get('title') or '',
-                ds.get('description') or '',
-                ds.get('rights_holder') or '',
-                ds.get('source') or '',
-                ds.get('health_category') or '',
-                ' '.join(ds.get('keywords', [])),
-                ' '.join(d.get('title', '') for d in ds.get('distributions', [])),
-            ]).lower()
+            haystack = ' '.join(
+                [
+                    ds.get('title') or '',
+                    ds.get('description') or '',
+                    ds.get('custodian') or '',
+                    ds.get('source') or '',
+                    ds.get('health_category') or '',
+                    ' '.join(ds.get('keywords', [])),
+                    ' '.join(d.get('title', '') for d in ds.get('distributions', [])),
+                ]
+            ).lower()
             if q not in haystack:
                 continue
         result.append(ds)
@@ -184,6 +188,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
 
 
 # ── Views ─────────────────────────────────────────────────────────────────────
+
 
 def _make_sidebar_items(counter: Counter, active: set) -> list[dict]:
     """Build [{value, count, checked}] dicts for sidebar checkbox groups.
@@ -217,41 +222,41 @@ class CatalogueIndexView(LoginRequiredMixin, View):
 
         # ── Active filter state ──────────────────────────────────────────────
         get = request.GET
-        q               = get.get('q', '')
-        active_status   = set(get.getlist('status'))
+        q = get.get('q', '')
+        active_status = set(get.getlist('status'))
         active_keywords = set(get.getlist('keywords'))
-        active_sources  = set(get.getlist('source'))
-        active_rights   = set(get.getlist('rights_holder'))
-        active_cats     = set(get.getlist('health_category'))
-        active_themes   = set(get.getlist('theme'))
-        active_columns  = set(get.getlist('column'))
+        active_sources = set(get.getlist('source'))
+        active_custodians = set(get.getlist('custodian'))
+        active_cats = set(get.getlist('health_category'))
+        active_themes = set(get.getlist('theme'))
+        active_columns = set(get.getlist('column'))
 
         filter_params = {
-            'q':               q,
-            'status':          active_status,
-            'keywords':        active_keywords,
-            'source':          active_sources,
-            'rights_holder':   active_rights,
+            'q': q,
+            'status': active_status,
+            'keywords': active_keywords,
+            'source': active_sources,
+            'custodian': active_custodians,
             'health_category': active_cats,
-            'theme':           active_themes,
-            'column':          active_columns,
+            'theme': active_themes,
+            'column': active_columns,
         }
 
         # ── Filter + paginate ────────────────────────────────────────────────
-        filtered  = _filter_datasets(all_datasets, get)
+        filtered = _filter_datasets(all_datasets, get)
         paginator = Paginator(filtered, PAGE_SIZE)
-        page_obj  = paginator.get_page(get.get('page', 1))
+        page_obj = paginator.get_page(get.get('page', 1))
 
         # ── Global stats (unfiltered) ─────────────────────────────────────────
         total_count = len(all_datasets)
-        dist_count  = sum(len(ds.get('distributions', [])) for ds in all_datasets)
+        dist_count = sum(len(ds.get('distributions', [])) for ds in all_datasets)
 
         # ── Sidebar counters (computed from filtered results) ─────────────────
-        kw_counter:     Counter = Counter()
-        src_counter:    Counter = Counter()
-        rh_counter:     Counter = Counter()
-        hc_counter:     Counter = Counter()
-        theme_counter:  Counter = Counter()
+        kw_counter: Counter = Counter()
+        src_counter: Counter = Counter()
+        custodian_counter: Counter = Counter()
+        hc_counter: Counter = Counter()
+        theme_counter: Counter = Counter()
         status_counter: Counter = Counter()
 
         for ds in filtered:
@@ -260,8 +265,8 @@ class CatalogueIndexView(LoginRequiredMixin, View):
                     kw_counter[kw] += 1
             if ds.get('source'):
                 src_counter[ds['source']] += 1
-            if ds.get('rights_holder'):
-                rh_counter[ds['rights_holder']] += 1
+            if ds.get('custodian'):
+                custodian_counter[ds['custodian']] += 1
             if ds.get('health_category'):
                 hc_counter[ds['health_category']] += 1
             if ds.get('theme'):
@@ -272,22 +277,20 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         col_counter: Counter = Counter()
         filtered_dist_names = [
             d['name']
-            for ds in filtered if ds.get('app') == 'warehouse'
+            for ds in filtered
+            if ds.get('app') == 'warehouse'
             for d in ds.get('distributions', [])
         ]
         if filtered_dist_names:
             dist_to_dataset: dict[str, str] = {
-                d['name']: ds['name']
-                for ds in filtered
-                for d in ds.get('distributions', [])
+                d['name']: ds['name'] for ds in filtered for d in ds.get('distributions', [])
             }
             seen_col_ds: set[tuple] = set()
             attr_rows = (
-                Attribute.objects.using('metadata_db')
-                .filter(distribution_name__in=filtered_dist_names)
+                Column.objects.using('metadata_db')
+                .filter(table__distribution_name__in=filtered_dist_names)
                 .exclude(title='')
-                .filter(title__isnull=False)
-                .values_list('title', 'distribution_name')
+                .values_list('title', 'table__distribution_name')
                 .distinct()
             )
             for title, dist_name in attr_rows:
@@ -296,30 +299,34 @@ class CatalogueIndexView(LoginRequiredMixin, View):
                     col_counter[title] += 1
                     seen_col_ds.add((title, ds_name))
 
-        return render(request, 'catalogue/index.html', {
-            'page_obj':      page_obj,
-            'filter_params': filter_params,
-            # Sidebar checkbox groups
-            'sidebar_keywords':          _make_sidebar_items(kw_counter, active_keywords),
-            'sidebar_sources':           _make_sidebar_items(src_counter, active_sources),
-            'sidebar_rights_holders':    _make_sidebar_items(rh_counter, active_rights),
-            'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats),
-            'sidebar_themes':            _make_sidebar_items(theme_counter, active_themes),
-            'sidebar_columns':           _make_sidebar_items(col_counter, active_columns),
-            # Status bar counts
-            'sidebar_counts': {
-                'ready':       status_counter.get('ready', 0),
-                'raw':         status_counter.get('raw', 0),
-                'unavailable': status_counter.get('unavailable', 0),
+        return render(
+            request,
+            'catalogue/index.html',
+            {
+                'page_obj': page_obj,
+                'filter_params': filter_params,
+                # Sidebar checkbox groups
+                'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
+                'sidebar_sources': _make_sidebar_items(src_counter, active_sources),
+                'sidebar_custodians': _make_sidebar_items(custodian_counter, active_custodians),
+                'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats),
+                'sidebar_themes': _make_sidebar_items(theme_counter, active_themes),
+                'sidebar_columns': _make_sidebar_items(col_counter, active_columns),
+                # Status bar counts
+                'sidebar_counts': {
+                    'ready': status_counter.get('ready', 0),
+                    'raw': status_counter.get('raw', 0),
+                    'unavailable': status_counter.get('unavailable', 0),
+                },
+                # Hero stats
+                'total_count': total_count,
+                'dist_count': dist_count,
+                # Schema modal
+                'schema_json': schema_json,
+                # Cart state
+                'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
             },
-            # Hero stats
-            'total_count':   total_count,
-            'dist_count':    dist_count,
-            # Schema modal
-            'schema_json':   schema_json,
-            # Cart state
-            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
-        })
+        )
 
 
 class DatasetDetailView(LoginRequiredMixin, View):
@@ -352,20 +359,28 @@ class DatasetDetailView(LoginRequiredMixin, View):
         _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
 
         dcat_rows = [
-            (_inverse[f.name], schema_json[_inverse[f.name]].get('label', _inverse[f.name]), ds_dict.get(f.name))
+            (
+                _inverse[f.name],
+                schema_json[_inverse[f.name]].get('label', _inverse[f.name]),
+                ds_dict.get(f.name),
+            )
             for f in dataclasses.fields(UnifiedDataset)
             if f.name in _inverse
         ]
 
-        return render(request, self.template_name, {
-            'dataset':      ds_dict,
-            'distributions': ds_dict['distributions'],
-            'schema_json':  schema_json,
-            'jsonld_str':   json.dumps(jsonld, indent=2, ensure_ascii=False),
-            'app':          app,
-            'dcat_rows':    dcat_rows,
-            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
-        })
+        return render(
+            request,
+            self.template_name,
+            {
+                'dataset': ds_dict,
+                'distributions': ds_dict['distributions'],
+                'schema_json': schema_json,
+                'jsonld_str': json.dumps(jsonld, indent=2, ensure_ascii=False),
+                'app': app,
+                'dcat_rows': dcat_rows,
+                'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
+            },
+        )
 
 
 class DistributionDetailView(LoginRequiredMixin, View):
@@ -403,34 +418,44 @@ class DistributionDetailView(LoginRequiredMixin, View):
         _inverse = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
 
         dcat_rows = [
-            (_inverse[f.name], schema_json[_inverse[f.name]].get('label', _inverse[f.name]), distribution.get(f.name))
+            (
+                _inverse[f.name],
+                schema_json[_inverse[f.name]].get('label', _inverse[f.name]),
+                distribution.get(f.name),
+            )
             for f in dataclasses.fields(UnifiedDistribution)
             if f.name in _inverse
         ]
 
-        attrs = Attribute.objects.using('metadata_db').filter(
-            distribution_name=name
-        ).order_by('var_order', 'name')
+        col_qs = (
+            Column.objects.using('metadata_db')
+            .filter(table__distribution_name=name)
+            .select_related('table')
+            .order_by('var_order', 'name')
+        )
         columns = [
             {
-                'name':         a.name,
-                'title':        a.title,
-                'description':  a.description,
-                'datatype':     a.datatype,
-                'type_r':       a.type_r,
-                'key_db':       a.key_db,
-                'property_url': a.property_url,
+                'name': c.name,
+                'title': c.title,
+                'description': c.description,
+                'datatype': c.datatype,
+                'type_r': c.type_r,
+                'key_db': c.key_db,
+                'property_url': c.property_url,
             }
-            for a in attrs
+            for c in col_qs
         ]
 
-        return render(request, self.template_name, {
-            'distribution': distribution,
-            'dataset':      dataset,
-            'columns':      columns,
-            'schema_json':  schema_json,
-            'app':          app,
-            'dcat_rows':    dcat_rows,
-            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
-        })
-
+        return render(
+            request,
+            self.template_name,
+            {
+                'distribution': distribution,
+                'dataset': dataset,
+                'columns': columns,
+                'schema_json': schema_json,
+                'app': app,
+                'dcat_rows': dcat_rows,
+                'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
+            },
+        )

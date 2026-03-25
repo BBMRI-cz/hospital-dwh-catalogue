@@ -1,5 +1,5 @@
 {% load i18n %}
-{# Expects: sidebar_keywords, sidebar_sources, sidebar_rights_holders, sidebar_health_categories, sidebar_themes, sidebar_columns, sidebar_counts, filter_params #}
+{# Expects: sidebar_keywords, sidebar_sources, sidebar_custodians, sidebar_health_categories, sidebar_themes, sidebar_columns, sidebar_counts, filter_params #}
 
 <form id="filter-form" method="GET" action="{% url 'warehouse:catalogue' %}" class="flex flex-col h-full">
   <input type="hidden" name="page" value="1">
@@ -19,9 +19,9 @@
       </div>
     </div>
 
-    {% trans "Keywords" as t_kw %}{% trans "Rights Holder" as t_rh %}{% trans "Health Category" as t_hc %}{% trans "Source" as t_src %}{% trans "Theme" as t_theme %}{% trans "Distribution Columns" as t_cols %}
+    {% trans "Keywords" as t_kw %}{% trans "Custodian" as t_custodian %}{% trans "Health Category" as t_hc %}{% trans "Source" as t_src %}{% trans "Theme" as t_theme %}{% trans "Distribution Columns" as t_cols %}
     {% include "includes/_filter_group.html" with title=t_kw items=sidebar_keywords list_id='kw-list' field_name='keywords' only %}
-    {% include "includes/_filter_group.html" with title=t_rh items=sidebar_rights_holders list_id='rh-list' field_name='rights_holder' only %}
+    {% include "includes/_filter_group.html" with title=t_custodian items=sidebar_custodians list_id='custodian-list' field_name='custodian' only %}
     {% include "includes/_filter_group.html" with title=t_hc items=sidebar_health_categories list_id='hc-list' field_name='health_category' only %}
     {% include "includes/_filter_group.html" with title=t_src items=sidebar_sources list_id='src-list' field_name='source' only %}
     {% include "includes/_filter_group.html" with title=t_theme items=sidebar_themes list_id='theme-list' field_name='theme' only %}

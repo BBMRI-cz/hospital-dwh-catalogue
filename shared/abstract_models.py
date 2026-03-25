@@ -104,7 +104,7 @@ class AgentBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Description'),
-        help_text=_('dct:description — description of the agent\'s activities (0..*)'),
+        help_text=_("dct:description — description of the agent's activities (0..*)"),
     )
     # FK resolved at concrete-model level; string reference keeps base portable.
     contact_point = models.ForeignKey(
@@ -285,7 +285,9 @@ class DatasetBase(models.Model):
         null=True,
         blank=False,
         verbose_name=_('Keywords'),
-        help_text=_('dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'),
+        help_text=_(
+            'dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'
+        ),
     )
     source = models.TextField(
         null=True,
@@ -301,18 +303,12 @@ class DatasetBase(models.Model):
     )
     contact_point = models.ForeignKey(
         'ContactPoint',
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.PROTECT,
+        null=False,
         blank=False,
         related_name='datasets',
         verbose_name=_('Contact Point'),
         help_text=_('dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)'),
-    )
-    rights_holder = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Rights Holder'),
-        help_text=_('dct:rightsHolder'),
     )
     provenance = models.TextField(
         null=True,
@@ -336,8 +332,7 @@ class DatasetBase(models.Model):
         max_length=500,
         verbose_name=_('Access Rights'),
         help_text=_(
-            'dct:accessRights — controlled vocabulary URI '
-            '(mandatory per HealthDCAT-AP v6)'
+            'dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)'
         ),
     )
     applicable_legislation = models.CharField(
@@ -416,7 +411,20 @@ class DatasetBase(models.Model):
         # Change 4: publisher, if present, must have a contact point
         if self.publisher_id and self.publisher.contact_point_id is None:
             raise ValidationError(
-                {'publisher': _('The publisher agent must have a contact point (HealthDCAT-AP v6).')}
+                {
+                    'publisher': _(
+                        'The publisher agent must have a contact point (HealthDCAT-AP v6).'
+                    )
+                }
+            )
+        # Change 5: custodian, if present, must have a contact point
+        if self.custodian_id and self.custodian.contact_point_id is None:
+            raise ValidationError(
+                {
+                    'custodian': _(
+                        'The custodian agent must have a contact point (HealthDCAT-AP v6).'
+                    )
+                }
             )
 
 

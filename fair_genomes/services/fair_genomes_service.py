@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service layer for Fair Genomes catalogue.
 
 The original GraphQL / MOLGENIS sync logic has been removed while the

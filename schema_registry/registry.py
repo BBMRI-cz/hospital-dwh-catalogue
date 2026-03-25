@@ -148,12 +148,10 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
 
     try:
         from rdflib import Graph  # type: ignore[import-untyped]
+        from rdflib import Literal as RDFLiteral
         from rdflib.namespace import SH  # type: ignore[import-untyped]
-        from rdflib import Literal as RDFLiteral, URIRef  # noqa: F401
     except ImportError:
-        logger.error(
-            'rdflib is not installed. Install it with: pip install rdflib>=7.0.0'
-        )
+        logger.error('rdflib is not installed. Install it with: pip install rdflib>=7.0.0')
         return {}, {}
 
     try:
@@ -208,26 +206,22 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
         # English shacl:name (label)
         label: str | None = None
         for val in g.objects(subj, SH.name):
-            if isinstance(val, RDFLiteral):
-                if not val.language or val.language == 'en':
-                    label = str(val)
-                    break
+            if isinstance(val, RDFLiteral) and (not val.language or val.language == 'en'):
+                label = str(val)
+                break
         if label is None:
             continue
 
         # English shacl:description
         description = ''
         for val in g.objects(subj, SH.description):
-            if isinstance(val, RDFLiteral):
-                if not val.language or val.language == 'en':
-                    description = str(val)
-                    break
+            if isinstance(val, RDFLiteral) and (not val.language or val.language == 'en'):
+                description = str(val)
+                break
 
         # Requirement from shacl:minCount
         min_count_node = g.value(subj, SH.minCount)
-        has_mandatory = (
-            min_count_node is not None and int(str(min_count_node)) >= 1
-        )
+        has_mandatory = min_count_node is not None and int(str(min_count_node)) >= 1
 
         existing = by_path.get(path_uri)
         if existing is None:
@@ -247,7 +241,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
             continue
         colon_idx = prefixed.index(':')
         prefix = prefixed[:colon_idx]
-        local_name = prefixed[colon_idx + 1:]
+        local_name = prefixed[colon_idx + 1 :]
         requirement = 'mandatory' if info['mandatory'] else 'optional'
         result[prefixed] = {
             'prefix': prefix,
@@ -274,7 +268,7 @@ def _uri_to_prefixed(uri: str, prefix_map: dict[str, str]) -> str | None:
     """Convert a full URI to ``prefix:local`` form, or None if no prefix matches."""
     for prefix, base in prefix_map.items():
         if uri.startswith(base) and len(uri) > len(base):
-            return f'{prefix}:{uri[len(base):]}'
+            return f'{prefix}:{uri[len(base) :]}'
     return None
 
 

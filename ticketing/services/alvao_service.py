@@ -12,7 +12,7 @@ import requests
 
 from django.conf import settings
 
-from .base import TicketData, TicketInfo, TicketResponse
+from .base import TicketData, TicketResponse
 
 logger = logging.getLogger(__name__)
 

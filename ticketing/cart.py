@@ -23,12 +23,12 @@ class CartService:
     """Session-backed cart for dataset access requests."""
 
     @staticmethod
-    def get(session: 'SessionBase') -> list[dict]:
+    def get(session: SessionBase) -> list[dict]:
         """Return the current cart items list (may be empty)."""
         return list(session.get(CART_SESSION_KEY, []))
 
     @staticmethod
-    def add(session: 'SessionBase', app: str, name: str, title: str) -> bool:
+    def add(session: SessionBase, app: str, name: str, title: str) -> bool:
         """
         Add a dataset to the cart.
 
@@ -52,7 +52,7 @@ class CartService:
         return True
 
     @staticmethod
-    def remove(session: 'SessionBase', app: str, name: str) -> bool:
+    def remove(session: SessionBase, app: str, name: str) -> bool:
         """
         Remove a dataset from the cart.
 
@@ -67,12 +67,12 @@ class CartService:
         return True
 
     @staticmethod
-    def clear(session: 'SessionBase') -> None:
+    def clear(session: SessionBase) -> None:
         """Empty the cart."""
         session[CART_SESSION_KEY] = []
         session.modified = True
 
     @staticmethod
-    def count(session: 'SessionBase') -> int:
+    def count(session: SessionBase) -> int:
         """Return the number of items in the cart."""
         return len(session.get(CART_SESSION_KEY, []))

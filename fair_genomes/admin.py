@@ -1,4 +1,3 @@
 """
 Fair Genomes Admin Configuration
 """
-

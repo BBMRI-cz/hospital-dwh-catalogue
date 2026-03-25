@@ -11,8 +11,7 @@ from datetime import datetime
 
 from django.utils import timezone
 
-from .alvao_service import AlvaoServiceException
-from .base import TicketData, TicketInfo, TicketResponse
+from .base import TicketData, TicketResponse
 
 logger = logging.getLogger(__name__)
 

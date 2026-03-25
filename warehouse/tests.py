@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for the warehouse application â€” Local Metadata HealthDCAT-AP Profile.
 
 All warehouse models are managed=False (pre-existing metadata_db tables).
@@ -7,7 +7,7 @@ Tests verify model structure, __str__, and Meta without DB writes.
 
 from django.test import TestCase
 
-from .models import Agent, Attribute, Catalog, ContactPoint, Dataset, Distribution
+from .models import Agent, Catalog, Column, ContactPoint, Dataset, Distribution, Table
 
 
 class ContactPointModelTest(TestCase):
@@ -93,8 +93,13 @@ class DatasetModelTest(TestCase):
 
     def test_mandatory_fields_present(self):
         """Mandatory HealthDCAT-AP v6 fields must not allow blank."""
-        for field_name in ('access_rights', 'applicable_legislation', 'health_category',
-                           'title', 'description'):
+        for field_name in (
+            'access_rights',
+            'applicable_legislation',
+            'health_category',
+            'title',
+            'description',
+        ):
             field = Dataset._meta.get_field(field_name)
             self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
 
@@ -129,25 +134,77 @@ class DistributionModelTest(TestCase):
             self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
 
 
-class AttributeModelTest(TestCase):
-    """Tests for the Attribute model."""
+class TableModelTest(TestCase):
+    """Tests for the Table model (csvw:Table)."""
 
     databases = {'default', 'auth_db'}
 
     def test_str_with_title(self):
-        obj = Attribute(name='attr1', title='Patient ID')
-        self.assertEqual(str(obj), 'Patient ID')
+        obj = Table(name='TBL_PAT_RAW', title='Raw patient table')
+        self.assertEqual(str(obj), 'Raw patient table')
 
     def test_str_fallback_to_name(self):
-        obj = Attribute(name='attr1', title='')
-        self.assertEqual(str(obj), 'attr1')
+        obj = Table(name='TBL_PAT_RAW', title=None)
+        self.assertEqual(str(obj), 'TBL_PAT_RAW')
 
     def test_meta_managed_false(self):
-        self.assertFalse(Attribute._meta.managed)
+        self.assertFalse(Table._meta.managed)
 
     def test_meta_db_table(self):
-        self.assertEqual(Attribute._meta.db_table, 'metadata"."lm_attribute')
+        self.assertEqual(Table._meta.db_table, 'metadata"."lm_table')
 
     def test_meta_ordering(self):
-        self.assertEqual(Attribute._meta.ordering, ['var_order', 'name'])
+        self.assertEqual(Table._meta.ordering, ['name'])
 
+    def test_url_mandatory(self):
+        field = Table._meta.get_field('url')
+        self.assertFalse(field.null)
+        self.assertFalse(field.blank)
+
+
+class ColumnModelTest(TestCase):
+    """Tests for the Column model (csvw:Column)."""
+
+    databases = {'default', 'auth_db'}
+
+    def test_str_with_title(self):
+        obj = Column(name='COL_PAT_ID', title='ID pacienta')
+        self.assertEqual(str(obj), 'ID pacienta')
+
+    def test_str_fallback_to_name(self):
+        obj = Column(name='COL_PAT_ID', title='')
+        self.assertEqual(str(obj), 'COL_PAT_ID')
+
+    def test_meta_managed_false(self):
+        self.assertFalse(Column._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(Column._meta.db_table, 'metadata"."lm_column')
+
+    def test_meta_ordering(self):
+        self.assertEqual(Column._meta.ordering, ['var_order', 'name'])
+
+    def test_mandatory_fields_not_nullable(self):
+        """title, description, datatype are mandatory and must not allow null/blank."""
+        for field_name in ('title', 'description', 'datatype'):
+            field = Column._meta.get_field(field_name)
+            self.assertFalse(
+                getattr(field, 'null', False), msg=f'{field_name} should not be null=True'
+            )
+            self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
+
+    def test_optional_fields_nullable(self):
+        """All metadata helper fields must be nullable."""
+        for field_name in (
+            'property_url',
+            'var_order',
+            'key_db',
+            'type_r',
+            'definition_ddl',
+            'definition_pk_pom1',
+            'definition_pk_pom2',
+            'definition_pk',
+        ):
+            field = Column._meta.get_field(field_name)
+            self.assertTrue(field.null, msg=f'{field_name} should allow null')
+            self.assertTrue(field.blank, msg=f'{field_name} should allow blank')

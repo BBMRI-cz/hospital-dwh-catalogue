@@ -21,7 +21,6 @@ FK strategy
   Cross-DB FKs are never used (enforced by WarehouseRouter).
 """
 
-from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from shared.abstract_models import (
@@ -112,4 +111,3 @@ class Distribution(DistributionBase):
         db_table = 'fair_genomes_distribution'
         verbose_name = _('Distribution')
         verbose_name_plural = _('Distributions')
-

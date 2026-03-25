@@ -4,8 +4,8 @@ Tests for the ticketing application.
 Covers models, forms, views, services, and cart functionality.
 """
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 
 from .models import TicketRequest, TicketRequestItem

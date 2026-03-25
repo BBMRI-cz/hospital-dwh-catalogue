@@ -1,4 +1,4 @@
-﻿"""
+"""
 Schema Registry  Tests
 ========================
 
@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import patch
 
 from django.conf import settings
 from django.test import TestCase, override_settings
@@ -20,7 +19,7 @@ from django.test import TestCase, override_settings
 from schema_registry.registry import _load, invalidate_cache
 
 # Absolute path to the release-6 directory inside the submodule.
-_RELEASE_6 = settings.BASE_DIR / "health_dcat_ap" / "public" / "releases" / "release-6"
+_RELEASE_6 = settings.BASE_DIR / 'health_dcat_ap' / 'public' / 'releases' / 'release-6'
 
 
 class RegistryParserTest(TestCase):
@@ -36,7 +35,7 @@ class RegistryParserTest(TestCase):
         term_dict, _prefix_map = _load(_RELEASE_6)
         return term_dict
 
-    #  Basic structure 
+    #  Basic structure
 
     def test_returns_non_empty_dict(self) -> None:
         registry = self._load_release6()
@@ -46,84 +45,84 @@ class RegistryParserTest(TestCase):
     def test_keys_are_prefixed_strings(self) -> None:
         registry = self._load_release6()
         for key in registry:
-            self.assertIn(":", key, f'Key "{key}" is not in prefix:local form')
+            self.assertIn(':', key, f'Key "{key}" is not in prefix:local form')
 
     def test_each_entry_has_required_fields(self) -> None:
         registry = self._load_release6()
-        required_fields = {"prefix", "local_name", "uri", "requirement", "label", "description"}
+        required_fields = {'prefix', 'local_name', 'uri', 'requirement', 'label', 'description'}
         for key, entry in registry.items():
             with self.subTest(semantics=key):
                 self.assertEqual(set(entry.keys()), required_fields)
 
-    #  Requirement values 
+    #  Requirement values
 
     def test_requirement_values_are_valid(self) -> None:
-        valid = {"mandatory", "recommended", "optional", "deprecated"}
+        valid = {'mandatory', 'recommended', 'optional', 'deprecated'}
         registry = self._load_release6()
         for key, entry in registry.items():
             with self.subTest(semantics=key):
-                self.assertIn(entry["requirement"], valid)
+                self.assertIn(entry['requirement'], valid)
 
     def test_has_mandatory_terms(self) -> None:
         registry = self._load_release6()
-        mandatory = [k for k, v in registry.items() if v["requirement"] == "mandatory"]
+        mandatory = [k for k, v in registry.items() if v['requirement'] == 'mandatory']
         self.assertGreater(len(mandatory), 0)
 
-    #  Known base DCAT-AP terms 
+    #  Known base DCAT-AP terms
 
     def test_dct_title_present(self) -> None:
         registry = self._load_release6()
-        self.assertIn("dct:title", registry)
-        entry = registry["dct:title"]
-        self.assertEqual(entry["prefix"], "dct")
-        self.assertEqual(entry["local_name"], "title")
-        self.assertIn("purl.org/dc/terms", entry["uri"])
+        self.assertIn('dct:title', registry)
+        entry = registry['dct:title']
+        self.assertEqual(entry['prefix'], 'dct')
+        self.assertEqual(entry['local_name'], 'title')
+        self.assertIn('purl.org/dc/terms', entry['uri'])
 
     def test_dct_description_present(self) -> None:
         registry = self._load_release6()
-        self.assertIn("dct:description", registry)
+        self.assertIn('dct:description', registry)
 
     def test_dcat_keyword_present(self) -> None:
         registry = self._load_release6()
-        self.assertIn("dcat:keyword", registry)
+        self.assertIn('dcat:keyword', registry)
 
     def test_dct_publisher_is_mandatory(self) -> None:
         registry = self._load_release6()
-        self.assertIn("dct:publisher", registry)
-        self.assertEqual(registry["dct:publisher"]["requirement"], "mandatory")
+        self.assertIn('dct:publisher', registry)
+        self.assertEqual(registry['dct:publisher']['requirement'], 'mandatory')
 
-    #  URI consistency 
+    #  URI consistency
 
     def test_uri_matches_prefix_and_local_name(self) -> None:
         registry = self._load_release6()
         for key, entry in registry.items():
             with self.subTest(semantics=key):
-                self.assertTrue(entry["uri"].endswith(entry["local_name"]))
+                self.assertTrue(entry['uri'].endswith(entry['local_name']))
 
     def test_no_empty_uris(self) -> None:
         registry = self._load_release6()
         for key, entry in registry.items():
             with self.subTest(semantics=key):
-                self.assertTrue(entry["uri"], f'Empty URI for "{key}"')
+                self.assertTrue(entry['uri'], f'Empty URI for "{key}"')
 
-    #  HealthDCAT-AP extension terms 
+    #  HealthDCAT-AP extension terms
 
     def test_healthdcat_healthcategory_present(self) -> None:
         registry = self._load_release6()
-        self.assertIn("healthdcatap:healthCategory", registry)
-        entry = registry["healthdcatap:healthCategory"]
-        self.assertEqual(entry["prefix"], "healthdcatap")
-        self.assertEqual(entry["local_name"], "healthCategory")
-        self.assertIn("healthdataportal.eu", entry["uri"])
-        self.assertEqual(entry["requirement"], "mandatory")
+        self.assertIn('healthdcatap:healthCategory', registry)
+        entry = registry['healthdcatap:healthCategory']
+        self.assertEqual(entry['prefix'], 'healthdcatap')
+        self.assertEqual(entry['local_name'], 'healthCategory')
+        self.assertIn('healthdataportal.eu', entry['uri'])
+        self.assertEqual(entry['requirement'], 'mandatory')
 
     def test_healthdcat_hdab_present(self) -> None:
         registry = self._load_release6()
-        self.assertIn("healthdcatap:hdab", registry)
-        entry = registry["healthdcatap:hdab"]
-        self.assertEqual(entry["requirement"], "optional")
+        self.assertIn('healthdcatap:hdab', registry)
+        entry = registry['healthdcatap:hdab']
+        self.assertEqual(entry['requirement'], 'optional')
 
-    #  Namespace prefix map 
+    #  Namespace prefix map
 
     def test_namespace_prefixes_include_healthdcat_specific(self) -> None:
         """
@@ -131,16 +130,17 @@ class RegistryParserTest(TestCase):
         DCAT-AP SHACL TTL) must be present in the returned prefix map.
         """
         from schema_registry.registry import get_namespace_prefixes
+
         prefixes = get_namespace_prefixes(_RELEASE_6)
         for expected in ('healthdcatap', 'geodcatap', 'dcatap', 'dpv', 'org', 'csvw'):
             with self.subTest(prefix=expected):
                 self.assertIn(expected, prefixes, f'Prefix "{expected}" missing from namespace map')
                 self.assertTrue(prefixes[expected].startswith('http'))
 
-    #  Edge cases 
+    #  Edge cases
 
     def test_missing_release_dir_returns_empty_dict(self) -> None:
-        term_dict, prefix_map = _load(Path("/nonexistent/path/release-99"))
+        term_dict, prefix_map = _load(Path('/nonexistent/path/release-99'))
         self.assertEqual(term_dict, {})
         self.assertEqual(prefix_map, {})
 
@@ -161,12 +161,14 @@ class RegistryCacheTest(TestCase):
 
     def test_get_registry_caches_result(self) -> None:
         from schema_registry.registry import get_registry
+
         first = get_registry(_RELEASE_6)
         second = get_registry(_RELEASE_6)
         self.assertIs(first, second)
 
     def test_invalidate_clears_cache(self) -> None:
         from schema_registry.registry import get_registry
+
         first = get_registry(_RELEASE_6)
         invalidate_cache()
         second = get_registry(_RELEASE_6)
@@ -185,20 +187,23 @@ class ServiceLayerTest(TestCase):
 
     def test_get_schema_dict_returns_dict(self) -> None:
         from schema_registry.services import get_schema_dict
+
         result = get_schema_dict()
         self.assertIsInstance(result, dict)
         self.assertGreater(len(result), 0)
 
     def test_get_schema_dict_uses_settings_version(self) -> None:
         from schema_registry.services import get_schema_dict
-        with override_settings(HEALTH_DCAT_VERSION="release-6"):
+
+        with override_settings(HEALTH_DCAT_VERSION='release-6'):
             invalidate_cache()
             result = get_schema_dict()
-        self.assertIn("dct:title", result)
+        self.assertIn('dct:title', result)
 
     def test_get_schema_dict_returns_empty_for_unknown_version(self) -> None:
         from schema_registry.services import get_schema_dict
-        with override_settings(HEALTH_DCAT_VERSION="release-999"):
+
+        with override_settings(HEALTH_DCAT_VERSION='release-999'):
             invalidate_cache()
             result = get_schema_dict()
         self.assertEqual(result, {})

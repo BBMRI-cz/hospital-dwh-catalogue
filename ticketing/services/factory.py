@@ -31,4 +31,3 @@ def get_ticket_service() -> TicketService:
 
     logger.info('Using real Alvao service')
     return AlvaoService()
-

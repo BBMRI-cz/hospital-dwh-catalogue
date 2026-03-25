@@ -28,6 +28,7 @@ def _build_context() -> dict[str, str]:
     """
     try:
         from schema_registry.services import get_context_prefixes
+
         return get_context_prefixes()
     except Exception:
         return {}
@@ -47,19 +48,24 @@ def build_jsonld(ds_dict: dict) -> dict:
     # Normalise contact-point email to mailto: URI for RDF export (Change 1).
     raw_email = ds_dict.get('contact_point') or ''
     contact_email_iri = (
-        raw_email if raw_email.startswith('mailto:') else f'mailto:{raw_email}'
-    ) if raw_email else ''
+        (raw_email if raw_email.startswith('mailto:') else f'mailto:{raw_email}')
+        if raw_email
+        else ''
+    )
 
     custodian_name = ds_dict.get('custodian')
 
     result: dict = {
         '@context': _build_context(),
         '@type': ['dcat:Dataset', 'healthdcatap:HealthDataset'],
-        '@id': f"{base}/dataset/{ds_dict['app']}/{ds_dict['name']}",
+        '@id': f'{base}/dataset/{ds_dict["app"]}/{ds_dict["name"]}',
         'dct:title': [{'@language': 'cs', '@value': ds_dict['title']}],
         'dct:description': [{'@language': 'cs', '@value': ds_dict.get('description') or ''}],
         'dcat:keyword': ds_dict.get('keywords', []),
-        'dct:rightsHolder': {'@type': 'org:Organization', 'foaf:name': ds_dict.get('rights_holder') or ''},
+        'dct:rightsHolder': {
+            '@type': 'org:Organization',
+            'foaf:name': ds_dict.get('custodian') or '',
+        },
         'dct:publisher': {'@type': 'org:Organization', 'foaf:name': ds_dict.get('publisher') or ''},
         'dct:accessRights': {'@id': ds_dict.get('access_rights') or ''},
         'healthdcatap:hasHealthCategory': {'@id': ds_dict.get('health_category') or ''},
@@ -67,15 +73,12 @@ def build_jsonld(ds_dict: dict) -> dict:
         'dcat:distribution': [
             {
                 '@type': ['dcat:Distribution', 'healthdcatap:HealthDistribution'],
-                '@id': f"{base}/distribution/{d['name']}",
+                '@id': f'{base}/distribution/{d["name"]}',
                 'dct:title': [{'@language': 'cs', '@value': d['title']}],
                 'dcat:accessURL': {'@id': d.get('access_url') or ''},
                 'dct:format': d.get('format') or '',
                 'dcatap:applicableLegislation': {'@id': d.get('applicable_legislation') or ''},
-                **(
-                    {'healthdcatap:dbLayer': d['db_layer']}
-                    if d.get('db_layer') else {}
-                ),
+                **({'healthdcatap:dbLayer': d['db_layer']} if d.get('db_layer') else {}),
             }
             for d in ds_dict.get('distributions', [])
         ],

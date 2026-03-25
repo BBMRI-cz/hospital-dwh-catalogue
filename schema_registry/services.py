@@ -1,4 +1,4 @@
-﻿"""
+"""
 Schema Registry Service Layer
 ==============================
 
@@ -32,7 +32,7 @@ from typing import Any
 
 from django.conf import settings
 
-from schema_registry.registry import get_registry, get_namespace_prefixes
+from schema_registry.registry import get_namespace_prefixes, get_registry
 
 logger = logging.getLogger(__name__)
 

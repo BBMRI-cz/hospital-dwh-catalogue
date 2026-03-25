@@ -63,9 +63,9 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
     keyword                TEXT,                   -- dcat:keyword (comma-sep)
     source                 TEXT,                   -- dct:source URI
     creator                TEXT,                   -- dct:creator name(s)
-    contact_point_id       BIGINT REFERENCES metadata."lm_contact_point"(id)
-                               ON DELETE SET NULL,
-    rights_holder          TEXT,                   -- dct:rightsHolder
+    contact_point_id       BIGINT NOT NULL             -- dcat:contactPoint (mandatory)
+                               REFERENCES metadata."lm_contact_point"(id)
+                               ON DELETE RESTRICT,
     provenance             TEXT,                   -- dct:provenance
     catalog_id             VARCHAR(255) REFERENCES metadata."lm_catalog"(name)
                                ON DELETE SET NULL,
@@ -106,19 +106,32 @@ CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
     db_layer               VARCHAR(100)            -- DWH layer (raw/clean/analytical)
 );
 
--- ── 6. Attribute ─────────────────────────────────────────────
--- Maps to warehouse.Attribute (no abstract base — LM-specific only).
--- Describes physical columns within a Distribution (DB table).
+-- ── 6. Table ─────────────────────────────────────────────────
+-- Maps to warehouse.Table.  Links a Distribution to its physical DB table.
 -- distribution_name uses explicit db_column (to_field='name' in Django model).
-CREATE TABLE IF NOT EXISTS metadata."lm_attribute" (
+CREATE TABLE IF NOT EXISTS metadata."lm_table" (
+    name              VARCHAR(255) PRIMARY KEY,
+    distribution_name VARCHAR(255) NOT NULL   -- FK with explicit db_column
+                          REFERENCES metadata."lm_distribution"(name)
+                          ON DELETE CASCADE,
+    url               VARCHAR(500) NOT NULL,  -- csvw:url (mandatory)
+    title             VARCHAR(500),           -- csvw:title (optional)
+    description       TEXT                    -- dct:description (optional)
+);
+
+-- ── 7. Column ────────────────────────────────────────────────
+-- Maps to warehouse.Column (no abstract base — LM-specific only).
+-- Describes individual columns within a physical DB table.
+-- table_name uses explicit db_column (to_field='name' in Django model).
+CREATE TABLE IF NOT EXISTS metadata."lm_column" (
     name               VARCHAR(255) PRIMARY KEY,
-    distribution_name  VARCHAR(255) NOT NULL   -- FK with explicit db_column
-                           REFERENCES metadata."lm_distribution"(name)
+    table_name         VARCHAR(255) NOT NULL   -- FK with explicit db_column
+                           REFERENCES metadata."lm_table"(name)
                            ON DELETE CASCADE,
-    title              VARCHAR(500),           -- human-readable column name
-    description        TEXT,
-    datatype           VARCHAR(100),           -- DB datatype (VARCHAR, INTEGER …)
-    property_url       VARCHAR(500),           -- semantic property URI (ontology)
+    title              VARCHAR(500) NOT NULL,  -- csvw:title (mandatory)
+    description        TEXT         NOT NULL,  -- dct:description (mandatory)
+    datatype           VARCHAR(100) NOT NULL,  -- csvw:datatype (mandatory)
+    property_url       VARCHAR(500),           -- csvw:propertyUrl (optional)
     var_order          SMALLINT,               -- position in source table
     key_db             VARCHAR(100),           -- PK / FK / UK / NULL
     type_r             VARCHAR(50),            -- R datatype (character/integer …)

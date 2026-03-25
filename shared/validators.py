@@ -30,9 +30,7 @@ def validate_mandatory_fields(obj: object, fields: list[str]) -> None:
         value = getattr(obj, field_name, None)
         if value is None or (isinstance(value, str) and not value.strip()):
             errors[field_name] = [
-                _(
-                    '%(field)s is mandatory (HealthDCAT-AP v6).'
-                ) % {'field': field_name}
+                _('%(field)s is mandatory (HealthDCAT-AP v6).') % {'field': field_name}
             ]
     if errors:
         raise ValidationError(errors)

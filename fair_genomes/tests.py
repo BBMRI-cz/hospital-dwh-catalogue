@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for the fair_genomes application â€” HealthDCAT-AP Profile.
 
 FAIR Genomes models are managed=True (Django creates tables in fair_genomes_db).
@@ -86,8 +86,13 @@ class DatasetModelTest(TestCase):
         self.assertEqual(Dataset._meta.db_table, 'fair_genomes_dataset')
 
     def test_mandatory_fields_not_blank(self):
-        for field_name in ('access_rights', 'applicable_legislation', 'health_category',
-                           'title', 'description'):
+        for field_name in (
+            'access_rights',
+            'applicable_legislation',
+            'health_category',
+            'title',
+            'description',
+        ):
             field = Dataset._meta.get_field(field_name)
             self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
 
@@ -139,4 +144,3 @@ class FairGenomesServiceTest(TestCase):
 
     def test_exception_class_exists(self):
         self.assertTrue(issubclass(FairGenomesAPIException, Exception))
-

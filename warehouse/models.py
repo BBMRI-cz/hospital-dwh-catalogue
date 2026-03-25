@@ -1,4 +1,4 @@
-﻿"""
+"""
 Warehouse Models â€” Local Metadata HealthDCAT-AP Profile
 =======================================================
 
@@ -14,7 +14,7 @@ Why managed=False?
 Extension points vs the shared base
   * Distribution adds db_layer â€” the physical DWH layer identifier.  This
     concept is absent from FAIR Genomes which has no DWH layer notion.
-  * Attribute is entirely Local Metadata-specific.  Physical column metadata
+  * Table/Column are entirely Local Metadata-specific.  Physical table/column metadata
     has no DCAT-AP equivalent; it is added here because the Local Metadata
     schema must describe individual DB table columns.
 
@@ -89,7 +89,8 @@ class Dataset(DatasetBase):
       access_rights, applicable_legislation, health_category, hdab.
 
     No Local Metadata-specific extensions at the dataset level; local
-    specifics live in Distribution (db_layer) and Attribute.
+    specifics live in Distribution (db_layer), Table (csvw:Table),
+    and Column (csvw:Column).
     """
 
     class Meta:
@@ -133,59 +134,100 @@ class Distribution(DistributionBase):
         return self.title or self.name
 
 
-class Attribute(models.Model):
+class Table(models.Model):
     """
-    Physical column / variable metadata for a Distribution.
+    Physical DB table metadata for a Distribution (csvw:Table).
 
-    This entity is entirely Local Metadata-specific â€” it describes individual
-    columns of a physical DB table.  There is no DCAT-AP equivalent and no
-    corresponding concept in the FAIR Genomes profile, so it has no abstract
-    base in shared/.
-
-    FK distribution_name uses to_field='name' to stay consistent with the
-    natural-key identifier strategy used throughout the catalogue.
+    Maps to:  csvw:Table
     """
 
     name = models.CharField(
         max_length=255,
         primary_key=True,
         verbose_name=_('Name'),
-        help_text=_('Unique column / variable identifier'),
+        help_text=_('csvw:name — unique identifier for this table'),
     )
-    distribution_name = models.ForeignKey(
+    distribution = models.ForeignKey(
         Distribution,
         on_delete=models.CASCADE,
         to_field='name',
         db_column='distribution_name',
-        related_name='attributes',
+        related_name='tables',
         verbose_name=_('Distribution'),
-        help_text=_('Distribution (table) this attribute belongs to'),
+        help_text=_('Distribution this table belongs to'),
+    )
+    url = models.CharField(
+        max_length=500,
+        verbose_name=_('URL'),
+        help_text=_('csvw:url — physical location / connection string for this table'),
     )
     title = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Title'),
-        help_text=_('Human-readable column name'),
+        help_text=_('csvw:title — human-readable table name'),
     )
     description = models.TextField(
         null=True,
         blank=True,
         verbose_name=_('Description'),
+        help_text=_('dct:description'),
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'metadata"."lm_table'
+        verbose_name = _('Table')
+        verbose_name_plural = _('Tables')
+        ordering = ['name']
+
+    def __str__(self) -> str:
+        return self.title or self.name
+
+
+class Column(models.Model):
+    """
+    Physical column metadata within a Table (csvw:Column).
+
+    Maps to:  csvw:Column
+    """
+
+    name = models.CharField(
+        max_length=255,
+        primary_key=True,
+        verbose_name=_('Name'),
+        help_text=_('csvw:name — unique column identifier'),
+    )
+    table = models.ForeignKey(
+        Table,
+        on_delete=models.CASCADE,
+        to_field='name',
+        db_column='table_name',
+        related_name='columns',
+        verbose_name=_('Table'),
+        help_text=_('Table this column belongs to'),
+    )
+    title = models.CharField(
+        max_length=500,
+        verbose_name=_('Title'),
+        help_text=_('csvw:title — human-readable column name'),
+    )
+    description = models.TextField(
+        verbose_name=_('Description'),
+        help_text=_('dct:description'),
     )
     datatype = models.CharField(
         max_length=100,
-        null=True,
-        blank=True,
         verbose_name=_('Datatype'),
-        help_text=_('Column datatype (e.g. VARCHAR, INTEGER, DATE)'),
+        help_text=_('csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)'),
     )
     property_url = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Property URL'),
-        help_text=_('Semantic property URI (e.g. from a biomedical ontology)'),
+        help_text=_('csvw:propertyUrl — semantic property URI'),
     )
     var_order = models.SmallIntegerField(
         null=True,
@@ -232,11 +274,10 @@ class Attribute(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'metadata"."lm_attribute'
-        verbose_name = _('Attribute')
-        verbose_name_plural = _('Attributes')
+        db_table = 'metadata"."lm_column'
+        verbose_name = _('Column')
+        verbose_name_plural = _('Columns')
         ordering = ['var_order', 'name']
 
     def __str__(self) -> str:
         return self.title or self.name
-
