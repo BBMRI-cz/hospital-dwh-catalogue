@@ -130,7 +130,7 @@ INSERT INTO metadata."lm_dataset" (
 
 -- DS_PHARMACY: source + keyword; PUBLIC access; EHDS only legislation
 INSERT INTO metadata."lm_dataset" (
-    name, title, keyword, source, publisher_id,
+    name, title, keyword, source, publisher_id, contact_point_id,
     identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
@@ -139,6 +139,7 @@ INSERT INTO metadata."lm_dataset" (
     'léky,předpisy,ATC kódy,dávkování,aplikace',
     'https://lekarna.hospital.cz/api',
     'AGENT_LABS',
+    1,
     'https://nemis.hospital.cz/dataset/DS_PHARMACY',
     'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
     'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
@@ -261,7 +262,7 @@ INSERT INTO metadata."lm_dataset" (
 
 -- DS_PATHOLOGY: pathology results; NON_PUBLIC; GDPR;EHDS; diagnostic_data
 INSERT INTO metadata."lm_dataset" (
-    name, title, description, keyword, publisher_id,
+    name, title, description, keyword, publisher_id, contact_point_id,
     identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
@@ -270,6 +271,7 @@ INSERT INTO metadata."lm_dataset" (
     'Histologické, cytologické a molekulárně-patologické nálezy z biopsií a pitvání.',
     'patologie,histologie,cytologie,biopsie,pitva',
     'AGENT_LABS',
+    1,
     'https://nemis.hospital.cz/dataset/DS_PATHOLOGY',
     'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
     'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
@@ -337,7 +339,7 @@ INSERT INTO metadata."lm_dataset" (
 
 -- DS_PEDIATRICS: pediatric patient data; NON_PUBLIC; GDPR;EHDS; patient_data
 INSERT INTO metadata."lm_dataset" (
-    name, title, description, keyword, publisher_id,
+    name, title, description, keyword, publisher_id, contact_point_id,
     identifier, type,
     access_rights, applicable_legislation, health_category, hdab_id
 ) VALUES (
@@ -346,6 +348,7 @@ INSERT INTO metadata."lm_dataset" (
     'Dětská demografie, růstové parametry, očkování, diagnózy a hospitalizace.',
     'pediatrie,děti,očkování,růst,diagnózy',
     'AGENT_DWH',
+    1,
     'https://nemis.hospital.cz/dataset/DS_PEDIATRICS',
     'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
     'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',

@@ -131,7 +131,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
         dist_names = (
             Column.objects.using('metadata_db')
             .filter(title__in=column_filter)
-            .values_list('table__distribution_name', flat=True)
+            .values_list('table__distribution_id', flat=True)
             .distinct()
         )
         dataset_names = (
@@ -190,16 +190,47 @@ def _filter_datasets(datasets: list, get_params) -> list:
 # ── Views ─────────────────────────────────────────────────────────────────────
 
 
-def _make_sidebar_items(counter: Counter, active: set) -> list[dict]:
-    """Build [{value, count, checked}] dicts for sidebar checkbox groups.
+def _agent_label(name: str) -> str:
+    """Human-readable label for an agent identifier, e.g. AGENT_DWH → DWH."""
+    label = re.sub(r'AGENT_', '', name, flags=re.IGNORECASE)
+    return label.replace('_', ' ').strip() or name
+
+
+def _health_category_label(value: str) -> str:
+    """Human-readable label for a health_category code, e.g. patient_data → Patient data."""
+    return value.replace('_', ' ').capitalize()
+
+
+def _theme_label(value: str) -> str:
+    """Human-readable label for a theme URI, e.g. .../MESH/D000293 → MESH / D000293."""
+    # Strip trailing slash then take the last two path segments
+    parts = value.rstrip('/').rsplit('/', 2)
+    if len(parts) >= 3:
+        return f'{parts[-2]} / {parts[-1]}'
+    return parts[-1] or value
+
+
+def _make_sidebar_items(
+    counter: Counter,
+    active: set,
+    label_fn: object = None,
+) -> list[dict]:
+    """Build [{value, label, count, checked}] dicts for sidebar checkbox groups.
 
     Active (checked) values are always included even when their count drops to
     zero after another filter narrows the result set, and they are sorted to the
     top so the user never loses track of what they selected.
+
+    label_fn, if provided, maps a raw value to a display label.
     """
     all_values = (set(counter) | active) - {''}
     return [
-        {'value': v, 'count': counter.get(v, 0), 'checked': v in active}
+        {
+            'value': v,
+            'label': label_fn(v) if label_fn else v,
+            'count': counter.get(v, 0),
+            'checked': v in active,
+        }
         for v in sorted(all_values, key=lambda v: (v not in active, v.lower()))
     ]
 
@@ -288,9 +319,9 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             seen_col_ds: set[tuple] = set()
             attr_rows = (
                 Column.objects.using('metadata_db')
-                .filter(table__distribution_name__in=filtered_dist_names)
+                .filter(table__distribution__in=filtered_dist_names)
                 .exclude(title='')
-                .values_list('title', 'table__distribution_name')
+                .values_list('title', 'table__distribution_id')
                 .distinct()
             )
             for title, dist_name in attr_rows:
@@ -308,9 +339,9 @@ class CatalogueIndexView(LoginRequiredMixin, View):
                 # Sidebar checkbox groups
                 'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
                 'sidebar_sources': _make_sidebar_items(src_counter, active_sources),
-                'sidebar_custodians': _make_sidebar_items(custodian_counter, active_custodians),
-                'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats),
-                'sidebar_themes': _make_sidebar_items(theme_counter, active_themes),
+                'sidebar_custodians': _make_sidebar_items(custodian_counter, active_custodians, label_fn=_agent_label),
+                'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats, label_fn=_health_category_label),
+                'sidebar_themes': _make_sidebar_items(theme_counter, active_themes, label_fn=_theme_label),
                 'sidebar_columns': _make_sidebar_items(col_counter, active_columns),
                 # Status bar counts
                 'sidebar_counts': {
@@ -429,7 +460,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
 
         col_qs = (
             Column.objects.using('metadata_db')
-            .filter(table__distribution_name=name)
+            .filter(table__distribution_id=name)
             .select_related('table')
             .order_by('var_order', 'name')
         )

@@ -16,7 +16,7 @@
     <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md transition-colors cursor-pointer {% if item.checked %}bg-sky-50 hover:bg-sky-100{% else %}hover:bg-gray-50{% endif %}" title="{{ item.value }}">
       <input type="checkbox" name="{{ field_name }}" value="{{ item.value }}" class="checkbox checkbox-xs shrink-0" style="accent-color:#53c0d7"
         {% if item.checked %}checked{% endif %}>
-      <span class="text-xs {% if item.checked %}text-sky-700 font-medium{% else %}text-txt{% endif %} truncate min-w-0 flex-1">{{ item.value }}</span>
+      <span class="text-xs {% if item.checked %}text-sky-700 font-medium{% else %}text-txt{% endif %} truncate min-w-0 flex-1">{{ item.label|default:item.value }}</span>
       <span class="font-mono text-[10px] {% if item.checked %}text-sky-500{% else %}text-gray-400{% endif %} shrink-0 pl-1">{{ item.count }}</span>
     </label>
     {% empty %}
