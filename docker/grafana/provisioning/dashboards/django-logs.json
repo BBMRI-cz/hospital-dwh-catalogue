@@ -1,0 +1,116 @@
+{
+  "uid": "django-logs",
+  "title": "Django Application Logs",
+  "tags": ["django", "logs"],
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "type": "logs",
+      "title": "All Logs",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 10 },
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showCommonLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{app=\"hospital-dwh-catalogue\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Errors Only",
+      "gridPos": { "x": 0, "y": 10, "w": 24, "h": 8 },
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{app=\"hospital-dwh-catalogue\", levelname=\"ERROR\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Log Volume by Level",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "custom": { "fillOpacity": 20 } }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (levelname) (count_over_time({app=\"hospital-dwh-catalogue\"}[1m]))",
+          "refId": "A",
+          "legendFormat": "{{levelname}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Slow Requests (>1s)",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{app=\"hospital-dwh-catalogue\", name=\"catalogue.request\"} | json | levelname=`WARNING`",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "logs",
+      "title": "HTTP Requests",
+      "gridPos": { "x": 0, "y": 26, "w": 24, "h": 8 },
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false,
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{app=\"hospital-dwh-catalogue\", name=\"catalogue.request\"}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

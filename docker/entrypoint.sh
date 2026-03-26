@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Ensure the logs directory exists (required for file-based logging handlers)
+mkdir -p /app/logs
+
 # Run migrations for all databases
 # auth_db: sessions, auth, contenttypes, admin
 python manage.py migrate --database=auth_db --noinput

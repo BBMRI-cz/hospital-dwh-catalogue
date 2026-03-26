@@ -75,40 +75,6 @@ MOCK_ALVAO = True
 # Email backend for testing
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Logging configuration for testing (console only - no file writes in CI)
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'fair_genomes.services.fair_genomes_service': {
-            'handlers': ['console'],
-            'level': 'CRITICAL',  # Suppress ERROR/WARNING during tests
-            'propagate': False,
-        },
-    },
-}
-
 # Test-specific security settings (less strict than production)
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False

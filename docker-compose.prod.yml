@@ -45,7 +45,7 @@ services:
     command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS}
     volumes:
       - staticfiles_prod:/app/staticfiles
-      - ./logs:/app/logs
+      - logs_prod:/app/logs
     env_file:
       - .env
     environment:
@@ -73,7 +73,7 @@ services:
     container_name: hospital_dwh_scheduler_prod
     entrypoint: ["/bin/sh", "/app/docker/scheduler-entrypoint.sh"]
     volumes:
-      - ./logs:/app/logs
+      - logs_prod:/app/logs
     env_file:
       - .env
     environment:
@@ -128,6 +128,54 @@ services:
     networks:
       - hospital_network
 
+  # --- Observability stack ---
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: hospital_dwh_loki_prod
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data_prod:/loki
+    restart: unless-stopped
+    networks:
+      - hospital_network
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: hospital_dwh_promtail_prod
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./docker/promtail/config.yml:/etc/promtail/config.yml:ro
+      - logs_prod:/app/logs:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - hospital_network
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: hospital_dwh_grafana_prod
+    # No direct port exposure — access only via Nginx at /grafana/
+    volumes:
+      - grafana_data_prod:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_SERVER_DOMAIN=${SERVER_NAME}
+      - GF_SERVER_ROOT_URL=https://${SERVER_NAME}/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - hospital_network
+
 volumes:
   postgres_data_prod:
     name: hospital_dwh_postgres_data_prod
@@ -135,6 +183,12 @@ volumes:
     name: hospital_dwh_redis_data_prod
   staticfiles_prod:
     name: hospital_dwh_staticfiles_prod
+  logs_prod:
+    name: hospital_dwh_logs_prod
+  loki_data_prod:
+    name: hospital_dwh_loki_data_prod
+  grafana_data_prod:
+    name: hospital_dwh_grafana_data_prod
   letsencrypt_data:
     name: hospital_dwh_letsencrypt
   certbot_webroot:

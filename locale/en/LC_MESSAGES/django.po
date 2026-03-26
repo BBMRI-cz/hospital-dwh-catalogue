@@ -2783,6 +2783,10 @@ msgstr "View cart"
 msgid "Admin Panel"
 msgstr "Admin Panel"
 
+#: warehouse/templates/catalogue/components/_header.html:69
+msgid "Logs"
+msgstr "Logs"
+
 #: warehouse/templates/catalogue/components/_header.html:78
 msgid "Sign out"
 msgstr "Sign out"

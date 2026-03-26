@@ -44,12 +44,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'log_request_id.middleware.RequestIDMiddleware',  # must be first — stamps request_id on every log record
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'catalogue.middleware.RequestLoggingMiddleware',  # after auth so request.user is available
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -243,31 +245,71 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Logging base configuration
+# Logging — single shared configuration for all environments.
+# Each env inherits this from base; do NOT override LOGGING in env-specific settings.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+    },
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'fmt': '%(asctime)s %(levelname)s %(name)s %(module)s %(process)d %(request_id)s %(message)s',
         },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'json',
+            'filters': ['request_id'],
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'app.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'json',
+            'filters': ['request_id'],
+        },
+        'error_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'json',
+            'filters': ['request_id'],
+            'level': 'ERROR',
         },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file', 'error_file'],
         'level': 'INFO',
     },
+    'loggers': {
+        'django': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'django.request': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
+        'django.security': {'handlers': ['console', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        'django_redis': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
+        'warehouse': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'ticketing': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'fair_genomes': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'schema_registry': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'catalogue': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'catalogue.request': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+    },
 }
+
+# Request ID settings (django-log-request-id)
+# Reads X-Request-ID from upstream (e.g. Nginx) and generates one if absent.
+LOG_REQUEST_ID_HEADER = 'HTTP_X_REQUEST_ID'
+GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
+
+# Slow request threshold (seconds) — requests exceeding this are logged at WARNING.
+LOG_SLOW_REQUEST_THRESHOLD_S = config('LOG_SLOW_REQUEST_THRESHOLD_S', default=1.0, cast=float)
 
 
 # Static files (CSS, JavaScript, Images)

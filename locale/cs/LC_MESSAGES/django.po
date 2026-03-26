@@ -2805,6 +2805,10 @@ msgstr "Zobrazit košík"
 msgid "Admin Panel"
 msgstr "Administrační panel"
 
+#: warehouse/templates/catalogue/components/_header.html:69
+msgid "Logs"
+msgstr "Logy"
+
 #: warehouse/templates/catalogue/components/_header.html:78
 msgid "Sign out"
 msgstr "Odhlásit se"
