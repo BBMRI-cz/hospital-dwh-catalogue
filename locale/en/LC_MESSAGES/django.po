@@ -2916,6 +2916,14 @@ msgstr "Sign in"
 msgid "Health DCAT-AP · FAIR Data Register"
 msgstr "Health DCAT-AP · FAIR Data Register"
 
+#: warehouse/templates/404.html
+msgid "Page Not Found"
+msgstr "Page Not Found"
+
+#: warehouse/templates/404.html
+msgid "The page you are looking for does not exist or has been moved."
+msgstr "The page you are looking for does not exist or has been moved."
+
 #~ msgid "Inserted By"
 #~ msgstr "Inserted By"
 

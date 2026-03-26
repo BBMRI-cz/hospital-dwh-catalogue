@@ -4,7 +4,7 @@
 {% block title %}{% trans "My Tickets" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-6 py-8">
+<div class="py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
   {% trans "Catalogue" as t_catalogue %}
@@ -26,8 +26,8 @@
     <table class="w-full">
       <thead>
         <tr class="border-b border-gray-100">
-          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Subject" %}</th>
-          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Items" %}</th>
+          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt font-medium text-left">{% trans "Subject" %}</th>
+          <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt font-medium text-left">{% trans "Items" %}</th>
           <th class="w-6"></th>
         </tr>
       </thead>

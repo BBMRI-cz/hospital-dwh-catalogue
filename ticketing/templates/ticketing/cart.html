@@ -4,7 +4,7 @@
 {% block title %}{% trans "Cart" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-6 py-8">
+<div class="py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
   {% trans "Catalogue" as t_catalogue %}
@@ -32,7 +32,7 @@
             <a href="{% url 'warehouse:dataset_detail' item.app item.name %}" target="_blank" rel="noopener noreferrer"
                class="group block hover:text-[#53c0d7] transition-colors">
               <div class="font-medium text-gray-800 text-sm group-hover:text-[#53c0d7]">{{ item.title }}</div>
-              <div class="font-mono text-[10px] text-gray-400 group-hover:text-[#53c0d7]/70">{{ item.name }}</div>
+              <div class="font-mono text-[10px] text-txt-muted group-hover:text-[#53c0d7]/70">{{ item.name }}</div>
             </a>
           </td>
           <td class="pr-5 text-right">

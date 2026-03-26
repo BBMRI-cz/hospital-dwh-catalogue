@@ -28,14 +28,14 @@
           <input type="hidden" name="name" value="{{ dataset.name }}">
           <input type="hidden" name="title" value="{{ dist.title|default:dist.name }}">
           <input type="hidden" name="next" value="{{ request.path }}">
-          <button type="submit" title="{% trans 'Add to cart' %}" class="btn btn-ghost btn-xs px-1.5 text-gray-400 hover:text-orange-500">
+          <button type="submit" title="{% trans 'Add to cart' %}" class="btn btn-ghost btn-xs px-1.5 text-txt-muted hover:text-orange-500">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
             </svg>
           </button>
         </form>
-        <svg class="expand-icon text-gray-300 shrink-0 transition-transform" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg class="expand-icon text-txt-muted shrink-0 transition-transform" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"/>
         </svg>
       </div>
@@ -48,25 +48,25 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {% if dist.access_url %}
           <div class="flex flex-col gap-0.5">
-            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dcat:accessURL</span>
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dcat:accessURL</span>
             <span class="text-xs text-gray-700 break-all">{{ dist.access_url }}</span>
           </div>
           {% endif %}
           {% if dist.issued %}
           <div class="flex flex-col gap-0.5">
-            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dct:issued</span>
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dct:issued</span>
             <span class="text-xs text-gray-700">{{ dist.issued }}</span>
           </div>
           {% endif %}
           {% if dist.modified %}
           <div class="flex flex-col gap-0.5">
-            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dct:modified</span>
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dct:modified</span>
             <span class="text-xs text-gray-700">{{ dist.modified }}</span>
           </div>
           {% endif %}
           {% if dist.byte_size %}
           <div class="flex flex-col gap-0.5">
-            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">dcat:byteSize</span>
+            <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dcat:byteSize</span>
             <span class="text-xs font-mono text-gray-700">{{ dist.byte_size }} B</span>
           </div>
           {% endif %}
@@ -76,7 +76,7 @@
     </div>
   </article>
   {% empty %}
-  <div class="text-center py-10 text-gray-400 italic text-sm">{% trans "No distributions available." %}</div>
+  <div class="text-center py-10 text-txt-muted italic text-sm">{% trans "No distributions available." %}</div>
   {% endfor %}
 </div>
 

@@ -48,7 +48,7 @@
         } else {
           b.innerHTML = nowInCart ? CART_ICON_REMOVE : CART_ICON_ADD;
           b.title     = nowInCart ? (cfg.labelRemove || 'Remove from cart') : (cfg.labelAdd || 'Add to cart');
-          ['text-gray-400', 'text-red-400', 'text-mou-cyan',
+          ['text-txt-muted', 'text-red-400', 'text-mou-cyan',
            'hover:text-orange-500', 'hover:text-red-600', 'hover:text-cyan-600',
            'hover:bg-orange-50', 'hover:bg-red-50', 'hover:bg-cyan-50'].forEach(c => b.classList.remove(c));
           if (nowInCart) {

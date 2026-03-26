@@ -39,7 +39,7 @@
     }
 
     /* Ensure content is above texture */
-    .site-header, .site-content,
+    .site-header, .site-content, .site-outer,
     .cat-header,  .cat-content  { position: relative; z-index: 1; }
 
     /* Chevron transition */
@@ -79,8 +79,12 @@
 
 <!-- ══════════════════════ CONTENT ══════════════════════ -->
 {% block sidebar %}
-<div class="site-content relative z-[1] max-w-screen-2xl mx-auto px-6 py-8">
-  {% block content %}{% endblock %}
+<div class="site-outer bg-outer-bg" style="min-height:calc(100vh - 80px)">
+  <div class="site-content max-w-screen-2xl mx-auto px-6 py-8 bg-page-bg" style="min-height:calc(100vh - 80px)">
+    <div class="max-w-7xl mx-auto">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
 </div>
 {% endblock %}
 

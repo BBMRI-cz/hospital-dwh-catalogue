@@ -1,4 +1,4 @@
-{% extends "catalogue/base_catalogue.html" %}
+﻿{% extends "catalogue/base_catalogue.html" %}
 {% load i18n static %}
 
 {% block title %}{{ dataset.title|default:dataset.name }}{% endblock %}
@@ -7,7 +7,7 @@
 {{ schema_json|json_script:"schema-data" }}
 <script id="jsonld-data" type="application/json">{{ jsonld_str|safe }}</script>
 
-<div class="max-w-4xl mx-auto px-6 py-8">
+<div class="py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
   {% trans "Catalogue" as t_catalogue %}
@@ -56,13 +56,13 @@
         {% endfor %}
         {% if dataset.keywords %}
         <div class="flex flex-col gap-1.5 px-5 py-3.5 border-r border-b border-gray-100 sm:col-span-2">
-          <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-gray-400">
+          <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">
             Keyword
             {% include "includes/_info_btn.html" with semantics="dcat:keyword" schema_json=schema_json %}
           </div>
           <div class="flex flex-wrap gap-1.5">
             {% for kw in dataset.keywords %}
-            <span class="badge badge-sm font-mono text-[10px]" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">{{ kw }}</span>
+            {% include "includes/_badge.html" with b_value=kw b_variant="cyan" only %}
             {% endfor %}
           </div>
         </div>
@@ -87,12 +87,12 @@
       {% for dist in distributions %}
       {% include "catalogue/components/_distribution_card.html" with dist=dist dataset=dataset loop_id=forloop.counter cart_dataset_ids=cart_dataset_ids schema_json=schema_json only %}
       {% empty %}
-      <div class="text-center py-12 text-gray-400 italic text-sm">{% trans "No distributions available for this dataset." %}</div>
+      <div class="text-center py-12 text-txt-muted italic text-sm">{% trans "No distributions available for this dataset." %}</div>
       {% endfor %}
     </div>
   </div>
   {% else %}
-  <div class="text-center py-12 text-gray-400 italic text-sm">{% trans "No distributions available for this dataset." %}</div>
+  <div class="text-center py-12 text-txt-muted italic text-sm">{% trans "No distributions available for this dataset." %}</div>
   {% endif %}
 
 </div>

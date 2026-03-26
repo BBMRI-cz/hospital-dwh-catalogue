@@ -717,7 +717,7 @@ msgstr "Katalog"
 
 #: ticketing/templates/ticketing/cart.html:11
 msgid "Data Request Cart"
-msgstr "Košík žádosti na data"
+msgstr "Košík žádosti o data"
 
 #: ticketing/templates/ticketing/cart.html:12
 msgid "Review selected datasets and submit an Alvao request"
@@ -2937,6 +2937,14 @@ msgstr "Přihlásit se"
 #: warehouse/templates/registration/login.html:71
 msgid "Health DCAT-AP · FAIR Data Register"
 msgstr "Health DCAT-AP · Registr FAIR dat"
+
+#: warehouse/templates/404.html
+msgid "Page Not Found"
+msgstr "Stránka nenalezena"
+
+#: warehouse/templates/404.html
+msgid "The page you are looking for does not exist or has been moved."
+msgstr "Stránka, kterou hledáte, neexistuje nebo byla přesunuta."
 
 #~ msgid "Inserted By"
 #~ msgstr "Vložil"

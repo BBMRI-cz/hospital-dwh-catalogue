@@ -7,6 +7,7 @@ Stores ticket requests and cart items locally before sending to Alvao.
 from typing import TYPE_CHECKING
 
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 if TYPE_CHECKING:
@@ -164,3 +165,18 @@ class TicketRequestItem(models.Model):
 
     def __str__(self) -> str:
         return f'{self.ItemType(self.item_type).label}: {self.item_name}'
+
+    @property
+    def detail_url(self) -> str | None:
+        """Return URL to the dataset detail page, or None if not applicable or dataset no longer exists."""
+        if self.item_type == self.ItemType.DATASET and '/' in self.item_id:
+            app, name = self.item_id.split('/', 1)
+            from django.apps import apps as django_apps
+            try:
+                model = django_apps.get_model(app, 'Dataset')
+                if not model.objects.filter(pk=name).exists():
+                    return None
+            except LookupError:
+                return None
+            return reverse('warehouse:dataset_detail', kwargs={'app': app, 'name': name})
+        return None

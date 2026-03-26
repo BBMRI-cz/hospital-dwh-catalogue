@@ -1,4 +1,4 @@
-{% extends "catalogue/base_catalogue.html" %}
+﻿{% extends "catalogue/base_catalogue.html" %}
 {% load i18n %}
 
 {% block title %}{{ distribution.title|default:distribution.name }} · {% trans "Distribution" %}{% endblock %}
@@ -6,7 +6,7 @@
 {% block content %}
 {{ schema_json|json_script:"schema-data" }}
 
-<div class="max-w-4xl mx-auto px-6 py-8">
+<div class="py-8">
 
   {% url 'warehouse:catalogue' as catalogue_url %}
   {% if dataset %}{% url 'warehouse:dataset_detail' app=distribution.app name=dataset.name as bc_mid_url %}{% endif %}
@@ -27,7 +27,7 @@
       {% if dataset %}
       <div class="flex flex-col gap-2 shrink-0 w-44">
         {% include "includes/_cart_add_btn.html" with cart_source=distribution.app cart_name=dataset.name cart_title=distribution.title|default:distribution.name cart_next=request.path %}
-        <p class="text-[10px] text-gray-400 text-center leading-snug">
+        <p class="text-[10px] text-txt-muted text-center leading-snug">
           {% trans "Adds the entire dataset" %}<br>
           <span class="font-medium text-txt-muted">{{ dataset.title|default:dataset.name }}</span>
         </p>

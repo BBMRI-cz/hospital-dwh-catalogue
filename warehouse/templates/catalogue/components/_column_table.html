@@ -7,7 +7,7 @@
     {% include "includes/_info_btn.html" with semantics="csvw:Column" %}
     <div class="flex-1"></div>
     <div class="relative shrink-0">
-      <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input type="text" placeholder="{% trans 'Search columns…' %}"
@@ -18,18 +18,18 @@
   <table class="w-full">
     <thead>
       <tr class="border-b border-gray-100">
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal">
           <span class="flex items-center gap-1">dct:title {% include "includes/_info_btn.html" with semantics="dct:title" %}</span>
         </th>
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal hidden sm:table-cell">
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden sm:table-cell">
           <span class="flex items-center gap-1">csvw:name {% include "includes/_info_btn.html" with semantics="csvw:name" %}</span>
         </th>
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal">{% trans "Key" %}</th>
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal hidden md:table-cell">
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal">{% trans "Key" %}</th>
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden md:table-cell">
           <span class="flex items-center gap-1">csvw:datatype {% include "includes/_info_btn.html" with semantics="csvw:datatype" %}</span>
         </th>
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal hidden lg:table-cell">{% trans "R type" %}</th>
-        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 text-left font-normal hidden lg:table-cell">skos:inScheme</th>
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden lg:table-cell">{% trans "R type" %}</th>
+        <th class="px-5 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden lg:table-cell">skos:inScheme</th>
         <th class="w-8"></th>
       </tr>
     </thead>
@@ -41,16 +41,16 @@
         <td class="px-5 py-3">
           <div class="font-medium text-sm" style="color:#53c0d7">{{ col.title|default:"—" }}</div>
         </td>
-        <td class="px-5 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">{{ col.name }}</td>
+        <td class="px-5 py-3 font-mono text-xs text-txt-muted hidden sm:table-cell">{{ col.name }}</td>
         <td class="px-5 py-3">
           {% if col.key_db == 'PK' %}
           <span class="badge badge-sm font-mono text-[9px]" style="background:#fbeebc;color:#92400e;border:1px solid #fcd34d;">PK</span>
           {% elif col.key_db == 'FK' %}
-          <span class="badge badge-sm font-mono text-[9px]" style="background:#e8f7fb;color:#007fc8;border:1px solid #9ddcea;">FK</span>
+          {% include "includes/_badge.html" with b_value="FK" b_variant="cyan" only %}
           {% elif col.key_db %}
-          <span class="badge badge-sm font-mono text-[9px] bg-gray-100 text-txt-muted border border-gray-200">{{ col.key_db }}</span>
+          {% include "includes/_badge.html" with b_value=col.key_db only %}
           {% else %}
-          <span class="text-gray-300 text-xs">—</span>
+          <span class="text-txt-muted text-xs">—</span>
           {% endif %}
         </td>
         <td class="px-5 py-3 font-mono text-xs text-txt-muted hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
@@ -63,12 +63,12 @@
             {% trans "View" %}
           </a>
           {% else %}
-          <span class="text-gray-300 text-xs">—</span>
+          <span class="text-txt-muted text-xs">—</span>
           {% endif %}
         </td>
         <td class="pr-4">
           {% if col.description %}
-          <svg id="chev-col-desc-{{ forloop.counter }}" class="text-gray-300 transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg id="chev-col-desc-{{ forloop.counter }}" class="text-txt-muted transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
           {% endif %}
@@ -77,7 +77,7 @@
       {% if col.description %}
       <tr id="col-desc-{{ forloop.counter }}" class="hidden bg-gray-50">
         <td colspan="7" class="px-5 py-3">
-          <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-1">
+          <div class="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted mb-1">
             dct:description
             {% include "includes/_info_btn.html" with semantics="dct:description" stop=1 %}
           </div>
@@ -86,7 +86,7 @@
       </tr>
       {% endif %}
       {% empty %}
-      <tr><td colspan="7" class="text-center py-10 text-sm text-gray-400 italic">{% trans "No columns available." %}</td></tr>
+      <tr><td colspan="7" class="text-center py-10 text-sm text-txt-muted italic">{% trans "No columns available." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,12 +1,12 @@
-{% load i18n %}
+﻿{% load i18n %}
 {# Ticket summary row + collapsible detail row. Expects: ticket #}
 <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="toggleTicket('{{ ticket.pk }}')">
   <td class="px-5 py-3">
     <div class="font-medium text-sm max-w-xs truncate" style="color:#53c0d7">{{ ticket.subject }}</div>
-    <div class="font-mono text-[10px] text-gray-400 mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
+    <div class="font-mono text-[10px] font-medium text-txt mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
   </td>
   <td class="px-5 py-3">
-    <span class="badge badge-sm font-mono text-[10px] border text-txt-muted bg-gray-50 border-gray-200">{{ ticket.item_count }}</span>
+    {% include "includes/_badge.html" with b_value=ticket.item_count only %}
   </td>
   <td class="pr-5">
     <svg id="chev-{{ ticket.pk }}" class="chevron-icon text-gray-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -17,18 +17,26 @@
 <tr id="items-{{ ticket.pk }}" class="hidden bg-gray-50">
   <td colspan="3" class="px-5 py-3">
     {% if ticket.description %}
-    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-1">{% trans "Description" %}</div>
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-txt-muted mb-1">{% trans "Description" %}</div>
     <p class="text-sm text-txt mb-3 whitespace-pre-wrap">{{ ticket.description }}</p>
     {% endif %}
-    <div class="font-mono text-[9.5px] uppercase tracking-wider text-gray-400 mb-2">{% trans "Requested datasets" %}</div>
+    <div class="font-mono text-[9.5px] uppercase tracking-wider text-txt-muted mb-2">{% trans "Requested datasets" %}</div>
     <div class="flex flex-col divide-y divide-gray-100">
       {% for item in ticket.items.all %}
       <div class="py-1.5 first:pt-0 last:pb-0">
+        {% if item.detail_url %}
+        <a href="{{ item.detail_url }}" target="_blank" rel="noopener noreferrer"
+           class="group block hover:text-[#53c0d7] transition-colors">
+          <div class="font-medium text-sm group-hover:text-[#53c0d7]" style="color:#53c0d7">{{ item.item_name }}</div>
+          {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5 group-hover:text-[#53c0d7]/70">{{ item.parent_dataset }}</div>{% endif %}
+        </a>
+        {% else %}
         <div class="font-medium text-gray-800 text-sm">{{ item.item_name }}</div>
-        {% if item.parent_dataset %}<div class="font-mono text-[10px] text-gray-400 mt-0.5">{{ item.parent_dataset }}</div>{% endif %}
+        {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5">{{ item.parent_dataset }}</div>{% endif %}
+        {% endif %}
       </div>
       {% empty %}
-      <span class="text-sm text-gray-400 italic">{% trans "No items" %}</span>
+      <span class="text-sm text-txt-muted italic">{% trans "No items" %}</span>
       {% endfor %}
     </div>
   </td>

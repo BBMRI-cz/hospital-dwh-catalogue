@@ -30,6 +30,12 @@ _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
 _CACHE_KEY_SCHEMA = 'catalogue_schema_json'
 
 
+
+def page_not_found(request, exception):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, '404.html', status=404)
+
 def _to_snake(camel: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()
 

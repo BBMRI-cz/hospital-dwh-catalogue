@@ -1,4 +1,4 @@
-﻿{# Expects: semantics, optional stop #}
+{# Expects: semantics, optional stop #}
 {% if semantics in schema_json %}
 <button type="button"
   onclick="showSchemaModal('{{ semantics }}'){% if stop %};event.stopPropagation(){% endif %}"
