@@ -2,7 +2,7 @@
 {# Ticket summary row + collapsible detail row. Expects: ticket #}
 <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="toggleTicket('{{ ticket.pk }}')">
   <td class="px-5 py-3">
-    <div class="font-medium text-sm max-w-xs truncate" style="color:#53c0d7">{{ ticket.subject }}</div>
+    <div class="font-medium text-sm max-w-xs truncate" style="color:#f04600">{{ ticket.subject }}</div>
     <div class="font-mono text-[10px] font-medium text-txt mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
   </td>
   <td class="px-5 py-3">
