@@ -326,8 +326,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Fair Genomes GraphQL API Configuration
-FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')
+# Fair Genomes Integration Configuration
+FAIR_GENOMES_RDF_URL = config('FAIR_GENOMES_RDF_URL', default='')
+FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')  # legacy GraphQL endpoint (unused)
 FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN', default='')
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
 
