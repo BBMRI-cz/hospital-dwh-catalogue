@@ -5,7 +5,6 @@ This service handles communication with the real Alvao Service Desk API.
 Used in production and test environments.
 """
 
-import contextlib
 import logging
 
 import requests
@@ -134,8 +133,13 @@ class AlvaoService:
             # Check for errors
             if response.status_code >= 400:
                 error_data = None
-                with contextlib.suppress(Exception):
+                try:
                     error_data = response.json()
+                except Exception:
+                    logger.debug(
+                        'Alvao error response body is not valid JSON (status=%s)',
+                        response.status_code,
+                    )
 
                 error_message = f'Alvao API error: {response.status_code}'
                 if error_data:

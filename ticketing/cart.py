@@ -10,10 +10,13 @@ Cart items are stored in the session as a list of dicts:
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from django.contrib.sessions.backends.base import SessionBase
+
+logger = logging.getLogger(__name__)
 
 CART_SESSION_KEY = 'cart'
 CART_MAX_ITEMS = 50
@@ -41,14 +44,20 @@ class CartService:
         # Already present — idempotent
         for item in cart:
             if item['app'] == app and item['name'] == name:
+                logger.debug('Cart add no-op: app=%s name=%s already present', app, name)
                 return False
 
         if len(cart) >= CART_MAX_ITEMS:
+            logger.debug('Cart add rejected: app=%s name=%s cart full (%d)', app, name, CART_MAX_ITEMS)
             return False
 
         cart.append({'app': app, 'name': name, 'title': title})
         session[CART_SESSION_KEY] = cart
         session.modified = True
+        logger.info(
+            'Cart add: app=%s name=%s session=%s size=%d',
+            app, name, session.session_key, len(cart),
+        )
         return True
 
     @staticmethod
@@ -61,14 +70,20 @@ class CartService:
         cart: list[dict] = list(session.get(CART_SESSION_KEY, []))
         new_cart = [i for i in cart if not (i['app'] == app and i['name'] == name)]
         if len(new_cart) == len(cart):
+            logger.debug('Cart remove no-op: app=%s name=%s not in cart', app, name)
             return False
         session[CART_SESSION_KEY] = new_cart
         session.modified = True
+        logger.info(
+            'Cart remove: app=%s name=%s session=%s size=%d',
+            app, name, session.session_key, len(new_cart),
+        )
         return True
 
     @staticmethod
     def clear(session: SessionBase) -> None:
         """Empty the cart."""
+        logger.info('Cart clear: session=%s', session.session_key)
         session[CART_SESSION_KEY] = []
         session.modified = True
 

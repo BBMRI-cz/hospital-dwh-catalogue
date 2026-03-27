@@ -69,6 +69,7 @@ class UnifiedCatalogService:
         except Exception:
             logger.exception('Failed to load fair_genomes datasets')
 
+        logger.info('Loaded %d datasets', len(results))
         return results
 
     def get_distributions(self) -> list[UnifiedDistribution]:
@@ -101,6 +102,7 @@ class UnifiedCatalogService:
         except Exception:
             logger.exception('Failed to load fair_genomes distributions')
 
+        logger.info('Loaded %d distributions', len(results))
         return results
 
     def get_datasets_with_distributions(
@@ -139,6 +141,7 @@ class UnifiedCatalogService:
         for ds in datasets:
             if ds.app == app and ds.name == name:
                 return ds, ds.distributions
+        logger.warning('Dataset not found: app=%s name=%s', app, name)
         return None, []
 
     def get_schema_json(self) -> dict:

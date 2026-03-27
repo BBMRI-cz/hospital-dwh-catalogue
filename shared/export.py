@@ -11,7 +11,11 @@ Public API:
 
 from __future__ import annotations
 
+import logging
+
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def _build_context() -> dict[str, str]:
@@ -31,6 +35,7 @@ def _build_context() -> dict[str, str]:
 
         return get_context_prefixes()
     except Exception:
+        logger.warning('Could not load JSON-LD context prefixes from schema registry', exc_info=True)
         return {}
 
 

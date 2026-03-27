@@ -117,6 +117,10 @@ class CartView(LoginRequiredMixin, View):
             status=TicketRequest.Status.DRAFT,
             session_key=request.session.session_key,
         )
+        logger.info(
+            'TicketRequest created: pk=%s user=%s items=%d',
+            ticket.pk, request.user, len(cart),
+        )
 
         for item in cart:
             TicketRequestItem.objects.create(
@@ -141,6 +145,10 @@ class CartView(LoginRequiredMixin, View):
             ticket.status = TicketRequest.Status.SUBMITTED
             ticket.submitted_at = timezone.now()
             ticket.save()
+            logger.info(
+                'Ticket submitted to Alvao: local_pk=%s alvao_id=%s user=%s',
+                ticket.pk, response.ticket_id, request.user,
+            )
             CartService.clear(request.session)
             ticket_id = response.ticket_id or ''
             if ticket_id:
