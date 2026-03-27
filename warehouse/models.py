@@ -29,9 +29,11 @@ from django.utils.translation import gettext_lazy as _
 from shared.abstract_models import (
     AgentBase,
     CatalogBase,
+    ColumnBase,
     ContactPointBase,
     DatasetBase,
     DistributionBase,
+    TableBase,
 )
 
 
@@ -134,46 +136,15 @@ class Distribution(DistributionBase):
         return self.title or self.name
 
 
-class Table(models.Model):
+class Table(TableBase):
     """
-    Physical DB table metadata for a Distribution (csvw:Table).
+    Local Metadata physical DB table metadata (csvw:Table).
+
+    Inherits name (PK), distribution, url, title, description from TableBase.
+    No Local Metadata-specific extensions.
 
     Maps to:  csvw:Table
     """
-
-    name = models.CharField(
-        max_length=255,
-        primary_key=True,
-        verbose_name=_('Name'),
-        help_text=_('csvw:name — unique identifier for this table'),
-    )
-    distribution = models.ForeignKey(
-        Distribution,
-        on_delete=models.CASCADE,
-        to_field='name',
-        db_column='distribution_name',
-        related_name='tables',
-        verbose_name=_('Distribution'),
-        help_text=_('Distribution this table belongs to'),
-    )
-    url = models.CharField(
-        max_length=500,
-        verbose_name=_('URL'),
-        help_text=_('csvw:url — physical location / connection string for this table'),
-    )
-    title = models.CharField(
-        max_length=500,
-        null=True,
-        blank=True,
-        verbose_name=_('Title'),
-        help_text=_('csvw:title — human-readable table name'),
-    )
-    description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_('Description'),
-        help_text=_('dct:description'),
-    )
 
     class Meta:
         managed = False
@@ -182,53 +153,17 @@ class Table(models.Model):
         verbose_name_plural = _('Tables')
         ordering = ['name']
 
-    def __str__(self) -> str:
-        return self.title or self.name
 
-
-class Column(models.Model):
+class Column(ColumnBase):
     """
-    Physical column metadata within a Table (csvw:Column).
+    Local Metadata physical column metadata within a Table (csvw:Column).
+
+    Inherits name (PK), table, title, description, datatype, property_url
+    from ColumnBase.  Adds Local Metadata / DWH-specific tracking fields.
 
     Maps to:  csvw:Column
     """
 
-    name = models.CharField(
-        max_length=255,
-        primary_key=True,
-        verbose_name=_('Name'),
-        help_text=_('csvw:name — unique column identifier'),
-    )
-    table = models.ForeignKey(
-        Table,
-        on_delete=models.CASCADE,
-        to_field='name',
-        db_column='table_name',
-        related_name='columns',
-        verbose_name=_('Table'),
-        help_text=_('Table this column belongs to'),
-    )
-    title = models.CharField(
-        max_length=500,
-        verbose_name=_('Title'),
-        help_text=_('csvw:title — human-readable column name'),
-    )
-    description = models.TextField(
-        verbose_name=_('Description'),
-        help_text=_('dct:description'),
-    )
-    datatype = models.CharField(
-        max_length=100,
-        verbose_name=_('Datatype'),
-        help_text=_('csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)'),
-    )
-    property_url = models.CharField(
-        max_length=500,
-        null=True,
-        blank=True,
-        verbose_name=_('Property URL'),
-        help_text=_('csvw:propertyUrl — semantic property URI'),
-    )
     var_order = models.SmallIntegerField(
         null=True,
         blank=True,

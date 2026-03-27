@@ -538,3 +538,117 @@ class DistributionBase(models.Model):
     def clean(self) -> None:
         super().clean()
         validate_mandatory_fields(self, ['access_url', 'applicable_legislation'])
+
+
+class TableBase(models.Model):
+    """
+    Physical DB table metadata linked to a Distribution (csvw:Table).
+
+    Fields common to every catalogue profile:
+      name         — csvw:name (natural PK)
+      distribution — FK → Distribution (implementation link)
+      url          — csvw:url (mandatory)
+      title        — csvw:title (optional)
+      description  — dct:description (optional)
+
+    Maps to:  csvw:Table
+    """
+
+    name = models.CharField(
+        max_length=255,
+        primary_key=True,
+        verbose_name=_('Name'),
+        help_text=_('csvw:name — unique identifier for this table'),
+    )
+    distribution = models.ForeignKey(
+        'Distribution',
+        on_delete=models.CASCADE,
+        to_field='name',
+        db_column='distribution_name',
+        related_name='tables',
+        verbose_name=_('Distribution'),
+        help_text=_('Distribution this table belongs to'),
+    )
+    url = models.CharField(
+        max_length=500,
+        verbose_name=_('URL'),
+        help_text=_('csvw:url — physical location / connection string for this table'),
+    )
+    title = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        verbose_name=_('Title'),
+        help_text=_('csvw:title — human-readable table name'),
+    )
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_('Description'),
+        help_text=_('dct:description'),
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self) -> str:
+        return self.title or self.name
+
+
+class ColumnBase(models.Model):
+    """
+    Physical column metadata within a Table (csvw:Column).
+
+    Fields common to every catalogue profile:
+      name         — csvw:name (natural PK)
+      table        — FK → Table (belongs to table)
+      title        — csvw:title (mandatory)
+      description  — dct:description (mandatory)
+      datatype     — csvw:datatype (mandatory)
+      property_url — csvw:propertyUrl (optional)
+
+    Maps to:  csvw:Column
+    """
+
+    name = models.CharField(
+        max_length=255,
+        primary_key=True,
+        verbose_name=_('Name'),
+        help_text=_('csvw:name — unique column identifier'),
+    )
+    table = models.ForeignKey(
+        'Table',
+        on_delete=models.CASCADE,
+        to_field='name',
+        db_column='table_name',
+        related_name='columns',
+        verbose_name=_('Table'),
+        help_text=_('Table this column belongs to'),
+    )
+    title = models.CharField(
+        max_length=500,
+        verbose_name=_('Title'),
+        help_text=_('csvw:title — human-readable column name'),
+    )
+    description = models.TextField(
+        verbose_name=_('Description'),
+        help_text=_('dct:description'),
+    )
+    datatype = models.CharField(
+        max_length=100,
+        verbose_name=_('Datatype'),
+        help_text=_('csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)'),
+    )
+    property_url = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        verbose_name=_('Property URL'),
+        help_text=_('csvw:propertyUrl — semantic property URI'),
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self) -> str:
+        return self.title or self.name

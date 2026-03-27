@@ -26,9 +26,11 @@ from django.utils.translation import gettext_lazy as _
 from shared.abstract_models import (
     AgentBase,
     CatalogBase,
+    ColumnBase,
     ContactPointBase,
     DatasetBase,
     DistributionBase,
+    TableBase,
 )
 
 
@@ -111,3 +113,39 @@ class Distribution(DistributionBase):
         db_table = 'fair_genomes_distribution'
         verbose_name = _('Distribution')
         verbose_name_plural = _('Distributions')
+
+
+class Table(TableBase):
+    """
+    FAIR Genomes physical table metadata (csvw:Table).
+
+    Inherits name (PK), distribution, url, title, description from TableBase.
+    No FAIR Genomes-specific extensions.
+
+    Maps to:  csvw:Table
+    """
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_table'
+        verbose_name = _('Table')
+        verbose_name_plural = _('Tables')
+        ordering = ['name']
+
+
+class Column(ColumnBase):
+    """
+    FAIR Genomes physical column metadata within a Table (csvw:Column).
+
+    Inherits name (PK), table, title, description, datatype, property_url
+    from ColumnBase.  No FAIR Genomes-specific extensions.
+
+    Maps to:  csvw:Column
+    """
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_column'
+        verbose_name = _('Column')
+        verbose_name_plural = _('Columns')
+        ordering = ['name']
