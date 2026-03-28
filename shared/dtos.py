@@ -61,8 +61,8 @@ class UnifiedDistribution:
     conforms_to: str | None = None
     byte_size: int | None = None
     rights: str | None = None
-    issued: str | None = None
-    modified: str | None = None
+    release_date: str | None = None
+    modification_date: str | None = None
     licence: str | None = None
     # Warehouse-specific; None for FAIR Genomes distributions
     db_layer: str | None = None

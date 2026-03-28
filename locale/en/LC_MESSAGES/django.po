@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-28 04:28+0100\n"
+"POT-Creation-Date: 2026-03-28 20:17+0100\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -29,7 +29,7 @@ msgid "Fair Genomes Integration"
 msgstr "Fair Genomes Integration"
 
 #: fair_genomes/models.py:49 shared/abstract_models.py:116
-#: shared/abstract_models.py:310 warehouse/models.py:51
+#: shared/abstract_models.py:319 warehouse/models.py:51
 msgid "Contact Point"
 msgstr "Contact Point"
 
@@ -45,7 +45,7 @@ msgstr "Agent"
 msgid "Agents"
 msgstr "Agents"
 
-#: fair_genomes/models.py:79 shared/abstract_models.py:325
+#: fair_genomes/models.py:79 shared/abstract_models.py:334
 #: warehouse/models.py:81
 msgid "Catalog"
 msgstr "Catalog"
@@ -54,7 +54,7 @@ msgstr "Catalog"
 msgid "Catalogs"
 msgstr "Catalogs"
 
-#: fair_genomes/models.py:99 shared/abstract_models.py:458
+#: fair_genomes/models.py:99 shared/abstract_models.py:467
 #: ticketing/models.py:125 warehouse/models.py:101
 msgid "Dataset"
 msgstr "Dataset"
@@ -64,7 +64,7 @@ msgstr "Dataset"
 msgid "Datasets"
 msgstr "Datasets"
 
-#: fair_genomes/models.py:115 shared/abstract_models.py:571
+#: fair_genomes/models.py:115 shared/abstract_models.py:578
 #: warehouse/models.py:132
 #: warehouse/templates/catalogue/distribution_detail.html:4
 msgid "Distribution"
@@ -75,7 +75,7 @@ msgstr "Distribution"
 msgid "Distributions"
 msgstr "Distributions"
 
-#: fair_genomes/models.py:132 shared/abstract_models.py:627
+#: fair_genomes/models.py:132 shared/abstract_models.py:634
 #: warehouse/models.py:152
 #, fuzzy
 #| msgid "Ref Table"
@@ -184,8 +184,8 @@ msgid ""
 msgstr ""
 
 #: shared/abstract_models.py:100 shared/abstract_models.py:140
-#: shared/abstract_models.py:206 shared/abstract_models.py:449
-#: shared/abstract_models.py:560 shared/abstract_models.py:618
+#: shared/abstract_models.py:206 shared/abstract_models.py:458
+#: shared/abstract_models.py:569 shared/abstract_models.py:625
 msgid "Name"
 msgstr "Name"
 
@@ -194,8 +194,8 @@ msgid "Unique identifier / name for this agent"
 msgstr "Unique identifier / name for this agent"
 
 #: shared/abstract_models.py:106 shared/abstract_models.py:153
-#: shared/abstract_models.py:225 shared/abstract_models.py:470
-#: shared/abstract_models.py:589 shared/abstract_models.py:636
+#: shared/abstract_models.py:225 shared/abstract_models.py:479
+#: shared/abstract_models.py:596 shared/abstract_models.py:643
 #: ticketing/models.py:50 ticketing/templates/ticketing/_ticket_row.html:20
 #: warehouse/templates/catalogue/components/_dcat_tooltip.html:28
 #: warehouse/templates/includes/schema_modal.html:29
@@ -215,8 +215,8 @@ msgid "Unique identifier for this catalog"
 msgstr "Unique identifier for this catalog"
 
 #: shared/abstract_models.py:147 shared/abstract_models.py:213
-#: shared/abstract_models.py:465 shared/abstract_models.py:583
-#: shared/abstract_models.py:632
+#: shared/abstract_models.py:474 shared/abstract_models.py:590
+#: shared/abstract_models.py:639
 msgid "Title"
 msgstr "Title"
 
@@ -240,8 +240,8 @@ msgstr "Publisher"
 msgid "Agent responsible for making this catalog available"
 msgstr "Agent responsible for making this catalog available"
 
-#: shared/abstract_models.py:169 shared/abstract_models.py:340
-#: shared/abstract_models.py:518
+#: shared/abstract_models.py:169 shared/abstract_models.py:349
+#: shared/abstract_models.py:527
 msgid "Applicable Legislation"
 msgstr "Applicable Legislation"
 
@@ -300,7 +300,7 @@ msgid ""
 "authority/data-theme/HEAL"
 msgstr ""
 
-#: shared/abstract_models.py:269 shared/abstract_models.py:483
+#: shared/abstract_models.py:269 shared/abstract_models.py:492
 msgid "Conforms To"
 msgstr "Conforms To"
 
@@ -308,7 +308,7 @@ msgstr "Conforms To"
 msgid "dct:conformsTo — standard / specification URI"
 msgstr "dct:conformsTo — standard / specification URI"
 
-#: shared/abstract_models.py:275 shared/abstract_models.py:501
+#: shared/abstract_models.py:275
 msgid "Issued"
 msgstr "Issued"
 
@@ -316,7 +316,7 @@ msgstr "Issued"
 msgid "dct:issued — date of first publication"
 msgstr "dct:issued — date of first publication"
 
-#: shared/abstract_models.py:281 shared/abstract_models.py:506
+#: shared/abstract_models.py:281
 msgid "Modified"
 msgstr "Modified"
 
@@ -337,51 +337,55 @@ msgid ""
 "1..*)"
 msgstr "dcat:keyword — comma-separated keywords"
 
-#: shared/abstract_models.py:295
+#: shared/abstract_models.py:300
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 #: warehouse/templates/catalogue/index.html:54
 msgid "Source"
 msgstr "Source"
 
-#: shared/abstract_models.py:296
-msgid "dct:source — URI of the source dataset"
+#: shared/abstract_models.py:301
+#, fuzzy
+#| msgid "dct:source — URI of the source dataset"
+msgid "dct:source — source dataset this one is derived from"
 msgstr "dct:source — URI of the source dataset"
 
-#: shared/abstract_models.py:301
+#: shared/abstract_models.py:310
 msgid "Creator"
 msgstr "Creator"
 
-#: shared/abstract_models.py:302
-msgid "dct:creator — name(s) of the dataset creator(s)"
+#: shared/abstract_models.py:311
+#, fuzzy
+#| msgid "dct:creator — name(s) of the dataset creator(s)"
+msgid "dct:creator — agent who created this dataset"
 msgstr "dct:creator — name(s) of the dataset creator(s)"
 
-#: shared/abstract_models.py:311
+#: shared/abstract_models.py:320
 #, fuzzy
 #| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)"
 msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:316
+#: shared/abstract_models.py:325
 msgid "Provenance"
 msgstr "Provenance"
 
-#: shared/abstract_models.py:317
+#: shared/abstract_models.py:326
 #, fuzzy
 #| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)"
 msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:333
+#: shared/abstract_models.py:342
 msgid "Access Rights"
 msgstr "Access Rights"
 
-#: shared/abstract_models.py:335
+#: shared/abstract_models.py:344
 msgid ""
 "dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
 msgstr ""
 "dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:342 shared/abstract_models.py:520
+#: shared/abstract_models.py:351 shared/abstract_models.py:529
 #, fuzzy
 #| msgid "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
 msgid ""
@@ -389,23 +393,23 @@ msgid ""
 "v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)"
 msgstr "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:348
+#: shared/abstract_models.py:357
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 #: warehouse/templates/catalogue/index.html:53
 msgid "Health Category"
 msgstr "Health Category"
 
-#: shared/abstract_models.py:350
+#: shared/abstract_models.py:359
 msgid ""
 "healthdcat:healthCategory — must be a URI/IRI (mandatory per HealthDCAT-AP "
 "v6, e.g. https://healthdataportal.eu/categorisation/Health-care-delivery)"
 msgstr ""
 
-#: shared/abstract_models.py:358
+#: shared/abstract_models.py:367
 msgid "HDAB"
 msgstr "HDAB"
 
-#: shared/abstract_models.py:360
+#: shared/abstract_models.py:369
 msgid ""
 "healthdcat:hdab — Health Data Access Body responsible for this dataset "
 "(mandatory per HealthDCAT-AP v6)"
@@ -413,157 +417,165 @@ msgstr ""
 "healthdcat:hdab — Health Data Access Body responsible for this dataset "
 "(mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:370
+#: shared/abstract_models.py:379
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 #: warehouse/templates/catalogue/index.html:52
 msgid "Custodian"
 msgstr ""
 
-#: shared/abstract_models.py:372
+#: shared/abstract_models.py:381
 msgid ""
 "geodcatap:custodian — agent responsible for maintaining this dataset "
 "(HealthDCAT-AP Release 6, optional)"
 msgstr ""
 
-#: shared/abstract_models.py:401
+#: shared/abstract_models.py:410
 msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
 
-#: shared/abstract_models.py:404
+#: shared/abstract_models.py:413
 #, fuzzy
 #| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "contact_point is mandatory (HealthDCAT-AP v6)."
 msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
 
-#: shared/abstract_models.py:409
+#: shared/abstract_models.py:418
 #, fuzzy
 #| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "The HDAB agent must have a contact point (HealthDCAT-AP v6)."
 msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
 
-#: shared/abstract_models.py:416
+#: shared/abstract_models.py:425
 msgid "The publisher agent must have a contact point (HealthDCAT-AP v6)."
 msgstr ""
 
-#: shared/abstract_models.py:425
+#: shared/abstract_models.py:434
 msgid "The custodian agent must have a contact point (HealthDCAT-AP v6)."
 msgstr ""
 
-#: shared/abstract_models.py:450
+#: shared/abstract_models.py:459
 msgid "Unique identifier for this distribution"
 msgstr "Unique identifier for this distribution"
 
-#: shared/abstract_models.py:459
+#: shared/abstract_models.py:468
 msgid "Dataset this distribution belongs to"
 msgstr "Dataset this distribution belongs to"
 
-#: shared/abstract_models.py:476
+#: shared/abstract_models.py:485
 msgid "Format"
 msgstr "Format"
 
-#: shared/abstract_models.py:477
+#: shared/abstract_models.py:486
 msgid "dct:format — media type or format URI"
 msgstr "dct:format — media type or format URI"
 
-#: shared/abstract_models.py:488
+#: shared/abstract_models.py:497
 msgid "Byte Size"
 msgstr "Byte Size"
 
-#: shared/abstract_models.py:489
+#: shared/abstract_models.py:498
 msgid "dcat:byteSize"
 msgstr "dcat:byteSize"
 
-#: shared/abstract_models.py:495
+#: shared/abstract_models.py:504
 msgid "Rights"
 msgstr "Rights"
 
-#: shared/abstract_models.py:496
+#: shared/abstract_models.py:505
 msgid "dct:rights"
 msgstr "dct:rights"
 
-#: shared/abstract_models.py:513
+#: shared/abstract_models.py:510
+msgid "Release Date"
+msgstr "Release Date"
+
+#: shared/abstract_models.py:515
+msgid "Modification Date"
+msgstr "Modification Date"
+
+#: shared/abstract_models.py:522
 msgid "Access URL"
 msgstr "Access URL"
 
-#: shared/abstract_models.py:514
+#: shared/abstract_models.py:523
 msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:528
+#: shared/abstract_models.py:537
 #, fuzzy
 #| msgid "License"
 msgid "Licence"
 msgstr "License"
 
-#: shared/abstract_models.py:529
+#: shared/abstract_models.py:538
 msgid "dct:license — licence under which this distribution is made available"
 msgstr ""
 
-#: shared/abstract_models.py:561
+#: shared/abstract_models.py:570
 #, fuzzy
 #| msgid "Unique identifier for this catalog"
 msgid "csvw:name — unique identifier for this table"
 msgstr "Unique identifier for this catalog"
 
-#: shared/abstract_models.py:572
-msgid ""
-"Distribution this table belongs to (optional — tables synced from GraphQL "
-"may have no distribution yet)"
-msgstr ""
+#: shared/abstract_models.py:579
+#, fuzzy
+#| msgid "Distribution (table) this attribute belongs to"
+msgid "Distribution this table belongs to"
+msgstr "Distribution (table) this attribute belongs to"
 
-#: shared/abstract_models.py:576
+#: shared/abstract_models.py:583
 msgid "URL"
 msgstr "URL"
 
-#: shared/abstract_models.py:577
+#: shared/abstract_models.py:584
 msgid "csvw:url — physical location / connection string for this table"
 msgstr ""
 
-#: shared/abstract_models.py:584
+#: shared/abstract_models.py:591
 #, fuzzy
 #| msgid "Human-readable column name"
 msgid "csvw:title — human-readable table name"
 msgstr "Human-readable column name"
 
-#: shared/abstract_models.py:590 shared/abstract_models.py:637
+#: shared/abstract_models.py:597 shared/abstract_models.py:644
 #, fuzzy
 #| msgid "Description"
 msgid "dct:description"
 msgstr "Description"
 
-#: shared/abstract_models.py:619
+#: shared/abstract_models.py:626
 #, fuzzy
 #| msgid "Unique column / variable identifier"
 msgid "csvw:name — unique column identifier"
 msgstr "Unique column / variable identifier"
 
-#: shared/abstract_models.py:628
+#: shared/abstract_models.py:635
 #, fuzzy
 #| msgid "Dataset this distribution belongs to"
 msgid "Table this column belongs to"
 msgstr "Dataset this distribution belongs to"
 
-#: shared/abstract_models.py:633
+#: shared/abstract_models.py:640
 #, fuzzy
 #| msgid "Human-readable column name"
 msgid "csvw:title — human-readable column name"
 msgstr "Human-readable column name"
 
-#: shared/abstract_models.py:641
+#: shared/abstract_models.py:648
 msgid "Datatype"
 msgstr "Datatype"
 
-#: shared/abstract_models.py:642
+#: shared/abstract_models.py:649
 #, fuzzy
 #| msgid "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
 msgid "csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)"
 msgstr "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
 
-#: shared/abstract_models.py:648
+#: shared/abstract_models.py:655
 msgid "Property URL"
 msgstr "Property URL"
 
-#: shared/abstract_models.py:649
+#: shared/abstract_models.py:656
 msgid "csvw:propertyUrl — semantic property URI"
 msgstr ""
 
@@ -2256,9 +2268,6 @@ msgstr "Sign in"
 #~ msgid "Include by Ajax"
 #~ msgstr "Include by Ajax"
 
-#~ msgid "Distribution (table) this attribute belongs to"
-#~ msgstr "Distribution (table) this attribute belongs to"
-
 #~ msgid "Semantic property URI (e.g. from a biomedical ontology)"
 #~ msgstr "Semantic property URI (e.g. from a biomedical ontology)"
 
@@ -2495,9 +2504,6 @@ msgstr "Sign in"
 #~ "Failed to submit your request. Please try again later. Error: %(error)s"
 #~ msgstr ""
 #~ "Failed to submit your request. Please try again later. Error: %(error)s"
-
-#~ msgid "Requested Data Items:"
-#~ msgstr "Requested Data Items:"
 
 #~ msgid "Data Sources"
 #~ msgstr "Data Sources"

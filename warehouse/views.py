@@ -105,8 +105,8 @@ def _dataset_to_dict(ds) -> dict:
                 'conforms_to': d.conforms_to,
                 'byte_size': d.byte_size,
                 'rights': d.rights,
-                'issued': d.issued,
-                'modified': d.modified,
+                'release_date': d.release_date,
+                'modification_date': d.modification_date,
                 'licence': d.licence,
                 'db_layer': getattr(d, 'db_layer', None),
             }

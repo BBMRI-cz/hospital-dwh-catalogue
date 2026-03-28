@@ -52,16 +52,16 @@
             <span class="text-xs text-gray-700 break-all">{{ dist.access_url }}</span>
           </div>
           {% endif %}
-          {% if dist.issued %}
+          {% if dist.release_date %}
           <div class="flex flex-col gap-0.5">
             <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dct:issued</span>
-            <span class="text-xs text-gray-700">{{ dist.issued }}</span>
+            <span class="text-xs text-gray-700">{{ dist.release_date }}</span>
           </div>
           {% endif %}
-          {% if dist.modified %}
+          {% if dist.modification_date %}
           <div class="flex flex-col gap-0.5">
             <span class="font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">dct:modified</span>
-            <span class="text-xs text-gray-700">{{ dist.modified }}</span>
+            <span class="text-xs text-gray-700">{{ dist.modification_date }}</span>
           </div>
           {% endif %}
           {% if dist.byte_size %}

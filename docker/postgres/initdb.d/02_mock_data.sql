@@ -77,8 +77,8 @@ INSERT INTO metadata."lm_dataset" (
     '2020-01-15 00:00:00+01',
     '2025-06-01 00:00:00+02',
     'pacient,demografie,jméno,rodné číslo,pohlaví',
-    'https://nemis.hospital.cz/api/patients',
-    'Klinický tým; IT oddělení',
+    NULL,
+    'AGENT_DWH',
     1,
     'Data pocházejí z nemocničního informačního systému NEMIS. ETL pipeline spouštěn denně.',
     'CAT_LM',
@@ -137,7 +137,7 @@ INSERT INTO metadata."lm_dataset" (
     'DS_PHARMACY',
     'Farmakoterapie a lékárna',
     'léky,předpisy,ATC kódy,dávkování,aplikace',
-    'https://lekarna.hospital.cz/api',
+    'DS_PATIENTS',
     'AGENT_LABS',
     1,
     'https://nemis.hospital.cz/dataset/DS_PHARMACY',
@@ -172,7 +172,7 @@ INSERT INTO metadata."lm_dataset" (
 ) VALUES (
     'DS_ADMIN',
     'Administrativní a fakturační data',
-    'Ekonomické oddělení; IT oddělení',
+    'AGENT_DWH',
     1,
     'https://nemis.hospital.cz/dataset/DS_ADMIN',
     'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
@@ -463,7 +463,7 @@ INSERT INTO metadata."lm_dataset" (
 -- DS_PATIENTS – raw: all optional filled; format PARQUET; rights internal
 INSERT INTO metadata."lm_distribution" (
     name, dataset_name, title, description, format, conforms_to, byte_size,
-    rights, issued, modified, access_url, applicable_legislation, licence, db_layer
+    rights, release_date, modification_date, access_url, applicable_legislation, licence, db_layer
 ) VALUES (
     'DIST_PATIENTS_RAW',
     'DS_PATIENTS',
@@ -526,9 +526,9 @@ INSERT INTO metadata."lm_distribution" (
     'raw'
 );
 
--- DS_LABS – clean: format JSON; no rights; with issued/modified
+-- DS_LABS – clean: format JSON; no rights; with release_date/modification_date
 INSERT INTO metadata."lm_distribution" (
-    name, dataset_name, title, format, issued, modified,
+    name, dataset_name, title, format, release_date, modification_date,
     access_url, applicable_legislation, db_layer
 ) VALUES (
     'DIST_LABS_CLEAN',
@@ -587,7 +587,7 @@ INSERT INTO metadata."lm_distribution" (
 -- DS_ADMIN – raw; NULL db_layer; all optional fields
 INSERT INTO metadata."lm_distribution" (
     name, dataset_name, title, description, format, byte_size,
-    issued, access_url, applicable_legislation, db_layer
+    release_date, access_url, applicable_legislation, db_layer
 ) VALUES (
     'DIST_ADMIN_RAW',
     'DS_ADMIN',

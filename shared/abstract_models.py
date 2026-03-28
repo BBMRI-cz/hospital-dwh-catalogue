@@ -289,17 +289,26 @@ class DatasetBase(models.Model):
             'dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'
         ),
     )
-    source = models.TextField(
+    source = models.ForeignKey(
+        'Dataset',
+        on_delete=models.SET_NULL,
+        to_field='name',
+        db_column='source',
         null=True,
         blank=True,
+        related_name='derived_datasets',
         verbose_name=_('Source'),
-        help_text=_('dct:source — URI of the source dataset'),
+        help_text=_('dct:source — source dataset this one is derived from'),
     )
-    creator = models.TextField(
+    creator = models.ForeignKey(
+        'Agent',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        db_column='creator',
+        related_name='creator_datasets',
         verbose_name=_('Creator'),
-        help_text=_('dct:creator — name(s) of the dataset creator(s)'),
+        help_text=_('dct:creator — agent who created this dataset'),
     )
     contact_point = models.ForeignKey(
         'ContactPoint',
@@ -495,15 +504,15 @@ class DistributionBase(models.Model):
         verbose_name=_('Rights'),
         help_text=_('dct:rights'),
     )
-    issued = models.DateTimeField(
+    release_date = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Issued'),
+        verbose_name=_('Release Date'),
     )
-    modified = models.DateTimeField(
+    modification_date = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_('Modified'),
+        verbose_name=_('Modification Date'),
     )
 
     # ── Mandatory HealthDCAT-AP v6 fields ──────────────────────────────────
@@ -562,14 +571,12 @@ class TableBase(models.Model):
     )
     distribution = models.ForeignKey(
         'Distribution',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         to_field='name',
         db_column='distribution_name',
         related_name='tables',
-        null=True,
-        blank=True,
         verbose_name=_('Distribution'),
-        help_text=_('Distribution this table belongs to (optional — tables synced from GraphQL may have no distribution yet)'),
+        help_text=_('Distribution this table belongs to'),
     )
     url = models.CharField(
         max_length=500,

@@ -61,8 +61,12 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
     issued                 TIMESTAMPTZ,            -- dct:issued
     modified               TIMESTAMPTZ,            -- dct:modified
     keyword                TEXT,                   -- dcat:keyword (comma-sep)
-    source                 TEXT,                   -- dct:source URI
-    creator                TEXT,                   -- dct:creator name(s)
+    source                 VARCHAR(255)            -- dct:source FK → lm_dataset.name
+                               REFERENCES metadata."lm_dataset"(name)
+                               ON DELETE SET NULL,
+    creator                VARCHAR(255)            -- dct:creator FK → lm_agent.name
+                               REFERENCES metadata."lm_agent"(name)
+                               ON DELETE SET NULL,
     contact_point_id       BIGINT NOT NULL             -- dcat:contactPoint (mandatory)
                                REFERENCES metadata."lm_contact_point"(id)
                                ON DELETE RESTRICT,
@@ -96,8 +100,8 @@ CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
     conforms_to            VARCHAR(500),
     byte_size              INTEGER,                 -- dcat:byteSize
     rights                 VARCHAR(500),            -- dct:rights
-    issued                 TIMESTAMPTZ,
-    modified               TIMESTAMPTZ,
+    release_date           TIMESTAMPTZ,            -- dct:issued
+    modification_date      TIMESTAMPTZ,            -- dct:modified
     -- Mandatory HealthDCAT-AP v6
     access_url             VARCHAR(500) NOT NULL,  -- dcat:accessURL
     applicable_legislation VARCHAR(500) NOT NULL,

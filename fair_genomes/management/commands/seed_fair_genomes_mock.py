@@ -156,8 +156,7 @@ class Command(BaseCommand):
                     'issued': now,
                     'modified': now,
                     'keyword': 'genomika,WGS,RNA-seq,kohorta,biobanka',
-                    'source': 'https://fairgenomes.hospital.cz/api/cohort',
-                    'creator': 'Genomický tým; IT oddělení',
+                    'creator': agent_dwh,
                     'contact_point': cp_both,
                     'provenance': 'Data ze sekvenátoru Illumina NovaSeq 6000, validována dle FAIR Genomes.',
                     'catalog': cat_full,
@@ -181,6 +180,7 @@ class Command(BaseCommand):
                     'keyword': 'VCF,SNP,InDel,CNV,varianty',
                     'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
                     'provenance': 'Variant calling pipeline GATK4 na sekvenačních datech kohorty.',
+                    'source_id': 'DS_FG_COHORT',
                     'contact_point': cp_email_only,
                     'access_rights': (
                         'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'
@@ -201,7 +201,6 @@ class Command(BaseCommand):
                     'keyword': 'fenotyp,klinika,EHR,diagnóza',
                     'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
                     'provenance': 'Export z nemocničního informačního systému, pseudonymizován před předáním.',
-                    'source': 'https://fairgenomes.hospital.cz/api/phenotypes',
                     'publisher': agent_molgenis,
                     'contact_point': cp_both,
                     'access_rights': (
@@ -570,8 +569,8 @@ class Command(BaseCommand):
                     'conforms_to': 'https://samtools.github.io/hts-specs/VCFv4.3.pdf',
                     'byte_size': 10737418240,  # 10 GB
                     'rights': 'internal',
-                    'issued': now,
-                    'modified': now,
+                    'release_date': now,
+                    'modification_date': now,
                     'access_url': 'https://fairgenomes.hospital.cz/api/files/cohort.vcf.gz',
                     'applicable_legislation': 'GDPR;EHDS',
                     'licence': 'https://creativecommons.org/licenses/by/4.0/',
@@ -610,7 +609,7 @@ class Command(BaseCommand):
                     'description': 'JSON-LD export klinických fenotypů dle FAIR Genomes schématu.',
                     'format': 'JSON',
                     'byte_size': 524288000,  # 500 MB
-                    'issued': now,
+                    'release_date': now,
                     'access_url': 'https://fairgenomes.hospital.cz/api/phenotypes.jsonld',
                     'applicable_legislation': 'GDPR;EHDS;NIS2',
                     'licence': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
