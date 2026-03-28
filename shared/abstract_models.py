@@ -562,12 +562,14 @@ class TableBase(models.Model):
     )
     distribution = models.ForeignKey(
         'Distribution',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         to_field='name',
         db_column='distribution_name',
         related_name='tables',
+        null=True,
+        blank=True,
         verbose_name=_('Distribution'),
-        help_text=_('Distribution this table belongs to'),
+        help_text=_('Distribution this table belongs to (optional — tables synced from GraphQL may have no distribution yet)'),
     )
     url = models.CharField(
         max_length=500,

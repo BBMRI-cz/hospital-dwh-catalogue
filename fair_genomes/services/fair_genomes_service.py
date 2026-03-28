@@ -1,28 +1,31 @@
 """
 Service layer for Fair Genomes catalogue.
 
-Syncs catalogue metadata from a FAIR Data Point (FDP) endpoint that exposes
-RDF data.  The endpoint URL is configured via the FAIR_GENOMES_RDF_URL
-environment variable.
+Two sync sources contribute to one atomic transaction per run:
 
-Data parsed and saved:
-  - Agent    : saved fully (name only; description/contact_point are absent in
-               the FDP schema and are nullable in our model).
-  - Catalog  : saved with partial data (applicable_legislation is mandatory in
-               HealthDCAT-AP v6 but not present in the FDP — saved as empty
-               string; must be filled in manually or via a second sync phase).
-  - Dataset  : collected but NOT saved — several mandatory fields (hdab, type,
-               access_rights, applicable_legislation, health_category) are
-               absent from the FDP data.  See the sync report for details.
+  1. RDF (FAIR Data Point) — configured via FAIR_GENOMES_RDF_URL.
+       - Agent    : saved fully.
+       - Catalog  : saved with partial data (applicable_legislation mandatory
+                    in HealthDCAT-AP v6 but absent from FDP — stored as '').
+       - Dataset  : collected but NOT saved (mandatory fields missing).
 
-The sync() method returns a structured report dict suitable for downstream
-reporting (management command, admin UI, log entries, etc.).
+  2. GraphQL (MOLGENIS EMX2) — configured via FAIR_GENOMES_API_URL +
+     FAIR_GENOMES_API_TOKEN.
+       - Table    : DATA tables only (ONTOLOGIES lookup tables are skipped).
+       - Column   : all columns belonging to the saved DATA tables.
+
+Both sources' DB writes are wrapped in a single transaction.atomic so the
+catalogue never has partial data — either everything succeeds or nothing is
+persisted.
+
+sync() returns a structured report dict for downstream reporting.
 """
 
 import logging
 
 import requests
 from django.conf import settings
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +37,17 @@ class FairGenomesAPIException(Exception):
 
 
 class FairGenomesService:
-    """Sync Fair Genomes catalogue data from a FAIR Data Point RDF endpoint."""
+    """Sync Fair Genomes catalogue data from RDF (FDP) and GraphQL (MOLGENIS)."""
 
     def __init__(
         self,
         rdf_url: str | None = None,
-        api_url: str | None = None,   # kept for backward compatibility
-        api_token: str | None = None,  # kept for backward compatibility
+        api_url: str | None = None,
+        api_token: str | None = None,
         timeout: int = 30,
     ):
         self.rdf_url = rdf_url or getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
-        self.api_url = api_url or getattr(settings, 'FAIR_GENOMES_API_URL', '')
+        self.graphql_url = api_url or getattr(settings, 'FAIR_GENOMES_API_URL', '')
         self.api_token = api_token or getattr(settings, 'FAIR_GENOMES_API_TOKEN', '')
         self.timeout = timeout
 
@@ -54,41 +57,86 @@ class FairGenomesService:
 
     def sync(self) -> dict:
         """
-        Fetch RDF from the configured FDP endpoint, parse it, and save what is
-        saveable to fair_genomes_db.
+        Fetch data from all configured sources, then persist everything in one
+        atomic transaction so the catalogue is never left in a partial state.
+
+        Sources:
+          - RDF (FDP)       : FAIR_GENOMES_RDF_URL
+          - GraphQL (MOLGENIS): FAIR_GENOMES_API_URL + FAIR_GENOMES_API_TOKEN
 
         Returns a structured report dict with the following top-level keys:
-            status               — 'complete' | 'partial' | 'nothing_saved' | 'skipped'
-            rdf_url              — the URL that was fetched
-            fetched              — names of entities found in the RDF
-            saved                — created/updated counts per entity type
-            not_saved            — datasets that could not be saved and why
-            partial_saves        — catalog fields saved with incomplete data
-            rdf_fields_not_in_model — RDF fields that have no model equivalent
-            model_fields_not_in_rdf — model fields absent from the RDF
+            status                    — 'complete' | 'partial' | 'nothing_saved' | 'skipped'
+            rdf_url                   — the RDF URL that was fetched (empty if not configured)
+            graphql_url               — the GraphQL URL that was fetched (empty if not configured)
+            fetched                   — names of RDF entities found
+            saved                     — created/updated counts for RDF entities (agents, catalogs)
+            not_saved                 — datasets that could not be saved and why
+            partial_saves             — catalog fields saved with incomplete data
+            rdf_fields_not_in_model   — RDF fields with no model equivalent
+            model_fields_not_in_rdf   — model fields absent from the RDF
+            graphql_synced            — tables/columns created+updated counts
+            graphql_filtered_out      — table names skipped (ONTOLOGIES)
+            graphql_fields_not_in_model — GraphQL column fields that have no Column model field
 
         Raises:
-            FairGenomesAPIException: if the HTTP request or RDF parsing fails.
+            FairGenomesAPIException: if any network fetch or parse step fails.
         """
-        if not self.rdf_url:
+        if not self.rdf_url and not self.graphql_url:
             return {
                 'status': 'skipped',
-                'reason': 'FAIR_GENOMES_RDF_URL is not configured — set it in the environment',
+                'reason': (
+                    'Neither FAIR_GENOMES_RDF_URL nor FAIR_GENOMES_API_URL is configured '
+                    '— set at least one in the environment'
+                ),
             }
 
-        response = self._fetch(self.rdf_url)
-        rdf_format = self._detect_format(response)
+        # ── Phase 1: all network calls outside the transaction ────────────────
+        graph = None
+        if self.rdf_url:
+            response = self._fetch(self.rdf_url)
+            rdf_format = self._detect_format(response)
+            try:
+                from rdflib import Graph
+                graph = Graph()
+                graph.parse(data=response.text, format=rdf_format)
+            except Exception as exc:
+                raise FairGenomesAPIException(
+                    f'Failed to parse RDF from {self.rdf_url}: {exc}'
+                ) from exc
 
-        try:
-            from rdflib import Graph  # rdflib>=7.0.0 is in requirements.txt
-            g = Graph()
-            g.parse(data=response.text, format=rdf_format)
-        except Exception as exc:
-            raise FairGenomesAPIException(
-                f'Failed to parse RDF from {self.rdf_url}: {exc}'
-            ) from exc
+        graphql_tables = None
+        if self.graphql_url:
+            graphql_tables = self._fetch_graphql_schema()
 
-        return self._process_graph(g)
+        # ── Phase 2: all DB writes in one atomic transaction ──────────────────
+        with transaction.atomic(using='fair_genomes_db'):
+            report = self._process_graph(graph) if graph else {
+                'status': 'partial',
+                'rdf_url': '',
+                'fetched': {'agents': [], 'catalogs': [], 'datasets': []},
+                'saved': {
+                    'agents': {'created': [], 'updated': []},
+                    'catalogs': {'created': [], 'updated': []},
+                },
+                'not_saved': {'datasets': []},
+                'partial_saves': {'catalogs': {}},
+                'rdf_fields_not_in_model': {},
+                'model_fields_not_in_rdf': {},
+            }
+
+            if graphql_tables is not None:
+                gql_report = self._process_graphql_tables(graphql_tables)
+                report['graphql_url'] = self.graphql_url
+                report['graphql_synced'] = gql_report['synced']
+                report['graphql_filtered_out'] = gql_report['filtered_out']
+                report['graphql_fields_not_in_model'] = gql_report['fields_not_in_model']
+            else:
+                report['graphql_url'] = ''
+                report['graphql_synced'] = None
+                report['graphql_filtered_out'] = []
+                report['graphql_fields_not_in_model'] = []
+
+        return report
 
     def close(self) -> None:
         """No-op: retained for interface compatibility."""
@@ -343,3 +391,132 @@ class FairGenomesService:
             report['status'] = 'nothing_saved'
 
         return report
+
+    def _fetch_graphql_schema(self) -> list[dict]:
+        """
+        POST to the MOLGENIS EMX2 GraphQL endpoint and return the raw list of
+        table dicts from ``data._schema.tables``.
+
+        Authentication is via the ``x-molgenis-token`` request header, read
+        from FAIR_GENOMES_API_TOKEN.
+
+        Raises FairGenomesAPIException on any network, HTTP, or GraphQL error.
+        """
+        query = (
+            '{ _schema { tables { name label description tableType semantics '
+            'columns { name label description type semantics } } } }'
+        )
+        headers: dict[str, str] = {'Content-Type': 'application/json'}
+        if self.api_token:
+            headers['x-molgenis-token'] = self.api_token
+
+        try:
+            response = requests.post(
+                self.graphql_url,
+                json={'query': query},
+                headers=headers,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+        except requests.RequestException as exc:
+            raise FairGenomesAPIException(
+                f'Failed to fetch GraphQL schema from {self.graphql_url}: {exc}'
+            ) from exc
+        except ValueError as exc:
+            raise FairGenomesAPIException(
+                f'Invalid JSON response from {self.graphql_url}: {exc}'
+            ) from exc
+
+        if 'errors' in data:
+            raise FairGenomesAPIException(
+                f'GraphQL errors from {self.graphql_url}: {data["errors"]}'
+            )
+
+        tables = data.get('data', {}).get('_schema', {}).get('tables', [])
+        if tables is None:
+            raise FairGenomesAPIException(
+                f'No "_schema.tables" key in GraphQL response from {self.graphql_url}'
+            )
+        return tables
+
+    def _process_graphql_tables(self, tables: list[dict]) -> dict:
+        """
+        Persist Table and Column records from a MOLGENIS GraphQL schema response.
+
+        Only tables with ``tableType == "DATA"`` are saved; ONTOLOGIES lookup
+        tables are recorded in the ``filtered_out`` list and skipped.
+
+        Column PKs are stored as ``"{table_name}.{column_name}"`` to guarantee
+        uniqueness across all tables.
+
+        Must be called inside a ``transaction.atomic`` block (sync() ensures this).
+        """
+        from fair_genomes.models import Column, Table
+
+        # GraphQL fields present in the schema response that have no matching
+        # field on the Column model.
+        fields_not_in_model = ['refTable', 'required', 'readonly', 'key']
+
+        data_tables = [t for t in tables if t.get('tableType') == 'DATA']
+        filtered_out = [t['name'] for t in tables if t.get('tableType') != 'DATA' and t.get('name')]
+
+        synced_tables: dict[str, list[str]] = {'created': [], 'updated': []}
+        synced_columns: dict[str, int] = {'created': 0, 'updated': 0}
+
+        # Derive a stable base URL for the ``url`` field (mandatory, non-nullable).
+        # Use the first semantic IRI if present, otherwise build from the endpoint.
+        base_url = self.graphql_url.split('/graphql')[0] if '/graphql' in self.graphql_url else self.graphql_url
+
+        for table_data in data_tables:
+            table_name = table_data.get('name', '').strip()
+            if not table_name:
+                logger.warning('Skipping GraphQL table with empty name')
+                continue
+
+            semantics: list[str] = table_data.get('semantics') or []
+            url = semantics[0] if semantics else f'{base_url}/tables/{table_name}'
+
+            _, created = Table.objects.using('fair_genomes_db').update_or_create(
+                name=table_name,
+                defaults={
+                    'title': table_data.get('label') or '',
+                    'description': table_data.get('description') or '',
+                    'url': url,
+                    'distribution': None,
+                },
+            )
+            synced_tables['created' if created else 'updated'].append(table_name)
+
+            for col_data in table_data.get('columns') or []:
+                col_name = col_data.get('name', '').strip()
+                if not col_name:
+                    continue
+
+                col_pk = f'{table_name}.{col_name}'
+                col_semantics: list[str] = col_data.get('semantics') or []
+                prop_url = col_semantics[0] if col_semantics else None
+
+                _, col_created = Column.objects.using('fair_genomes_db').update_or_create(
+                    name=col_pk,
+                    defaults={
+                        'table_id': table_name,
+                        'title': col_data.get('label') or col_name,
+                        'description': col_data.get('description') or '',
+                        'datatype': col_data.get('type') or '',
+                        'property_url': prop_url,
+                    },
+                )
+                if col_created:
+                    synced_columns['created'] += 1
+                else:
+                    synced_columns['updated'] += 1
+
+        return {
+            'synced': {
+                'tables': synced_tables,
+                'columns': synced_columns,
+            },
+            'filtered_out': filtered_out,
+            'fields_not_in_model': fields_not_in_model,
+        }
