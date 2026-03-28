@@ -78,3 +78,32 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Test-specific security settings (less strict than production)
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
+
+# Disable file-based log handlers in tests — log files are owned by root in
+# Docker containers and are not writable by the developer's OS user.
+# All loggers fall back to console only.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(name)s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'fair_genomes': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'warehouse': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'ticketing': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+    },
+}

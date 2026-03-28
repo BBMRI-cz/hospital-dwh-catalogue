@@ -46,9 +46,13 @@ class FairGenomesService:
         api_token: str | None = None,
         timeout: int = 30,
     ):
-        self.rdf_url = rdf_url or getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
-        self.graphql_url = api_url or getattr(settings, 'FAIR_GENOMES_API_URL', '')
-        self.api_token = api_token or getattr(settings, 'FAIR_GENOMES_API_TOKEN', '')
+        # None → fall back to settings; explicit value (even '') → use as-is
+        def _cfg(val: str | None, key: str) -> str:
+            return val if val is not None else getattr(settings, key, '')
+
+        self.rdf_url = _cfg(rdf_url, 'FAIR_GENOMES_RDF_URL')
+        self.graphql_url = _cfg(api_url, 'FAIR_GENOMES_API_URL')
+        self.api_token = _cfg(api_token, 'FAIR_GENOMES_API_TOKEN')
         self.timeout = timeout
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -411,7 +415,7 @@ class FairGenomesService:
         """
         query = (
             '{ _schema { tables { name label description tableType semantics '
-            'columns { name label description type semantics } } } }'
+            'columns { name label description columnType semantics } } } }'
         )
         headers: dict[str, str] = {'Content-Type': 'application/json'}
         if self.api_token:
@@ -510,7 +514,7 @@ class FairGenomesService:
                         'table_id': table_name,
                         'title': col_data.get('label') or col_name,
                         'description': col_data.get('description') or '',
-                        'datatype': col_data.get('type') or '',
+                        'datatype': col_data.get('columnType') or '',
                         'property_url': prop_url,
                     },
                 )
@@ -555,7 +559,9 @@ class FairGenomesService:
             # Build the GraphQL filter expression based on column type.
             # ref / ref_array columns store their value in a nested ontology
             # object, so the filter must go one level deeper.
-            if defn.column_type in ('ref', 'ref_array'):
+            # Accept both lowercase ('ref') from stat_config and uppercase
+            # ('REF') as stored by the API / Column.datatype field.
+            if defn.column_type.upper() in ('REF', 'REF_ARRAY'):
                 filter_expr = (
                     f'{{ {defn.column}: {{ value: {{ equals: "{defn.filter_value}" }} }} }}'
                 )
@@ -564,7 +570,7 @@ class FairGenomesService:
                     f'{{ {defn.column}: {{ equals: "{defn.filter_value}" }} }}'
                 )
 
-            query = f'{{ {defn.table}_agg(filter: {filter_expr}) {{ count }} }}'
+            query = f'{{ {defn.table.capitalize()}_agg(filter: {filter_expr}) {{ count }} }}'
 
             headers: dict[str, str] = {'Content-Type': 'application/json'}
             if self.api_token:
@@ -595,7 +601,7 @@ class FairGenomesService:
 
             count = (
                 data.get('data', {})
-                .get(f'{defn.table}_agg', {})
+                .get(f'{defn.table.capitalize()}_agg', {})
                 .get('count')
             )
 
