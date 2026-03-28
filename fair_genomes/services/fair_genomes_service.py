@@ -479,6 +479,9 @@ class FairGenomesService:
         # Use the first semantic IRI if present, otherwise build from the endpoint.
         base_url = self.graphql_url.split('/graphql')[0] if '/graphql' in self.graphql_url else self.graphql_url
 
+        # Ensure every synced table has a browseable Distribution → Dataset chain.
+        auto_distribution = self._ensure_fg_distribution(base_url)
+
         for table_data in data_tables:
             table_name = table_data.get('name', '').strip()
             if not table_name:
@@ -494,7 +497,7 @@ class FairGenomesService:
                     'title': table_data.get('label') or '',
                     'description': table_data.get('description') or '',
                     'url': url,
-                    'distribution': None,
+                    'distribution': auto_distribution,
                 },
             )
             synced_tables['created' if created else 'updated'].append(table_name)
@@ -530,7 +533,63 @@ class FairGenomesService:
             },
             'filtered_out': filtered_out,
             'fields_not_in_model': fields_not_in_model,
+            'auto_distribution': auto_distribution.name if auto_distribution else None,
         }
+
+    def _ensure_fg_distribution(self, base_url: str):
+        """
+        Get or create a minimal ContactPoint → Agent → Dataset → Distribution
+        chain so that GraphQL-synced Tables always have a browseable entry
+        point in the catalogue.
+
+        Uses ``get_or_create`` throughout so re-running sync is idempotent.
+        """
+        from fair_genomes.models import Agent, ContactPoint, Dataset, Distribution
+
+        cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
+            contact_page=base_url,
+            defaults={'email': None},
+        )
+
+        agent, _ = Agent.objects.using('fair_genomes_db').get_or_create(
+            name='FAIR_GENOMES_AUTO',
+            defaults={'contact_point': cp, 'description': 'Auto-created by GraphQL sync'},
+        )
+
+        dataset, _ = Dataset.objects.using('fair_genomes_db').get_or_create(
+            name='DS_FAIR_GENOMES_AUTO',
+            defaults={
+                'identifier': base_url,
+                'title': 'FAIR Genomes (auto)',
+                'description': 'Auto-created placeholder dataset — synced from MOLGENIS FAIR Genomes API.',
+                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
+                'keyword': 'fair-genomes,genomics',
+                'provenance': f'Synced from MOLGENIS FAIR Genomes API at {base_url}',
+                'contact_point': cp,
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
+                'applicable_legislation': 'http://data.europa.eu/eli/reg/2016/679/oj',
+                'health_category': 'patient_data',
+                'hdab': agent,
+                'publisher': agent,
+            },
+        )
+
+        distribution, _ = Distribution.objects.using('fair_genomes_db').get_or_create(
+            name='DIST_FAIR_GENOMES_AUTO',
+            defaults={
+                'dataset_name': dataset,
+                'title': 'FAIR Genomes MOLGENIS API (auto)',
+                'access_url': base_url,
+                'applicable_legislation': 'http://data.europa.eu/eli/reg/2016/679/oj',
+            },
+        )
+
+        logger.info(
+            'Auto-distribution ensured: %s (dataset: %s)',
+            distribution.name, dataset.name,
+        )
+        return distribution
 
     def _sync_stats(self) -> dict:
         """

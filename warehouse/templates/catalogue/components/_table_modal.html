@@ -1,0 +1,167 @@
+{% load i18n %}
+{% comment %}
+  Per-table column modal.
+  Variables expected (pass via {% include … with tbl=tbl idx=forloop.counter app=app %}):
+    tbl  — table dict (name, title, description, url, columns[], stats[])
+    idx  — outer loop counter (integer) — used for unique element IDs
+    app  — source app name (e.g. 'fair_genomes' or 'warehouse')
+{% endcomment %}
+<dialog id="tbl-modal-{{ idx }}" class="modal modal-middle"
+  style="border:none;background:transparent;padding:0;"
+  onclick="if(event.target===this)this.close()">
+  <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden"
+       style="width:min(92vw,56rem);max-width:92vw;max-height:88vh;border-radius:0.75rem;display:flex;flex-direction:column;">
+
+    <!-- ── Header (gradient, matching schema modal) ──────────────────── -->
+    <div class="px-6 pt-5 pb-5 shrink-0"
+         style="background:linear-gradient(135deg,#e8f7fb 0%,#f4fbfd 100%);border-bottom:1px solid #9ddcea;">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0 flex-1">
+
+          <!-- label row: accent bar · term · name badge -->
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <div class="w-0.5 h-4 rounded shrink-0" style="background:#53c0d7"></div>
+            <span class="font-mono text-[9.5px] uppercase tracking-widest" style="color:#53c0d7">csvw:Table</span>
+            <span class="badge font-mono text-[11px] px-2 py-0.5 rounded shrink-0"
+                  style="background:#e0f0fb;color:#007fc8;border:1px solid #6dc0eb">{{ tbl.name }}</span>
+          </div>
+
+          <!-- title -->
+          <h3 class="font-serif text-xl leading-tight text-gray-900">{{ tbl.title }}</h3>
+
+          <!-- description -->
+          {% if tbl.description %}
+          <p class="text-sm text-gray-600 mt-1.5 leading-relaxed">{{ tbl.description }}</p>
+          {% endif %}
+
+          <!-- stat count badges: single inline line -->
+          {% if tbl.stats %}
+          <div class="flex flex-wrap items-center gap-1.5 mt-2">
+            <span class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mr-1">{% trans "Record counts" %}</span>
+            {% for sr in tbl.stats %}
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-xs font-semibold"
+                  style="background:#f0f8ff;color:#1565c0;border:1px solid #bbdefb"
+                  title="{% blocktrans with col=sr.column_name val=sr.filter_value %}Count of records where {{ col }} = {{ val }}{% endblocktrans %}">
+              {{ sr.count }} <span class="font-normal text-txt-muted">{{ sr.filter_value }}</span>{% if sr.last_synced %}<span class="font-normal text-txt-muted text-[10px]"> · {{ sr.last_synced|date:"d/m/Y" }}</span>{% endif %}
+            </span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+        </div>
+        <!-- close button -->
+        <form method="dialog" class="shrink-0 -mt-1">
+          <button class="btn btn-sm btn-ghost btn-circle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Body: scrollable column table ────────────────────────────── -->
+    <div class="overflow-y-auto flex-1 bg-white">
+      {% if tbl.columns %}
+
+      <!-- sticky subheader with search -->
+      <div class="flex items-center gap-3 px-6 py-2.5 border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
+        <span class="font-mono text-[9.5px] uppercase tracking-wider text-txt-muted">
+          csvw:Column · {{ tbl.columns|length }}
+        </span>
+        <div class="flex-1"></div>
+        <div class="relative shrink-0">
+          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none"
+               width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" placeholder="{% trans 'Search columns…' %}"
+            oninput="filterTableModalCols(this, 'tbl-modal-{{ idx }}')"
+            class="input input-sm input-bordered pl-8 w-48 bg-white text-sm">
+        </div>
+      </div>
+
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="px-6 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal">dct:title</th>
+            <th class="px-6 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden sm:table-cell">csvw:name</th>
+            <th class="px-6 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden md:table-cell">csvw:datatype</th>
+            <th class="px-6 py-3 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted text-left font-normal hidden lg:table-cell">skos:inScheme</th>
+            <th class="w-8"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for col in tbl.columns %}
+          <tr class="tbl-col-row border-t border-gray-100 hover:bg-gray-50 {% if col.description %}cursor-pointer{% endif %}"
+              data-col="{{ col.name|lower }} {{ col.title|lower }}"
+              {% if col.description %}onclick="toggleColDesc('tbl-col-desc-{{ idx }}-{{ forloop.counter }}')"{% endif %}>
+            <td class="px-6 py-3">
+              <div class="font-medium text-sm" style="color:#53c0d7">{{ col.title|default:"—" }}</div>
+            </td>
+            <td class="px-6 py-3 font-mono text-xs text-txt-muted hidden sm:table-cell">{{ col.name }}</td>
+            <td class="px-6 py-3 font-mono text-xs text-txt-muted hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
+            <td class="px-6 py-3 hidden lg:table-cell">
+              {% if col.property_url %}
+              <a href="{{ col.property_url }}" target="_blank" rel="noopener"
+                 onclick="event.stopPropagation()"
+                 class="inline-flex items-center gap-1 font-mono text-[11px] no-underline transition-colors"
+                 style="color:#53c0d7">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                {% trans "View" %}
+              </a>
+              {% else %}
+              <span class="text-txt-muted text-xs">—</span>
+              {% endif %}
+            </td>
+            <td class="pr-4 text-right">
+              {% if col.description %}
+              <svg id="tbl-chev-{{ idx }}-{{ forloop.counter }}"
+                   class="text-txt-muted transition-transform duration-200 inline"
+                   width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+              {% endif %}
+            </td>
+          </tr>
+          {% if col.description %}
+          <tr id="tbl-col-desc-{{ idx }}-{{ forloop.counter }}" class="hidden bg-gray-50">
+            <td colspan="5" class="px-6 py-3">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mb-1">dct:description</div>
+              <p class="text-sm text-txt leading-relaxed">{{ col.description }}</p>
+            </td>
+          </tr>
+          {% endif %}
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-8 text-sm text-txt-muted italic">{% trans "No columns available." %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% else %}
+      <p class="text-center py-10 text-sm text-txt-muted italic">{% trans "No columns available." %}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Footer ───────────────────────────────────────────────────── -->
+    {% if tbl.url %}
+    <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 shrink-0">
+      <a href="{{ tbl.url }}" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-1.5 font-mono text-xs no-underline transition-colors"
+         style="color:#53c0d7">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        {% if app == 'fair_genomes' %}{% trans "Open in MOLGENIS" %}{% else %}{% trans "View source" %}{% endif %}
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</dialog>

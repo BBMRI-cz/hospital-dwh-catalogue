@@ -51,36 +51,14 @@
     </div>
   </div>
 
-  <!-- Column table -->
-  {% if columns %}
-  <div class="mb-8">
-    {% include 'catalogue/components/_column_table.html' with columns=columns %}
-  </div>
-  {% endif %}
-
-  {% if stat_groups %}
-  <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8">
-    <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
-      <div class="w-0.5 h-4 rounded shrink-0" style="background:#007fc8"></div>
-      <span class="font-mono text-[10px] uppercase tracking-wider shrink-0" style="color:#007fc8">{% trans "Record counts" %}</span>
-    </div>
-    <div class="divide-y divide-gray-100">
-      {% for key, results in stat_groups.items %}
-      <div class="px-5 py-4">
-        <div class="font-mono text-xs text-txt-muted mb-2">{{ key.0 }} · {{ key.1 }}</div>
-        <div class="flex flex-wrap gap-2">
-          {% for sr in results %}
-          <div class="flex flex-col items-center px-4 py-2 rounded-lg border min-w-[90px]" style="border-color:#bbdefb;background:#f0f8ff">
-            <span class="font-mono font-bold text-2xl leading-none" style="color:#1565c0">{{ sr.count }}</span>
-            <span class="text-xs text-txt-muted mt-1 text-center">{{ sr.filter_value }}</span>
-            {% if sr.last_synced %}
-            <span class="text-[10px] text-txt-muted mt-0.5">{{ sr.last_synced|date:"d/m/Y" }}</span>
-            {% endif %}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endfor %}
+  <!-- Tables and columns — same component for all apps; stats only rendered for fair_genomes -->
+  {% if tables %}
+  {% include 'catalogue/components/_table_list.html' with tables=tables app=app %}
+  {% else %}
+  <div class="card bg-white border border-gray-200 shadow-sm rounded-lg mb-8">
+    <div class="card-body items-center py-12 text-center gap-2">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-txt-muted"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <p class="text-sm text-txt-muted italic">{% trans "No tables available for this distribution." %}</p>
     </div>
   </div>
   {% endif %}

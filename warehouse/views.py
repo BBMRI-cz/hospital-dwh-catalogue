@@ -22,7 +22,7 @@ from shared.dtos import UnifiedDataset, UnifiedDistribution
 from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService as CartService
-from warehouse.models import Column, Distribution
+from warehouse.models import Column, Distribution, Table
 
 PAGE_SIZE = 15
 _CACHE_TTL = 300  # 5 minutes
@@ -464,50 +464,63 @@ class DistributionDetailView(LoginRequiredMixin, View):
             if f.name in _inverse
         ]
 
-        col_qs = (
-            Column.objects.using('metadata_db')
-            .filter(table__distribution_id=name)
-            .select_related('table')
-            .order_by('var_order', 'name')
+        # ── Table + column data — unified structure for both apps ──────────────
+        # Warehouse distributions use metadata_db; fair_genomes use fair_genomes_db.
+        # Stat counts are only populated for fair_genomes; warehouse always has [].
+        from collections import defaultdict
+
+        if app == 'fair_genomes':
+            from fair_genomes.models import Column as AppColumn
+            from fair_genomes.models import StatResult
+            from fair_genomes.models import Table as AppTable
+            using_db = 'fair_genomes_db'
+            col_order = ('table_id', 'name')
+        else:
+            AppTable = Table
+            AppColumn = Column
+            using_db = 'metadata_db'
+            col_order = ('table_id', 'var_order', 'name')
+
+        table_qs = (
+            AppTable.objects.using(using_db)
+            .filter(distribution_id=name)
+            .order_by('name')
         )
-        columns = [
-            {
+        table_names = [t.name for t in table_qs]
+
+        stat_by_table: dict[str, list] = defaultdict(list)
+        if app == 'fair_genomes' and table_names:
+            for sr in StatResult.objects.using('fair_genomes_db').filter(
+                table_name__in=table_names,
+                count__isnull=False,
+            ):
+                stat_by_table[sr.table_name].append(sr)
+
+        col_by_table: dict[str, list] = defaultdict(list)
+        for c in (
+            AppColumn.objects.using(using_db)
+            .filter(table_id__in=table_names)
+            .order_by(*col_order)
+        ):
+            col_by_table[c.table_id].append({
                 'name': c.name,
                 'title': c.title,
                 'description': c.description,
                 'datatype': c.datatype,
-                'type_r': c.type_r,
-                'key_db': c.key_db,
                 'property_url': c.property_url,
+            })
+
+        tables = [
+            {
+                'name': t.name,
+                'title': t.title or t.name,
+                'description': t.description or '',
+                'url': t.url,
+                'columns': col_by_table.get(t.name, []),
+                'stats': stat_by_table.get(t.name, []),
             }
-            for c in col_qs
+            for t in table_qs
         ]
-
-        # For Fair Genomes distributions: attach stat counts grouped by column.
-        # fair_genomes.Table rows are linked to this distribution via their
-        # distribution FK; StatResult rows are keyed by table_name + column_name.
-        stat_groups = None
-        if app == 'fair_genomes':
-            from collections import defaultdict
-
-            from fair_genomes.models import StatResult
-            from fair_genomes.models import Table as FGTable
-
-            fg_table_names = list(
-                FGTable.objects.using('fair_genomes_db')
-                .filter(distribution_id=name)
-                .values_list('name', flat=True)
-            )
-            if fg_table_names:
-                stat_qs = StatResult.objects.using('fair_genomes_db').filter(
-                    table_name__in=fg_table_names,
-                    count__isnull=False,
-                )
-                grouped: dict = defaultdict(list)
-                for sr in stat_qs:
-                    grouped[(sr.table_name, sr.column_name)].append(sr)
-                if grouped:
-                    stat_groups = grouped
 
         return render(
             request,
@@ -515,11 +528,10 @@ class DistributionDetailView(LoginRequiredMixin, View):
             {
                 'distribution': distribution,
                 'dataset': dataset,
-                'columns': columns,
+                'tables': tables,
                 'schema_json': schema_json,
                 'app': app,
                 'dcat_rows': dcat_rows,
-                'stat_groups': stat_groups,
                 'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
             },
         )
