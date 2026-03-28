@@ -136,6 +136,13 @@ class FairGenomesService:
                 report['graphql_filtered_out'] = []
                 report['graphql_fields_not_in_model'] = []
 
+        # ── Phase 3: stat counts — outside transaction so a failed count query
+        # never rolls back the schema sync that just completed successfully.
+        if self.graphql_url:
+            report['stats'] = self._sync_stats()
+        else:
+            report['stats'] = None
+
         return report
 
     def close(self) -> None:
@@ -520,3 +527,87 @@ class FairGenomesService:
             'filtered_out': filtered_out,
             'fields_not_in_model': fields_not_in_model,
         }
+
+    def _sync_stats(self) -> dict:
+        """
+        Fetch counts from MOLGENIS for every definition in ``stat_config`` and
+        write the results back to ``StatResult``.
+
+        Runs *outside* any transaction — a failure for one stat definition is
+        logged and counted but does not prevent the others from being stored.
+
+        Returns a dict with keys:
+            updated  — number of StatResult rows successfully written
+            failed   — number of definitions that raised an error
+            errors   — list of short error strings for reporting
+        """
+        from datetime import datetime, timezone
+
+        from fair_genomes.models import StatResult
+        from fair_genomes.stat_config import get_stat_definitions
+
+        definitions = get_stat_definitions()
+        updated = 0
+        failed = 0
+        errors: list[str] = []
+
+        for defn in definitions:
+            # Build the GraphQL filter expression based on column type.
+            # ref / ref_array columns store their value in a nested ontology
+            # object, so the filter must go one level deeper.
+            if defn.column_type in ('ref', 'ref_array'):
+                filter_expr = (
+                    f'{{ {defn.column}: {{ value: {{ equals: "{defn.filter_value}" }} }} }}'
+                )
+            else:
+                filter_expr = (
+                    f'{{ {defn.column}: {{ equals: "{defn.filter_value}" }} }}'
+                )
+
+            query = f'{{ {defn.table}_agg(filter: {filter_expr}) {{ count }} }}'
+
+            headers: dict[str, str] = {'Content-Type': 'application/json'}
+            if self.api_token:
+                headers['x-molgenis-token'] = self.api_token
+
+            try:
+                response = requests.post(
+                    self.graphql_url,
+                    json={'query': query},
+                    headers=headers,
+                    timeout=self.timeout,
+                )
+                response.raise_for_status()
+                data = response.json()
+            except (requests.RequestException, ValueError) as exc:
+                msg = f'{defn.table}.{defn.column}={defn.filter_value!r}: {exc}'
+                logger.warning('Stat sync failed: %s', msg)
+                errors.append(msg)
+                failed += 1
+                continue
+
+            if 'errors' in data:
+                msg = f'{defn.table}.{defn.column}={defn.filter_value!r}: GraphQL errors {data["errors"]}'
+                logger.warning('Stat sync GraphQL error: %s', msg)
+                errors.append(msg)
+                failed += 1
+                continue
+
+            count = (
+                data.get('data', {})
+                .get(f'{defn.table}_agg', {})
+                .get('count')
+            )
+
+            StatResult.objects.using('fair_genomes_db').update_or_create(
+                table_name=defn.table,
+                column_name=defn.column,
+                filter_value=defn.filter_value,
+                defaults={
+                    'count': count,
+                    'last_synced': datetime.now(tz=timezone.utc),
+                },
+            )
+            updated += 1
+
+        return {'updated': updated, 'failed': failed, 'errors': errors}

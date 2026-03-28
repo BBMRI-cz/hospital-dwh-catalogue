@@ -483,6 +483,32 @@ class DistributionDetailView(LoginRequiredMixin, View):
             for c in col_qs
         ]
 
+        # For Fair Genomes distributions: attach stat counts grouped by column.
+        # fair_genomes.Table rows are linked to this distribution via their
+        # distribution FK; StatResult rows are keyed by table_name + column_name.
+        stat_groups = None
+        if app == 'fair_genomes':
+            from collections import defaultdict
+
+            from fair_genomes.models import StatResult
+            from fair_genomes.models import Table as FGTable
+
+            fg_table_names = list(
+                FGTable.objects.using('fair_genomes_db')
+                .filter(distribution_id=name)
+                .values_list('name', flat=True)
+            )
+            if fg_table_names:
+                stat_qs = StatResult.objects.using('fair_genomes_db').filter(
+                    table_name__in=fg_table_names,
+                    count__isnull=False,
+                )
+                grouped: dict = defaultdict(list)
+                for sr in stat_qs:
+                    grouped[(sr.table_name, sr.column_name)].append(sr)
+                if grouped:
+                    stat_groups = grouped
+
         return render(
             request,
             self.template_name,
@@ -493,6 +519,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
                 'schema_json': schema_json,
                 'app': app,
                 'dcat_rows': dcat_rows,
+                'stat_groups': stat_groups,
                 'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
             },
         )

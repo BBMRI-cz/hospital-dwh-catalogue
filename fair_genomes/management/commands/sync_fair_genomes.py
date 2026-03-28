@@ -171,3 +171,20 @@ class Command(BaseCommand):
                 )
             )
 
+        # ── Stat counts ────────────────────────────────────────────────────────
+        stats = report.get('stats')
+        if stats is not None:
+            self.stdout.write('')
+            self.stdout.write('STAT COUNTS:')
+            self.stdout.write(
+                self.style.SUCCESS(f"  Updated: {stats['updated']}")
+                if stats['updated']
+                else f"  Updated: {stats['updated']}"
+            )
+            if stats['failed']:
+                self.stdout.write(
+                    self.style.WARNING(f"  Failed:  {stats['failed']}")
+                )
+                for err in stats['errors']:
+                    self.stdout.write(self.style.WARNING(f'    {err}'))
+

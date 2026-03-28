@@ -21,6 +21,7 @@ FK strategy
   Cross-DB FKs are never used (enforced by WarehouseRouter).
 """
 
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from shared.abstract_models import (
@@ -149,3 +150,50 @@ class Column(ColumnBase):
         verbose_name = _('Column')
         verbose_name_plural = _('Columns')
         ordering = ['name']
+
+
+class StatResult(models.Model):
+    """
+    Persisted count for a single (table, column, filter_value) stat query.
+
+    Definitions of *what* to count live in ``fair_genomes.stat_config`` —
+    this model only stores the *results* written back by the sync.
+
+    Keys are plain strings matching ``stat_config.StatDef`` fields so that
+    results survive re-syncs even if the Column model rows are replaced.
+    """
+
+    table_name = models.CharField(
+        max_length=100,
+        verbose_name=_('Table name'),
+        help_text=_('MOLGENIS table name, e.g. "sequencing"'),
+    )
+    column_name = models.CharField(
+        max_length=200,
+        verbose_name=_('Column name'),
+        help_text=_('Unqualified column name, e.g. "sequencinginstrumentmodel"'),
+    )
+    filter_value = models.CharField(
+        max_length=500,
+        verbose_name=_('Filter value'),
+        help_text=_('The value that was counted, e.g. "MiSeq"'),
+    )
+    count = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Count'),
+        help_text=_('Number of records matching the filter; null means not yet synced'),
+    )
+    last_synced = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last synced'),
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_stat_result'
+        verbose_name = _('Stat Result')
+        verbose_name_plural = _('Stat Results')
+        unique_together = [('table_name', 'column_name', 'filter_value')]
+        ordering = ['table_name', 'column_name', 'filter_value']
