@@ -293,6 +293,11 @@ LOGGING = {
         'django': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
         'django.request': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
         'django.security': {'handlers': ['console', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        # Suppress INFO access-log spam from Django's dev HTTP server — all requests are already
+        # captured by catalogue.request (RequestLoggingMiddleware).  Keep WARNING so 4xx/5xx show.
+        'django.server': {'handlers': ['console', 'file', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        # Suppress file-watcher polling from runserver's auto-reloader — not relevant in production.
+        'django.utils.autoreload': {'handlers': ['console', 'file', 'error_file'], 'level': 'WARNING', 'propagate': False},
         'django_redis': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
         'warehouse': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
         'ticketing': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
