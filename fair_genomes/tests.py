@@ -247,6 +247,7 @@ class SyncStatsTest(TestCase):
     @patch('fair_genomes.services.fair_genomes_service.requests.post')
     def test_sync_stats_http_error(self, mock_post):
         import requests as req_lib
+
         mock_post.side_effect = req_lib.RequestException('connection refused')
 
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')

@@ -22,8 +22,10 @@ sync() returns a structured report dict for downstream reporting.
 """
 
 import logging
+from datetime import UTC
 
 import requests
+
 from django.conf import settings
 from django.db import transaction
 
@@ -101,6 +103,7 @@ class FairGenomesService:
             rdf_format = self._detect_format(response)
             try:
                 from rdflib import Graph
+
                 graph = Graph()
                 graph.parse(data=response.text, format=rdf_format)
             except Exception as exc:
@@ -114,19 +117,23 @@ class FairGenomesService:
 
         # ── Phase 2: all DB writes in one atomic transaction ──────────────────
         with transaction.atomic(using='fair_genomes_db'):
-            report = self._process_graph(graph) if graph else {
-                'status': 'partial',
-                'rdf_url': '',
-                'fetched': {'agents': [], 'catalogs': [], 'datasets': []},
-                'saved': {
-                    'agents': {'created': [], 'updated': []},
-                    'catalogs': {'created': [], 'updated': []},
-                },
-                'not_saved': {'datasets': []},
-                'partial_saves': {'catalogs': {}},
-                'rdf_fields_not_in_model': {},
-                'model_fields_not_in_rdf': {},
-            }
+            report = (
+                self._process_graph(graph)
+                if graph
+                else {
+                    'status': 'partial',
+                    'rdf_url': '',
+                    'fetched': {'agents': [], 'catalogs': [], 'datasets': []},
+                    'saved': {
+                        'agents': {'created': [], 'updated': []},
+                        'catalogs': {'created': [], 'updated': []},
+                    },
+                    'not_saved': {'datasets': []},
+                    'partial_saves': {'catalogs': {}},
+                    'rdf_fields_not_in_model': {},
+                    'model_fields_not_in_rdf': {},
+                }
+            )
 
             if graphql_tables is not None:
                 gql_report = self._process_graphql_tables(graphql_tables)
@@ -172,9 +179,7 @@ class FairGenomesService:
             )
             response.raise_for_status()
         except requests.RequestException as exc:
-            raise FairGenomesAPIException(
-                f'Failed to fetch RDF from {url}: {exc}'
-            ) from exc
+            raise FairGenomesAPIException(f'Failed to fetch RDF from {url}: {exc}') from exc
         return response
 
     @staticmethod
@@ -200,7 +205,7 @@ class FairGenomesService:
     def _process_graph(self, g) -> dict:
         """Walk the parsed RDF graph and produce a structured sync report."""
         from rdflib import Literal, Namespace, URIRef
-        from rdflib.namespace import DCAT, DCTERMS, FOAF, RDFS, RDF
+        from rdflib.namespace import DCAT, DCTERMS, FOAF, RDF, RDFS
 
         # The FDP encodes each field twice: once with a standard predicate
         # (e.g. dcterms:title) and once with a column-specific predicate
@@ -349,14 +354,22 @@ class FairGenomesService:
                 ('description', DCTERMS.description, col('Dataset', 'description')),
                 ('theme', DCAT.theme, col('Dataset', 'theme')),
                 # RDF column is named "conformedTo"; model field is conforms_to
-                ('conforms_to [RDF: conformedTo]', DCTERMS.conformsTo, col('Dataset', 'conformedTo')),
+                (
+                    'conforms_to [RDF: conformedTo]',
+                    DCTERMS.conformsTo,
+                    col('Dataset', 'conformedTo'),
+                ),
                 ('keyword', DCAT.keyword, col('Dataset', 'keyword')),
                 ('source', col('Dataset', 'source')),
                 ('creator', col('Dataset', 'creator')),
                 ('provenance', col('Dataset', 'provenance')),
                 ('issued', FDP_O.metadataIssued, col('Dataset', 'issued')),
                 ('modified', FDP_O.metadataModified, col('Dataset', 'modified')),
-                ('contact_point_raw (email string)', DCAT.contactPoint, col('Dataset', 'contactPoint')),
+                (
+                    'contact_point_raw (email string)',
+                    DCAT.contactPoint,
+                    col('Dataset', 'contactPoint'),
+                ),
                 ('publisher (URI)', DCTERMS.publisher, col('Dataset', 'publisher')),
             ]
             for entry in field_map:
@@ -374,19 +387,21 @@ class FairGenomesService:
             if rights_holder_val:
                 rdf_not_in_model['rightsHolder'] = rights_holder_val
 
-            report['not_saved']['datasets'].append({
-                'name': name,
-                'reason': 'missing required fields — cannot save without them',
-                'missing_required': [
-                    'hdab — non-nullable FK to Agent, not present in RDF',
-                    'type — not present in RDF',
-                    'access_rights — not present in RDF',
-                    'applicable_legislation — not present in RDF',
-                    'health_category — not present in RDF',
-                ],
-                'available_fields': list(available.keys()),
-                'rdf_fields_not_in_model': rdf_not_in_model,
-            })
+            report['not_saved']['datasets'].append(
+                {
+                    'name': name,
+                    'reason': 'missing required fields — cannot save without them',
+                    'missing_required': [
+                        'hdab — non-nullable FK to Agent, not present in RDF',
+                        'type — not present in RDF',
+                        'access_rights — not present in RDF',
+                        'applicable_legislation — not present in RDF',
+                        'health_category — not present in RDF',
+                    ],
+                    'available_fields': list(available.keys()),
+                    'rdf_fields_not_in_model': rdf_not_in_model,
+                }
+            )
 
         # ── OVERALL STATUS ────────────────────────────────────────────────────
         any_saved = any(
@@ -477,7 +492,11 @@ class FairGenomesService:
 
         # Derive a stable base URL for the ``url`` field (mandatory, non-nullable).
         # Use the first semantic IRI if present, otherwise build from the endpoint.
-        base_url = self.graphql_url.split('/graphql')[0] if '/graphql' in self.graphql_url else self.graphql_url
+        base_url = (
+            self.graphql_url.split('/graphql')[0]
+            if '/graphql' in self.graphql_url
+            else self.graphql_url
+        )
 
         # Ensure every synced table has a browseable Distribution → Dataset chain.
         auto_distribution = self._ensure_fg_distribution(base_url)
@@ -587,7 +606,8 @@ class FairGenomesService:
 
         logger.info(
             'Auto-distribution ensured: %s (dataset: %s)',
-            distribution.name, dataset.name,
+            distribution.name,
+            dataset.name,
         )
         return distribution
 
@@ -604,7 +624,7 @@ class FairGenomesService:
             failed   — number of definitions that raised an error
             errors   — list of short error strings for reporting
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from fair_genomes.models import StatResult
         from fair_genomes.stat_config import get_stat_definitions
@@ -625,9 +645,7 @@ class FairGenomesService:
                     f'{{ {defn.column}: {{ value: {{ equals: "{defn.filter_value}" }} }} }}'
                 )
             else:
-                filter_expr = (
-                    f'{{ {defn.column}: {{ equals: "{defn.filter_value}" }} }}'
-                )
+                filter_expr = f'{{ {defn.column}: {{ equals: "{defn.filter_value}" }} }}'
 
             query = f'{{ {defn.table.capitalize()}_agg(filter: {filter_expr}) {{ count }} }}'
 
@@ -658,11 +676,7 @@ class FairGenomesService:
                 failed += 1
                 continue
 
-            count = (
-                data.get('data', {})
-                .get(f'{defn.table.capitalize()}_agg', {})
-                .get('count')
-            )
+            count = data.get('data', {}).get(f'{defn.table.capitalize()}_agg', {}).get('count')
 
             StatResult.objects.using('fair_genomes_db').update_or_create(
                 table_name=defn.table,
@@ -670,7 +684,7 @@ class FairGenomesService:
                 filter_value=defn.filter_value,
                 defaults={
                     'count': count,
-                    'last_synced': datetime.now(tz=timezone.utc),
+                    'last_synced': datetime.now(tz=UTC),
                 },
             )
             updated += 1

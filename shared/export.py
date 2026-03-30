@@ -35,7 +35,9 @@ def _build_context() -> dict[str, str]:
 
         return get_context_prefixes()
     except Exception:
-        logger.warning('Could not load JSON-LD context prefixes from schema registry', exc_info=True)
+        logger.warning(
+            'Could not load JSON-LD context prefixes from schema registry', exc_info=True
+        )
         return {}
 
 

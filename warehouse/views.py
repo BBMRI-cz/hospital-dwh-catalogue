@@ -10,12 +10,13 @@ import dataclasses
 import json
 import re
 from collections import Counter
+from collections.abc import Callable
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import View
 
 from shared.dtos import UnifiedDataset, UnifiedDistribution
@@ -30,11 +31,11 @@ _CACHE_KEY_DATASETS = 'catalogue_all_datasets'
 _CACHE_KEY_SCHEMA = 'catalogue_schema_json'
 
 
-
 def page_not_found(request, exception):
     if not request.user.is_authenticated:
         return redirect('login')
     return render(request, '404.html', status=404)
+
 
 def _to_snake(camel: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()
@@ -219,7 +220,7 @@ def _theme_label(value: str) -> str:
 def _make_sidebar_items(
     counter: Counter,
     active: set,
-    label_fn: object = None,
+    label_fn: Callable[[str], str] | None = None,
 ) -> list[dict]:
     """Build [{value, label, count, checked}] dicts for sidebar checkbox groups.
 
@@ -345,9 +346,15 @@ class CatalogueIndexView(LoginRequiredMixin, View):
                 # Sidebar checkbox groups
                 'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
                 'sidebar_sources': _make_sidebar_items(src_counter, active_sources),
-                'sidebar_custodians': _make_sidebar_items(custodian_counter, active_custodians, label_fn=_agent_label),
-                'sidebar_health_categories': _make_sidebar_items(hc_counter, active_cats, label_fn=_health_category_label),
-                'sidebar_themes': _make_sidebar_items(theme_counter, active_themes, label_fn=_theme_label),
+                'sidebar_custodians': _make_sidebar_items(
+                    custodian_counter, active_custodians, label_fn=_agent_label
+                ),
+                'sidebar_health_categories': _make_sidebar_items(
+                    hc_counter, active_cats, label_fn=_health_category_label
+                ),
+                'sidebar_themes': _make_sidebar_items(
+                    theme_counter, active_themes, label_fn=_theme_label
+                ),
                 'sidebar_columns': _make_sidebar_items(col_counter, active_columns),
                 # Status bar counts
                 'sidebar_counts': {
@@ -473,6 +480,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
             from fair_genomes.models import Column as AppColumn
             from fair_genomes.models import StatResult
             from fair_genomes.models import Table as AppTable
+
             using_db = 'fair_genomes_db'
             col_order = ('table_id', 'name')
         else:
@@ -481,11 +489,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
             using_db = 'metadata_db'
             col_order = ('table_id', 'var_order', 'name')
 
-        table_qs = (
-            AppTable.objects.using(using_db)
-            .filter(distribution_id=name)
-            .order_by('name')
-        )
+        table_qs = AppTable.objects.using(using_db).filter(distribution_id=name).order_by('name')
         table_names = [t.name for t in table_qs]
 
         stat_by_table: dict[str, list] = defaultdict(list)
@@ -498,17 +502,17 @@ class DistributionDetailView(LoginRequiredMixin, View):
 
         col_by_table: dict[str, list] = defaultdict(list)
         for c in (
-            AppColumn.objects.using(using_db)
-            .filter(table_id__in=table_names)
-            .order_by(*col_order)
+            AppColumn.objects.using(using_db).filter(table_id__in=table_names).order_by(*col_order)
         ):
-            col_by_table[c.table_id].append({
-                'name': c.name,
-                'title': c.title,
-                'description': c.description,
-                'datatype': c.datatype,
-                'property_url': c.property_url,
-            })
+            col_by_table[c.table_id].append(
+                {
+                    'name': c.name,
+                    'title': c.title,
+                    'description': c.description,
+                    'datatype': c.datatype,
+                    'property_url': c.property_url,
+                }
+            )
 
         tables = [
             {

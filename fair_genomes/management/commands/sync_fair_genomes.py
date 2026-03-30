@@ -33,13 +33,13 @@ class Command(BaseCommand):
         status = report.get('status', 'unknown')
 
         if status == 'skipped':
-            self.stdout.write(self.style.WARNING(f"Sync skipped: {report.get('reason')}"))
+            self.stdout.write(self.style.WARNING(f'Sync skipped: {report.get("reason")}'))
             return
 
         # ── Summary header ────────────────────────────────────────────────────
         style_fn = self.style.SUCCESS if status == 'complete' else self.style.WARNING
         self.stdout.write(style_fn(f'Sync status: {status.upper()}'))
-        self.stdout.write(f"Source: {report.get('rdf_url')}")
+        self.stdout.write(f'Source: {report.get("rdf_url")}')
         self.stdout.write('')
 
         # ── Fetched ───────────────────────────────────────────────────────────
@@ -57,9 +57,7 @@ class Command(BaseCommand):
             created = saved.get(entity, {}).get('created', [])
             updated = saved.get(entity, {}).get('updated', [])
             if created:
-                self.stdout.write(
-                    self.style.SUCCESS(f'  {entity.capitalize()} created: {created}')
-                )
+                self.stdout.write(self.style.SUCCESS(f'  {entity.capitalize()} created: {created}'))
             if updated:
                 self.stdout.write(f'  {entity.capitalize()} updated: {updated}')
             if not created and not updated:
@@ -94,7 +92,7 @@ class Command(BaseCommand):
                 for f in ds.get('missing_required', []):
                     self.stdout.write(f'    Missing required: {f}')
                 self.stdout.write(
-                    f"    Available in RDF:  {', '.join(ds.get('available_fields', []))}"
+                    f'    Available in RDF:  {", ".join(ds.get("available_fields", []))}'
                 )
                 rdf_not_in_model = ds.get('rdf_fields_not_in_model', {})
                 if rdf_not_in_model:
@@ -116,8 +114,7 @@ class Command(BaseCommand):
         model_not_in_rdf = report.get('model_fields_not_in_rdf', {})
         if model_not_in_rdf:
             self.stdout.write(
-                'MODEL FIELDS NOT IN RDF '
-                '(must be filled manually or via a second sync phase):'
+                'MODEL FIELDS NOT IN RDF (must be filled manually or via a second sync phase):'
             )
             for entity, fields in model_not_in_rdf.items():
                 self.stdout.write(f'  {entity}: {", ".join(fields)}')
@@ -138,7 +135,9 @@ class Command(BaseCommand):
             self.stdout.write('GRAPHQL SYNCED:')
             if tables_created:
                 self.stdout.write(
-                    self.style.SUCCESS(f'  Tables created ({len(tables_created)}): {tables_created}')
+                    self.style.SUCCESS(
+                        f'  Tables created ({len(tables_created)}): {tables_created}'
+                    )
                 )
             if tables_updated:
                 self.stdout.write(f'  Tables updated ({len(tables_updated)}): {tables_updated}')
@@ -146,23 +145,21 @@ class Command(BaseCommand):
                 self.stdout.write('  Tables: nothing saved')
 
             self.stdout.write(
-                f"  Columns: {cols.get('created', 0)} created, {cols.get('updated', 0)} updated"
+                f'  Columns: {cols.get("created", 0)} created, {cols.get("updated", 0)} updated'
             )
 
             filtered = report.get('graphql_filtered_out', [])
             if filtered:
                 self.stdout.write(
                     self.style.WARNING(
-                        f'  Filtered out (ONTOLOGIES, not catalogued) '
-                        f'({len(filtered)}): {filtered}'
+                        f'  Filtered out (ONTOLOGIES, not catalogued) ({len(filtered)}): {filtered}'
                     )
                 )
 
             gql_no_model = report.get('graphql_fields_not_in_model', [])
             if gql_no_model:
                 self.stdout.write(
-                    '  GraphQL column fields with no model equivalent: '
-                    + ', '.join(gql_no_model)
+                    '  GraphQL column fields with no model equivalent: ' + ', '.join(gql_no_model)
                 )
         elif graphql_url == '':
             self.stdout.write(
@@ -177,14 +174,11 @@ class Command(BaseCommand):
             self.stdout.write('')
             self.stdout.write('STAT COUNTS:')
             self.stdout.write(
-                self.style.SUCCESS(f"  Updated: {stats['updated']}")
+                self.style.SUCCESS(f'  Updated: {stats["updated"]}')
                 if stats['updated']
-                else f"  Updated: {stats['updated']}"
+                else f'  Updated: {stats["updated"]}'
             )
             if stats['failed']:
-                self.stdout.write(
-                    self.style.WARNING(f"  Failed:  {stats['failed']}")
-                )
+                self.stdout.write(self.style.WARNING(f'  Failed:  {stats["failed"]}'))
                 for err in stats['errors']:
                     self.stdout.write(self.style.WARNING(f'    {err}'))
-

@@ -24,7 +24,16 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from fair_genomes.models import Agent, Catalog, Column, ContactPoint, Dataset, Distribution, StatResult, Table
+from fair_genomes.models import (
+    Agent,
+    Catalog,
+    Column,
+    ContactPoint,
+    Dataset,
+    Distribution,
+    StatResult,
+    Table,
+)
 
 logger = logging.getLogger(__name__)
 

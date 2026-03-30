@@ -290,21 +290,61 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
-        'django': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'django': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'django.request': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
-        'django.security': {'handlers': ['console', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        'django.security': {
+            'handlers': ['console', 'error_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         # Suppress INFO access-log spam from Django's dev HTTP server — all requests are already
         # captured by catalogue.request (RequestLoggingMiddleware).  Keep WARNING so 4xx/5xx show.
-        'django.server': {'handlers': ['console', 'file', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        'django.server': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         # Suppress file-watcher polling from runserver's auto-reloader — not relevant in production.
-        'django.utils.autoreload': {'handlers': ['console', 'file', 'error_file'], 'level': 'WARNING', 'propagate': False},
+        'django.utils.autoreload': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         'django_redis': {'handlers': ['error_file'], 'level': 'ERROR', 'propagate': False},
-        'warehouse': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
-        'ticketing': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
-        'fair_genomes': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
-        'schema_registry': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
-        'catalogue': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
-        'catalogue.request': {'handlers': ['console', 'file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'warehouse': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'ticketing': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'fair_genomes': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'schema_registry': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'catalogue': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'catalogue.request': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 
@@ -333,7 +373,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Fair Genomes Integration Configuration
 FAIR_GENOMES_RDF_URL = config('FAIR_GENOMES_RDF_URL', default='')
-FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')   # GraphQL schema endpoint
+FAIR_GENOMES_API_URL = config('FAIR_GENOMES_API_URL', default='')  # GraphQL schema endpoint
 FAIR_GENOMES_API_TOKEN = config('FAIR_GENOMES_API_TOKEN', default='')  # x-molgenis-token header
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int)
 

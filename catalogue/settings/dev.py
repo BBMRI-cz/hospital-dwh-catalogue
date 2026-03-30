@@ -34,5 +34,3 @@ CACHES = {
 
 # Email backend for development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-

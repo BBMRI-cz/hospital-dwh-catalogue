@@ -119,7 +119,9 @@ class CartView(LoginRequiredMixin, View):
         )
         logger.info(
             'TicketRequest created: pk=%s user=%s items=%d',
-            ticket.pk, request.user, len(cart),
+            ticket.pk,
+            request.user,
+            len(cart),
         )
 
         for item in cart:
@@ -147,7 +149,9 @@ class CartView(LoginRequiredMixin, View):
             ticket.save()
             logger.info(
                 'Ticket submitted to Alvao: local_pk=%s alvao_id=%s user=%s',
-                ticket.pk, response.ticket_id, request.user,
+                ticket.pk,
+                response.ticket_id,
+                request.user,
             )
             CartService.clear(request.session)
             ticket_id = response.ticket_id or ''

@@ -48,7 +48,9 @@ class CartService:
                 return False
 
         if len(cart) >= CART_MAX_ITEMS:
-            logger.debug('Cart add rejected: app=%s name=%s cart full (%d)', app, name, CART_MAX_ITEMS)
+            logger.debug(
+                'Cart add rejected: app=%s name=%s cart full (%d)', app, name, CART_MAX_ITEMS
+            )
             return False
 
         cart.append({'app': app, 'name': name, 'title': title})
@@ -56,7 +58,10 @@ class CartService:
         session.modified = True
         logger.info(
             'Cart add: app=%s name=%s session=%s size=%d',
-            app, name, session.session_key, len(cart),
+            app,
+            name,
+            session.session_key,
+            len(cart),
         )
         return True
 
@@ -76,7 +81,10 @@ class CartService:
         session.modified = True
         logger.info(
             'Cart remove: app=%s name=%s session=%s size=%d',
-            app, name, session.session_key, len(new_cart),
+            app,
+            name,
+            session.session_key,
+            len(new_cart),
         )
         return True
 

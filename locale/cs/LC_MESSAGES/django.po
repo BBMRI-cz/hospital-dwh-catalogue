@@ -77,16 +77,12 @@ msgstr "Distribuce"
 
 #: fair_genomes/models.py:132 shared/abstract_models.py:634
 #: warehouse/models.py:152
-#, fuzzy
-#| msgid "Ref Table"
 msgid "Table"
-msgstr "Referenční tabulka"
+msgstr "Tabulka"
 
 #: fair_genomes/models.py:133 warehouse/models.py:153
-#, fuzzy
-#| msgid "Tables ready"
 msgid "Tables"
-msgstr "Tabulky připraveny"
+msgstr "Tabulky"
 
 #: fair_genomes/models.py:150 warehouse/models.py:213
 #: warehouse/templates/catalogue/index.html:56
@@ -99,58 +95,48 @@ msgid "Columns"
 msgstr "Sloupce"
 
 #: fair_genomes/models.py:168
-#, fuzzy
-#| msgid "Table Name"
 msgid "Table name"
 msgstr "Název tabulky"
 
 #: fair_genomes/models.py:169
 msgid "MOLGENIS table name, e.g. \"sequencing\""
-msgstr ""
+msgstr "Název tabulky v MOLGENIS, např. "sequencing""
 
 #: fair_genomes/models.py:173
-#, fuzzy
-#| msgid "Column Name"
 msgid "Column name"
 msgstr "Název sloupce"
 
 #: fair_genomes/models.py:174
 msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
-msgstr ""
+msgstr "Nekvalifikovaný název sloupce, např. "sequencinginstrumentmodel""
 
 #: fair_genomes/models.py:178
 msgid "Filter value"
-msgstr ""
+msgstr "Hodnota filtru"
 
 #: fair_genomes/models.py:179
 msgid "The value that was counted, e.g. \"MiSeq\""
-msgstr ""
+msgstr "Počíaná hodnota, např. "MiSeq""
 
 #: fair_genomes/models.py:184
-#, fuzzy
-#| msgid "Items Count"
 msgid "Count"
-msgstr "Počet položek"
+msgstr "Počet"
 
 #: fair_genomes/models.py:185
 msgid "Number of records matching the filter; null means not yet synced"
-msgstr ""
+msgstr "Počet záznamů odpovídajících filtru; null znamená dosud nesynchronizováno"
 
 #: fair_genomes/models.py:190
 msgid "Last synced"
-msgstr ""
+msgstr "Naposledy synchronizováno"
 
 #: fair_genomes/models.py:196
-#, fuzzy
-#| msgid "Static Files"
 msgid "Stat Result"
-msgstr "Statické soubory"
+msgstr "Výsledek statistiky"
 
 #: fair_genomes/models.py:197
-#, fuzzy
-#| msgid "Status"
 msgid "Stat Results"
-msgstr "Stav"
+msgstr "Výsledky statistik"
 
 #: schema_registry/apps.py:8
 msgid "Schema Registry"
@@ -204,7 +190,7 @@ msgstr "Popis"
 
 #: shared/abstract_models.py:107
 msgid "dct:description — description of the agent's activities (0..*)"
-msgstr ""
+msgstr "dct:description — popis činností agenta (0..*)"
 
 #: shared/abstract_models.py:117
 msgid "Contact information for this agent"
@@ -221,16 +207,12 @@ msgid "Title"
 msgstr "Název"
 
 #: shared/abstract_models.py:148 shared/abstract_models.py:214
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:title — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
+msgstr "dct:title — povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:154 shared/abstract_models.py:226
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:description — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
+msgstr "dct:description — povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:163 shared/abstract_models.py:263
 msgid "Publisher"
@@ -246,10 +228,6 @@ msgid "Applicable Legislation"
 msgstr "Příslušné právní předpisy"
 
 #: shared/abstract_models.py:171
-#, fuzzy
-#| msgid ""
-#| "Legal basis under which this catalog is published (mandatory per "
-#| "HealthDCAT-AP v6)"
 msgid ""
 "Legal basis under which this catalog is published — must be a URI/IRI "
 "(mandatory per HealthDCAT-AP v6, e.g. http://data.europa.eu/eli/reg/2022/868/"
@@ -266,7 +244,7 @@ msgstr "Verze"
 
 #: shared/abstract_models.py:230
 msgid "Identifier"
-msgstr ""
+msgstr "Identifikátor"
 
 #: shared/abstract_models.py:232
 msgid ""
@@ -328,8 +306,6 @@ msgid "Keywords"
 msgstr "Klíčová slova"
 
 #: shared/abstract_models.py:289
-#, fuzzy
-#| msgid "dcat:keyword — comma-separated keywords"
 msgid ""
 "dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, "
 "1..*)"
@@ -342,36 +318,28 @@ msgid "Source"
 msgstr "Zdroj"
 
 #: shared/abstract_models.py:301
-#, fuzzy
-#| msgid "dct:source — URI of the source dataset"
 msgid "dct:source — source dataset this one is derived from"
-msgstr "dct:source — URI zdrojového souboru dat"
+msgstr "dct:source — zdrojový soubor dat, ze kterého je tento odvozen"
 
 #: shared/abstract_models.py:310
 msgid "Creator"
 msgstr "Autor"
 
 #: shared/abstract_models.py:311
-#, fuzzy
-#| msgid "dct:creator — name(s) of the dataset creator(s)"
 msgid "dct:creator — agent who created this dataset"
-msgstr "dct:creator — jméno/jména autora/autorů souboru dat"
+msgstr "dct:creator — agent, který vytvořil tento soubor dat"
 
 #: shared/abstract_models.py:320
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
+msgstr "dcat:contactPoint — povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:325
 msgid "Provenance"
 msgstr "Původ"
 
 #: shared/abstract_models.py:326
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
+msgstr "dct:provenance — povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:342
 msgid "Access Rights"
@@ -384,8 +352,6 @@ msgstr ""
 "dct:accessRights — URI řízeného slovníku (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:351 shared/abstract_models.py:529
-#, fuzzy
-#| msgid "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
 msgid ""
 "dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP "
 "v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)"
@@ -419,7 +385,7 @@ msgstr ""
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 #: warehouse/templates/catalogue/index.html:52
 msgid "Custodian"
-msgstr ""
+msgstr "Správce"
 
 #: shared/abstract_models.py:381
 msgid ""
@@ -432,24 +398,20 @@ msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgstr "HDAB je povinné (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:413
-#, fuzzy
-#| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "contact_point is mandatory (HealthDCAT-AP v6)."
-msgstr "HDAB je povinné (HealthDCAT-AP v6)."
+msgstr "Kontaktní bod je povinný (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:418
-#, fuzzy
-#| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "The HDAB agent must have a contact point (HealthDCAT-AP v6)."
-msgstr "HDAB je povinné (HealthDCAT-AP v6)."
+msgstr "Agent HDAB musí mít kontaktní bod (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:425
 msgid "The publisher agent must have a contact point (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "Agent vydavatele musí mít kontaktní bod (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:434
 msgid "The custodian agent must have a contact point (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "Agent správce musí mít kontaktní bod (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:459
 msgid "Unique identifier for this distribution"
@@ -500,26 +462,20 @@ msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgstr "dcat:accessURL (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:537
-#, fuzzy
-#| msgid "License"
 msgid "Licence"
 msgstr "Licence"
 
 #: shared/abstract_models.py:538
 msgid "dct:license — licence under which this distribution is made available"
-msgstr ""
+msgstr "dct:license — licence, pod níž je tato distribuce zpřístupněna"
 
 #: shared/abstract_models.py:570
-#, fuzzy
-#| msgid "Unique identifier for this catalog"
 msgid "csvw:name — unique identifier for this table"
-msgstr "Jedinečný identifikátor tohoto katalogu"
+msgstr "csvw:name — jedinečný identifikátor této tabulky"
 
 #: shared/abstract_models.py:579
-#, fuzzy
-#| msgid "Distribution (table) this attribute belongs to"
 msgid "Distribution this table belongs to"
-msgstr "Distribuce (tabulka), ke které tento atribut patří"
+msgstr "Distribuce, ke které tato tabulka patří"
 
 #: shared/abstract_models.py:583
 msgid "URL"
@@ -527,47 +483,35 @@ msgstr "URL"
 
 #: shared/abstract_models.py:584
 msgid "csvw:url — physical location / connection string for this table"
-msgstr ""
+msgstr "csvw:url — fyzické umístění / připojovací řetězec pro tuto tabulku"
 
 #: shared/abstract_models.py:591
-#, fuzzy
-#| msgid "Human-readable column name"
 msgid "csvw:title — human-readable table name"
-msgstr "Lidsky čitelný název sloupce"
+msgstr "csvw:title — lidsky čitelný název tabulky"
 
 #: shared/abstract_models.py:597 shared/abstract_models.py:644
-#, fuzzy
-#| msgid "Description"
 msgid "dct:description"
-msgstr "Popis"
+msgstr "dct:description"
 
 #: shared/abstract_models.py:626
-#, fuzzy
-#| msgid "Unique column / variable identifier"
 msgid "csvw:name — unique column identifier"
-msgstr "Jedinečný identifikátor sloupce / proměnné"
+msgstr "csvw:name — jedinečný identifikátor sloupce"
 
 #: shared/abstract_models.py:635
-#, fuzzy
-#| msgid "Dataset this distribution belongs to"
 msgid "Table this column belongs to"
-msgstr "Soubor dat, ke kterému tato distribuce patří"
+msgstr "Tabulka, ke které tento sloupec patří"
 
 #: shared/abstract_models.py:640
-#, fuzzy
-#| msgid "Human-readable column name"
 msgid "csvw:title — human-readable column name"
-msgstr "Lidsky čitelný název sloupce"
+msgstr "csvw:title — lidsky čitelný název sloupce"
 
 #: shared/abstract_models.py:648
 msgid "Datatype"
 msgstr "Datový typ"
 
 #: shared/abstract_models.py:649
-#, fuzzy
-#| msgid "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
 msgid "csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)"
-msgstr "Datový typ sloupce (např. VARCHAR, INTEGER, DATE)"
+msgstr "csvw:datatype — datový typ sloupce (např. VARCHAR, INTEGER, DATE)"
 
 #: shared/abstract_models.py:655
 msgid "Property URL"
@@ -575,7 +519,7 @@ msgstr "URL vlastnosti"
 
 #: shared/abstract_models.py:656
 msgid "csvw:propertyUrl — semantic property URI"
-msgstr ""
+msgstr "csvw:propertyUrl — URI sémantické vlastnosti"
 
 #: shared/validators.py:33
 #, python-format
@@ -818,8 +762,7 @@ msgid "Data access request"
 msgstr "Žádost o přístup k datům"
 
 #: ticketing/views.py:157
-#, fuzzy, python-format
-#| msgid "Your request has been submitted."
+#, python-format
 msgid "Your request has been submitted — ticket #%(ticket_id)s"
 msgstr "Váš požadavek byl odeslán."
 
@@ -937,14 +880,12 @@ msgid "Search columns…"
 msgstr "Hledat ve sloupcích…"
 
 #: warehouse/templates/catalogue/components/_column_table.html:27
-#, fuzzy
-#| msgid "DB Key"
 msgid "Key"
 msgstr "Klíč DB"
 
 #: warehouse/templates/catalogue/components/_column_table.html:31
 msgid "R type"
-msgstr ""
+msgstr "Typ R"
 
 #: warehouse/templates/catalogue/components/_column_table.html:63
 #: warehouse/templates/catalogue/components/_table_modal.html:114
@@ -1013,33 +954,27 @@ msgid "Clear"
 msgstr "Vymazat"
 
 #: warehouse/templates/catalogue/components/_table_list.html:21
-#, fuzzy
-#| msgid "Search columns…"
 msgid "Search tables…"
 msgstr "Hledat ve sloupcích…"
 
 #: warehouse/templates/catalogue/components/_table_list.html:64
-#, fuzzy
-#| msgid "No columns available."
 msgid "No tables available."
 msgstr "Žádné sloupce k dispozici."
 
 #: warehouse/templates/catalogue/components/_table_modal.html:40
 msgid "Record counts"
-msgstr ""
+msgstr "Počty záznamů"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:44
 #, python-format
 msgid "Count of records where %(col)s = %(val)s"
-msgstr ""
+msgstr "Počet záznamů, kde %(col)s = %(val)s"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:161
 msgid "Open in MOLGENIS"
-msgstr ""
+msgstr "Otevřít v MOLGENIS"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:161
-#, fuzzy
-#| msgid "Data source"
 msgid "View source"
 msgstr "Zdroj dat"
 
@@ -1069,8 +1004,6 @@ msgid "Distribution Metadata"
 msgstr "Metadata distribuce"
 
 #: warehouse/templates/catalogue/distribution_detail.html:61
-#, fuzzy
-#| msgid "No distributions available for this dataset."
 msgid "No tables available for this distribution."
 msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
 
@@ -1130,21 +1063,21 @@ msgstr "Žádné možnosti"
 
 #: warehouse/templates/includes/_toast_messages.html:15
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: warehouse/templates/includes/_toast_messages.html:18
 #: warehouse/templates/includes/_toast_messages.html:38
 #: warehouse/templates/includes/_toast_messages.html:57
 msgid "Dismiss"
-msgstr ""
+msgstr "Zavřít"
 
 #: warehouse/templates/includes/_toast_messages.html:35
 msgid "Warning"
-msgstr ""
+msgstr "Upozornění"
 
 #: warehouse/templates/includes/_toast_messages.html:54
 msgid "Success"
-msgstr ""
+msgstr "Úspěch"
 
 #: warehouse/templates/includes/schema_modal.html:12
 msgid "DCAT-AP term"

@@ -197,3 +197,6 @@ class StatResult(models.Model):
         verbose_name_plural = _('Stat Results')
         unique_together = [('table_name', 'column_name', 'filter_value')]
         ordering = ['table_name', 'column_name', 'filter_value']
+
+    def __str__(self) -> str:
+        return f'{self.table_name}.{self.column_name}={self.filter_value} ({self.count})'

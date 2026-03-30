@@ -77,16 +77,12 @@ msgstr "Distributions"
 
 #: fair_genomes/models.py:132 shared/abstract_models.py:634
 #: warehouse/models.py:152
-#, fuzzy
-#| msgid "Ref Table"
 msgid "Table"
-msgstr "Ref Table"
+msgstr "Table"
 
 #: fair_genomes/models.py:133 warehouse/models.py:153
-#, fuzzy
-#| msgid "Tables ready"
 msgid "Tables"
-msgstr "Tables ready"
+msgstr "Tables"
 
 #: fair_genomes/models.py:150 warehouse/models.py:213
 #: warehouse/templates/catalogue/index.html:56
@@ -99,58 +95,48 @@ msgid "Columns"
 msgstr "Columns"
 
 #: fair_genomes/models.py:168
-#, fuzzy
-#| msgid "Table Name"
 msgid "Table name"
-msgstr "Table Name"
+msgstr "Table name"
 
 #: fair_genomes/models.py:169
 msgid "MOLGENIS table name, e.g. \"sequencing\""
-msgstr ""
+msgstr "MOLGENIS table name, e.g. "sequencing""
 
 #: fair_genomes/models.py:173
-#, fuzzy
-#| msgid "Column Name"
 msgid "Column name"
-msgstr "Column Name"
+msgstr "Column name"
 
 #: fair_genomes/models.py:174
 msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
-msgstr ""
+msgstr "Unqualified column name, e.g. "sequencinginstrumentmodel""
 
 #: fair_genomes/models.py:178
 msgid "Filter value"
-msgstr ""
+msgstr "Filter value"
 
 #: fair_genomes/models.py:179
 msgid "The value that was counted, e.g. \"MiSeq\""
-msgstr ""
+msgstr "The value that was counted, e.g. "MiSeq""
 
 #: fair_genomes/models.py:184
-#, fuzzy
-#| msgid "Items Count"
 msgid "Count"
-msgstr "Items Count"
+msgstr "Count"
 
 #: fair_genomes/models.py:185
 msgid "Number of records matching the filter; null means not yet synced"
-msgstr ""
+msgstr "Number of records matching the filter; null means not yet synced"
 
 #: fair_genomes/models.py:190
 msgid "Last synced"
-msgstr ""
+msgstr "Last synced"
 
 #: fair_genomes/models.py:196
-#, fuzzy
-#| msgid "Static Files"
 msgid "Stat Result"
-msgstr "Static Files"
+msgstr "Stat Result"
 
 #: fair_genomes/models.py:197
-#, fuzzy
-#| msgid "Status"
 msgid "Stat Results"
-msgstr "Status"
+msgstr "Stat Results"
 
 #: schema_registry/apps.py:8
 msgid "Schema Registry"
@@ -204,7 +190,7 @@ msgstr "Description"
 
 #: shared/abstract_models.py:107
 msgid "dct:description — description of the agent's activities (0..*)"
-msgstr ""
+msgstr "dct:description — description of the agent's activities (0..*)"
 
 #: shared/abstract_models.py:117
 msgid "Contact information for this agent"
@@ -221,16 +207,12 @@ msgid "Title"
 msgstr "Title"
 
 #: shared/abstract_models.py:148 shared/abstract_models.py:214
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:title — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
+msgstr "dct:title — mandatory per HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:154 shared/abstract_models.py:226
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:description — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
+msgstr "dct:description — mandatory per HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:163 shared/abstract_models.py:263
 msgid "Publisher"
@@ -246,10 +228,6 @@ msgid "Applicable Legislation"
 msgstr "Applicable Legislation"
 
 #: shared/abstract_models.py:171
-#, fuzzy
-#| msgid ""
-#| "Legal basis under which this catalog is published (mandatory per "
-#| "HealthDCAT-AP v6)"
 msgid ""
 "Legal basis under which this catalog is published — must be a URI/IRI "
 "(mandatory per HealthDCAT-AP v6, e.g. http://data.europa.eu/eli/reg/2022/868/"
@@ -268,7 +246,7 @@ msgstr "Version"
 
 #: shared/abstract_models.py:230
 msgid "Identifier"
-msgstr ""
+msgstr "Identifier"
 
 #: shared/abstract_models.py:232
 msgid ""
@@ -330,8 +308,6 @@ msgid "Keywords"
 msgstr "Keywords"
 
 #: shared/abstract_models.py:289
-#, fuzzy
-#| msgid "dcat:keyword — comma-separated keywords"
 msgid ""
 "dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, "
 "1..*)"
@@ -344,36 +320,28 @@ msgid "Source"
 msgstr "Source"
 
 #: shared/abstract_models.py:301
-#, fuzzy
-#| msgid "dct:source — URI of the source dataset"
 msgid "dct:source — source dataset this one is derived from"
-msgstr "dct:source — URI of the source dataset"
+msgstr "dct:source — source dataset this one is derived from"
 
 #: shared/abstract_models.py:310
 msgid "Creator"
 msgstr "Creator"
 
 #: shared/abstract_models.py:311
-#, fuzzy
-#| msgid "dct:creator — name(s) of the dataset creator(s)"
 msgid "dct:creator — agent who created this dataset"
-msgstr "dct:creator — name(s) of the dataset creator(s)"
+msgstr "dct:creator — agent who created this dataset"
 
 #: shared/abstract_models.py:320
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
+msgstr "dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:325
 msgid "Provenance"
 msgstr "Provenance"
 
 #: shared/abstract_models.py:326
-#, fuzzy
-#| msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgid "dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
+msgstr "dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:342
 msgid "Access Rights"
@@ -386,8 +354,6 @@ msgstr ""
 "dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:351 shared/abstract_models.py:529
-#, fuzzy
-#| msgid "dct:applicableLegislation (mandatory per HealthDCAT-AP v6)"
 msgid ""
 "dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP "
 "v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)"
@@ -421,7 +387,7 @@ msgstr ""
 #: warehouse/templates/catalogue/components/_sidebar_filters.html:22
 #: warehouse/templates/catalogue/index.html:52
 msgid "Custodian"
-msgstr ""
+msgstr "Custodian"
 
 #: shared/abstract_models.py:381
 msgid ""
@@ -434,24 +400,20 @@ msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:413
-#, fuzzy
-#| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "contact_point is mandatory (HealthDCAT-AP v6)."
-msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
+msgstr "contact_point is mandatory (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:418
-#, fuzzy
-#| msgid "HDAB is mandatory (HealthDCAT-AP v6)."
 msgid "The HDAB agent must have a contact point (HealthDCAT-AP v6)."
-msgstr "HDAB is mandatory (HealthDCAT-AP v6)."
+msgstr "The HDAB agent must have a contact point (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:425
 msgid "The publisher agent must have a contact point (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "The publisher agent must have a contact point (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:434
 msgid "The custodian agent must have a contact point (HealthDCAT-AP v6)."
-msgstr ""
+msgstr "The custodian agent must have a contact point (HealthDCAT-AP v6)."
 
 #: shared/abstract_models.py:459
 msgid "Unique identifier for this distribution"
@@ -502,26 +464,20 @@ msgid "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 msgstr "dcat:accessURL (mandatory per HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:537
-#, fuzzy
-#| msgid "License"
 msgid "Licence"
-msgstr "License"
+msgstr "Licence"
 
 #: shared/abstract_models.py:538
 msgid "dct:license — licence under which this distribution is made available"
-msgstr ""
+msgstr "dct:license — licence under which this distribution is made available"
 
 #: shared/abstract_models.py:570
-#, fuzzy
-#| msgid "Unique identifier for this catalog"
 msgid "csvw:name — unique identifier for this table"
-msgstr "Unique identifier for this catalog"
+msgstr "csvw:name — unique identifier for this table"
 
 #: shared/abstract_models.py:579
-#, fuzzy
-#| msgid "Distribution (table) this attribute belongs to"
 msgid "Distribution this table belongs to"
-msgstr "Distribution (table) this attribute belongs to"
+msgstr "Distribution this table belongs to"
 
 #: shared/abstract_models.py:583
 msgid "URL"
@@ -529,47 +485,35 @@ msgstr "URL"
 
 #: shared/abstract_models.py:584
 msgid "csvw:url — physical location / connection string for this table"
-msgstr ""
+msgstr "csvw:url — physical location / connection string for this table"
 
 #: shared/abstract_models.py:591
-#, fuzzy
-#| msgid "Human-readable column name"
 msgid "csvw:title — human-readable table name"
-msgstr "Human-readable column name"
+msgstr "csvw:title — human-readable table name"
 
 #: shared/abstract_models.py:597 shared/abstract_models.py:644
-#, fuzzy
-#| msgid "Description"
 msgid "dct:description"
-msgstr "Description"
+msgstr "dct:description"
 
 #: shared/abstract_models.py:626
-#, fuzzy
-#| msgid "Unique column / variable identifier"
 msgid "csvw:name — unique column identifier"
-msgstr "Unique column / variable identifier"
+msgstr "csvw:name — unique column identifier"
 
 #: shared/abstract_models.py:635
-#, fuzzy
-#| msgid "Dataset this distribution belongs to"
 msgid "Table this column belongs to"
-msgstr "Dataset this distribution belongs to"
+msgstr "Table this column belongs to"
 
 #: shared/abstract_models.py:640
-#, fuzzy
-#| msgid "Human-readable column name"
 msgid "csvw:title — human-readable column name"
-msgstr "Human-readable column name"
+msgstr "csvw:title — human-readable column name"
 
 #: shared/abstract_models.py:648
 msgid "Datatype"
 msgstr "Datatype"
 
 #: shared/abstract_models.py:649
-#, fuzzy
-#| msgid "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
 msgid "csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)"
-msgstr "Column datatype (e.g. VARCHAR, INTEGER, DATE)"
+msgstr "csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)"
 
 #: shared/abstract_models.py:655
 msgid "Property URL"
@@ -577,7 +521,7 @@ msgstr "Property URL"
 
 #: shared/abstract_models.py:656
 msgid "csvw:propertyUrl — semantic property URI"
-msgstr ""
+msgstr "csvw:propertyUrl — semantic property URI"
 
 #: shared/validators.py:33
 #, python-format
@@ -820,8 +764,7 @@ msgid "Data access request"
 msgstr "Data access request"
 
 #: ticketing/views.py:157
-#, fuzzy, python-format
-#| msgid "Your request has been submitted."
+#, python-format
 msgid "Your request has been submitted — ticket #%(ticket_id)s"
 msgstr "Your request has been submitted."
 
@@ -939,14 +882,12 @@ msgid "Search columns…"
 msgstr "Search columns…"
 
 #: warehouse/templates/catalogue/components/_column_table.html:27
-#, fuzzy
-#| msgid "DB Key"
 msgid "Key"
 msgstr "DB Key"
 
 #: warehouse/templates/catalogue/components/_column_table.html:31
 msgid "R type"
-msgstr ""
+msgstr "R type"
 
 #: warehouse/templates/catalogue/components/_column_table.html:63
 #: warehouse/templates/catalogue/components/_table_modal.html:114
@@ -1015,33 +956,27 @@ msgid "Clear"
 msgstr "Clear"
 
 #: warehouse/templates/catalogue/components/_table_list.html:21
-#, fuzzy
-#| msgid "Search columns…"
 msgid "Search tables…"
 msgstr "Search columns…"
 
 #: warehouse/templates/catalogue/components/_table_list.html:64
-#, fuzzy
-#| msgid "No columns available."
 msgid "No tables available."
 msgstr "No columns available."
 
 #: warehouse/templates/catalogue/components/_table_modal.html:40
 msgid "Record counts"
-msgstr ""
+msgstr "Record counts"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:44
 #, python-format
 msgid "Count of records where %(col)s = %(val)s"
-msgstr ""
+msgstr "Count of records where %(col)s = %(val)s"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:161
 msgid "Open in MOLGENIS"
-msgstr ""
+msgstr "Open in MOLGENIS"
 
 #: warehouse/templates/catalogue/components/_table_modal.html:161
-#, fuzzy
-#| msgid "Data source"
 msgid "View source"
 msgstr "Data source"
 
@@ -1071,8 +1006,6 @@ msgid "Distribution Metadata"
 msgstr "Distribution Metadata"
 
 #: warehouse/templates/catalogue/distribution_detail.html:61
-#, fuzzy
-#| msgid "No distributions available for this dataset."
 msgid "No tables available for this distribution."
 msgstr "No distributions available for this dataset."
 
@@ -1131,21 +1064,21 @@ msgstr "No options"
 
 #: warehouse/templates/includes/_toast_messages.html:15
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: warehouse/templates/includes/_toast_messages.html:18
 #: warehouse/templates/includes/_toast_messages.html:38
 #: warehouse/templates/includes/_toast_messages.html:57
 msgid "Dismiss"
-msgstr ""
+msgstr "Dismiss"
 
 #: warehouse/templates/includes/_toast_messages.html:35
 msgid "Warning"
-msgstr ""
+msgstr "Warning"
 
 #: warehouse/templates/includes/_toast_messages.html:54
 msgid "Success"
-msgstr ""
+msgstr "Success"
 
 #: warehouse/templates/includes/schema_modal.html:12
 msgid "DCAT-AP term"

@@ -172,6 +172,7 @@ class TicketRequestItem(models.Model):
         if self.item_type == self.ItemType.DATASET and '/' in self.item_id:
             app, name = self.item_id.split('/', 1)
             from django.apps import apps as django_apps
+
             try:
                 model = django_apps.get_model(app, 'Dataset')
                 if not model.objects.filter(pk=name).exists():
