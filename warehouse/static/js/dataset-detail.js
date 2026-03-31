@@ -9,11 +9,13 @@ function toggleDistCard(id) {
   if (isOpen) {
     body.classList.add('hidden');
     chev?.classList.remove('rotate-180');
-    card?.style.setProperty('border-color', '#e5e7eb');
+    card?.classList.remove('border-mou-orange');
+    card?.classList.add('border-site-border');
   } else {
     body.classList.remove('hidden');
     chev?.classList.add('rotate-180');
-    card?.style.setProperty('border-color', '#f04600');
+    card?.classList.remove('border-site-border');
+    card?.classList.add('border-mou-orange');
   }
 }
 

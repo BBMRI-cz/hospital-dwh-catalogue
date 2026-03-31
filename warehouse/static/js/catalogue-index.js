@@ -31,8 +31,7 @@
       if (SKIP.has(key) || !val) return;
       const label = LABELS[key] || key;
       const chip  = document.createElement('span');
-      chip.className  = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium';
-      chip.style.cssText = 'background:#e0f5fa;color:#0e7490;border-color:#a5dce8;';
+      chip.className  = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border';
       const text = document.createElement('span');
       text.textContent = label + ': ' + val;
       const btn = document.createElement('button');
@@ -70,34 +69,16 @@ function toggleCard(idx) {
   if (isOpen) {
     body.classList.add('hidden');
     chev?.classList.remove('rotate-180');
-    card?.style.setProperty('border-color', '#e5e7eb');
+    card?.classList.remove('border-mou-cyan');
+    card?.classList.add('border-site-border');
     openCards.delete(idx);
   } else {
     body.classList.remove('hidden');
     chev?.classList.add('rotate-180');
-    card?.style.setProperty('border-color', '#53c0d7');
+    card?.classList.remove('border-site-border');
+    card?.classList.add('border-mou-cyan');
     openCards.add(idx);
   }
-}
-
-/* ── Distribution tile expand / collapse ─────────────────────────────── */
-const openDists = {};
-function toggleDist(cardIdx, distIdx) {
-  const current = openDists[cardIdx];
-  if (current) {
-    const oldPanel = document.getElementById('dpanel-' + cardIdx + '-' + current);
-    const oldTile  = document.getElementById('dtile-'  + cardIdx + '-' + current);
-    if (oldPanel) oldPanel.classList.add('hidden');
-    if (oldTile)  { oldTile.style.borderColor = '#e5e7eb'; oldTile.style.background = ''; }
-    openDists[cardIdx] = null;
-    if (current === distIdx) return;
-  }
-  const panel = document.getElementById('dpanel-' + cardIdx + '-' + distIdx);
-  const tile  = document.getElementById('dtile-'  + cardIdx + '-' + distIdx);
-  if (panel) panel.classList.remove('hidden');
-  if (tile)  { tile.style.borderColor = '#f04600'; tile.style.background = '#fdeee7'; }
-  openDists[cardIdx] = distIdx;
-  setTimeout(() => panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
 }
 
 /* ── Sidebar keyword/category text-search (client-side hide) ──────────── */

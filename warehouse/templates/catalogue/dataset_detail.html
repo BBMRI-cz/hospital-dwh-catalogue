@@ -17,7 +17,7 @@
   <div class="mb-8 pb-7 border-b border-gray-200">
     <div class="flex items-start gap-4 flex-wrap">
       <div class="flex-1 min-w-0">
-        <h1 class="font-serif text-4xl font-normal leading-tight" style="color:#53c0d7">
+        <h1 class="font-serif text-4xl font-normal leading-tight text-mou-cyan">
           {{ dataset.title|default:dataset.name }}
         </h1>
         {% if dataset.description %}
@@ -28,8 +28,7 @@
         <!-- JSON-LD Download -->
         <button onclick="downloadJsonLd()"
           data-jsonld-filename="healthdcatap_{{ dataset.app }}_{{ dataset.name }}.jsonld"
-          class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer"
-          style="background:#53c0d7;">
+          class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -47,8 +46,8 @@
   <div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
     <div class="card-body p-0">
       <div class="flex items-center gap-2 px-5 py-3.5 border-b border-gray-100">
-        <div class="w-0.5 h-4 rounded" style="background:#53c0d7"></div>
-        <span class="font-mono text-[10px] uppercase tracking-wider" style="color:#53c0d7">{% trans "Dataset Metadata" %}</span>
+        <div class="w-0.5 h-4 rounded bg-mou-cyan"></div>
+        <span class="font-mono text-[10px] uppercase tracking-wider text-mou-cyan">{% trans "Dataset Metadata" %}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2">
         {% for semantics, label, value in dcat_rows %}
@@ -76,11 +75,11 @@
   {% if distributions %}
   <div class="mb-8">
     <div class="flex items-center gap-2 mb-4">
-      <div class="w-0.5 h-5 rounded" style="background:#f04600"></div>
-      <h2 class="font-mono text-[10px] uppercase tracking-wider" style="color:#f04600">
+      <div class="w-0.5 h-5 rounded bg-mou-orange"></div>
+      <h2 class="font-mono text-[10px] uppercase tracking-wider text-mou-orange">
         dcat:distribution — {{ distributions|length }} {% trans "distribution(s)" %}
       </h2>
-      <div class="flex-1 h-px" style="background:#fdeee7"></div>
+      <div class="flex-1 h-px bg-mou-orange-light"></div>
     </div>
 
     <div class="flex flex-col gap-2.5">

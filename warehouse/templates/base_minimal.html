@@ -26,27 +26,7 @@
 
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-page-bg text-txt font-sans min-h-screen">
-
-{% include 'catalogue/components/_header.html' %}
-
-<!-- ══════════════════════ MESSAGES ══════════════════════ -->
-<!-- ══════════════════════ MESSAGES ══════════════════════ -->
-{% include "includes/_toast_messages.html" %}
-
-<!-- ══════════════════════ CONTENT ══════════════════════ -->
-{% block sidebar %}
-<div class="site-outer bg-outer-bg" style="min-height:calc(100vh - 80px)">
-  <div class="site-content max-w-screen-2xl mx-auto px-6 py-8 bg-page-bg" style="min-height:calc(100vh - 80px)">
-    <div class="max-w-7xl mx-auto">
-      {% block content %}{% endblock %}
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block page_modals %}{% endblock %}
-{% block extra_scripts %}{% endblock %}
-
+<body class="bg-page-bg font-sans min-h-screen {% block body_class %}{% endblock %}">
+  {% block body %}{% endblock %}
 </body>
 </html>

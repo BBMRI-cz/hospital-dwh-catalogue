@@ -13,16 +13,14 @@
 {% endcomment %}
 {% if href %}
 <a href="{{ href }}"
-   class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] {{ extra_class }}"
-   style="background:#53c0d7;"
+   class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] bg-mou-cyan {{ extra_class }}"
    {% if extra_attrs %}{{ extra_attrs }}{% endif %}>
   {% if icon_svg %}{{ icon_svg }}{% endif %}
   {% if label %}{% trans label %}{% endif %}
 </a>
 {% else %}
 <button type="{{ btn_type|default:'button' }}"
-   class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer {{ extra_class }}"
-   style="background:#53c0d7;"
+   class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan {{ extra_class }}"
    {% if onclick %}onclick="{{ onclick }}"{% endif %}
    {% if extra_attrs %}{{ extra_attrs }}{% endif %}>
   {% if icon_svg %}{{ icon_svg }}{% endif %}

@@ -44,7 +44,8 @@
           const labelRemove = b.dataset.labelRemove || cfg.labelRemove || 'Remove from cart';
           b.innerHTML        = (nowInCart ? CART_ICON_REMOVE : CART_ICON_ADD) + ' ' + (nowInCart ? labelRemove : labelAdd);
           b.title            = nowInCart ? labelRemove : labelAdd;
-          b.style.background = nowInCart ? '#dc2626' : '#f04600';
+          b.classList.remove('bg-red-600', 'bg-mou-orange');
+          b.classList.add(nowInCart ? 'bg-red-600' : 'bg-mou-orange');
         } else {
           b.innerHTML = nowInCart ? CART_ICON_REMOVE : CART_ICON_ADD;
           b.title     = nowInCart ? (cfg.labelRemove || 'Remove from cart') : (cfg.labelAdd || 'Add to cart');
@@ -65,7 +66,7 @@
         else badge.classList.add('hidden');
       }
     })
-    .catch(() => {})
+    .catch(e => console.error('Cart toggle failed:', e))
     .finally(() => { btn.disabled = false; });
   }
 
@@ -93,7 +94,7 @@
         setTimeout(() => btn.classList.remove('text-orange-500'), 800);
       }
     })
-    .catch(() => {});
+    .catch(e => console.error('Cart add failed:', e));
     return false;
   }
 

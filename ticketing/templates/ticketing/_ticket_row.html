@@ -1,8 +1,11 @@
 ﻿{% load i18n %}
 {# Ticket summary row + collapsible detail row. Expects: ticket #}
-<tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="toggleTicket('{{ ticket.pk }}')">
+<tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+    role="button" tabindex="0"
+    onclick="toggleTicket('{{ ticket.pk }}')"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTicket('{{ ticket.pk }}')}">
   <td class="px-5 py-3">
-    <div class="font-medium text-sm max-w-xs truncate" style="color:#f04600">{{ ticket.subject }}</div>
+    <div class="font-medium text-sm max-w-xs truncate text-mou-orange">{{ ticket.subject }}</div>
     <div class="font-mono text-[10px] font-medium text-txt mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
   </td>
   <td class="px-5 py-3">
@@ -26,9 +29,9 @@
       <div class="py-1.5 first:pt-0 last:pb-0">
         {% if item.detail_url %}
         <a href="{{ item.detail_url }}" target="_blank" rel="noopener noreferrer"
-           class="group block hover:text-[#53c0d7] transition-colors">
-          <div class="font-medium text-sm group-hover:text-[#53c0d7]" style="color:#53c0d7">{{ item.item_name }}</div>
-          {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5 group-hover:text-[#53c0d7]/70">{{ item.parent_dataset }}</div>{% endif %}
+           class="group block hover:text-mou-cyan transition-colors">
+          <div class="font-medium text-sm text-mou-cyan group-hover:text-mou-cyan">{{ item.item_name }}</div>
+          {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5 group-hover:text-mou-cyan/70">{{ item.parent_dataset }}</div>{% endif %}
         </a>
         {% else %}
         <div class="font-medium text-gray-800 text-sm">{{ item.item_name }}</div>

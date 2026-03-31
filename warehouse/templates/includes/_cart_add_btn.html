@@ -21,8 +21,7 @@
   data-label-add="{% trans 'Add to cart' %}"
   data-label-remove="{% trans 'Remove from cart' %}"
   title="{% if cart_name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
-  class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer"
-  style="background:{% if cart_name in cart_dataset_ids %}#dc2626{% else %}#f04600{% endif %};"
+  class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer {% if cart_name in cart_dataset_ids %}bg-red-600{% else %}bg-mou-orange{% endif %}"
 >
   {% if cart_name in cart_dataset_ids %}
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

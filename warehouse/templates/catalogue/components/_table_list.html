@@ -8,8 +8,8 @@
 {% endcomment %}
 <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8">
   <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
-    <div class="w-0.5 h-4 rounded shrink-0" style="background:#007fc8"></div>
-    <span class="font-mono text-[10px] uppercase tracking-wider shrink-0" style="color:#007fc8">
+    <div class="w-0.5 h-4 rounded shrink-0 bg-mou-blue"></div>
+    <span class="font-mono text-[10px] uppercase tracking-wider shrink-0 text-mou-blue">
       csvw:Table · {{ tables|length }}
     </span>
     {% include "includes/_info_btn.html" with semantics="csvw:Table" %}
@@ -42,10 +42,12 @@
     <tbody>
       {% for tbl in tables %}
       <tr class="tbl-row border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+          role="button" tabindex="0"
           data-tbl="{{ tbl.name|lower }} {{ tbl.title|lower }}"
-          onclick="document.getElementById('tbl-modal-{{ forloop.counter }}').showModal()">
+          onclick="document.getElementById('tbl-modal-{{ forloop.counter }}').showModal()"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('tbl-modal-{{ forloop.counter }}').showModal()}">
         <td class="px-5 py-3">
-          <div class="font-medium text-sm" style="color:#53c0d7">{{ tbl.title }}</div>
+          <div class="font-medium text-sm text-mou-cyan">{{ tbl.title }}</div>
           {% if tbl.description %}
           <div class="text-xs text-txt-muted mt-0.5 line-clamp-1">{{ tbl.description }}</div>
           {% endif %}
@@ -72,27 +74,4 @@
 {% include 'catalogue/components/_table_modal.html' with tbl=tbl idx=forloop.counter app=app %}
 {% endfor %}
 
-<script>
-function filterTableList(inp) {
-  const v = inp.value.toLowerCase();
-  inp.closest('.card').querySelectorAll('.tbl-row').forEach(row => {
-    row.style.display = row.dataset.tbl.includes(v) ? '' : 'none';
-  });
-}
-
-function filterTableModalCols(inp, modalId) {
-  const v = inp.value.toLowerCase();
-  document.getElementById(modalId).querySelectorAll('.tbl-col-row').forEach(row => {
-    row.style.display = row.dataset.col.includes(v) ? '' : 'none';
-  });
-}
-
-function toggleColDesc(id) {
-  const row  = document.getElementById(id);
-  const chevId = id.replace('tbl-col-desc-', 'tbl-chev-');
-  const chev = document.getElementById(chevId);
-  const hidden = row.classList.contains('hidden');
-  row.classList.toggle('hidden', !hidden);
-  if (chev) chev.style.transform = hidden ? 'rotate(180deg)' : '';
-}
-</script>
+<script src="{% static 'js/table-list.js' %}"></script>

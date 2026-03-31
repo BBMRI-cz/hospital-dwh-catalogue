@@ -12,7 +12,7 @@
   {% trans "Review selected datasets and submit an Alvao request" as t_cart_subtitle %}
   {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_current=t_cart_title %}
 
-  {% with hero_title=t_cart_title hero_subtitle=t_cart_subtitle hero_color="#f04600" hero_icon="cart" hero_icon_bg="#fdeee7" hero_icon_border="#f9bfa8" hero_icon_color="#f04600" %}
+  {% with hero_title=t_cart_title hero_subtitle=t_cart_subtitle hero_title_class="text-mou-orange" hero_icon="cart" hero_icon_class="bg-mou-orange-light border border-mou-orange-border text-mou-orange" %}
   {% include "includes/_page_hero.html" %}
   {% endwith %}
 
@@ -22,7 +22,7 @@
     {% trans "Selected datasets" as t_selected_datasets %}
     {% with cart_count_str=cart|length|stringformat:"s" %}
     {% with cart_label=t_selected_datasets|add:" · "|add:cart_count_str %}
-    {% include "includes/_card_section_header.html" with csh_color="#53c0d7" csh_label=cart_label %}
+    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-cyan" csh_text_class="text-mou-cyan" csh_label=cart_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">
       <tbody>
@@ -30,9 +30,9 @@
         <tr class="border-t border-gray-100 hover:bg-gray-50">
           <td class="px-5 py-3">
             <a href="{% url 'warehouse:dataset_detail' item.app item.name %}" target="_blank" rel="noopener noreferrer"
-               class="group block hover:text-[#53c0d7] transition-colors">
-              <div class="font-medium text-gray-800 text-sm group-hover:text-[#53c0d7]">{{ item.title }}</div>
-              <div class="font-mono text-[10px] text-txt-muted group-hover:text-[#53c0d7]/70">{{ item.name }}</div>
+               class="group block hover:text-mou-cyan transition-colors">
+              <div class="font-medium text-gray-800 text-sm group-hover:text-mou-cyan">{{ item.title }}</div>
+              <div class="font-mono text-[10px] text-txt-muted group-hover:text-mou-cyan/70">{{ item.name }}</div>
             </a>
           </td>
           <td class="pr-5 text-right">
@@ -58,14 +58,13 @@
   <!-- Submit form — always visible -->
   <div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mt-6">
     {% trans "Submit request" as t_submit_request %}
-    {% include "includes/_card_section_header.html" with csh_color="#f04600" csh_label=t_submit_request %}
+    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-orange" csh_text_class="text-mou-orange" csh_label=t_submit_request %}
     <div class="px-5 pt-3 pb-5 flex flex-col gap-3">
       <form method="post" action="{% url 'ticketing:cart' %}">
         {% csrf_token %}
         {% include "includes/_form_field.html" with field=form.description mb="mb-0" %}
         <button type="submit"
-          class="mt-3 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer w-full sm:w-auto"
-          style="background:#f04600;">
+          class="mt-3 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer w-full sm:w-auto bg-mou-orange">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
