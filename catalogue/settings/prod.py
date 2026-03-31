@@ -12,7 +12,7 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS: list[str] = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])  # type: ignore[assignment]
+ALLOWED_HOSTS: list[str] = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])  # type: ignore[assignment, no-redef]
 
 CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
 
