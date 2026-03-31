@@ -40,85 +40,48 @@ class Command(BaseCommand):
         # ── Summary header ────────────────────────────────────────────────────
         style_fn = self.style.SUCCESS if status == 'complete' else self.style.WARNING
         self.stdout.write(style_fn(f'Sync status: {status.upper()}'))
-        self.stdout.write(f'Source: {report.get("rdf_url")}')
+        self.stdout.write(f'RDF source: {report.get("rdf_url", "")}')
+        duration = report.get('duration_seconds')
+        if duration is not None:
+            self.stdout.write(f'Duration: {duration}s')
         self.stdout.write('')
 
         # ── Fetched ───────────────────────────────────────────────────────────
         fetched = report.get('fetched', {})
         self.stdout.write('FETCHED FROM RDF:')
-        for entity in ('agents', 'catalogs', 'datasets'):
+        for entity in ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions'):
             names = fetched.get(entity, [])
-            self.stdout.write(f'  {entity.capitalize():<10} ({len(names)}): {names}')
+            label = entity.replace('_', ' ').capitalize()
+            self.stdout.write(f'  {label:<18} ({len(names)}): {names}')
         self.stdout.write('')
 
         # ── Saved ─────────────────────────────────────────────────────────────
         saved = report.get('saved', {})
         self.stdout.write('SAVED:')
-        for entity in ('agents', 'catalogs'):
+        for entity in ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions'):
             created = saved.get(entity, {}).get('created', [])
             updated = saved.get(entity, {}).get('updated', [])
+            label = entity.replace('_', ' ').capitalize()
             if created:
-                self.stdout.write(self.style.SUCCESS(f'  {entity.capitalize()} created: {created}'))
+                self.stdout.write(self.style.SUCCESS(f'  {label} created: {created}'))
             if updated:
-                self.stdout.write(f'  {entity.capitalize()} updated: {updated}')
+                self.stdout.write(f'  {label} updated: {updated}')
             if not created and not updated:
-                self.stdout.write(f'  {entity.capitalize()}: nothing saved')
+                self.stdout.write(f'  {label}: nothing saved')
         self.stdout.write('')
 
-        # ── Partial saves ─────────────────────────────────────────────────────
-        partial_saves = report.get('partial_saves', {})
-        if any(v for v in partial_saves.values()):
-            self.stdout.write('PARTIAL SAVES (fields missing from RDF, filled with defaults):')
-            for entity, items in partial_saves.items():
-                if isinstance(items, dict):
-                    for item_name, notes in items.items():
-                        self.stdout.write(
-                            self.style.WARNING(f"  {entity.capitalize()} '{item_name}':")
+        # ── Skipped (unresolved FKs) ──────────────────────────────────────────
+        skipped = report.get('skipped', {})
+        if skipped:
+            self.stdout.write(self.style.WARNING('SKIPPED (unresolved FK references):'))
+            for entity, items in skipped.items():
+                for item in items:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"  {entity.capitalize()} '{item['name']}': {item['reason']}"
                         )
-                        for note in notes:
-                            self.stdout.write(f'    - {note}')
+                    )
             self.stdout.write('')
-
-        # ── Not saved — datasets ──────────────────────────────────────────────
-        not_saved_datasets = report.get('not_saved', {}).get('datasets', [])
-        if not_saved_datasets:
-            self.stdout.write(
-                self.style.WARNING(
-                    f'NOT SAVED — Datasets ({len(not_saved_datasets)} total, '
-                    'missing required fields):'
-                )
-            )
-            for ds in not_saved_datasets:
-                self.stdout.write(self.style.WARNING(f"  '{ds['name']}': {ds['reason']}"))
-                for f in ds.get('missing_required', []):
-                    self.stdout.write(f'    Missing required: {f}')
-                self.stdout.write(
-                    f'    Available in RDF:  {", ".join(ds.get("available_fields", []))}'
-                )
-                rdf_not_in_model = ds.get('rdf_fields_not_in_model', {})
-                if rdf_not_in_model:
-                    for field, value in rdf_not_in_model.items():
-                        self.stdout.write(f'    In RDF but not in model: {field} = {value!r}')
-            self.stdout.write('')
-
-        # ── RDF fields with no model equivalent ───────────────────────────────
-        rdf_not_in_model = report.get('rdf_fields_not_in_model', {})
-        if rdf_not_in_model:
-            self.stdout.write('RDF FIELDS WITH NO MODEL EQUIVALENT:')
-            for entity, fields in rdf_not_in_model.items():
-                self.stdout.write(f'  {entity}:')
-                for f in fields:
-                    self.stdout.write(f'    - {f}')
-            self.stdout.write('')
-
-        # ── Model fields absent from RDF ──────────────────────────────────────
-        model_not_in_rdf = report.get('model_fields_not_in_rdf', {})
-        if model_not_in_rdf:
-            self.stdout.write(
-                'MODEL FIELDS NOT IN RDF (must be filled manually or via a second sync phase):'
-            )
-            for entity, fields in model_not_in_rdf.items():
-                self.stdout.write(f'  {entity}: {", ".join(fields)}')
 
         # ── GraphQL sync results ───────────────────────────────────────────────
         graphql_url = report.get('graphql_url')

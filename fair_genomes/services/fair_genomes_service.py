@@ -22,6 +22,7 @@ sync() returns a structured report dict for downstream reporting.
 """
 
 import logging
+import time
 from datetime import UTC
 
 import requests
@@ -74,15 +75,13 @@ class FairGenomesService:
             status                    — 'complete' | 'partial' | 'nothing_saved' | 'skipped'
             rdf_url                   — the RDF URL that was fetched (empty if not configured)
             graphql_url               — the GraphQL URL that was fetched (empty if not configured)
-            fetched                   — names of RDF entities found
-            saved                     — created/updated counts for RDF entities (agents, catalogs)
-            not_saved                 — datasets that could not be saved and why
-            partial_saves             — catalog fields saved with incomplete data
-            rdf_fields_not_in_model   — RDF fields with no model equivalent
-            model_fields_not_in_rdf   — model fields absent from the RDF
+            fetched                   — names of RDF entities found per type
+            saved                     — created/updated counts per entity type
+            skipped                   — entities skipped due to unresolved FKs
             graphql_synced            — tables/columns created+updated counts
             graphql_filtered_out      — table names skipped (ONTOLOGIES)
             graphql_fields_not_in_model — GraphQL column fields that have no Column model field
+            duration_seconds          — wall-clock sync duration
 
         Raises:
             FairGenomesAPIException: if any network fetch or parse step fails.
@@ -95,6 +94,12 @@ class FairGenomesService:
                     '— set at least one in the environment'
                 ),
             }
+
+        t0 = time.monotonic()
+        logger.info(
+            'Sync started',
+            extra={'rdf_url': self.rdf_url, 'graphql_url': self.graphql_url},
+        )
 
         # ── Phase 1: all network calls outside the transaction ────────────────
         graph = None
@@ -110,12 +115,15 @@ class FairGenomesService:
                 raise FairGenomesAPIException(
                     f'Failed to parse RDF from {self.rdf_url}: {exc}'
                 ) from exc
+            logger.info('RDF fetched and parsed', extra={'triples': len(graph)})
 
         graphql_tables = None
         if self.graphql_url:
             graphql_tables = self._fetch_graphql_schema()
+            logger.info('GraphQL schema fetched', extra={'table_count': len(graphql_tables)})
 
         # ── Phase 2: all DB writes in one atomic transaction ──────────────────
+        _empty_counts: dict = {'created': [], 'updated': []}
         with transaction.atomic(using='fair_genomes_db'):
             report = (
                 self._process_graph(graph)
@@ -123,15 +131,21 @@ class FairGenomesService:
                 else {
                     'status': 'partial',
                     'rdf_url': '',
-                    'fetched': {'agents': [], 'catalogs': [], 'datasets': []},
-                    'saved': {
-                        'agents': {'created': [], 'updated': []},
-                        'catalogs': {'created': [], 'updated': []},
+                    'fetched': {
+                        'contact_points': [],
+                        'agents': [],
+                        'catalogs': [],
+                        'datasets': [],
+                        'distributions': [],
                     },
-                    'not_saved': {'datasets': []},
-                    'partial_saves': {'catalogs': {}},
-                    'rdf_fields_not_in_model': {},
-                    'model_fields_not_in_rdf': {},
+                    'saved': {
+                        'contact_points': {**_empty_counts},
+                        'agents': {**_empty_counts},
+                        'catalogs': {**_empty_counts},
+                        'datasets': {**_empty_counts},
+                        'distributions': {**_empty_counts},
+                    },
+                    'skipped': {},
                 }
             )
 
@@ -153,6 +167,13 @@ class FairGenomesService:
             report['stats'] = self._sync_stats()
         else:
             report['stats'] = None
+
+        duration = round(time.monotonic() - t0, 2)
+        report['duration_seconds'] = duration
+        logger.info(
+            'Sync completed',
+            extra={'status': report['status'], 'duration_seconds': duration},
+        )
 
         return report
 
@@ -203,17 +224,30 @@ class FairGenomesService:
         return 'turtle'  # MOLGENIS FDP default
 
     def _process_graph(self, g) -> dict:
-        """Walk the parsed RDF graph and produce a structured sync report."""
+        """
+        Walk the parsed RDF graph and persist all HealthDCAT-AP v6 entities.
+
+        Processing order respects FK dependencies:
+        ContactPoint → Agent → Catalog → Dataset → Distribution.
+        """
+        from datetime import datetime
+
         from rdflib import Literal, Namespace, URIRef
         from rdflib.namespace import DCAT, DCTERMS, FOAF, RDF, RDFS
 
-        # The FDP encodes each field twice: once with a standard predicate
-        # (e.g. dcterms:title) and once with a column-specific predicate
-        # (e.g. <{fdp_base}/Dataset/column/title>).  Standard predicates
-        # are used where available; column predicates are the fallback for
-        # fields stored only via relative-URI predicates (<dct:source> etc.).
+        from fair_genomes.models import (
+            Agent,
+            Catalog,
+            ContactPoint,
+            Dataset,
+            Distribution,
+        )
+
         fdp_base = self.rdf_url.rstrip('/')
         FDP_O = Namespace('https://w3id.org/fdp/fdp-o#')
+        HEALTHDCAT = Namespace('http://healthdcat-ap.eu/ns#')
+        GEODCATAP = Namespace('http://data.europa.eu/930/')
+        VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
         def col(entity: str, field: str) -> URIRef:
             """FDP column predicate URI for a given entity and field name."""
@@ -233,65 +267,104 @@ class FairGenomesService:
                     return str(val)
             return None
 
+        def parse_datetime(val: str | None) -> datetime | None:
+            if not val:
+                return None
+            try:
+                return datetime.fromisoformat(val)
+            except (ValueError, TypeError):
+                return None
+
+        def parse_int(val: str | None) -> int | None:
+            if not val:
+                return None
+            try:
+                return int(val)
+            except (ValueError, TypeError):
+                return None
+
+        _ec: dict = {'created': [], 'updated': []}
         report: dict = {
             'status': 'partial',
             'rdf_url': self.rdf_url,
-            'fetched': {'agents': [], 'catalogs': [], 'datasets': []},
+            'fetched': {
+                'contact_points': [],
+                'agents': [],
+                'catalogs': [],
+                'datasets': [],
+                'distributions': [],
+            },
             'saved': {
-                'agents': {'created': [], 'updated': []},
-                'catalogs': {'created': [], 'updated': []},
+                'contact_points': {**_ec},
+                'agents': {**_ec},
+                'catalogs': {**_ec},
+                'datasets': {**_ec},
+                'distributions': {**_ec},
             },
-            'not_saved': {'datasets': []},
-            'partial_saves': {'catalogs': {}},
-            'rdf_fields_not_in_model': {
-                'Dataset': [
-                    'license (dcterms:license) — Dataset model has no license field; '
-                    'Distribution has licence',
-                    'rightsHolder (dct:rightsHolder) — no direct field mapping in any '
-                    'Dataset or Distribution model',
-                ],
-                'Agent': [
-                    'mg_draft — MOLGENIS internal metadata, not catalogued',
-                    'mg_insertedOn — MOLGENIS internal metadata, not catalogued',
-                    'mg_updatedOn — MOLGENIS internal metadata, not catalogued',
-                ],
-                'Catalog': [
-                    'mg_draft — MOLGENIS internal metadata, not catalogued',
-                    'mg_insertedOn — MOLGENIS internal metadata, not catalogued',
-                    'mg_updatedOn — MOLGENIS internal metadata, not catalogued',
-                ],
-            },
-            'model_fields_not_in_rdf': {
-                'Dataset': [
-                    'hdab (non-nullable FK to Agent)',
-                    'type',
-                    'access_rights',
-                    'applicable_legislation',
-                    'health_category',
-                ],
-                'Catalog': ['applicable_legislation'],
-                'Agent': ['description', 'contact_point'],
-            },
+            'skipped': {},
         }
 
-        # Import here to keep the class importable without Django setup
-        from fair_genomes.models import Agent, Catalog
+        # Lookup maps keyed by RDF subject URI → model instance.
+        cp_by_uri: dict[str, ContactPoint] = {}
+        agent_by_name: dict[str, Agent] = {}
+        catalog_by_name: dict[str, Catalog] = {}
+        dataset_by_name: dict[str, Dataset] = {}
 
-        # ── AGENTS ────────────────────────────────────────────────────────────
+        def _resolve_agent(name_val: str | None) -> Agent | None:
+            if not name_val:
+                return None
+            return agent_by_name.get(name_val)
+
+        def _resolve_cp(uri_val: str | None) -> ContactPoint | None:
+            if not uri_val:
+                return None
+            return cp_by_uri.get(uri_val)
+
+        # ── 1. CONTACT POINTS ─────────────────────────────────────────────────
+        for subj in g.subjects(RDF.type, VCARD.Kind):
+            email = get_literal(subj, VCARD.hasEmail, col('ContactPoint', 'email'))
+            contact_page = get_literal(
+                subj, VCARD.hasURL, col('ContactPoint', 'contact_page')
+            ) or get_uri(subj, VCARD.hasURL, col('ContactPoint', 'contact_page'))
+
+            if not email and not contact_page:
+                logger.warning('Skipping ContactPoint with no email or page: %s', subj)
+                continue
+
+            label = email or contact_page or str(subj)
+            report['fetched']['contact_points'].append(label)
+
+            # Look up by the combination of fields — that's the natural identity.
+            cp, created = ContactPoint.objects.using('fair_genomes_db').get_or_create(
+                email=email,
+                contact_page=contact_page,
+            )
+            report['saved']['contact_points']['created' if created else 'updated'].append(label)
+            cp_by_uri[str(subj)] = cp
+
+        # ── 2. AGENTS ─────────────────────────────────────────────────────────
         for subj in g.subjects(RDF.type, FOAF.Agent):
             name = get_literal(subj, FOAF.name, RDFS.label, col('Agent', 'name'))
             if not name:
                 logger.warning('Skipping Agent with no name: %s', subj)
                 continue
 
+            description = get_literal(subj, DCTERMS.description, col('Agent', 'description'))
+            cp_uri = get_uri(subj, DCAT.contactPoint, col('Agent', 'contactPoint'))
+            contact_point = _resolve_cp(cp_uri)
+
             report['fetched']['agents'].append(name)
             _, created = Agent.objects.using('fair_genomes_db').update_or_create(
                 name=name,
-                defaults={},
+                defaults={
+                    'description': description or '',
+                    'contact_point': contact_point,
+                },
             )
             report['saved']['agents']['created' if created else 'updated'].append(name)
+            agent_by_name[name] = _
 
-        # ── CATALOGS ──────────────────────────────────────────────────────────
+        # ── 3. CATALOGS ───────────────────────────────────────────────────────
         for subj in g.subjects(RDF.type, DCAT.Catalog):
             name = get_literal(subj, RDFS.label, col('Catalog', 'name'))
             if not name:
@@ -300,30 +373,13 @@ class FairGenomesService:
 
             title = get_literal(subj, DCTERMS.title, col('Catalog', 'title'))
             description = get_literal(subj, DCTERMS.description, col('Catalog', 'description'))
-            publisher_uri = get_uri(subj, DCTERMS.publisher, col('Catalog', 'publisher'))
-
-            publisher_agent = None
-            if publisher_uri and 'name=' in publisher_uri:
-                publisher_name = publisher_uri.split('name=')[-1]
-                try:
-                    publisher_agent = Agent.objects.using('fair_genomes_db').get(
-                        name=publisher_name
-                    )
-                except Agent.DoesNotExist:
-                    logger.warning(
-                        'Publisher Agent "%s" not found for Catalog "%s"',
-                        publisher_name,
-                        name,
-                    )
-
-            partial_notes: list[str] = [
-                'applicable_legislation — mandatory in HealthDCAT-AP v6 but not present in RDF; '
-                'saved as empty string',
-            ]
-            if not title:
-                partial_notes.append('title — not present in RDF, saved as empty string')
-            if not description:
-                partial_notes.append('description — not present in RDF, saved as empty string')
+            applicable_legislation = (
+                get_literal(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
+                or get_uri(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
+                or ''
+            )
+            publisher_name = get_literal(subj, DCTERMS.publisher, col('Catalog', 'publisher'))
+            publisher_agent = _resolve_agent(publisher_name)
 
             report['fetched']['catalogs'].append(name)
             _, created = Catalog.objects.using('fair_genomes_db').update_or_create(
@@ -332,84 +388,169 @@ class FairGenomesService:
                     'title': title or '',
                     'description': description or '',
                     'publisher': publisher_agent,
-                    'applicable_legislation': '',
+                    'applicable_legislation': applicable_legislation,
                 },
             )
             report['saved']['catalogs']['created' if created else 'updated'].append(name)
-            report['partial_saves']['catalogs'][name] = partial_notes
+            catalog_by_name[name] = _
 
-        # ── DATASETS (collected, not saved) ───────────────────────────────────
+        # ── 4. DATASETS ───────────────────────────────────────────────────────
         for subj in g.subjects(RDF.type, DCAT.Dataset):
             name = get_literal(subj, RDFS.label, col('Dataset', 'name'))
             if not name:
+                logger.warning('Skipping Dataset with no name: %s', subj)
                 continue
 
             report['fetched']['datasets'].append(name)
 
-            available: dict[str, str] = {'name': name}
-            # Each entry: (report_key, predicate1, predicate2, ...)
-            field_map = [
-                ('title', DCTERMS.title, col('Dataset', 'title')),
-                ('version', DCTERMS.hasVersion, col('Dataset', 'version')),
-                ('description', DCTERMS.description, col('Dataset', 'description')),
-                ('theme', DCAT.theme, col('Dataset', 'theme')),
-                # RDF column is named "conformedTo"; model field is conforms_to
-                (
-                    'conforms_to [RDF: conformedTo]',
-                    DCTERMS.conformsTo,
-                    col('Dataset', 'conformedTo'),
-                ),
-                ('keyword', DCAT.keyword, col('Dataset', 'keyword')),
-                ('source', col('Dataset', 'source')),
-                ('creator', col('Dataset', 'creator')),
-                ('provenance', col('Dataset', 'provenance')),
-                ('issued', FDP_O.metadataIssued, col('Dataset', 'issued')),
-                ('modified', FDP_O.metadataModified, col('Dataset', 'modified')),
-                (
-                    'contact_point_raw (email string)',
-                    DCAT.contactPoint,
-                    col('Dataset', 'contactPoint'),
-                ),
-                ('publisher (URI)', DCTERMS.publisher, col('Dataset', 'publisher')),
-            ]
-            for entry in field_map:
-                key, *preds = entry
-                val = get_literal(subj, *preds) or get_uri(subj, *preds)
-                if val:
-                    available[key] = val
+            # Resolve mandatory non-nullable FKs.
+            hdab_name = get_literal(subj, HEALTHDCAT.hdab, col('Dataset', 'hdab'))
+            hdab = _resolve_agent(hdab_name)
+            cp_uri = get_uri(subj, DCAT.contactPoint, col('Dataset', 'contactPoint'))
+            contact_point = _resolve_cp(cp_uri)
 
-            # Track RDF fields that exist in this record but have no model equivalent
-            rdf_not_in_model: dict[str, str] = {}
-            license_val = get_literal(subj, DCTERMS.license, col('Dataset', 'license'))
-            if license_val:
-                rdf_not_in_model['license'] = license_val
-            rights_holder_val = get_literal(subj, col('Dataset', 'rightsHolder'))
-            if rights_holder_val:
-                rdf_not_in_model['rightsHolder'] = rights_holder_val
+            if not hdab:
+                logger.warning('Skipping Dataset "%s": hdab agent "%s" not found', name, hdab_name)
+                report['skipped'].setdefault('datasets', []).append(
+                    {'name': name, 'reason': f'hdab agent "{hdab_name}" not resolved'}
+                )
+                continue
+            if not contact_point:
+                logger.warning('Skipping Dataset "%s": contact_point "%s" not found', name, cp_uri)
+                report['skipped'].setdefault('datasets', []).append(
+                    {'name': name, 'reason': f'contact_point "{cp_uri}" not resolved'}
+                )
+                continue
 
-            report['not_saved']['datasets'].append(
-                {
-                    'name': name,
-                    'reason': 'missing required fields — cannot save without them',
-                    'missing_required': [
-                        'hdab — non-nullable FK to Agent, not present in RDF',
-                        'type — not present in RDF',
-                        'access_rights — not present in RDF',
-                        'applicable_legislation — not present in RDF',
-                        'health_category — not present in RDF',
-                    ],
-                    'available_fields': list(available.keys()),
-                    'rdf_fields_not_in_model': rdf_not_in_model,
-                }
+            # Optional FK fields.
+            publisher_name = get_literal(subj, DCTERMS.publisher, col('Dataset', 'publisher'))
+            creator_name = get_literal(subj, DCTERMS.creator, col('Dataset', 'creator'))
+            custodian_name = get_literal(subj, GEODCATAP.custodian, col('Dataset', 'custodian'))
+            catalog_name = get_literal(subj, col('Dataset', 'catalog'))
+            source_name = get_literal(subj, DCTERMS.source, col('Dataset', 'source'))
+
+            defaults = {
+                'title': get_literal(subj, DCTERMS.title, col('Dataset', 'title')) or '',
+                'version': get_literal(subj, DCTERMS.hasVersion, col('Dataset', 'version')) or '',
+                'description': get_literal(subj, DCTERMS.description, col('Dataset', 'description'))
+                or '',
+                'identifier': get_literal(subj, DCTERMS.identifier, col('Dataset', 'identifier'))
+                or str(subj),
+                'type': get_literal(subj, DCTERMS.type, col('Dataset', 'type')) or '',
+                'theme': get_literal(subj, DCAT.theme, col('Dataset', 'theme')) or '',
+                'keyword': get_literal(subj, DCAT.keyword, col('Dataset', 'keyword')) or '',
+                'provenance': get_literal(subj, DCTERMS.provenance, col('Dataset', 'provenance'))
+                or '',
+                'conforms_to': get_literal(subj, DCTERMS.conformsTo, col('Dataset', 'conformsTo'))
+                or '',
+                'access_rights': get_literal(
+                    subj, DCTERMS.accessRights, col('Dataset', 'access_rights')
+                )
+                or get_uri(subj, DCTERMS.accessRights, col('Dataset', 'access_rights'))
+                or '',
+                'applicable_legislation': get_literal(
+                    subj, DCTERMS.relation, col('Dataset', 'applicable_legislation')
+                )
+                or get_uri(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
+                or '',
+                'health_category': get_literal(
+                    subj, HEALTHDCAT.healthCategory, col('Dataset', 'health_category')
+                )
+                or get_uri(subj, HEALTHDCAT.healthCategory, col('Dataset', 'health_category'))
+                or '',
+                'issued': parse_datetime(get_literal(subj, DCTERMS.issued, FDP_O.metadataIssued)),
+                'modified': parse_datetime(
+                    get_literal(subj, DCTERMS.modified, FDP_O.metadataModified)
+                ),
+                'hdab': hdab,
+                'contact_point': contact_point,
+                'publisher': _resolve_agent(publisher_name),
+                'creator': _resolve_agent(creator_name),
+                'custodian': _resolve_agent(custodian_name),
+                'catalog': catalog_by_name.get(catalog_name) if catalog_name else None,
+                'source': dataset_by_name.get(source_name) if source_name else None,
+            }
+
+            _, created = Dataset.objects.using('fair_genomes_db').update_or_create(
+                name=name,
+                defaults=defaults,
             )
+            report['saved']['datasets']['created' if created else 'updated'].append(name)
+            dataset_by_name[name] = _
+
+        # ── 5. DISTRIBUTIONS ──────────────────────────────────────────────────
+        for subj in g.subjects(RDF.type, DCAT.Distribution):
+            name = get_literal(subj, RDFS.label, col('Distribution', 'name'))
+            if not name:
+                logger.warning('Skipping Distribution with no name: %s', subj)
+                continue
+
+            report['fetched']['distributions'].append(name)
+
+            ds_name = get_literal(subj, col('Distribution', 'dataset_name'))
+            dataset = dataset_by_name.get(ds_name) if ds_name else None
+            if not dataset:
+                # Try resolving via dcat:Distribution being a child of dcat:Dataset.
+                ds_uri = get_uri(subj, DCTERMS.isPartOf)
+                if ds_uri:
+                    ds_label = get_literal(g.resource(URIRef(ds_uri)).identifier, RDFS.label)
+                    dataset = dataset_by_name.get(ds_label) if ds_label else None
+
+            if not dataset:
+                logger.warning('Skipping Distribution "%s": dataset "%s" not found', name, ds_name)
+                report['skipped'].setdefault('distributions', []).append(
+                    {'name': name, 'reason': f'dataset "{ds_name}" not resolved'}
+                )
+                continue
+
+            defaults = {
+                'dataset_name': dataset,
+                'title': get_literal(subj, DCTERMS.title, col('Distribution', 'title')) or '',
+                'description': get_literal(
+                    subj, DCTERMS.description, col('Distribution', 'description')
+                )
+                or '',
+                'format': get_literal(subj, DCTERMS.format, col('Distribution', 'format')) or '',
+                'conforms_to': get_literal(
+                    subj, DCTERMS.conformsTo, col('Distribution', 'conforms_to')
+                )
+                or '',
+                'byte_size': parse_int(
+                    get_literal(subj, DCAT.byteSize, col('Distribution', 'byte_size'))
+                ),
+                'rights': get_literal(subj, DCTERMS.rights, col('Distribution', 'rights')) or '',
+                'release_date': parse_datetime(
+                    get_literal(subj, DCTERMS.issued, col('Distribution', 'release_date'))
+                ),
+                'modification_date': parse_datetime(
+                    get_literal(subj, DCTERMS.modified, col('Distribution', 'modification_date'))
+                ),
+                'access_url': get_literal(subj, DCAT.accessURL, col('Distribution', 'access_url'))
+                or get_uri(subj, DCAT.accessURL, col('Distribution', 'access_url'))
+                or '',
+                'applicable_legislation': get_literal(
+                    subj, DCTERMS.relation, col('Distribution', 'applicable_legislation')
+                )
+                or get_uri(subj, DCTERMS.relation, col('Distribution', 'applicable_legislation'))
+                or '',
+                'licence': get_literal(subj, DCTERMS.license, col('Distribution', 'licence'))
+                or get_uri(subj, DCTERMS.license, col('Distribution', 'licence'))
+                or '',
+            }
+
+            _, created = Distribution.objects.using('fair_genomes_db').update_or_create(
+                name=name,
+                defaults=defaults,
+            )
+            report['saved']['distributions']['created' if created else 'updated'].append(name)
 
         # ── OVERALL STATUS ────────────────────────────────────────────────────
+        all_entity_types = ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions')
         any_saved = any(
-            report['saved'][ent][op]
-            for ent in ('agents', 'catalogs')
-            for op in ('created', 'updated')
+            report['saved'][ent][op] for ent in all_entity_types for op in ('created', 'updated')
         )
-        if any_saved and not report['not_saved']['datasets']:
+        any_skipped = bool(report['skipped'])
+        if any_saved and not any_skipped:
             report['status'] = 'complete'
         elif any_saved:
             report['status'] = 'partial'
