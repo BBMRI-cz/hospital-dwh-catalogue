@@ -1,11 +1,16 @@
 """
 Alvao Service Desk REST API integration.
 
-This service handles communication with the real Alvao Service Desk API.
-Used in production and test environments.
+This service handles communication with the real Alvao Service Desk API (v1.3).
+Uses a service account with basic authentication to create tickets on behalf of users.
+
+Alvao API spec: https://app.swaggerhub.com/apis-docs/A3555/ALVAO_REST_API/v1.3
+Base URL pattern: https://{server}/AlvaoRestApi/v1/
 """
 
+import contextlib
 import logging
+import time
 
 import requests
 
@@ -15,27 +20,41 @@ from .base import TicketData, TicketResponse
 
 logger = logging.getLogger(__name__)
 
+_MAX_RETRIES = 3
+_RETRY_BACKOFF_BASE = 2
+_RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+
 
 class AlvaoServiceException(Exception):
     """Custom exception for Alvao API errors."""
 
-    def __init__(self, message: str, status_code: int | None = None, response: dict | None = None):
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        response: dict | None = None,
+        *,
+        retryable: bool = False,
+    ):
         super().__init__(message)
         self.status_code = status_code
         self.response = response
+        self.retryable = retryable
 
 
 class AlvaoService:
     """
-    Service class for interacting with Alvao Service Desk REST API.
+    Service class for interacting with Alvao Service Desk REST API v1.3.
 
-    Alvao REST API documentation:
-    - Uses bearer token authentication
-    - Base URL typically: https://{server}/api/v1/
-    - Main endpoints:
-        - POST /tickets - Create a new ticket
-        - GET /tickets/{id} - Get ticket details
-        - GET /tickets?requester={email} - List tickets by requester
+    Uses a dedicated Alvao service account (basic auth) to create tickets.
+    The service account must have permissions to create tickets in the
+    configured service.
+
+    Required settings:
+        ALVAO_API_URL: Base URL, e.g. https://alvao.company.com/AlvaoRestApi/v1
+        ALVAO_SERVICE_ACCOUNT_USERNAME: Service account login name
+        ALVAO_SERVICE_ACCOUNT_PASSWORD: Service account password
+        ALVAO_DEFAULT_SERVICE_ID: Service ID for new tickets (required by Alvao)
 
     Usage:
         service = AlvaoService()
@@ -45,25 +64,12 @@ class AlvaoService:
     def __init__(
         self,
         api_url: str | None = None,
-        api_token: str | None = None,
         service_account_username: str | None = None,
         service_account_password: str | None = None,
         default_service_id: int | None = None,
         timeout: int = 30,
     ):
-        """
-        Initialize the Alvao service.
-
-        Args:
-            api_url: Alvao REST API base URL
-            api_token: API token for authentication (preferred)
-            service_account_username: Username for basic auth (alternative)
-            service_account_password: Password for basic auth (alternative)
-            default_service_id: Default service ID for new tickets
-            timeout: Request timeout in seconds
-        """
         self.api_url = (api_url or getattr(settings, 'ALVAO_API_URL', '')).rstrip('/')
-        self.api_token = api_token or getattr(settings, 'ALVAO_API_TOKEN', '')
         self.service_account_username = service_account_username or getattr(
             settings, 'ALVAO_SERVICE_ACCOUNT_USERNAME', ''
         )
@@ -78,118 +84,142 @@ class AlvaoService:
 
     @property
     def session(self) -> requests.Session:
-        """Lazy-load and reuse requests session with authentication."""
+        """Lazy-load and reuse requests session with service account auth."""
         if self._session is None:
             self._session = requests.Session()
-
-            # Set up headers
-            headers = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            }
-
-            # Prefer token authentication
-            if self.api_token:
-                headers['Authorization'] = f'Bearer {self.api_token}'
-
-            self._session.headers.update(headers)
-
-            # Fall back to basic auth if no token
-            if not self.api_token and self.service_account_username:
-                self._session.auth = (self.service_account_username, self.service_account_password)
-
+            self._session.headers.update(
+                {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+            )
+            if self.service_account_username:
+                self._session.auth = (
+                    self.service_account_username,
+                    self.service_account_password,
+                )
         return self._session
 
     def _make_request(
-        self, method: str, endpoint: str, data: dict | None = None, params: dict | None = None
+        self,
+        method: str,
+        endpoint: str,
+        data: dict | None = None,
+        params: dict | None = None,
     ) -> dict:
         """
-        Make an HTTP request to the Alvao API.
+        Make an HTTP request to the Alvao API with automatic retry on transient failures.
 
-        Args:
-            method: HTTP method (GET, POST, etc.)
-            endpoint: API endpoint (relative to base URL)
-            data: Request body data (for POST/PUT)
-            params: Query parameters
-
-        Returns:
-            Response JSON data
-
-        Raises:
-            AlvaoServiceException: On API or network errors
+        Retries up to _MAX_RETRIES times with exponential backoff for 429/5xx errors
+        and connection/timeout errors.
         """
         url = f'{self.api_url}/{endpoint.lstrip("/")}'
+        last_exception: AlvaoServiceException | None = None
 
+        for attempt in range(_MAX_RETRIES):
+            try:
+                return self._do_request(method, url, data, params)
+            except AlvaoServiceException as exc:
+                last_exception = exc
+                if not exc.retryable or attempt == _MAX_RETRIES - 1:
+                    raise
+                wait = _RETRY_BACKOFF_BASE**attempt
+                logger.warning(
+                    'Alvao API transient error (attempt %d/%d), retrying in %ds: %s',
+                    attempt + 1,
+                    _MAX_RETRIES,
+                    wait,
+                    exc,
+                )
+                time.sleep(wait)
+
+        # Should not reach here, but satisfy type checker
+        raise last_exception  # type: ignore[misc]
+
+    def _do_request(
+        self,
+        method: str,
+        url: str,
+        data: dict | None,
+        params: dict | None,
+    ) -> dict:
+        """Execute a single HTTP request."""
         try:
-            logger.debug(f'Alvao API {method} {url}')
+            logger.debug('Alvao API %s %s', method, url)
 
             response = self.session.request(
-                method=method, url=url, json=data, params=params, timeout=self.timeout
+                method=method,
+                url=url,
+                json=data,
+                params=params,
+                timeout=self.timeout,
             )
 
-            # Log response for debugging
-            logger.debug(f'Alvao API response: {response.status_code}')
+            logger.debug('Alvao API response: %s', response.status_code)
 
-            # Check for errors
             if response.status_code >= 400:
                 error_data = None
-                try:
+                with contextlib.suppress(Exception):
                     error_data = response.json()
-                except Exception:
-                    logger.debug(
-                        'Alvao error response body is not valid JSON (status=%s)',
-                        response.status_code,
-                    )
 
                 error_message = f'Alvao API error: {response.status_code}'
-                if error_data:
+                if error_data and isinstance(error_data, dict):
                     error_message = error_data.get('message', error_message)
 
-                logger.error(f'Alvao API error: {response.status_code} - {error_message}')
+                logger.error('Alvao API error: %s - %s', response.status_code, error_message)
                 raise AlvaoServiceException(
-                    error_message, status_code=response.status_code, response=error_data
+                    error_message,
+                    status_code=response.status_code,
+                    response=error_data,
+                    retryable=response.status_code in _RETRYABLE_STATUS_CODES,
                 )
 
-            # Return empty dict for 204 No Content
             if response.status_code == 204:
                 return {}
 
             return response.json()
 
         except requests.exceptions.Timeout:
-            logger.error(f'Alvao API timeout after {self.timeout}s')
-            raise AlvaoServiceException(f'API request timed out after {self.timeout} seconds')
+            logger.error('Alvao API timeout after %ds', self.timeout)
+            raise AlvaoServiceException(
+                f'API request timed out after {self.timeout} seconds',
+                retryable=True,
+            )
 
         except requests.exceptions.ConnectionError as e:
-            logger.error(f'Alvao API connection error: {e}')
-            raise AlvaoServiceException(f'Could not connect to Alvao API: {e}')
+            logger.error('Alvao API connection error: %s', e)
+            raise AlvaoServiceException(
+                f'Could not connect to Alvao API: {e}',
+                retryable=True,
+            )
 
         except requests.exceptions.RequestException as e:
-            logger.error(f'Alvao API request error: {e}')
+            logger.error('Alvao API request error: %s', e)
             raise AlvaoServiceException(f'API request failed: {e}')
 
     def create_ticket(self, ticket_data: TicketData) -> TicketResponse:
         """
         Create a new ticket in Alvao Service Desk.
 
-        Args:
-            ticket_data: Data for the new ticket
-
-        Returns:
-            TicketResponse with the created ticket information
+        POST /tickets — requires `requester` and `serviceId` in the payload.
+        Returns 201 Created with the ticket object.
         """
         payload = ticket_data.to_dict()
 
-        # Add default service ID if not specified
+        # serviceId is required by Alvao; inject default if not already set
         if not payload.get('serviceId') and self.default_service_id:
             payload['serviceId'] = self.default_service_id
 
-        logger.info(f'Creating Alvao ticket for {ticket_data.requester_email}')
+        logger.info(
+            'Creating Alvao ticket for %s (service=%s)',
+            ticket_data.requester_email,
+            payload.get('serviceId'),
+        )
 
         response_data = self._make_request('POST', '/tickets', data=payload)
 
         result = TicketResponse.from_dict(response_data)
-        logger.info(f'Created Alvao ticket: {result.ticket_id}')
+        logger.info('Created Alvao ticket: id=%s tag=%s', result.ticket_id, result.ticket_number)
 
         return result
 

@@ -368,15 +368,16 @@ FAIR_GENOMES_SYNC_INTERVAL_HOURS = config('FAIR_GENOMES_SYNC_INTERVAL_HOURS', de
 # Set MOCK_ALVAO=True for development without real Alvao server
 MOCK_ALVAO = config('MOCK_ALVAO', default=False, cast=bool)
 
-# Real Alvao API settings (used when MOCK_ALVAO=False)
+# Alvao REST API v1.3 settings (used when MOCK_ALVAO=False)
+# URL pattern: https://{server}/AlvaoRestApi/v1
 ALVAO_API_URL = config('ALVAO_API_URL', default='')
-ALVAO_API_TOKEN = config('ALVAO_API_TOKEN', default='')
 
-# Alternative: Basic authentication (if token not available)
+# Service account (basic auth) — create in Alvao Administration > Users
+# with Application Account + Other Applications type
 ALVAO_SERVICE_ACCOUNT_USERNAME = config('ALVAO_SERVICE_ACCOUNT_USERNAME', default='')
 ALVAO_SERVICE_ACCOUNT_PASSWORD = config('ALVAO_SERVICE_ACCOUNT_PASSWORD', default='')
 
-# Default service ID for new tickets (optional)
+# Service ID for new tickets (required — find via GET /services)
 ALVAO_DEFAULT_SERVICE_ID = config(
     'ALVAO_DEFAULT_SERVICE_ID', default=None, cast=lambda x: int(x) if x else None
 )

@@ -86,28 +86,34 @@ class MockAlvaoService:
         now = timezone.now().isoformat()
 
         stored_data = {
-            'ticketId': ticket_id,
-            'ticketNumber': ticket_number,
-            'subject': ticket_data.subject,
-            'description': ticket_data.description,
-            'requesterEmail': ticket_data.requester_email,
-            'requesterName': ticket_data.requester_name,
-            'status': 'New',
-            'createdAt': now,
-            'updatedAt': now,
-            'url': f'http://localhost:8000/ticketing/mock-ticket/{ticket_id}/',
+            'id': ticket_id,
+            'messageTag': ticket_number,
+            'name': ticket_data.subject,
+            'descriptionHtml': ticket_data.description,
+            'requester': {
+                'email': ticket_data.requester_email,
+                'name': ticket_data.requester_name,
+            },
+            'stateName': 'New',
+            'createdDate': now,
             'serviceId': ticket_data.service_id,
-            'customFields': ticket_data.custom_fields,
+            '_links': {
+                'self': {
+                    'href': f'http://localhost:8000/ticketing/mock-ticket/{ticket_id}/',
+                },
+            },
         }
 
         self._store_ticket(ticket_id, stored_data)
 
         logger.info(f'[MOCK] Created ticket: {ticket_id} for {ticket_data.requester_email}')
 
+        mock_url = f'http://localhost:8000/ticketing/mock-ticket/{ticket_id}/'
+
         return TicketResponse(
             ticket_id=ticket_id,
             ticket_number=ticket_number,
             status='New',
-            url=stored_data['url'],
+            url=mock_url,
             raw_response=stored_data,
         )

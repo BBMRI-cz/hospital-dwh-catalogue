@@ -177,7 +177,7 @@ class TicketDataTest(TestCase):
     """Tests for the TicketData dataclass."""
 
     def test_to_dict(self):
-        """to_dict converts to API payload format."""
+        """to_dict converts to Alvao v1.3 API payload format."""
         data = TicketData(
             subject='Test',
             description='Desc',
@@ -185,10 +185,11 @@ class TicketDataTest(TestCase):
             requester_name='Test User',
         )
         result = data.to_dict()
-        self.assertEqual(result['subject'], 'Test')
-        self.assertEqual(result['description'], 'Desc')
-        self.assertEqual(result['requesterEmail'], 'test@example.com')
-        self.assertEqual(result['requesterName'], 'Test User')
+        self.assertEqual(result['name'], 'Test')
+        self.assertEqual(result['descriptionHtml'], 'Desc')
+        self.assertEqual(result['requester']['email'], 'test@example.com')
+        self.assertEqual(result['requester']['name'], 'Test User')
+        self.assertEqual(result['priority'], 'Medium')
 
     def test_to_dict_minimal(self):
         """to_dict with only required fields."""
@@ -198,7 +199,9 @@ class TicketDataTest(TestCase):
             requester_email='test@example.com',
         )
         result = data.to_dict()
-        self.assertIn('subject', result)
+        self.assertIn('name', result)
+        self.assertIn('requester', result)
+        self.assertIn('priority', result)
         self.assertNotIn('serviceId', result)
         self.assertNotIn('slaId', result)
 
@@ -218,31 +221,27 @@ class TicketResponseTest(TestCase):
     """Tests for the TicketResponse dataclass."""
 
     def test_from_dict(self):
-        """from_dict creates instance from API response."""
+        """from_dict creates instance from Alvao v1.3 API response."""
         response = TicketResponse.from_dict(
             {
-                'ticketId': '123',
-                'ticketNumber': 'T-123',
-                'status': 'New',
-                'url': 'http://example.com/ticket/123',
+                'id': 123,
+                'messageTag': 'T137SD',
+                'stateName': 'New',
+                '_links': {'self': {'href': 'https://alvao.example.com/api/tickets/123'}},
             }
         )
         self.assertEqual(response.ticket_id, '123')
-        self.assertEqual(response.ticket_number, 'T-123')
+        self.assertEqual(response.ticket_number, 'T137SD')
         self.assertEqual(response.status, 'New')
+        self.assertEqual(response.url, 'https://alvao.example.com/api/tickets/123')
 
-    def test_from_dict_with_alternative_keys(self):
-        """from_dict handles alternative key names."""
-        response = TicketResponse.from_dict(
-            {
-                'id': '456',
-                'number': 'T-456',
-                'state': 'Open',
-            }
-        )
+    def test_from_dict_minimal(self):
+        """from_dict handles response with only id."""
+        response = TicketResponse.from_dict({'id': 456})
         self.assertEqual(response.ticket_id, '456')
-        self.assertEqual(response.ticket_number, 'T-456')
-        self.assertEqual(response.status, 'Open')
+        self.assertIsNone(response.ticket_number)
+        self.assertIsNone(response.status)
+        self.assertIsNone(response.url)
 
 
 class MockAlvaoServiceTest(TestCase):
