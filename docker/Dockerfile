@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     gettext \
     cron \
+    libldap2-dev \
+    libsasl2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages

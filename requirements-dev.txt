@@ -2,10 +2,10 @@
 # Install with: pip install -r requirements-dev.txt
 
 # Linting and formatting
-ruff>=0.4.0
+ruff==0.4.4
 
 # Type checking
-mypy>=1.10.0
+mypy==1.10.0
 django-stubs>=5.0.0
 types-requests>=2.31.0
 

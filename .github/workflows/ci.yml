@@ -131,9 +131,21 @@ jobs:
           echo "Running tests..."
           ./scripts/check-tests.sh
 
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build -f docker/Dockerfile -t hospital-dwh-catalogue-ci:${{ github.sha }} .
+          echo "Docker image built successfully"
+
   ci-success:
     name: CI Result
-    needs: [lint, type-check, translations, security, test]
+    needs: [lint, type-check, translations, security, test, docker-build]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -148,13 +160,15 @@ jobs:
           echo "  Translations: ${{ needs.translations.result }}"
           echo "  Security:     ${{ needs.security.result }}"
           echo "  Tests:        ${{ needs.test.result }}"
+          echo "  Docker Build: ${{ needs.docker-build.result }}"
           echo ""
           
           if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.type-check.result }}" != "success" ] || \
              [ "${{ needs.translations.result }}" != "success" ] || \
              [ "${{ needs.security.result }}" != "success" ] || \
-             [ "${{ needs.test.result }}" != "success" ]; then
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.docker-build.result }}" != "success" ]; then
             echo "========================================"
             echo "FAILED: Some checks did not pass"
             echo "========================================"

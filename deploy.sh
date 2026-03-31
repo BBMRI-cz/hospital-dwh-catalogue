@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Deploy script for hospital-dwh-catalogue
 # Usage: ./deploy.sh
