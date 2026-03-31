@@ -9,6 +9,7 @@ Run with --verbosity 0 to suppress the detailed report and only see errors.
 
 import logging
 
+from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
 from fair_genomes.services import FairGenomesAPIException, FairGenomesService
@@ -182,3 +183,6 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'  Failed:  {stats["failed"]}'))
                 for err in stats['errors']:
                     self.stdout.write(self.style.WARNING(f'    {err}'))
+
+        # Invalidate catalogue cache so fresh data is served immediately.
+        cache.delete('catalogue_all_datasets')

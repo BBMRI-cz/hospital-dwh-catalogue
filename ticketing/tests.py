@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from ticketing.cart import CART_MAX_ITEMS, CartService
+
 from .models import TicketRequest, TicketRequestItem
 from .services.base import TicketData, TicketResponse
 from .services.factory import get_ticket_service
@@ -365,3 +367,71 @@ class CartAddViewTest(TestCase):
         self.assertFalse(payload['in_cart'])
         self.assertEqual(payload['cart_count'], 0)
         self.assertEqual(self.client.session.get('cart', []), [])
+
+    def test_open_redirect_prevented(self):
+        """POST with external next URL redirects to / instead."""
+        response = self.client.post(
+            self.url,
+            data={
+                'app': 'warehouse',
+                'name': 'dataset-1',
+                'title': 'Dataset 1',
+                'next': 'https://evil.com/steal',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+
+    def test_safe_next_redirect(self):
+        """POST with safe next URL redirects to it."""
+        response = self.client.post(
+            self.url,
+            data={
+                'app': 'warehouse',
+                'name': 'dataset-1',
+                'title': 'Dataset 1',
+                'next': '/cart/',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/cart/')
+
+
+class CartOverflowTest(TestCase):
+    """Tests for the cart item limit (CART_MAX_ITEMS)."""
+
+    databases = {'default', 'auth_db'}
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='overflow-user',
+            email='overflow@example.com',
+            password='secret123',
+        )
+        self.client.force_login(self.user)
+
+    def test_cart_rejects_item_beyond_max(self):
+        """Adding an item when the cart is full returns False."""
+        session = self.client.session
+        session['cart'] = [
+            {'app': 'warehouse', 'name': f'ds-{i}', 'title': f'Dataset {i}'}
+            for i in range(CART_MAX_ITEMS)
+        ]
+        session.save()
+
+        # Re-fetch session after save to get the persisted state
+        result = CartService.add(self.client.session, 'warehouse', 'ds-overflow', 'Overflow')
+        self.assertFalse(result)
+
+    def test_cart_accepts_item_at_boundary(self):
+        """Adding an item when cart has MAX-1 items succeeds."""
+        session = self.client.session
+        session['cart'] = [
+            {'app': 'warehouse', 'name': f'ds-{i}', 'title': f'Dataset {i}'}
+            for i in range(CART_MAX_ITEMS - 1)
+        ]
+        session.save()
+
+        result = CartService.add(self.client.session, 'warehouse', 'ds-last', 'Last One')
+        self.assertTrue(result)

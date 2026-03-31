@@ -165,9 +165,7 @@ if not MOCK_LDAP:
     AUTH_LDAP_BIND_PASSWORD = config('AUTH_LDAP_BIND_PASSWORD', default='')
 
     # User search base (where to look for users in AD)
-    AUTH_LDAP_USER_SEARCH_BASE = config(
-        'AUTH_LDAP_USER_SEARCH_BASE', default='dc=example,dc=com'
-    )
+    AUTH_LDAP_USER_SEARCH_BASE = config('AUTH_LDAP_USER_SEARCH_BASE', default='dc=example,dc=com')
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         AUTH_LDAP_USER_SEARCH_BASE,
         ldap.SCOPE_SUBTREE,

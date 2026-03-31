@@ -3,9 +3,17 @@ Tests for the warehouse application â€” Local Metadata HealthDCAT-AP Profil
 
 All warehouse models are managed=False (pre-existing metadata_db tables).
 Tests verify model structure, __str__, and Meta without DB writes.
+View tests mock UnifiedCatalogService to avoid requiring real metadata_db data.
 """
 
+from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.core.cache import cache as django_cache
 from django.test import TestCase
+from django.urls import reverse
+
+from shared.dtos import UnifiedDataset, UnifiedDistribution
 
 from .models import Agent, Catalog, Column, ContactPoint, Dataset, Distribution, Table
 
@@ -208,3 +216,160 @@ class ColumnModelTest(TestCase):
             field = Column._meta.get_field(field_name)
             self.assertTrue(field.null, msg=f'{field_name} should allow null')
             self.assertTrue(field.blank, msg=f'{field_name} should allow blank')
+
+
+# ── View tests ────────────────────────────────────────────────────────────────
+
+
+def _make_test_dataset(**overrides):
+    """Create a UnifiedDataset with sensible defaults for view tests."""
+    defaults = {
+        'app': 'fair_genomes',
+        'name': 'test-dataset',
+        'title': 'Test Dataset',
+        'access_rights': 'PUBLIC',
+        'keyword': 'genetics,biobank',
+        'health_category': 'patient_data',
+        'description': 'A test dataset',
+    }
+    defaults.update(overrides)
+    ds = UnifiedDataset(**defaults)
+    ds.distributions = [
+        UnifiedDistribution(
+            app=defaults['app'],
+            name='test-dist',
+            dataset_name=defaults['name'],
+            title='Test Distribution',
+        ),
+    ]
+    return ds
+
+
+def _mock_schema():
+    return {
+        'dct:title': {
+            'label': 'Title',
+            'local_name': 'title',
+            'min': 1,
+            'max': 1,
+        },
+        'dct:description': {
+            'label': 'Description',
+            'local_name': 'description',
+            'min': 1,
+            'max': 1,
+        },
+        'dct:accessRights': {
+            'label': 'Access Rights',
+            'local_name': 'accessRights',
+            'min': 1,
+            'max': 1,
+        },
+    }
+
+
+_SERVICE_PATH = 'warehouse.views.UnifiedCatalogService'
+
+
+class CatalogueIndexViewTest(TestCase):
+    """Tests for the main catalogue index view."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        django_cache.clear()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='viewer', email='v@example.com', password='secret'
+        )
+
+    def test_requires_login(self):
+        response = self.client.get(reverse('warehouse:catalogue'))
+        self.assertNotEqual(response.status_code, 200)
+
+    @patch(_SERVICE_PATH)
+    def test_returns_200_with_datasets(self, mock_cls):
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [_make_test_dataset()]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('warehouse:catalogue'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Dataset')
+
+    @patch(_SERVICE_PATH)
+    def test_empty_catalogue(self, mock_cls):
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = []
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('warehouse:catalogue'))
+        self.assertEqual(response.status_code, 200)
+
+    @patch(_SERVICE_PATH)
+    def test_text_search_filters(self, mock_cls):
+        ds1 = _make_test_dataset(name='ds1', title='Alpha Dataset')
+        ds2 = _make_test_dataset(name='ds2', title='Beta Dataset')
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [ds1, ds2]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('warehouse:catalogue'), {'q': 'Alpha'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Alpha Dataset')
+        self.assertNotContains(response, 'Beta Dataset')
+
+
+class DatasetDetailViewTest(TestCase):
+    """Tests for the dataset detail view."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        django_cache.clear()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='viewer2', email='v2@example.com', password='secret'
+        )
+
+    @patch(_SERVICE_PATH)
+    def test_returns_200_for_existing_dataset(self, mock_cls):
+        ds = _make_test_dataset()
+        mock_svc = mock_cls.return_value
+        mock_svc.get_single_dataset.return_value = (ds, ds.distributions)
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'warehouse:dataset_detail', kwargs={'app': 'fair_genomes', 'name': 'test-dataset'}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @patch(_SERVICE_PATH)
+    def test_missing_dataset_raises_404(self, mock_cls):
+        """A non-existent dataset triggers Http404 in the view."""
+        from django.http import Http404
+
+        mock_svc = mock_cls.return_value
+        mock_svc.get_single_dataset.return_value = (None, [])
+
+        self.client.force_login(self.user)
+        with self.assertRaises(Http404):
+            # Call the view directly to verify the Http404 is raised,
+            # bypassing the 404.html template (which has a known {% extends %} ordering issue).
+            from django.test import RequestFactory
+
+            from warehouse.views import DatasetDetailView
+
+            factory = RequestFactory()
+            request = factory.get('/dataset/fair_genomes/nonexistent/')
+            request.user = self.user
+            request.session = self.client.session
+            with patch(_SERVICE_PATH) as inner_mock:
+                inner_mock.return_value = mock_svc
+                DatasetDetailView.as_view()(request, app='fair_genomes', name='nonexistent')

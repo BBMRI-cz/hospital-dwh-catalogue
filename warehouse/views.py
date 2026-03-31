@@ -9,7 +9,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from collections.abc import Callable
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -133,21 +133,46 @@ def _filter_datasets(datasets: list, get_params) -> list:
         status_filter = all_statuses
 
     # Resolve column filter → matching dataset names via Column + Distribution
+    # Query both metadata_db and fair_genomes_db so the filter works across sources.
     matching_dataset_names: frozenset | None = None
     if column_filter:
-        dist_names = (
+        all_dataset_names: set[str] = set()
+
+        # Warehouse (metadata_db)
+        wh_dist_names = (
             Column.objects.using('metadata_db')
             .filter(title__in=column_filter)
             .values_list('table__distribution_id', flat=True)
             .distinct()
         )
-        dataset_names = (
+        all_dataset_names.update(
             Distribution.objects.using('metadata_db')
-            .filter(name__in=dist_names)
+            .filter(name__in=wh_dist_names)
             .values_list('dataset_name', flat=True)
             .distinct()
         )
-        matching_dataset_names = frozenset(dataset_names)
+
+        # Fair Genomes (fair_genomes_db)
+        try:
+            from fair_genomes.models import Column as FGColumn
+            from fair_genomes.models import Distribution as FGDistribution
+
+            fg_dist_names = (
+                FGColumn.objects.using('fair_genomes_db')
+                .filter(title__in=column_filter)
+                .values_list('table__distribution_id', flat=True)
+                .distinct()
+            )
+            all_dataset_names.update(
+                FGDistribution.objects.using('fair_genomes_db')
+                .filter(name__in=fg_dist_names)
+                .values_list('dataset_name', flat=True)
+                .distinct()
+            )
+        except Exception:
+            pass
+
+        matching_dataset_names = frozenset(all_dataset_names)
 
     result = []
     for ds in datasets:
@@ -242,6 +267,84 @@ def _make_sidebar_items(
     ]
 
 
+def _build_sidebar_context(
+    filtered: list[dict],
+    *,
+    active_keywords: set,
+    active_sources: set,
+    active_custodians: set,
+    active_cats: set,
+    active_themes: set,
+    active_status: set,
+    active_columns: set,
+) -> dict:
+    """Build the sidebar filter context dict from filtered datasets."""
+    kw_counter: Counter = Counter()
+    src_counter: Counter = Counter()
+    custodian_counter: Counter = Counter()
+    hc_counter: Counter = Counter()
+    theme_counter: Counter = Counter()
+    status_counter: Counter = Counter()
+
+    for ds in filtered:
+        for kw in ds.get('keywords', []):
+            if kw:
+                kw_counter[kw] += 1
+        if ds.get('source'):
+            src_counter[ds['source']] += 1
+        if ds.get('custodian'):
+            custodian_counter[ds['custodian']] += 1
+        if ds.get('health_category'):
+            hc_counter[ds['health_category']] += 1
+        if ds.get('theme'):
+            theme_counter[ds['theme']] += 1
+        status_counter[ds['status']] += 1
+
+    # Distribution column counter (from warehouse filtered datasets)
+    col_counter: Counter = Counter()
+    filtered_dist_names = [
+        d['name']
+        for ds in filtered
+        if ds.get('app') == 'warehouse'
+        for d in ds.get('distributions', [])
+    ]
+    if filtered_dist_names:
+        dist_to_dataset: dict[str, str] = {
+            d['name']: ds['name'] for ds in filtered for d in ds.get('distributions', [])
+        }
+        seen_col_ds: set[tuple] = set()
+        attr_rows = (
+            Column.objects.using('metadata_db')
+            .filter(table__distribution__in=filtered_dist_names)
+            .exclude(title='')
+            .values_list('title', 'table__distribution_id')
+            .distinct()
+        )
+        for title, dist_name in attr_rows:
+            ds_name = dist_to_dataset.get(dist_name)
+            if ds_name and (title, ds_name) not in seen_col_ds:
+                col_counter[title] += 1
+                seen_col_ds.add((title, ds_name))
+
+    return {
+        'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
+        'sidebar_sources': _make_sidebar_items(src_counter, active_sources),
+        'sidebar_custodians': _make_sidebar_items(
+            custodian_counter, active_custodians, label_fn=_agent_label
+        ),
+        'sidebar_health_categories': _make_sidebar_items(
+            hc_counter, active_cats, label_fn=_health_category_label
+        ),
+        'sidebar_themes': _make_sidebar_items(theme_counter, active_themes, label_fn=_theme_label),
+        'sidebar_columns': _make_sidebar_items(col_counter, active_columns),
+        'sidebar_counts': {
+            'ready': status_counter.get('ready', 0),
+            'raw': status_counter.get('raw', 0),
+            'unavailable': status_counter.get('unavailable', 0),
+        },
+    }
+
+
 class CatalogueIndexView(LoginRequiredMixin, View):
     """Main catalogue page — server-side filtered & paginated."""
 
@@ -289,53 +392,17 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         total_count = len(all_datasets)
         dist_count = sum(len(ds.get('distributions', [])) for ds in all_datasets)
 
-        # ── Sidebar counters (computed from filtered results) ─────────────────
-        kw_counter: Counter = Counter()
-        src_counter: Counter = Counter()
-        custodian_counter: Counter = Counter()
-        hc_counter: Counter = Counter()
-        theme_counter: Counter = Counter()
-        status_counter: Counter = Counter()
-
-        for ds in filtered:
-            for kw in ds.get('keywords', []):
-                if kw:
-                    kw_counter[kw] += 1
-            if ds.get('source'):
-                src_counter[ds['source']] += 1
-            if ds.get('custodian'):
-                custodian_counter[ds['custodian']] += 1
-            if ds.get('health_category'):
-                hc_counter[ds['health_category']] += 1
-            if ds.get('theme'):
-                theme_counter[ds['theme']] += 1
-            status_counter[ds['status']] += 1
-
-        # ── Distribution column counter (from filtered datasets) ──────────────
-        col_counter: Counter = Counter()
-        filtered_dist_names = [
-            d['name']
-            for ds in filtered
-            if ds.get('app') == 'warehouse'
-            for d in ds.get('distributions', [])
-        ]
-        if filtered_dist_names:
-            dist_to_dataset: dict[str, str] = {
-                d['name']: ds['name'] for ds in filtered for d in ds.get('distributions', [])
-            }
-            seen_col_ds: set[tuple] = set()
-            attr_rows = (
-                Column.objects.using('metadata_db')
-                .filter(table__distribution__in=filtered_dist_names)
-                .exclude(title='')
-                .values_list('title', 'table__distribution_id')
-                .distinct()
-            )
-            for title, dist_name in attr_rows:
-                ds_name = dist_to_dataset.get(dist_name)
-                if ds_name and (title, ds_name) not in seen_col_ds:
-                    col_counter[title] += 1
-                    seen_col_ds.add((title, ds_name))
+        # ── Sidebar counters ──────────────────────────────────────────────────
+        sidebar_ctx = _build_sidebar_context(
+            filtered,
+            active_keywords=active_keywords,
+            active_sources=active_sources,
+            active_custodians=active_custodians,
+            active_cats=active_cats,
+            active_themes=active_themes,
+            active_status=active_status,
+            active_columns=active_columns,
+        )
 
         return render(
             request,
@@ -343,25 +410,7 @@ class CatalogueIndexView(LoginRequiredMixin, View):
             {
                 'page_obj': page_obj,
                 'filter_params': filter_params,
-                # Sidebar checkbox groups
-                'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
-                'sidebar_sources': _make_sidebar_items(src_counter, active_sources),
-                'sidebar_custodians': _make_sidebar_items(
-                    custodian_counter, active_custodians, label_fn=_agent_label
-                ),
-                'sidebar_health_categories': _make_sidebar_items(
-                    hc_counter, active_cats, label_fn=_health_category_label
-                ),
-                'sidebar_themes': _make_sidebar_items(
-                    theme_counter, active_themes, label_fn=_theme_label
-                ),
-                'sidebar_columns': _make_sidebar_items(col_counter, active_columns),
-                # Status bar counts
-                'sidebar_counts': {
-                    'ready': status_counter.get('ready', 0),
-                    'raw': status_counter.get('raw', 0),
-                    'unavailable': status_counter.get('unavailable', 0),
-                },
+                **sidebar_ctx,
                 # Hero stats
                 'total_count': total_count,
                 'dist_count': dist_count,
@@ -474,8 +523,6 @@ class DistributionDetailView(LoginRequiredMixin, View):
         # ── Table + column data — unified structure for both apps ──────────────
         # Warehouse distributions use metadata_db; fair_genomes use fair_genomes_db.
         # Stat counts are only populated for fair_genomes; warehouse always has [].
-        from collections import defaultdict
-
         if app == 'fair_genomes':
             from fair_genomes.models import Column as AppColumn
             from fair_genomes.models import StatResult

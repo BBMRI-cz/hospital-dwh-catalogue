@@ -6,6 +6,7 @@ Stores ticket requests and cart items locally before sending to Alvao.
 
 from typing import TYPE_CHECKING
 
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -31,6 +32,15 @@ class TicketRequest(models.Model):
         FAILED = 'failed', _('Submission Failed')
 
     # Requester information
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='ticket_requests',
+        verbose_name=_('Requester'),
+        db_constraint=False,
+    )
     requester_email = models.EmailField(
         verbose_name=_('Requester Email'), help_text=_('Email of the person requesting data access')
     )

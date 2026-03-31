@@ -11,9 +11,11 @@ import logging
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import models
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, View
 
@@ -71,6 +73,8 @@ class CartAddView(LoginRequiredMixin, View):
                 }
             )
         next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            next_url = '/'
         return redirect(next_url)
 
 
@@ -110,6 +114,7 @@ class CartView(LoginRequiredMixin, View):
             else str(_('Data access request'))
         )[:500]
         ticket = TicketRequest.objects.create(
+            requester=request.user,
             requester_email=request.user.email,
             requester_name=request.user.get_full_name() or request.user.username,
             subject=auto_subject,
@@ -200,7 +205,10 @@ class TicketHistoryView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return (
-            TicketRequest.objects.filter(requester_email=self.request.user.email)
+            TicketRequest.objects.filter(
+                models.Q(requester=self.request.user)
+                | models.Q(requester__isnull=True, requester_email=self.request.user.email)
+            )
             .prefetch_related('items')
             .order_by('-created_at')
         )
