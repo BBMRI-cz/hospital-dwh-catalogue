@@ -37,6 +37,13 @@ from schema_registry.registry import get_namespace_prefixes, get_registry
 logger = logging.getLogger(__name__)
 
 
+def _release_dir() -> Path:
+    """Resolve the HealthDCAT-AP release directory from Django settings."""
+    version: str = getattr(settings, 'HEALTH_DCAT_VERSION', 'release-6')
+    base_dir: Path = settings.BASE_DIR
+    return base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
+
+
 def get_schema_dict() -> dict[str, Any]:
     """
     Return the in-memory schema dict for the configured release version.
@@ -51,10 +58,7 @@ def get_schema_dict() -> dict[str, Any]:
     Returns an empty dict if the submodule or release directory is missing,
     or if ``rdflib`` is not installed.
     """
-    version: str = getattr(settings, 'HEALTH_DCAT_VERSION', 'release-6')
-    base_dir: Path = settings.BASE_DIR
-    release_dir = base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
-    return get_registry(release_dir)
+    return get_registry(_release_dir())
 
 
 def get_context_prefixes() -> dict[str, str]:
@@ -67,7 +71,4 @@ def get_context_prefixes() -> dict[str, str]:
 
     Returns an empty dict if the submodule or rdflib is unavailable.
     """
-    version: str = getattr(settings, 'HEALTH_DCAT_VERSION', 'release-6')
-    base_dir: Path = settings.BASE_DIR
-    release_dir = base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
-    return get_namespace_prefixes(release_dir)
+    return get_namespace_prefixes(_release_dir())

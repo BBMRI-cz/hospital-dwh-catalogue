@@ -24,7 +24,10 @@
 
     <!-- ── Body ─────────────────────────────────────────────────── -->
     <div class="px-6 pt-5 pb-5 bg-white space-y-4">
-      <div id="sm-req"></div>
+      <div class="flex items-center gap-3">
+        <div id="sm-req"></div>
+        <span id="sm-card" class="font-mono text-[10px] text-txt-muted" style="display:none"></span>
+      </div>
       <div>
         <p class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mb-1.5">{% trans "Description" %}</p>
         <p id="sm-desc" class="text-sm text-gray-700 leading-relaxed"></p>

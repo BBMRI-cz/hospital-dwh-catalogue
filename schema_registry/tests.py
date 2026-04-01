@@ -49,7 +49,15 @@ class RegistryParserTest(TestCase):
 
     def test_each_entry_has_required_fields(self) -> None:
         registry = self._load_release6()
-        required_fields = {'prefix', 'local_name', 'uri', 'requirement', 'label', 'description'}
+        required_fields = {
+            'prefix',
+            'local_name',
+            'uri',
+            'requirement',
+            'cardinality',
+            'label',
+            'description',
+        }
         for key, entry in registry.items():
             with self.subTest(semantics=key):
                 self.assertEqual(set(entry.keys()), required_fields)
@@ -86,10 +94,11 @@ class RegistryParserTest(TestCase):
         registry = self._load_release6()
         self.assertIn('dcat:keyword', registry)
 
-    def test_dct_publisher_is_mandatory(self) -> None:
+    def test_dct_publisher_is_recommended(self) -> None:
+        """JSON overrides SHACL: publisher is Recommended at dataset level."""
         registry = self._load_release6()
         self.assertIn('dct:publisher', registry)
-        self.assertEqual(registry['dct:publisher']['requirement'], 'mandatory')
+        self.assertEqual(registry['dct:publisher']['requirement'], 'recommended')
 
     #  URI consistency
 
@@ -120,7 +129,7 @@ class RegistryParserTest(TestCase):
         registry = self._load_release6()
         self.assertIn('healthdcatap:hdab', registry)
         entry = registry['healthdcatap:hdab']
-        self.assertEqual(entry['requirement'], 'optional')
+        self.assertEqual(entry['requirement'], 'mandatory')
 
     #  Namespace prefix map
 
@@ -149,6 +158,31 @@ class RegistryParserTest(TestCase):
         serialised = json.dumps(registry)
         self.assertIsInstance(serialised, str)
 
+    #  Cardinality
+
+    def test_cardinality_set_for_json_matched_terms(self) -> None:
+        """Terms matched in the cardinality JSON must have a non-empty cardinality."""
+        registry = self._load_release6()
+        self.assertNotEqual(registry['dct:title']['cardinality'], '')
+        self.assertNotEqual(registry['healthdcatap:healthCategory']['cardinality'], '')
+
+    def test_cardinality_format(self) -> None:
+        """Cardinality values must follow the 'min..max' pattern."""
+        registry = self._load_release6()
+        for key, entry in registry.items():
+            card = entry['cardinality']
+            if card:
+                with self.subTest(semantics=key):
+                    self.assertRegex(card, r'^\d+\.\.([\d*]+)$')
+
+    #  Requirement upgrade from JSON
+
+    def test_dcat_keyword_is_recommended(self) -> None:
+        """JSON upgrades dcat:keyword from SHACL 'optional' to 'recommended'."""
+        registry = self._load_release6()
+        self.assertIn('dcat:keyword', registry)
+        self.assertEqual(registry['dcat:keyword']['requirement'], 'recommended')
+
 
 class RegistryCacheTest(TestCase):
     """Tests for the module-level lazy cache in schema_registry.registry."""
@@ -174,6 +208,18 @@ class RegistryCacheTest(TestCase):
         second = get_registry(_RELEASE_6)
         # Should be a fresh dict (different object)
         self.assertIsNot(first, second)
+
+    def test_cache_keyed_by_path(self) -> None:
+        """Different release_dir values get independent cache entries."""
+        from schema_registry.registry import get_registry
+
+        good = get_registry(_RELEASE_6)
+        bad = get_registry(Path('/nonexistent/path/release-99'))
+        # The valid path returns data, the missing path returns empty
+        self.assertGreater(len(good), 0)
+        self.assertEqual(len(bad), 0)
+        # Calling the valid path again still returns the cached data (not empty)
+        self.assertIs(get_registry(_RELEASE_6), good)
 
 
 class ServiceLayerTest(TestCase):
@@ -207,3 +253,11 @@ class ServiceLayerTest(TestCase):
             invalidate_cache()
             result = get_schema_dict()
         self.assertEqual(result, {})
+
+    def test_get_context_prefixes_returns_dict(self) -> None:
+        from schema_registry.services import get_context_prefixes
+
+        result = get_context_prefixes()
+        self.assertIsInstance(result, dict)
+        self.assertIn('dct', result)
+        self.assertTrue(result['dct'].startswith('http'))

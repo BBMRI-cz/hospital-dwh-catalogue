@@ -22,6 +22,7 @@ function showSchemaModal(semantics) {
   document.getElementById('sm-uri-text').textContent = s.uri;
 
   const reqEl  = document.getElementById('sm-req');
+  const cardEl = document.getElementById('sm-card');
   const reqMap = {
     mandatory:   ['Mandatory',   'bg-green-50 text-green-800 border-green-200'],
     recommended: ['Recommended', 'bg-amber-50 text-amber-800 border-amber-200'],
@@ -33,6 +34,13 @@ function showSchemaModal(semantics) {
     <span class="w-1.5 h-1.5 rounded-full inline-block" style="background:currentColor;opacity:.7"></span>
     ${rlabel}
   </span>`;
+
+  if (s.cardinality) {
+    cardEl.textContent = s.cardinality;
+    cardEl.style.display = '';
+  } else {
+    cardEl.style.display = 'none';
+  }
 
   document.getElementById('schema-modal').showModal();
 }

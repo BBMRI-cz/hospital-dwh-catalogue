@@ -6,8 +6,9 @@ Parses the SHACL TTL and HealthDCAT-AP cardinality rules from the
 ``health_dcat_ap/`` git submodule and returns a plain dict keyed by
 prefixed semantics string (e.g. ``"dct:title"``).
 
-The dict is loaded once per Python process (lazy singleton) and cached in
-``_registry_cache``.  Call ``invalidate_cache()`` in tests to force a reload.
+The dict is loaded once per Python process and cached in ``_registry_cache``
+keyed by the resolved release directory path.  Call ``invalidate_cache()`` in
+tests to force a reload.
 
 Returned dict shape (matches what the JS schema modal consumes)::
 
@@ -17,6 +18,7 @@ Returned dict shape (matches what the JS schema modal consumes)::
             "local_name":  "title",
             "uri":         "http://purl.org/dc/terms/title",
             "requirement": "mandatory",   # mandatory | recommended | optional | deprecated
+            "cardinality": "1..*",        # from cardinality JSON (empty if unknown)
             "label":       "Title",
             "description": "A name given to the Dataset.",
         },
@@ -27,9 +29,11 @@ Data sources
 ------------
 * ``shacl/dcat-ap-SHACL.ttl``     — base DCAT-AP terms (all NodeShape properties
   that carry ``shacl:name`` + ``shacl:path``)
-* ``context/healthdcat-cardinality-rules.json`` — HealthDCAT-AP extension terms
-  (healthdcatap: namespace); property names are extracted from the
-  ``usage_note`` HTML fragment in each entry.
+* ``context/healthdcat-cardinality-rules.json`` — HealthDCAT-AP cardinality rules;
+  property names are extracted from the ``usage_note`` HTML ``<a>`` tag in each
+  entry.  For terms already in the SHACL result, the JSON updates ``requirement``
+  (three-tier: mandatory / recommended / optional) and ``cardinality``.  New
+  ``healthdcatap:`` terms not present in the SHACL TTL are added from the JSON.
 
 Prefix normalisation
 --------------------
@@ -67,10 +71,9 @@ _NS_URI_TO_CANONICAL_PREFIX: dict[str, str] = {
 _HEALTHDCAT_PREFIX = 'healthdcatap'
 _HEALTHDCAT_BASE_URI = 'http://healthdataportal.eu/ns/health#'
 
-# Module-level cache: populated on first call to get_registry()
-# Stored as a tuple (term_dict, prefix_map) so both can be returned without
-# re-parsing the TTL.
-_registry_cache: tuple[dict[str, Any], dict[str, str]] | None = None
+# Module-level cache: keyed by resolved release_dir path so that different
+# release versions (or override_settings in tests) get independent caches.
+_registry_cache: dict[Path, tuple[dict[str, Any], dict[str, str]]] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -95,9 +98,10 @@ def get_registry(release_dir: Path) -> dict[str, Any]:
     directory or TTL file is missing.
     """
     global _registry_cache
-    if _registry_cache is None:
-        _registry_cache = _load(release_dir)
-    return _registry_cache[0]
+    resolved = release_dir.resolve()
+    if resolved not in _registry_cache:
+        _registry_cache[resolved] = _load(release_dir)
+    return _registry_cache[resolved][0]
 
 
 def get_namespace_prefixes(release_dir: Path) -> dict[str, str]:
@@ -112,15 +116,16 @@ def get_namespace_prefixes(release_dir: Path) -> dict[str, str]:
     Returns an empty dict if the submodule or rdflib is unavailable.
     """
     global _registry_cache
-    if _registry_cache is None:
-        _registry_cache = _load(release_dir)
-    return _registry_cache[1]
+    resolved = release_dir.resolve()
+    if resolved not in _registry_cache:
+        _registry_cache[resolved] = _load(release_dir)
+    return _registry_cache[resolved][1]
 
 
 def invalidate_cache() -> None:
     """Clear the module-level cache (useful in tests)."""
     global _registry_cache
-    _registry_cache = None
+    _registry_cache = {}
 
 
 # ---------------------------------------------------------------------------
@@ -248,6 +253,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
             'local_name': local_name,
             'uri': path_uri,
             'requirement': requirement,
+            'cardinality': '',
             'label': info['label'],
             'description': info['description'],
         }
@@ -277,17 +283,23 @@ def _merge_healthdcat_terms(
     result: dict[str, Any],
 ) -> None:
     """
-    Parse HealthDCAT-AP extension terms from ``healthdcat-cardinality-rules.json``
+    Parse HealthDCAT-AP cardinality rules from ``healthdcat-cardinality-rules.json``
     and merge them into *result*.
 
     The JSON contains a ``PUBLIC`` object with human-readable property names as
-    keys.  The actual RDF property name (e.g. ``healthdcatap:healthCategory``) is
-    embedded in the ``usage_note`` HTML as::
+    keys.  The actual RDF property name (e.g. ``dct:title``,
+    ``healthdcatap:healthCategory``) is embedded in the ``usage_note`` HTML
+    inside an ``<a>`` link::
 
         <a href="#healthdcatapXxx">healthdcatap:xxx</a>
 
-    Only entries whose usage_note contains a ``healthdcatap:`` reference are
-    added; entries already present from the SHACL TTL are not overwritten.
+    For terms **already present** from the SHACL TTL, ``requirement`` is updated
+    from the JSON (SHACL only distinguishes mandatory vs optional; the JSON
+    provides the authoritative three-tier scheme: mandatory / recommended /
+    optional) and ``cardinality`` is set from the JSON ``card`` field.
+
+    For new ``healthdcatap:`` terms not already in the SHACL result, a full
+    entry is created.
     """
     try:
         data = json.loads(json_path.read_text(encoding='utf-8'))
@@ -300,26 +312,42 @@ def _merge_healthdcat_terms(
 
     for term_label, term_info in cardinality_data.items():
         usage_note: str = term_info.get('usage_note', '')
-        # Extract healthdcatap:propertyName from the usage_note HTML
-        match = re.search(r'healthdcatap:(\w+)', usage_note)
+        # Extract prefix:propertyName from the <a> tag in the usage_note HTML.
+        # Anchoring to '>' avoids false positives from mentions of prefixed
+        # terms in the descriptive text (e.g. "healthdcatap:hdab" mentioned
+        # inside the "qualified attribution" entry's prose).
+        match = re.search(r'>(\w+):(\w+)', usage_note)
         if not match:
+            logger.debug(
+                'Cardinality JSON entry "%s" has no prefix:local reference '
+                'in usage_note <a> tag — skipped.',
+                term_label,
+            )
             continue
 
-        local_name = match.group(1)
-        semantics = f'{_HEALTHDCAT_PREFIX}:{local_name}'
-
-        if semantics in result:
-            # Already present from SHACL — do not overwrite
-            continue
+        prefix = match.group(1)
+        local_name = match.group(2)
+        semantics = f'{prefix}:{local_name}'
 
         req_raw = str(term_info.get('requirement', 'optional')).lower()
         requirement = _req_map.get(req_raw, 'optional')
+        cardinality = str(term_info.get('card', ''))
 
-        result[semantics] = {
-            'prefix': _HEALTHDCAT_PREFIX,
-            'local_name': local_name,
-            'uri': f'{_HEALTHDCAT_BASE_URI}{local_name}',
-            'requirement': requirement,
-            'label': term_label.title(),
-            'description': term_info.get('definition', ''),
-        }
+        if semantics in result:
+            # Update requirement and cardinality from the authoritative JSON.
+            result[semantics]['requirement'] = requirement
+            result[semantics]['cardinality'] = cardinality
+            continue
+
+        # New term — only add healthdcatap: terms (others should already
+        # be present from the SHACL TTL).
+        if prefix == _HEALTHDCAT_PREFIX:
+            result[semantics] = {
+                'prefix': prefix,
+                'local_name': local_name,
+                'uri': f'{_HEALTHDCAT_BASE_URI}{local_name}',
+                'requirement': requirement,
+                'cardinality': cardinality,
+                'label': term_label.title(),
+                'description': term_info.get('definition', ''),
+            }
