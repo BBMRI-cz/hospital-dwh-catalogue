@@ -85,13 +85,9 @@
     <div class="flex flex-col gap-2.5">
       {% for dist in distributions %}
       {% include "catalogue/components/_distribution_card.html" with dist=dist dataset=dataset loop_id=forloop.counter cart_dataset_ids=cart_dataset_ids schema_json=schema_json only %}
-      {% empty %}
-      <div class="text-center py-12 text-txt-muted italic text-sm">{% trans "No distributions available for this dataset." %}</div>
       {% endfor %}
     </div>
   </div>
-  {% else %}
-  <div class="text-center py-12 text-txt-muted italic text-sm">{% trans "No distributions available for this dataset." %}</div>
   {% endif %}
 
 </div>
