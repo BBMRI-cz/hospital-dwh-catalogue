@@ -20,6 +20,10 @@
   try { charts = JSON.parse(el.textContent); } catch (_) { return; }
   if (!Array.isArray(charts) || charts.length === 0) return;
 
+  var i18nEl = document.getElementById('stat-charts-i18n');
+  var labelTotal = 'total';
+  try { if (i18nEl) labelTotal = JSON.parse(i18nEl.textContent) || labelTotal; } catch (_) {}
+
   /* ── MOU-inspired colour palette ──────────────────────────────────────── */
   var PALETTE = [
     '#53c0d7',  /* mou-cyan    */
@@ -64,12 +68,12 @@
       ctx.textBaseline = 'middle';
 
       ctx.font      = 'bold 17px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#111827';
+      ctx.fillStyle = '#374151';  /* mou txt */
       ctx.fillText(total.toLocaleString(), cx, cy - 7);
 
       ctx.font      = '10px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#9ca3af';
-      ctx.fillText('total', cx, cy + 10);
+      ctx.fillStyle = '#4b5563';  /* mou txt-muted */
+      ctx.fillText(labelTotal, cx, cy + 10);
 
       ctx.restore();
     },

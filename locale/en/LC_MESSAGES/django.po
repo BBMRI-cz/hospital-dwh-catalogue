@@ -1108,6 +1108,12 @@ msgstr "Password"
 msgid "Sign in"
 msgstr "Sign in"
 
+msgid "Value Distributions"
+msgstr "Value Distributions"
+
+msgid "total"
+msgstr "total"
+
 #~ msgid "Slug"
 #~ msgstr "Slug"
 

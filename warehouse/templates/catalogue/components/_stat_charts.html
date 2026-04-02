@@ -38,5 +38,6 @@
 </div>
 
 {{ charts|json_script:"stat-charts-data" }}
+{% trans "total" as t_total %}{{ t_total|json_script:"stat-charts-i18n" }}
 <script src="{% static 'js/stat-charts.js' %}"></script>
 {% endif %}

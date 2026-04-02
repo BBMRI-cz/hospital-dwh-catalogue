@@ -1107,6 +1107,12 @@ msgstr "Heslo"
 msgid "Sign in"
 msgstr "Přihlásit se"
 
+msgid "Value Distributions"
+msgstr "Rozdělení hodnot"
+
+msgid "total"
+msgstr "celkem"
+
 #~ msgid "Slug"
 #~ msgstr "Slug"
 
