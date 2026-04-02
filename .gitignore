@@ -8,6 +8,7 @@ test_*.sqlite3
 media
 staticfiles/
 logs/*.log
+logs/*.log.*
 
 
 # Backup files # 

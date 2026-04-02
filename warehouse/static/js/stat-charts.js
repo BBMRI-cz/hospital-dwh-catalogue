@@ -82,8 +82,6 @@
     labels.forEach(function (label, i) {
       if (i >= MAX_LEGEND_ITEMS) return;
 
-      var pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : '0.0';
-
       var row   = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;gap:7px;min-width:0;';
 
@@ -93,16 +91,16 @@
       var text  = document.createElement('span');
       text.style.cssText = [
         'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;',
-        'font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#4b5563;',
+        'font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#374151;',
       ].join('');
       text.textContent = label;       /* textContent is XSS-safe */
 
       var badge = document.createElement('span');
       badge.style.cssText = [
         'flex-shrink:0;font-family:\'JetBrains Mono\',monospace;',
-        'font-size:11px;color:#9ca3af;font-variant-numeric:tabular-nums;',
+        'font-size:11px;color:#374151;font-variant-numeric:tabular-nums;font-weight:500;',
       ].join('');
-      badge.textContent = pct + '%';
+      badge.textContent = values[i].toLocaleString();
 
       row.appendChild(dot);
       row.appendChild(text);
