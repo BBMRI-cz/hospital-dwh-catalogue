@@ -121,7 +121,7 @@ echo ""
 # -----------------------------------------------------------------------------
 # Step 5: Translation Check
 # -----------------------------------------------------------------------------
-echo "[5/7] Translation Check"
+echo "[5/7] Translation Check (completeness + compiled)"
 echo "----------------------------------------"
 if ! "$SCRIPT_DIR/check-translations.sh"; then
     FAILED=true

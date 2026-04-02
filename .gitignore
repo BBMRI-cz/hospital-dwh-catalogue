@@ -9,8 +9,6 @@ media
 staticfiles/
 logs/*.log
 
-# Compiled translation files (generated automatically)
-*.mo
 
 # Backup files # 
 *.bak 

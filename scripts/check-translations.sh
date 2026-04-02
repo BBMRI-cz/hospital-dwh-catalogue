@@ -43,8 +43,25 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
     fi
 done
 
+# Check that .mo files exist and are not older than their .po files
+echo "Checking that .mo files are compiled and up to date..."
+for po_file in locale/*/LC_MESSAGES/django.po; do
+    if [ -f "$po_file" ]; then
+        mo_file="${po_file%.po}.mo"
+        if [ ! -f "$mo_file" ]; then
+            echo "FAILED: Missing compiled translation: $mo_file"
+            echo "  Run: python manage.py compilemessages"
+            TRANSLATION_ISSUES=true
+        elif [ "$po_file" -nt "$mo_file" ]; then
+            echo "FAILED: Stale compiled translation: $mo_file is older than $po_file"
+            echo "  Run: python manage.py compilemessages"
+            TRANSLATION_ISSUES=true
+        fi
+    fi
+done
+
 if [ "$TRANSLATION_ISSUES" = false ]; then
-    echo "PASSED: All translations complete"
+    echo "PASSED: All translations complete and compiled"
 else
     exit 1
 fi

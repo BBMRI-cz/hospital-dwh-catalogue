@@ -7,10 +7,20 @@ Called by docker/entrypoint.sh before the main server command.
 
 import os
 import sys
+from pathlib import Path
 
 import django
 from django.core.management import call_command
 from django.db import connections
+
+
+def _translations_need_compile(locale_dir: Path) -> bool:
+    """Return True if any .po file is missing its .mo or is newer than it."""
+    for po in locale_dir.rglob('*.po'):
+        mo = po.with_suffix('.mo')
+        if not mo.exists() or po.stat().st_mtime > mo.stat().st_mtime:
+            return True
+    return False
 
 
 def main() -> None:
@@ -52,7 +62,12 @@ def main() -> None:
         call_command('seed_fair_genomes_mock')
 
     # ── Translations ──────────────────────────────────────────────────────────
-    call_command('compilemessages', locale=['cs', 'en'], verbosity=0)
+    locale_dir = Path(__file__).resolve().parent.parent / 'locale'
+    if _translations_need_compile(locale_dir):
+        print('Compiling translations...', flush=True)
+        call_command('compilemessages', locale=['cs', 'en'], verbosity=0)
+    else:
+        print('Translations up to date, skipping compilemessages.', flush=True)
 
     # ── Static files (skip in dev — runserver serves them directly) ───────────
     if settings_module != 'catalogue.settings.dev':
