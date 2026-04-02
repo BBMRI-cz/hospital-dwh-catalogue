@@ -3,6 +3,7 @@ FROM python:3.13-slim
 # Prevent Python from writing .pyc files and buffer output
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 WORKDIR /app
 
