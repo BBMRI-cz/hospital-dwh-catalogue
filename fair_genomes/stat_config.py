@@ -1,31 +1,29 @@
 """
-Stat definitions for MOLGENIS FAIR Genomes counts.
+Stat definitions for MOLGENIS FAIR Genomes aggregations.
 
 ``get_stat_definitions()`` is the single place to add, remove, or rename
 tracked stats.  The sync machinery reads this function — it never queries the
 DB to learn *what* to fetch, only the DB to learn *what to store*.
 
-Each ``StatDef`` describes one count query:
+Each ``StatDef`` describes one aggregation query:
 
-  table        — MOLGENIS table name (same as ``Table.name`` after schema sync),
-                 e.g. ``"sequencing"``
+  table              — MOLGENIS table name, e.g. ``"sequencing"``
 
-  column       — column name within that table (unqualified, no table prefix),
-                 e.g. ``"sequencinginstrumentmodel"``
+  column             — column name within that table (unqualified, no table
+                       prefix), e.g. ``"sequencinginstrumentmodel"``
 
-  filter_value — the value to count records by, e.g. ``"MiSeq"``
+  distribution_name  — optional name of the DCAT Distribution whose detail page
+                       should display the resulting chart.  When ``None`` the
+                       stat is synced and stored but not shown on any page.
 
-  column_type  — MOLGENIS GraphQL type string for this column:
-                 ``"ref"`` or ``"ref_array"`` → filter wraps the value as
-                   ``{column: {value: {equals: "…"}}}``
-                 anything else (``"string"``, ``"int"``, …) → filter is
-                   ``{column: {equals: "…"}}``
-                 Must match the ``datatype`` stored in the Column model after
-                 a schema sync.
+The sync fetches a full GROUP BY distribution for each definition, returning
+counts of all distinct values in the column.
 
 To add a new stat, append a ``StatDef`` line below.  No DB migration or code
 change elsewhere is needed.
 """
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 
@@ -34,27 +32,45 @@ from dataclasses import dataclass
 class StatDef:
     table: str
     column: str
-    filter_value: str
-    column_type: str
+    distribution_name: str | None = None
 
 
 def get_stat_definitions() -> list[StatDef]:
-    """Return all stat queries that should be fetched and stored on every sync."""
+    """Return all aggregation queries that should be fetched and stored on every sync."""
     return [
-        # How many sequencing records used a MiSeq instrument?
         StatDef(
             table='sequencing',
             column='sequencinginstrumentmodel',
-            filter_value='MiSeq',
-            column_type='ref',
+            distribution_name='DIST_FG_WES_BAM',
         ),
-        # What library preparation kits are used in samplepreparation?
-        # Add one StatDef per kit value once the distinct values are known.
-        # Example (uncomment and adjust the value):
-        # StatDef(
-        #     table='samplepreparation',
-        #     column='librarypreparationkit',
-        #     filter_value='<kit name here>',
-        #     column_type='ref',
-        # ),
+        StatDef(
+            table='sequencing',
+            column='librarypreparationkit',
+            distribution_name='DIST_FG_WES_BAM',
+        ),
+        StatDef(
+            table='sequencing',
+            column='sequencingtype',
+            distribution_name='DIST_FG_WES_BAM',
+        ),
+        StatDef(
+            table='sample',
+            column='samplematerialtype',
+            distribution_name='DIST_FG_WES_BAM',
+        ),
+        StatDef(
+            table='sample',
+            column='pathologicalstate',
+            distribution_name='DIST_FG_WES_BAM',
+        ),
+        StatDef(
+            table='genomicdata',
+            column='genomebuild',
+            distribution_name='DIST_FG_WES_BAM',
+        ),
     ]
+
+
+def get_stats_for_distribution(name: str) -> list[StatDef]:
+    """Return only the stat definitions linked to a given distribution name."""
+    return [sd for sd in get_stat_definitions() if sd.distribution_name == name]

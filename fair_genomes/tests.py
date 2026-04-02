@@ -10,8 +10,9 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from .models import Agent, Catalog, Column, ContactPoint, Dataset, Distribution, StatResult, Table
+from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatResult
 from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
+from .stat_config import StatDef, get_stat_definitions, get_stats_for_distribution
 
 
 class ContactPointModelTest(TestCase):
@@ -152,35 +153,15 @@ class FairGenomesServiceTest(TestCase):
 
 
 class TableModelTest(TestCase):
-    """Tests for the FG Table model."""
+    """Table model has been removed — this placeholder prevents test discovery issues."""
 
-    databases = {'default', 'auth_db', 'fair_genomes_db'}
-
-    def test_str_with_title(self):
-        obj = Table(name='sequencing', title='Sequencing')
-        self.assertEqual(str(obj), 'Sequencing')
-
-    def test_str_fallback_to_name(self):
-        obj = Table(name='sequencing', title='')
-        self.assertEqual(str(obj), 'sequencing')
-
-    def test_meta_managed_true(self):
-        self.assertTrue(Table._meta.managed)
-
-    def test_meta_db_table(self):
-        self.assertEqual(Table._meta.db_table, 'fair_genomes_table')
+    pass
 
 
 class ColumnModelTest(TestCase):
-    """Tests for the FG Column model."""
+    """Column model has been removed — this placeholder prevents test discovery issues."""
 
-    databases = {'default', 'auth_db', 'fair_genomes_db'}
-
-    def test_meta_managed_true(self):
-        self.assertTrue(Column._meta.managed)
-
-    def test_meta_db_table(self):
-        self.assertEqual(Column._meta.db_table, 'fair_genomes_column')
+    pass
 
 
 class StatResultModelTest(TestCase):
@@ -196,21 +177,19 @@ class StatResultModelTest(TestCase):
 
     def test_unique_together(self):
         constraint = list(StatResult._meta.unique_together)
-        self.assertIn(('table_name', 'column_name', 'filter_value'), constraint)
+        self.assertIn(('table_name', 'column_name'), constraint)
 
     def test_create_and_retrieve(self):
         StatResult.objects.using('fair_genomes_db').create(
             table_name='sequencing',
             column_name='sequencinginstrumentmodel',
-            filter_value='MiSeq',
-            count=42,
+            distribution={'MiSeq': 42, 'NovaSeq': 10},
         )
         sr = StatResult.objects.using('fair_genomes_db').get(
             table_name='sequencing',
             column_name='sequencinginstrumentmodel',
-            filter_value='MiSeq',
         )
-        self.assertEqual(sr.count, 42)
+        self.assertEqual(sr.distribution, {'MiSeq': 42, 'NovaSeq': 10})
 
 
 class SyncStatsTest(TestCase):
@@ -218,31 +197,43 @@ class SyncStatsTest(TestCase):
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
-    def _make_ok_response(self, table: str, count: int) -> MagicMock:
-        """Return a mock requests.Response for a successful aggregation query."""
+    def _make_groupby_response(self, table: str, column: str, dist: dict) -> MagicMock:
+        """Return a mock requests.Response for a successful groupBy query."""
         resp = MagicMock()
         resp.raise_for_status.return_value = None
-        # MOLGENIS uses the capitalized table name as the response key
-        resp.json.return_value = {'data': {f'{table.capitalize()}_agg': {'count': count}}}
+        table_cap = table[0].upper() + table[1:]
+        rows = [
+            {'count': count, column: {'name': value}}
+            for value, count in dist.items()
+        ]
+        resp.json.return_value = {'data': {f'{table_cap}_groupBy': rows}}
         return resp
 
     @patch('fair_genomes.services.fair_genomes_service.requests.post')
     def test_sync_stats_success(self, mock_post):
-        mock_post.return_value = self._make_ok_response('sequencing', 17)
+        # Each stat def gets its own mock response; only the first needs real data.
+        n = len(get_stat_definitions())
+        first_resp = self._make_groupby_response(
+            'sequencing', 'sequencinginstrumentmodel', {'MiSeq': 17, 'NovaSeq': 5}
+        )
+        # Remaining defs receive a valid-but-empty groupBy response.
+        empty_resp = MagicMock()
+        empty_resp.raise_for_status.return_value = None
+        empty_resp.json.return_value = {'data': {}}
+        mock_post.side_effect = [first_resp] + [empty_resp] * (n - 1)
 
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
         report = svc._sync_stats()
 
-        self.assertEqual(report['updated'], 1)
+        self.assertEqual(report['updated'], n)
         self.assertEqual(report['failed'], 0)
         self.assertEqual(report['errors'], [])
 
         sr = StatResult.objects.using('fair_genomes_db').get(
             table_name='sequencing',
             column_name='sequencinginstrumentmodel',
-            filter_value='MiSeq',
         )
-        self.assertEqual(sr.count, 17)
+        self.assertEqual(sr.distribution, {'MiSeq': 17, 'NovaSeq': 5})
 
     @patch('fair_genomes.services.fair_genomes_service.requests.post')
     def test_sync_stats_http_error(self, mock_post):
@@ -253,9 +244,10 @@ class SyncStatsTest(TestCase):
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
         report = svc._sync_stats()
 
+        n = len(get_stat_definitions())
         self.assertEqual(report['updated'], 0)
-        self.assertEqual(report['failed'], 1)
-        self.assertEqual(len(report['errors']), 1)
+        self.assertEqual(report['failed'], n)
+        self.assertEqual(len(report['errors']), n)
 
     @patch('fair_genomes.services.fair_genomes_service.requests.post')
     def test_sync_stats_graphql_error_response(self, mock_post):
@@ -267,5 +259,49 @@ class SyncStatsTest(TestCase):
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
         report = svc._sync_stats()
 
-        self.assertEqual(report['failed'], 1)
+        n = len(get_stat_definitions())
+        self.assertEqual(report['failed'], n)
+        self.assertEqual(len(report['errors']), n)
         self.assertIn('GraphQL errors', report['errors'][0])
+
+
+class StatConfigTest(TestCase):
+    """Tests for fair_genomes.stat_config helpers."""
+
+    def test_stat_def_has_distribution_name_field(self):
+        sd = StatDef(table='t', column='c', distribution_name='my-dist')
+        self.assertEqual(sd.distribution_name, 'my-dist')
+
+    def test_stat_def_distribution_name_defaults_to_none(self):
+        sd = StatDef(table='t', column='c')
+        self.assertIsNone(sd.distribution_name)
+
+    def test_get_stats_for_distribution_returns_matching(self):
+        defs = get_stat_definitions()
+        # At least one definition must carry a distribution_name for this test to be meaningful.
+        named = [d for d in defs if d.distribution_name is not None]
+        self.assertTrue(named, 'Expected at least one StatDef with distribution_name set')
+        for d in named:
+            results = get_stats_for_distribution(d.distribution_name)
+            self.assertIn(d, results)
+
+    def test_get_stats_for_distribution_filters_out_unrelated(self):
+        results = get_stats_for_distribution('__nonexistent_distribution__')
+        self.assertEqual(results, [])
+
+    def test_get_stats_for_distribution_excludes_none_names(self):
+        """StatDefs with distribution_name=None must never appear in results."""
+        # Temporarily inject a None-named def to verify filtering.
+        from fair_genomes import stat_config
+        original = stat_config.get_stat_definitions
+
+        def patched():
+            return [*original(), StatDef(table='x', column='y', distribution_name=None)]
+
+        stat_config.get_stat_definitions = patched
+        try:
+            results = get_stats_for_distribution('any-dist')
+            for r in results:
+                self.assertIsNotNone(r.distribution_name)
+        finally:
+            stat_config.get_stat_definitions = original

@@ -27,11 +27,9 @@ from django.utils.translation import gettext_lazy as _
 from shared.abstract_models import (
     AgentBase,
     CatalogBase,
-    ColumnBase,
     ContactPointBase,
     DatasetBase,
     DistributionBase,
-    TableBase,
 )
 
 
@@ -116,51 +114,16 @@ class Distribution(DistributionBase):
         verbose_name_plural = _('Distributions')
 
 
-class Table(TableBase):
-    """
-    FAIR Genomes physical table metadata (csvw:Table).
-
-    Inherits name (PK), distribution, url, title, description from TableBase.
-    No FAIR Genomes-specific extensions.
-
-    Maps to:  csvw:Table
-    """
-
-    class Meta:
-        managed = True
-        db_table = 'fair_genomes_table'
-        verbose_name = _('Table')
-        verbose_name_plural = _('Tables')
-        ordering = ['name']
-
-
-class Column(ColumnBase):
-    """
-    FAIR Genomes physical column metadata within a Table (csvw:Column).
-
-    Inherits name (PK), table, title, description, datatype, property_url
-    from ColumnBase.  No FAIR Genomes-specific extensions.
-
-    Maps to:  csvw:Column
-    """
-
-    class Meta:
-        managed = True
-        db_table = 'fair_genomes_column'
-        verbose_name = _('Column')
-        verbose_name_plural = _('Columns')
-        ordering = ['name']
-
-
 class StatResult(models.Model):
     """
-    Persisted count for a single (table, column, filter_value) stat query.
+    Persisted value distribution for a single (table, column) aggregation.
 
-    Definitions of *what* to count live in ``fair_genomes.stat_config`` —
-    this model only stores the *results* written back by the sync.
+    Definitions of *which columns* to aggregate live in
+    ``fair_genomes.stat_config`` — this model only stores the *results*
+    written back by the sync.
 
-    Keys are plain strings matching ``stat_config.StatDef`` fields so that
-    results survive re-syncs even if the Column model rows are replaced.
+    ``distribution`` is a JSON object mapping each distinct value to its
+    count, e.g. ``{"MiSeq": 87, "NovaSeq": 42, "HiSeq": 15}``.
     """
 
     table_name = models.CharField(
@@ -173,16 +136,11 @@ class StatResult(models.Model):
         verbose_name=_('Column name'),
         help_text=_('Unqualified column name, e.g. "sequencinginstrumentmodel"'),
     )
-    filter_value = models.CharField(
-        max_length=500,
-        verbose_name=_('Filter value'),
-        help_text=_('The value that was counted, e.g. "MiSeq"'),
-    )
-    count = models.IntegerField(
-        null=True,
+    distribution = models.JSONField(
+        default=dict,
         blank=True,
-        verbose_name=_('Count'),
-        help_text=_('Number of records matching the filter; null means not yet synced'),
+        verbose_name=_('Distribution'),
+        help_text=_('JSON object mapping each distinct value to its record count'),
     )
     last_synced = models.DateTimeField(
         null=True,
@@ -195,8 +153,9 @@ class StatResult(models.Model):
         db_table = 'fair_genomes_stat_result'
         verbose_name = _('Stat Result')
         verbose_name_plural = _('Stat Results')
-        unique_together = [('table_name', 'column_name', 'filter_value')]
-        ordering = ['table_name', 'column_name', 'filter_value']
+        unique_together = [('table_name', 'column_name')]
+        ordering = ['table_name', 'column_name']
 
     def __str__(self) -> str:
-        return f'{self.table_name}.{self.column_name}={self.filter_value} ({self.count})'
+        n = len(self.distribution) if self.distribution else 0
+        return f'{self.table_name}.{self.column_name} ({n} values)'

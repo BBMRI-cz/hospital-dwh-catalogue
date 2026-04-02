@@ -19,6 +19,8 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
+from fair_genomes.models import StatResult as FGStatResult
+from fair_genomes.stat_config import get_stats_for_distribution
 from shared.dtos import UnifiedDataset, UnifiedDistribution
 from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
@@ -133,7 +135,7 @@ def _filter_datasets(datasets: list, get_params) -> list:
         status_filter = all_statuses
 
     # Resolve column filter → matching dataset names via Column + Distribution
-    # Query both metadata_db and fair_genomes_db so the filter works across sources.
+    # Query metadata_db so the filter works for warehouse sources.
     matching_dataset_names: frozenset | None = None
     if column_filter:
         all_dataset_names: set[str] = set()
@@ -151,26 +153,6 @@ def _filter_datasets(datasets: list, get_params) -> list:
             .values_list('dataset_name', flat=True)
             .distinct()
         )
-
-        # Fair Genomes (fair_genomes_db)
-        try:
-            from fair_genomes.models import Column as FGColumn
-            from fair_genomes.models import Distribution as FGDistribution
-
-            fg_dist_names = (
-                FGColumn.objects.using('fair_genomes_db')
-                .filter(title__in=column_filter)
-                .values_list('table__distribution_id', flat=True)
-                .distinct()
-            )
-            all_dataset_names.update(
-                FGDistribution.objects.using('fair_genomes_db')
-                .filter(name__in=fg_dist_names)
-                .values_list('dataset_name', flat=True)
-                .distinct()
-            )
-        except Exception:
-            pass
 
         matching_dataset_names = frozenset(all_dataset_names)
 
@@ -520,58 +502,58 @@ class DistributionDetailView(LoginRequiredMixin, View):
             if f.name in _inverse
         ]
 
-        # ── Table + column data — unified structure for both apps ──────────────
-        # Warehouse distributions use metadata_db; fair_genomes use fair_genomes_db.
-        # Stat counts are only populated for fair_genomes; warehouse always has [].
-        if app == 'fair_genomes':
-            from fair_genomes.models import Column as AppColumn
-            from fair_genomes.models import StatResult
-            from fair_genomes.models import Table as AppTable
+        # ── Table + column data — only for warehouse distributions ──────────────
+        # Fair genomes distributions do not have tables/columns.
+        tables = []
+        if app != 'fair_genomes':
+            table_qs = Table.objects.using('metadata_db').filter(distribution_id=name).order_by('name')
+            table_names = [t.name for t in table_qs]
 
-            using_db = 'fair_genomes_db'
-            col_order = ('table_id', 'name')
-        else:
-            AppTable = Table
-            AppColumn = Column
-            using_db = 'metadata_db'
-            col_order = ('table_id', 'var_order', 'name')
-
-        table_qs = AppTable.objects.using(using_db).filter(distribution_id=name).order_by('name')
-        table_names = [t.name for t in table_qs]
-
-        stat_by_table: dict[str, list] = defaultdict(list)
-        if app == 'fair_genomes' and table_names:
-            for sr in StatResult.objects.using('fair_genomes_db').filter(
-                table_name__in=table_names,
-                count__isnull=False,
+            col_by_table: dict[str, list] = defaultdict(list)
+            for c in (
+                Column.objects.using('metadata_db')
+                .filter(table_id__in=table_names)
+                .order_by('table_id', 'var_order', 'name')
             ):
-                stat_by_table[sr.table_name].append(sr)
+                col_by_table[c.table_id].append(
+                    {
+                        'name': c.name,
+                        'title': c.title,
+                        'description': c.description,
+                        'datatype': c.datatype,
+                        'property_url': c.property_url,
+                    }
+                )
 
-        col_by_table: dict[str, list] = defaultdict(list)
-        for c in (
-            AppColumn.objects.using(using_db).filter(table_id__in=table_names).order_by(*col_order)
-        ):
-            col_by_table[c.table_id].append(
+            tables = [
                 {
-                    'name': c.name,
-                    'title': c.title,
-                    'description': c.description,
-                    'datatype': c.datatype,
-                    'property_url': c.property_url,
+                    'name': t.name,
+                    'title': t.title or t.name,
+                    'description': t.description or '',
+                    'url': t.url,
+                    'columns': col_by_table.get(t.name, []),
+                    'stats': [],
                 }
-            )
+                for t in table_qs
+            ]
 
-        tables = [
-            {
-                'name': t.name,
-                'title': t.title or t.name,
-                'description': t.description or '',
-                'url': t.url,
-                'columns': col_by_table.get(t.name, []),
-                'stats': stat_by_table.get(t.name, []),
-            }
-            for t in table_qs
-        ]
+        # ── Stat charts — config-based mapping of aggregation results ───────────
+        charts: list[dict] = []
+        if app == 'fair_genomes':
+            stat_defs = get_stats_for_distribution(name)
+            for sd in stat_defs:
+                sr = (
+                    FGStatResult.objects.using('fair_genomes_db')
+                    .filter(table_name=sd.table, column_name=sd.column)
+                    .first()
+                )
+                if sr and sr.distribution:
+                    charts.append({
+                        'label': f'{sr.table_name}.{sr.column_name}',
+                        'table_name': sr.table_name,
+                        'column_name': sr.column_name,
+                        'data': sr.distribution,
+                    })
 
         return render(
             request,
@@ -580,6 +562,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
                 'distribution': distribution,
                 'dataset': dataset,
                 'tables': tables,
+                'charts': charts,
                 'schema_json': schema_json,
                 'app': app,
                 'dcat_rows': dcat_rows,

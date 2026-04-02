@@ -11,12 +11,12 @@ Two sync sources contribute to one atomic transaction per run:
 
   2. GraphQL (MOLGENIS EMX2) — configured via FAIR_GENOMES_API_URL +
      FAIR_GENOMES_API_TOKEN.
-       - Table    : DATA tables only (ONTOLOGIES lookup tables are skipped).
-       - Column   : all columns belonging to the saved DATA tables.
+       - Aggregation stats: full value distributions for columns defined in
+         stat_config.py.
 
-Both sources' DB writes are wrapped in a single transaction.atomic so the
-catalogue never has partial data — either everything succeeds or nothing is
-persisted.
+RDF DB writes are wrapped in a transaction.atomic so the catalogue never has
+partial data.  Stat aggregation runs outside the transaction so a failed count
+query never rolls back the RDF sync.
 
 sync() returns a structured report dict for downstream reporting.
 """
@@ -74,13 +74,11 @@ class FairGenomesService:
         Returns a structured report dict with the following top-level keys:
             status                    — 'complete' | 'partial' | 'nothing_saved' | 'skipped'
             rdf_url                   — the RDF URL that was fetched (empty if not configured)
-            graphql_url               — the GraphQL URL that was fetched (empty if not configured)
+            graphql_url               — the GraphQL URL used for stats (empty if not configured)
             fetched                   — names of RDF entities found per type
             saved                     — created/updated counts per entity type
             skipped                   — entities skipped due to unresolved FKs
-            graphql_synced            — tables/columns created+updated counts
-            graphql_filtered_out      — table names skipped (ONTOLOGIES)
-            graphql_fields_not_in_model — GraphQL column fields that have no Column model field
+            stats                     — stat sync results (updated/failed/errors)
             duration_seconds          — wall-clock sync duration
 
         Raises:
@@ -117,11 +115,6 @@ class FairGenomesService:
                 ) from exc
             logger.info('RDF fetched and parsed', extra={'triples': len(graph)})
 
-        graphql_tables = None
-        if self.graphql_url:
-            graphql_tables = self._fetch_graphql_schema()
-            logger.info('GraphQL schema fetched', extra={'table_count': len(graphql_tables)})
-
         # ── Phase 2: all DB writes in one atomic transaction ──────────────────
         _empty_counts: dict = {'created': [], 'updated': []}
         with transaction.atomic(using='fair_genomes_db'):
@@ -149,20 +142,10 @@ class FairGenomesService:
                 }
             )
 
-            if graphql_tables is not None:
-                gql_report = self._process_graphql_tables(graphql_tables)
-                report['graphql_url'] = self.graphql_url
-                report['graphql_synced'] = gql_report['synced']
-                report['graphql_filtered_out'] = gql_report['filtered_out']
-                report['graphql_fields_not_in_model'] = gql_report['fields_not_in_model']
-            else:
-                report['graphql_url'] = ''
-                report['graphql_synced'] = None
-                report['graphql_filtered_out'] = []
-                report['graphql_fields_not_in_model'] = []
+        report['graphql_url'] = self.graphql_url or ''
 
-        # ── Phase 3: stat counts — outside transaction so a failed count query
-        # never rolls back the schema sync that just completed successfully.
+        # ── Phase 3: stat aggregation — outside transaction so a failed query
+        # never rolls back the RDF sync that just completed successfully.
         if self.graphql_url:
             report['stats'] = self._sync_stats()
         else:
@@ -559,203 +542,13 @@ class FairGenomesService:
 
         return report
 
-    def _fetch_graphql_schema(self) -> list[dict]:
-        """
-        POST to the MOLGENIS EMX2 GraphQL endpoint and return the raw list of
-        table dicts from ``data._schema.tables``.
-
-        Authentication is via the ``x-molgenis-token`` request header, read
-        from FAIR_GENOMES_API_TOKEN.
-
-        Raises FairGenomesAPIException on any network, HTTP, or GraphQL error.
-        """
-        query = (
-            '{ _schema { tables { name label description tableType semantics '
-            'columns { name label description columnType semantics } } } }'
-        )
-        headers: dict[str, str] = {'Content-Type': 'application/json'}
-        if self.api_token:
-            headers['x-molgenis-token'] = self.api_token
-
-        try:
-            response = requests.post(
-                self.graphql_url,
-                json={'query': query},
-                headers=headers,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            data = response.json()
-        except requests.RequestException as exc:
-            raise FairGenomesAPIException(
-                f'Failed to fetch GraphQL schema from {self.graphql_url}: {exc}'
-            ) from exc
-        except ValueError as exc:
-            raise FairGenomesAPIException(
-                f'Invalid JSON response from {self.graphql_url}: {exc}'
-            ) from exc
-
-        if 'errors' in data:
-            raise FairGenomesAPIException(
-                f'GraphQL errors from {self.graphql_url}: {data["errors"]}'
-            )
-
-        tables = data.get('data', {}).get('_schema', {}).get('tables', [])
-        if tables is None:
-            raise FairGenomesAPIException(
-                f'No "_schema.tables" key in GraphQL response from {self.graphql_url}'
-            )
-        return tables
-
-    def _process_graphql_tables(self, tables: list[dict]) -> dict:
-        """
-        Persist Table and Column records from a MOLGENIS GraphQL schema response.
-
-        Only tables with ``tableType == "DATA"`` are saved; ONTOLOGIES lookup
-        tables are recorded in the ``filtered_out`` list and skipped.
-
-        Column PKs are stored as ``"{table_name}.{column_name}"`` to guarantee
-        uniqueness across all tables.
-
-        Must be called inside a ``transaction.atomic`` block (sync() ensures this).
-        """
-        from fair_genomes.models import Column, Table
-
-        # GraphQL fields present in the schema response that have no matching
-        # field on the Column model.
-        fields_not_in_model = ['refTable', 'required', 'readonly', 'key']
-
-        data_tables = [t for t in tables if t.get('tableType') == 'DATA']
-        filtered_out = [t['name'] for t in tables if t.get('tableType') != 'DATA' and t.get('name')]
-
-        synced_tables: dict[str, list[str]] = {'created': [], 'updated': []}
-        synced_columns: dict[str, int] = {'created': 0, 'updated': 0}
-
-        # Derive a stable base URL for the ``url`` field (mandatory, non-nullable).
-        # Use the first semantic IRI if present, otherwise build from the endpoint.
-        base_url = (
-            self.graphql_url.split('/graphql')[0]
-            if '/graphql' in self.graphql_url
-            else self.graphql_url
-        )
-
-        # Ensure every synced table has a browseable Distribution → Dataset chain.
-        auto_distribution = self._ensure_fg_distribution(base_url)
-
-        for table_data in data_tables:
-            table_name = table_data.get('name', '').strip()
-            if not table_name:
-                logger.warning('Skipping GraphQL table with empty name')
-                continue
-
-            semantics: list[str] = table_data.get('semantics') or []
-            url = semantics[0] if semantics else f'{base_url}/tables/{table_name}'
-
-            _, created = Table.objects.using('fair_genomes_db').update_or_create(
-                name=table_name,
-                defaults={
-                    'title': table_data.get('label') or '',
-                    'description': table_data.get('description') or '',
-                    'url': url,
-                    'distribution': auto_distribution,
-                },
-            )
-            synced_tables['created' if created else 'updated'].append(table_name)
-
-            for col_data in table_data.get('columns') or []:
-                col_name = col_data.get('name', '').strip()
-                if not col_name:
-                    continue
-
-                col_pk = f'{table_name}.{col_name}'
-                col_semantics: list[str] = col_data.get('semantics') or []
-                prop_url = col_semantics[0] if col_semantics else None
-
-                _, col_created = Column.objects.using('fair_genomes_db').update_or_create(
-                    name=col_pk,
-                    defaults={
-                        'table_id': table_name,
-                        'title': col_data.get('label') or col_name,
-                        'description': col_data.get('description') or '',
-                        'datatype': col_data.get('columnType') or '',
-                        'property_url': prop_url,
-                    },
-                )
-                if col_created:
-                    synced_columns['created'] += 1
-                else:
-                    synced_columns['updated'] += 1
-
-        return {
-            'synced': {
-                'tables': synced_tables,
-                'columns': synced_columns,
-            },
-            'filtered_out': filtered_out,
-            'fields_not_in_model': fields_not_in_model,
-            'auto_distribution': auto_distribution.name if auto_distribution else None,
-        }
-
-    def _ensure_fg_distribution(self, base_url: str):
-        """
-        Get or create a minimal ContactPoint → Agent → Dataset → Distribution
-        chain so that GraphQL-synced Tables always have a browseable entry
-        point in the catalogue.
-
-        Uses ``get_or_create`` throughout so re-running sync is idempotent.
-        """
-        from fair_genomes.models import Agent, ContactPoint, Dataset, Distribution
-
-        cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
-            contact_page=base_url,
-            defaults={'email': None},
-        )
-
-        agent, _ = Agent.objects.using('fair_genomes_db').get_or_create(
-            name='FAIR_GENOMES_AUTO',
-            defaults={'contact_point': cp, 'description': 'Auto-created by GraphQL sync'},
-        )
-
-        dataset, _ = Dataset.objects.using('fair_genomes_db').get_or_create(
-            name='DS_FAIR_GENOMES_AUTO',
-            defaults={
-                'identifier': base_url,
-                'title': 'FAIR Genomes (auto)',
-                'description': 'Auto-created placeholder dataset — synced from MOLGENIS FAIR Genomes API.',
-                'type': 'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
-                'theme': 'http://publications.europa.eu/resource/authority/data-theme/HEAL',
-                'keyword': 'fair-genomes,genomics',
-                'provenance': f'Synced from MOLGENIS FAIR Genomes API at {base_url}',
-                'contact_point': cp,
-                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
-                'applicable_legislation': 'http://data.europa.eu/eli/reg/2016/679/oj',
-                'health_category': 'patient_data',
-                'hdab': agent,
-                'publisher': agent,
-            },
-        )
-
-        distribution, _ = Distribution.objects.using('fair_genomes_db').get_or_create(
-            name='DIST_FAIR_GENOMES_AUTO',
-            defaults={
-                'dataset_name': dataset,
-                'title': 'FAIR Genomes MOLGENIS API (auto)',
-                'access_url': base_url,
-                'applicable_legislation': 'http://data.europa.eu/eli/reg/2016/679/oj',
-            },
-        )
-
-        logger.info(
-            'Auto-distribution ensured: %s (dataset: %s)',
-            distribution.name,
-            dataset.name,
-        )
-        return distribution
-
     def _sync_stats(self) -> dict:
         """
-        Fetch counts from MOLGENIS for every definition in ``stat_config`` and
-        write the results back to ``StatResult``.
+        Fetch full value distributions from MOLGENIS for every definition in
+        ``stat_config`` and write the results back to ``StatResult``.
+
+        For each ``StatDef(table, column)`` a GraphQL ``_groupBy`` aggregation
+        query is executed, returning all distinct values with their counts.
 
         Runs *outside* any transaction — a failure for one stat definition is
         logged and counted but does not prevent the others from being stored.
@@ -776,19 +569,11 @@ class FairGenomesService:
         errors: list[str] = []
 
         for defn in definitions:
-            # Build the GraphQL filter expression based on column type.
-            # ref / ref_array columns store their value in a nested ontology
-            # object, so the filter must go one level deeper.
-            # Accept both lowercase ('ref') from stat_config and uppercase
-            # ('REF') as stored by the API / Column.datatype field.
-            if defn.column_type.upper() in ('REF', 'REF_ARRAY'):
-                filter_expr = (
-                    f'{{ {defn.column}: {{ value: {{ equals: "{defn.filter_value}" }} }} }}'
-                )
-            else:
-                filter_expr = f'{{ {defn.column}: {{ equals: "{defn.filter_value}" }} }}'
-
-            query = f'{{ {defn.table.capitalize()}_agg(filter: {filter_expr}) {{ count }} }}'
+            table_cap = defn.table[0].upper() + defn.table[1:]
+            query = (
+                f'{{ {table_cap}_groupBy(column: "{defn.column}") '
+                f'{{ count {defn.column} {{ name }} }} }}'
+            )
 
             headers: dict[str, str] = {'Content-Type': 'application/json'}
             if self.api_token:
@@ -804,27 +589,40 @@ class FairGenomesService:
                 response.raise_for_status()
                 data = response.json()
             except (requests.RequestException, ValueError) as exc:
-                msg = f'{defn.table}.{defn.column}={defn.filter_value!r}: {exc}'
+                msg = f'{defn.table}.{defn.column}: {exc}'
                 logger.warning('Stat sync failed: %s', msg)
                 errors.append(msg)
                 failed += 1
                 continue
 
             if 'errors' in data:
-                msg = f'{defn.table}.{defn.column}={defn.filter_value!r}: GraphQL errors {data["errors"]}'
+                msg = f'{defn.table}.{defn.column}: GraphQL errors {data["errors"]}'
                 logger.warning('Stat sync GraphQL error: %s', msg)
                 errors.append(msg)
                 failed += 1
                 continue
 
-            count = data.get('data', {}).get(f'{defn.table.capitalize()}_agg', {}).get('count')
+            rows = data.get('data', {}).get(f'{table_cap}_groupBy', []) or []
+
+            distribution: dict[str, int] = {}
+            for row in rows:
+                count = row.get('count', 0)
+                # ref / ref_array columns nest the value under {column: {name: ...}}
+                col_val = row.get(defn.column)
+                if isinstance(col_val, dict):
+                    value = col_val.get('name') or col_val.get('label') or str(col_val)
+                elif col_val is not None:
+                    value = str(col_val)
+                else:
+                    value = ''
+                if value:
+                    distribution[value] = count
 
             StatResult.objects.using('fair_genomes_db').update_or_create(
                 table_name=defn.table,
                 column_name=defn.column,
-                filter_value=defn.filter_value,
                 defaults={
-                    'count': count,
+                    'distribution': distribution,
                     'last_synced': datetime.now(tz=UTC),
                 },
             )

@@ -15,6 +15,8 @@ Coverage:
                  applicable_legislation / health_category combinations
   Distribution : 5 rows — varying format / rights / byte_size combos
                  (no db_layer — that field is warehouse-only)
+  StatResult   : 6 mock value distributions (instrument model, library prep kit,
+                 sequencing type, sample material type, pathological state, genome build)
 """
 
 import logging
@@ -27,12 +29,10 @@ from django.utils import timezone
 from fair_genomes.models import (
     Agent,
     Catalog,
-    Column,
     ContactPoint,
     Dataset,
     Distribution,
     StatResult,
-    Table,
 )
 
 logger = logging.getLogger(__name__)
@@ -854,118 +854,86 @@ class Command(BaseCommand):
                 dist_created += 1
         created_counts['Distribution'] = dist_created
 
-        # ── Tables ────────────────────────────────────────────────────────
-        # Simulate the MOLGENIS EMX2 GraphQL schema tables that would be
-        # synced by FairGenomesService.  Linked to DIST_FG_COHORT_PARQUET so
-        # the stat counts card is visible on that distribution's detail page.
-        dist_cohort_parquet = dist_objects.get('DIST_FG_COHORT_PARQUET')
-
-        table_specs: list[dict] = [
-            {
-                'name': 'sequencing',
-                'defaults': {
-                    'distribution': dist_cohort_parquet,
-                    'title': 'Sequencing',
-                    'description': 'Sequencing instruments and run parameters.',
-                    'url': 'https://fairgenomes.hospital.cz/FAIR%20Genomes/sequencing',
-                },
-            },
-            {
-                'name': 'samplepreparation',
-                'defaults': {
-                    'distribution': dist_cohort_parquet,
-                    'title': 'Sample Preparation',
-                    'description': 'Library preparation and sample handling steps.',
-                    'url': 'https://fairgenomes.hospital.cz/FAIR%20Genomes/samplepreparation',
-                },
-            },
-            {
-                'name': 'subject',
-                'defaults': {
-                    'distribution': dist_cohort_parquet,
-                    'title': 'Subject',
-                    'description': 'Study participants and their core attributes.',
-                    'url': 'https://fairgenomes.hospital.cz/FAIR%20Genomes/subject',
-                },
-            },
-        ]
-
-        tbl_created = 0
-        table_objects: dict[str, Table] = {}
-        for spec in table_specs:
-            obj, created = Table.objects.using(DB).get_or_create(
-                name=spec['name'],
-                defaults=spec['defaults'],
-            )
-            table_objects[spec['name']] = obj
-            if created:
-                tbl_created += 1
-        created_counts['Table'] = tbl_created
-
-        # ── Columns ───────────────────────────────────────────────────────
-        column_specs: list[dict] = [
-            # sequencing
-            {
-                'name': 'sequencing.sequencinginstrumentmodel',
-                'defaults': {
-                    'table': table_objects['sequencing'],
-                    'title': 'Sequencing instrument model',
-                    'datatype': 'ref',
-                    'property_url': 'http://purl.obolibrary.org/obo/OBI_0400148',
-                },
-            },
-            {
-                'name': 'sequencing.sequencingdate',
-                'defaults': {
-                    'table': table_objects['sequencing'],
-                    'title': 'Sequencing date',
-                    'datatype': 'date',
-                },
-            },
-            # samplepreparation
-            {
-                'name': 'samplepreparation.librarypreparationkit',
-                'defaults': {
-                    'table': table_objects['samplepreparation'],
-                    'title': 'Library preparation kit',
-                    'datatype': 'ref',
-                    'property_url': 'http://purl.obolibrary.org/obo/OBI_0001958',
-                },
-            },
-            # subject
-            {
-                'name': 'subject.inclusion_status',
-                'defaults': {
-                    'table': table_objects['subject'],
-                    'title': 'Inclusion status',
-                    'datatype': 'string',
-                },
-            },
-        ]
-
-        col_created = 0
-        for spec in column_specs:
-            _obj, created = Column.objects.using(DB).get_or_create(
-                name=spec['name'],
-                defaults=spec['defaults'],
-            )
-            if created:
-                col_created += 1
-        created_counts['Column'] = col_created
-
         # ── StatResults ───────────────────────────────────────────────────
-        # Seed the MiSeq count that _sync_stats() would write after a real sync.
-        # Uses a plausible mock value so the distribution detail page shows a
-        # stat card without requiring a live MOLGENIS connection.
+        # Seed a mock value distribution that _sync_stats() would write after
+        # a real sync.  Uses plausible mock values so the application can be
+        # evaluated without a live MOLGENIS connection.
         from django.utils import timezone as tz
 
         stat_specs: list[dict] = [
             {
                 'table_name': 'sequencing',
                 'column_name': 'sequencinginstrumentmodel',
-                'filter_value': 'MiSeq',
                 'defaults': {
-                    'count': 87,
+                    'distribution': {
+                        'MiSeq': 87,
+                        'NovaSeq 6000': 42,
+                        'HiSeq X': 15,
+                        'NextSeq 550': 8,
+                    },
+                    'last_synced': tz.now(),
+                },
+            },
+            {
+                'table_name': 'sequencing',
+                'column_name': 'librarypreparationkit',
+                'defaults': {
+                    'distribution': {
+                        'Twist Human Core Exome': 68,
+                        'Agilent SureSelect XT': 41,
+                        'Illumina TruSeq DNA': 19,
+                        'KAPA HyperPrep': 14,
+                        'NEBNext Ultra II': 10,
+                    },
+                    'last_synced': tz.now(),
+                },
+            },
+            {
+                'table_name': 'sequencing',
+                'column_name': 'sequencingtype',
+                'defaults': {
+                    'distribution': {
+                        'WES': 109,
+                        'WGS': 27,
+                        'RNA-seq': 15,
+                        'Panel': 1,
+                    },
+                    'last_synced': tz.now(),
+                },
+            },
+            {
+                'table_name': 'sample',
+                'column_name': 'samplematerialtype',
+                'defaults': {
+                    'distribution': {
+                        'Peripheral blood': 93,
+                        'FFPE tissue': 34,
+                        'Fresh frozen tissue': 18,
+                        'Saliva': 7,
+                    },
+                    'last_synced': tz.now(),
+                },
+            },
+            {
+                'table_name': 'sample',
+                'column_name': 'pathologicalstate',
+                'defaults': {
+                    'distribution': {
+                        'Tumor': 71,
+                        'Normal': 63,
+                        'Germline': 18,
+                    },
+                    'last_synced': tz.now(),
+                },
+            },
+            {
+                'table_name': 'genomicdata',
+                'column_name': 'genomebuild',
+                'defaults': {
+                    'distribution': {
+                        'GRCh38': 118,
+                        'GRCh37': 34,
+                    },
                     'last_synced': tz.now(),
                 },
             },
@@ -976,7 +944,6 @@ class Command(BaseCommand):
             _obj, created = StatResult.objects.using(DB).update_or_create(
                 table_name=spec['table_name'],
                 column_name=spec['column_name'],
-                filter_value=spec['filter_value'],
                 defaults=spec['defaults'],
             )
             if created:

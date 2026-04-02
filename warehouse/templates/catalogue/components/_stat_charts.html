@@ -1,0 +1,42 @@
+{% load i18n static %}
+{% comment %}
+  Doughnut chart cards for StatResult value distributions.
+
+  Expects: charts — list of dicts:
+    label        — human-readable header, e.g. "sequencing.sequencinginstrumentmodel"
+    table_name   — MOLGENIS table name
+    column_name  — column name
+    data         — dict {value: count, …}
+
+  This component is app-agnostic: pass charts=[] for apps that don't have
+  aggregation data yet and nothing will render.
+{% endcomment %}
+{% if charts %}
+<div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
+  <div class="card-body p-0">
+    {% trans "Value Distributions" as t_vd %}
+    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-blue" csh_text_class="text-mou-blue" csh_label=t_vd %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 p-5">
+      {% for chart in charts %}
+      <div class="flex flex-col gap-3 border border-gray-100 rounded-xl p-4 bg-gray-50/40">
+        {# ── title ── #}
+        <div class="leading-tight">
+          <p class="font-mono text-xs font-semibold text-gray-700 uppercase tracking-wide truncate">{{ chart.column_name }}</p>
+          <p class="font-mono text-[10px] text-txt-muted">{{ chart.table_name }}</p>
+        </div>
+        {# ── fixed-height canvas — ring size is always the same ── #}
+        <div class="relative" style="height:180px;">
+          <canvas id="stat-chart-{{ forloop.counter }}"></canvas>
+        </div>
+        {# ── custom legend injected by stat-charts.js ── #}
+        <div id="stat-chart-legend-{{ forloop.counter }}" class="flex flex-col gap-1.5 mt-1"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{{ charts|json_script:"stat-charts-data" }}
+<script src="{% static 'js/stat-charts.js' %}"></script>
+{% endif %}

@@ -1,7 +1,13 @@
 ﻿{% extends "catalogue/base_catalogue.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{{ distribution.title|default:distribution.name }} · {% trans "Distribution" %}{% endblock %}
+
+{% block extra_head %}
+{% if charts %}
+<script src="{% static 'js/chart.umd.min.js' %}"></script>
+{% endif %}
+{% endblock %}
 
 {% block content %}
 {{ schema_json|json_script:"schema-data" }}
@@ -51,7 +57,12 @@
     </div>
   </div>
 
-  <!-- Tables and columns — same component for all apps; stats only rendered for fair_genomes -->
+  <!-- Value distribution charts (fair_genomes aggregation data) -->
+  {% if charts %}
+  {% include 'catalogue/components/_stat_charts.html' with charts=charts %}
+  {% endif %}
+
+  <!-- Tables and columns — same component for all apps -->
   {% if tables %}
   {% include 'catalogue/components/_table_list.html' with tables=tables app=app %}
   {% endif %}

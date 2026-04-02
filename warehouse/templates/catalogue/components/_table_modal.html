@@ -33,18 +33,7 @@
           <p class="text-sm text-gray-600 mt-1.5 leading-relaxed">{{ tbl.description }}</p>
           {% endif %}
 
-          <!-- stat count badges: single inline line -->
-          {% if tbl.stats %}
-          <div class="flex flex-wrap items-center gap-1.5 mt-2">
-            <span class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mr-1">{% trans "Record counts" %}</span>
-            {% for sr in tbl.stats %}
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-xs font-semibold bg-[#f0f8ff] text-[#1565c0] border border-[#bbdefb]"
-                  title="{% blocktrans with col=sr.column_name val=sr.filter_value %}Count of records where {{ col }} = {{ val }}{% endblocktrans %}">
-              {{ sr.count }} <span class="font-normal text-txt-muted">{{ sr.filter_value }}</span>{% if sr.last_synced %}<span class="font-normal text-txt-muted text-[10px]"> · {{ sr.last_synced|date:"d/m/Y" }}</span>{% endif %}
-            </span>
-            {% endfor %}
-          </div>
-          {% endif %}
+
 
         </div>
         <!-- close button -->
