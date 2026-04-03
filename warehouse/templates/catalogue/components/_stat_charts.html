@@ -1,36 +1,45 @@
 {% load i18n static %}
 {% comment %}
-  Doughnut chart cards for StatResult value distributions.
+  Doughnut chart cards for StatResult value distributions, grouped by MOLGENIS table.
 
-  Expects: charts — list of dicts:
-    label        — human-readable header, e.g. "sequencing.sequencinginstrumentmodel"
-    table_name   — MOLGENIS table name
-    column_name  — column name
-    data         — dict {value: count, …}
-
-  This component is app-agnostic: pass charts=[] for apps that don't have
-  aggregation data yet and nothing will render.
+  Expects:
+    chart_groups — list of {table_name, charts: [{label, table_name, column_name, canvas_idx, data}]}
+    charts       — flat list of all charts (used for the JSON data island consumed by JS)
 {% endcomment %}
-{% if charts %}
+{% if chart_groups %}
 <div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
   <div class="card-body p-0">
     {% trans "Value Distributions" as t_vd %}
     {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-blue" csh_text_class="text-mou-blue" csh_label=t_vd %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 p-5">
-      {% for chart in charts %}
-      <div class="flex flex-col gap-3 border border-gray-100 rounded-xl p-4 bg-gray-50/40">
-        {# ── title ── #}
-        <div class="leading-tight">
-          <p class="font-mono text-xs font-semibold text-gray-700 uppercase tracking-wide truncate">{{ chart.column_name }}</p>
-          <p class="font-mono text-[10px] text-txt-muted">{{ chart.table_name }}</p>
+    <div class="p-5 flex flex-col gap-8">
+      {% for group in chart_groups %}
+      <div>
+        {# ── table group header ── #}
+        <div class="flex items-center gap-3 mb-4">
+          <span class="font-mono text-xs font-bold text-mou-blue uppercase tracking-widest">{{ group.table_name }}</span>
+          <span class="flex-1 border-t border-mou-blue-border"></span>
         </div>
-        {# ── fixed-height canvas — ring size is always the same ── #}
-        <div class="relative" style="height:180px;">
-          <canvas id="stat-chart-{{ forloop.counter }}"></canvas>
+        {# ── charts grid for this table ── #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {% for chart in group.charts %}
+          <div class="flex flex-col gap-3 border border-gray-100 rounded-xl p-4 bg-gray-50/40">
+            {# ── title ── #}
+            <div class="leading-tight">
+              <p class="font-mono text-xs font-semibold text-gray-700 uppercase tracking-wide truncate">{{ chart.column_name }}</p>
+              {% if chart.label != chart.column_name %}
+              <p class="text-[11px] text-txt-muted mt-0.5">{{ chart.label }}</p>
+              {% endif %}
+            </div>
+            {# ── fixed-height canvas ── #}
+            <div class="relative" style="height:180px;">
+              <canvas id="stat-chart-{{ chart.canvas_idx }}"></canvas>
+            </div>
+            {# ── custom legend injected by stat-charts.js ── #}
+            <div id="stat-chart-legend-{{ chart.canvas_idx }}" class="flex flex-col gap-1.5 mt-1"></div>
+          </div>
+          {% endfor %}
         </div>
-        {# ── custom legend injected by stat-charts.js ── #}
-        <div id="stat-chart-legend-{{ forloop.counter }}" class="flex flex-col gap-1.5 mt-1"></div>
       </div>
       {% endfor %}
     </div>

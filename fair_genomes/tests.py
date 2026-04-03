@@ -10,9 +10,8 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatResult
+from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition, StatResult
 from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
-from .stat_config import StatDef, get_stat_definitions, get_stats_for_distribution
 
 
 class ContactPointModelTest(TestCase):
@@ -197,6 +196,55 @@ class SyncStatsTest(TestCase):
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
+    STAT_DEFS = [
+        ('sequencing', 'sequencinginstrumentmodel'),
+        ('sequencing', 'librarypreparationkit'),
+    ]
+
+    def setUp(self):
+        """Create a Distribution and two StatDefinition rows for testing."""
+        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition
+
+        cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
+            email='test@example.org',
+        )
+        agent, _ = Agent.objects.using('fair_genomes_db').get_or_create(
+            name='test-agent',
+        )
+        Catalog.objects.using('fair_genomes_db').get_or_create(
+            name='test-cat',
+            defaults={'title': 't', 'description': 'd', 'applicable_legislation': 'http://x'},
+        )
+        Dataset.objects.using('fair_genomes_db').get_or_create(
+            name='test-ds',
+            defaults={
+                'title': 't',
+                'description': 'd',
+                'access_rights': 'public',
+                'applicable_legislation': 'http://x',
+                'health_category': 'genomics',
+                'catalog_id': 'test-cat',
+                'contact_point': cp,
+                'hdab': agent,
+            },
+        )
+        Distribution.objects.using('fair_genomes_db').get_or_create(
+            name='DIST_TEST',
+            defaults={
+                'title': 'Test Distribution',
+                'access_url': 'http://example.com',
+                'applicable_legislation': 'http://x',
+                'dataset_name_id': 'test-ds',
+            },
+        )
+        for i, (table, col) in enumerate(self.STAT_DEFS):
+            StatDefinition.objects.using('fair_genomes_db').get_or_create(
+                distribution_id='DIST_TEST',
+                molgenis_table=table,
+                molgenis_column=col,
+                defaults={'sort_order': i, 'is_active': True},
+            )
+
     def _make_groupby_response(self, table: str, column: str, dist: dict) -> MagicMock:
         """Return a mock requests.Response for a successful groupBy query."""
         resp = MagicMock()
@@ -212,7 +260,7 @@ class SyncStatsTest(TestCase):
     @patch('fair_genomes.services.fair_genomes_service.requests.post')
     def test_sync_stats_success(self, mock_post):
         # Each stat def gets its own mock response; only the first needs real data.
-        n = len(get_stat_definitions())
+        n = len(self.STAT_DEFS)
         first_resp = self._make_groupby_response(
             'sequencing', 'sequencinginstrumentmodel', {'MiSeq': 17, 'NovaSeq': 5}
         )
@@ -244,7 +292,7 @@ class SyncStatsTest(TestCase):
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
         report = svc._sync_stats()
 
-        n = len(get_stat_definitions())
+        n = len(self.STAT_DEFS)
         self.assertEqual(report['updated'], 0)
         self.assertEqual(report['failed'], n)
         self.assertEqual(len(report['errors']), n)
@@ -259,49 +307,42 @@ class SyncStatsTest(TestCase):
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
         report = svc._sync_stats()
 
-        n = len(get_stat_definitions())
+        n = len(self.STAT_DEFS)
         self.assertEqual(report['failed'], n)
         self.assertEqual(len(report['errors']), n)
         self.assertIn('GraphQL errors', report['errors'][0])
 
 
-class StatConfigTest(TestCase):
-    """Tests for fair_genomes.stat_config helpers."""
+class StatDefinitionModelTest(TestCase):
+    """Tests for the StatDefinition model."""
 
-    def test_stat_def_has_distribution_name_field(self):
-        sd = StatDef(table='t', column='c', distribution_name='my-dist')
-        self.assertEqual(sd.distribution_name, 'my-dist')
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
 
-    def test_stat_def_distribution_name_defaults_to_none(self):
-        sd = StatDef(table='t', column='c')
-        self.assertIsNone(sd.distribution_name)
+    def test_meta_managed_true(self):
+        self.assertTrue(StatDefinition._meta.managed)
 
-    def test_get_stats_for_distribution_returns_matching(self):
-        defs = get_stat_definitions()
-        # At least one definition must carry a distribution_name for this test to be meaningful.
-        named = [d for d in defs if d.distribution_name is not None]
-        self.assertTrue(named, 'Expected at least one StatDef with distribution_name set')
-        for d in named:
-            results = get_stats_for_distribution(d.distribution_name)
-            self.assertIn(d, results)
+    def test_meta_db_table(self):
+        self.assertEqual(StatDefinition._meta.db_table, 'fair_genomes_stat_definition')
 
-    def test_get_stats_for_distribution_filters_out_unrelated(self):
-        results = get_stats_for_distribution('__nonexistent_distribution__')
-        self.assertEqual(results, [])
+    def test_unique_together(self):
+        constraint = list(StatDefinition._meta.unique_together)
+        self.assertIn(('distribution', 'molgenis_table', 'molgenis_column'), constraint)
 
-    def test_get_stats_for_distribution_excludes_none_names(self):
-        """StatDefs with distribution_name=None must never appear in results."""
-        # Temporarily inject a None-named def to verify filtering.
-        from fair_genomes import stat_config
-        original = stat_config.get_stat_definitions
+    def test_chart_label_uses_display_label(self):
+        sd = StatDefinition(
+            molgenis_table='seq', molgenis_column='col', display_label='My Label'
+        )
+        self.assertEqual(sd.chart_label, 'My Label')
 
-        def patched():
-            return [*original(), StatDef(table='x', column='y', distribution_name=None)]
+    def test_chart_label_falls_back_to_table_column(self):
+        sd = StatDefinition(molgenis_table='seq', molgenis_column='col', display_label='')
+        self.assertEqual(sd.chart_label, 'seq.col')
 
-        stat_config.get_stat_definitions = patched
-        try:
-            results = get_stats_for_distribution('any-dist')
-            for r in results:
-                self.assertIsNotNone(r.distribution_name)
-        finally:
-            stat_config.get_stat_definitions = original
+    def test_str_representation(self):
+        sd = StatDefinition(
+            molgenis_table='seq',
+            molgenis_column='col',
+            display_label='',
+            distribution_id='DIST_X',
+        )
+        self.assertEqual(str(sd), 'seq.col → DIST_X')

@@ -114,13 +114,72 @@ class Distribution(DistributionBase):
         verbose_name_plural = _('Distributions')
 
 
+class StatDefinition(models.Model):
+    """
+    Admin-configurable definition of a single MOLGENIS aggregation query.
+
+    Each row tells the sync machinery to run a ``_groupBy`` GraphQL query on
+    ``molgenis_table.molgenis_column`` and display the result on the linked
+    Distribution's detail page.
+
+    Replaces the former hardcoded ``stat_config.py``.
+    """
+
+    distribution = models.ForeignKey(
+        'Distribution',
+        on_delete=models.CASCADE,
+        related_name='stat_definitions',
+        verbose_name=_('Distribution'),
+        help_text=_('DCAT Distribution whose detail page should show this chart.'),
+    )
+    molgenis_table = models.CharField(
+        max_length=100,
+        verbose_name=_('MOLGENIS table'),
+        help_text=_('MOLGENIS table name, e.g. "sequencing"'),
+    )
+    molgenis_column = models.CharField(
+        max_length=200,
+        verbose_name=_('MOLGENIS column'),
+        help_text=_('Column name within the table, e.g. "sequencinginstrumentmodel"'),
+    )
+    display_label = models.CharField(
+        max_length=300,
+        blank=True,
+        default='',
+        verbose_name=_('Display label'),
+        help_text=_('Optional label for the chart. If blank, "table.column" is used.'),
+    )
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Sort order'),
+        help_text=_('Lower numbers are shown first on the distribution page.'),
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_('Active'),
+        help_text=_('Inactive definitions are not synced or displayed.'),
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_stat_definition'
+        verbose_name = _('Stat Definition')
+        verbose_name_plural = _('Stat Definitions')
+        unique_together = [('distribution', 'molgenis_table', 'molgenis_column')]
+        ordering = ['distribution', 'sort_order', 'molgenis_table', 'molgenis_column']
+
+    def __str__(self) -> str:
+        label = self.display_label or f'{self.molgenis_table}.{self.molgenis_column}'
+        return f'{label} → {self.distribution_id}'
+
+    @property
+    def chart_label(self) -> str:
+        return self.display_label or f'{self.molgenis_table}.{self.molgenis_column}'
+
+
 class StatResult(models.Model):
     """
     Persisted value distribution for a single (table, column) aggregation.
-
-    Definitions of *which columns* to aggregate live in
-    ``fair_genomes.stat_config`` — this model only stores the *results*
-    written back by the sync.
 
     ``distribution`` is a JSON object mapping each distinct value to its
     count, e.g. ``{"MiSeq": 87, "NovaSeq": 42, "HiSeq": 15}``.

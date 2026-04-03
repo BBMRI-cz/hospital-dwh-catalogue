@@ -19,8 +19,8 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
+from fair_genomes.models import StatDefinition as FGStatDefinition
 from fair_genomes.models import StatResult as FGStatResult
-from fair_genomes.stat_config import get_stats_for_distribution
 from shared.dtos import UnifiedDataset, UnifiedDistribution
 from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
@@ -537,23 +537,41 @@ class DistributionDetailView(LoginRequiredMixin, View):
                 for t in table_qs
             ]
 
-        # ── Stat charts — config-based mapping of aggregation results ───────────
+        # ── Stat charts — DB-driven mapping of aggregation results ───────────
         charts: list[dict] = []
         if app == 'fair_genomes':
-            stat_defs = get_stats_for_distribution(name)
+            stat_defs = (
+                FGStatDefinition.objects.using('fair_genomes_db')
+                .filter(distribution__name=name, is_active=True)
+                .order_by('sort_order', 'molgenis_table', 'molgenis_column')
+            )
             for sd in stat_defs:
                 sr = (
                     FGStatResult.objects.using('fair_genomes_db')
-                    .filter(table_name=sd.table, column_name=sd.column)
+                    .filter(table_name=sd.molgenis_table, column_name=sd.molgenis_column)
                     .first()
                 )
                 if sr and sr.distribution:
                     charts.append({
-                        'label': f'{sr.table_name}.{sr.column_name}',
+                        'label': sd.chart_label,
                         'table_name': sr.table_name,
                         'column_name': sr.column_name,
                         'data': sr.distribution,
                     })
+
+        # Group charts by MOLGENIS table, preserving order of first appearance.
+        # Assign each chart a stable canvas_idx (1-based flat position) so the
+        # JS data island and canvas IDs stay in sync regardless of grouping.
+        chart_groups: list[dict] = []
+        _seen_tables: dict[str, dict] = {}
+        for _i, _c in enumerate(charts, start=1):
+            _c['canvas_idx'] = _i
+            _tbl = _c['table_name']
+            if _tbl not in _seen_tables:
+                _group: dict = {'table_name': _tbl, 'charts': []}
+                chart_groups.append(_group)
+                _seen_tables[_tbl] = _group
+            _seen_tables[_tbl]['charts'].append(_c)
 
         return render(
             request,
@@ -563,6 +581,7 @@ class DistributionDetailView(LoginRequiredMixin, View):
                 'dataset': dataset,
                 'tables': tables,
                 'charts': charts,
+                'chart_groups': chart_groups,
                 'schema_json': schema_json,
                 'app': app,
                 'dcat_rows': dcat_rows,

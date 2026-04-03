@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Full Sync (RDF + Stats)" %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p>{% trans "This will re-sync all RDF metadata from the FAIR Data Point and re-run all active stat aggregations from MOLGENIS GraphQL." %}</p>
+    <p>{% trans "This may take a few seconds depending on the number of datasets and stat definitions." %}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="{% trans 'Run Full Sync' %}" class="default" />
+        <a href="../" class="button cancel-link">{% trans "Cancel" %}</a>
+    </form>
+</div>
+{% endblock %}

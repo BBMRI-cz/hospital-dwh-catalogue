@@ -544,11 +544,11 @@ class FairGenomesService:
 
     def _sync_stats(self) -> dict:
         """
-        Fetch full value distributions from MOLGENIS for every definition in
-        ``stat_config`` and write the results back to ``StatResult``.
+        Fetch full value distributions from MOLGENIS for every active
+        ``StatDefinition`` and write the results back to ``StatResult``.
 
-        For each ``StatDef(table, column)`` a GraphQL ``_groupBy`` aggregation
-        query is executed, returning all distinct values with their counts.
+        For each definition a GraphQL ``_groupBy`` aggregation query is
+        executed, returning all distinct values with their counts.
 
         Runs *outside* any transaction — a failure for one stat definition is
         logged and counted but does not prevent the others from being stored.
@@ -558,74 +558,150 @@ class FairGenomesService:
             failed   — number of definitions that raised an error
             errors   — list of short error strings for reporting
         """
-        from datetime import datetime
+        from fair_genomes.models import StatDefinition
 
-        from fair_genomes.models import StatResult
-        from fair_genomes.stat_config import get_stat_definitions
-
-        definitions = get_stat_definitions()
+        definitions = (
+            StatDefinition.objects.using('fair_genomes_db')
+            .filter(is_active=True)
+            .select_related('distribution')
+        )
         updated = 0
         failed = 0
         errors: list[str] = []
 
         for defn in definitions:
-            table_cap = defn.table[0].upper() + defn.table[1:]
-            query = (
-                f'{{ {table_cap}_groupBy(column: "{defn.column}") '
-                f'{{ count {defn.column} {{ name }} }} }}'
-            )
-
-            headers: dict[str, str] = {'Content-Type': 'application/json'}
-            if self.api_token:
-                headers['x-molgenis-token'] = self.api_token
-
-            try:
-                response = requests.post(
-                    self.graphql_url,
-                    json={'query': query},
-                    headers=headers,
-                    timeout=self.timeout,
-                )
-                response.raise_for_status()
-                data = response.json()
-            except (requests.RequestException, ValueError) as exc:
-                msg = f'{defn.table}.{defn.column}: {exc}'
-                logger.warning('Stat sync failed: %s', msg)
-                errors.append(msg)
+            ok, err = self._sync_single_stat(defn.molgenis_table, defn.molgenis_column)
+            if ok:
+                updated += 1
+            else:
                 failed += 1
-                continue
-
-            if 'errors' in data:
-                msg = f'{defn.table}.{defn.column}: GraphQL errors {data["errors"]}'
-                logger.warning('Stat sync GraphQL error: %s', msg)
-                errors.append(msg)
-                failed += 1
-                continue
-
-            rows = data.get('data', {}).get(f'{table_cap}_groupBy', []) or []
-
-            distribution: dict[str, int] = {}
-            for row in rows:
-                count = row.get('count', 0)
-                # ref / ref_array columns nest the value under {column: {name: ...}}
-                col_val = row.get(defn.column)
-                if isinstance(col_val, dict):
-                    value = col_val.get('name') or col_val.get('label') or str(col_val)
-                elif col_val is not None:
-                    value = str(col_val)
-                else:
-                    value = ''
-                if value:
-                    distribution[value] = count
-
-            StatResult.objects.using('fair_genomes_db').update_or_create(
-                table_name=defn.table,
-                column_name=defn.column,
-                defaults={
-                    'distribution': distribution,
-                    'last_synced': datetime.now(tz=UTC),
-                },
-            )
-            updated += 1
+                errors.append(err)
 
         return {'updated': updated, 'failed': failed, 'errors': errors}
+
+    def _sync_single_stat(self, table: str, column: str) -> tuple[bool, str]:
+        """
+        Fetch a single _groupBy aggregation and persist the result.
+
+        Returns ``(True, '')`` on success or ``(False, error_message)`` on failure.
+        """
+        from datetime import datetime
+
+        from fair_genomes.models import StatResult
+
+        table_cap = table[0].upper() + table[1:]
+        query = (
+            f'{{ {table_cap}_groupBy(column: "{column}") '
+            f'{{ count {column} {{ name }} }} }}'
+        )
+
+        headers: dict[str, str] = {'Content-Type': 'application/json'}
+        if self.api_token:
+            headers['x-molgenis-token'] = self.api_token
+
+        try:
+            response = requests.post(
+                self.graphql_url,
+                json={'query': query},
+                headers=headers,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+        except (requests.RequestException, ValueError) as exc:
+            msg = f'{table}.{column}: {exc}'
+            logger.warning('Stat sync failed: %s', msg)
+            return False, msg
+
+        if 'errors' in data:
+            msg = f'{table}.{column}: GraphQL errors {data["errors"]}'
+            logger.warning('Stat sync GraphQL error: %s', msg)
+            return False, msg
+
+        rows = data.get('data', {}).get(f'{table_cap}_groupBy', []) or []
+
+        distribution: dict[str, int] = {}
+        for row in rows:
+            count = row.get('count', 0)
+            # ref / ref_array columns nest the value under {column: {name: ...}}
+            col_val = row.get(column)
+            if isinstance(col_val, dict):
+                value = col_val.get('name') or col_val.get('label') or str(col_val)
+            elif col_val is not None:
+                value = str(col_val)
+            else:
+                value = ''
+            if value:
+                distribution[value] = count
+
+        StatResult.objects.using('fair_genomes_db').update_or_create(
+            table_name=table,
+            column_name=column,
+            defaults={
+                'distribution': distribution,
+                'last_synced': datetime.now(tz=UTC),
+            },
+        )
+        return True, ''
+
+    def introspect_molgenis_schema(self) -> dict[str, list[str]]:
+        """
+        Fetch the MOLGENIS GraphQL schema via introspection and return a
+        mapping of ``{table_name: [column_name, ...]}``.
+
+        Filters out internal types (``__``-prefixed, ``*_groupBy``, ``Query``,
+        ``Mutation``, ``*_agg``, ``_meta``…).
+
+        Returns an empty dict if the API URL is not configured or on error.
+        """
+        if not self.graphql_url:
+            return {}
+
+        query = (
+            '{ __schema { types { name kind fields { name } } } }'
+        )
+        headers: dict[str, str] = {'Content-Type': 'application/json'}
+        if self.api_token:
+            headers['x-molgenis-token'] = self.api_token
+
+        try:
+            response = requests.post(
+                self.graphql_url,
+                json={'query': query},
+                headers=headers,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+        except (requests.RequestException, ValueError) as exc:
+            logger.warning('MOLGENIS schema introspection failed: %s', exc)
+            return {}
+
+        types = data.get('data', {}).get('__schema', {}).get('types', [])
+
+        skip_suffixes = ('_groupBy', '_agg', '_aggregate', 'Input', 'OrderByInput',
+                         'FilterInput', 'Connection', 'Edge')
+        skip_names = {'Query', 'Mutation', 'Subscription', 'String', 'Int', 'Float',
+                      'Boolean', 'ID', 'DateTime', 'JSON'}
+
+        result: dict[str, list[str]] = {}
+        for t in types:
+            name = t.get('name', '')
+            kind = t.get('kind', '')
+            if kind != 'OBJECT':
+                continue
+            if name.startswith('__') or name.startswith('_'):
+                continue
+            if name in skip_names:
+                continue
+            if any(name.endswith(s) for s in skip_suffixes):
+                continue
+            fields = [
+                f['name']
+                for f in (t.get('fields') or [])
+                if not f['name'].startswith('_')
+            ]
+            if fields:
+                result[name] = sorted(fields)
+
+        return dict(sorted(result.items()))

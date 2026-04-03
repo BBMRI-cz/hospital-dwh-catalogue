@@ -32,6 +32,7 @@ from fair_genomes.models import (
     ContactPoint,
     Dataset,
     Distribution,
+    StatDefinition,
     StatResult,
 )
 
@@ -949,6 +950,27 @@ class Command(BaseCommand):
             if created:
                 stat_created += 1
         created_counts['StatResult'] = stat_created
+
+        # ── StatDefinitions ───────────────────────────────────────────────
+        # Each StatResult must have a corresponding StatDefinition that links
+        # the MOLGENIS table/column pair to the distribution whose detail page
+        # shows the chart.
+        wes_bam_dist = dist_objects.get('DIST_FG_WES_BAM')
+        sd_created = 0
+        if wes_bam_dist:
+            for idx, spec in enumerate(stat_specs):
+                _sd, created = StatDefinition.objects.using(DB).get_or_create(
+                    distribution=wes_bam_dist,
+                    molgenis_table=spec['table_name'],
+                    molgenis_column=spec['column_name'],
+                    defaults={
+                        'sort_order': idx,
+                        'is_active': True,
+                    },
+                )
+                if created:
+                    sd_created += 1
+        created_counts['StatDefinition'] = sd_created
 
         # ── Summary ────────────────────────────────────────────────────────
         total = sum(created_counts.values())

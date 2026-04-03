@@ -4,7 +4,7 @@
 {% block title %}{{ distribution.title|default:distribution.name }} · {% trans "Distribution" %}{% endblock %}
 
 {% block extra_head %}
-{% if charts %}
+{% if chart_groups %}
 <script src="{% static 'js/chart.umd.min.js' %}"></script>
 {% endif %}
 {% endblock %}
@@ -58,8 +58,8 @@
   </div>
 
   <!-- Value distribution charts (fair_genomes aggregation data) -->
-  {% if charts %}
-  {% include 'catalogue/components/_stat_charts.html' with charts=charts %}
+  {% if chart_groups %}
+  {% include 'catalogue/components/_stat_charts.html' with chart_groups=chart_groups charts=charts %}
   {% endif %}
 
   <!-- Tables and columns — same component for all apps -->
