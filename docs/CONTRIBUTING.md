@@ -1,135 +1,92 @@
-# Contributing Guide
+# Contributing
 
-This document describes the development workflow and code quality requirements for the Hospital Data Warehouse Catalogue project.
+## Setup
 
-## Development Workflow
-
-### 1. Install Development Dependencies
-
-First time setup - install development tools:
+Install development dependencies:
 
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-This installs:
-- `ruff` - Linting and formatting
-- `mypy` - Type checking
-- `bandit` - Security scanning
+This gives you `ruff` (linting and formatting), `mypy` (type checking), and `bandit` (security scanning).
 
-### 2. Create a Feature Branch
+## Workflow
 
-Never push directly to `master`. Always create a feature branch:
+1. Create a branch. Do not push directly to `master`.
 
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/bug-description
-```
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-### 3. Make Your Changes
+2. Make your changes.
 
-Write your code.
+3. Run all checks:
 
-### 4. Run Code Quality Checks
+   ```bash
+   ./scripts/check.sh
+   ```
 
-Before committing, **always run the quality check script**:
+   This runs linting, formatting, type checking, security scanning, translation checks, the test suite, and a Docker build check. Only commit when everything passes.
 
-```bash
-./scripts/check.sh
-```
+4. Commit and push:
 
-This will:
-- Auto-fix linting issues
-- Auto-format your code
-- Show type errors (fix manually)
-- Show security issues (fix manually)
-- Check translation completeness (fix manually)
-- Run test suite
+   ```bash
+   git add .
+   git commit -m "feat: description of changes"
+   git push origin feature/your-feature-name
+   ```
 
-**Only commit when all checks pass!**
+5. Open a pull request on GitHub. Wait for CI to pass, then merge.
 
-You can also run individual checks if needed:
+## Running individual checks
 
 ```bash
-./scripts/check-lint.sh          # Linting only
-./scripts/check-format.sh        # Formatting only
-./scripts/check-types.sh         # Type checking only
-./scripts/check-security.sh      # Security scan only
-./scripts/check-translations.sh  # Translations only
-./scripts/check-tests.sh         # Tests only
+./scripts/check-lint.sh          # Ruff linting (auto-fixes)
+./scripts/check-format.sh        # Ruff formatting (auto-fixes)
+./scripts/check-types.sh         # mypy type checking
+./scripts/check-security.sh      # Bandit security scan
+./scripts/check-translations.sh  # Translation completeness
+./scripts/check-tests.sh         # Django test suite
+./scripts/check-docker.sh        # Docker build check
 ```
 
-### 4. Commit and Push
+## Code quality requirements
 
-```bash
-git add .
-git commit -m "feat: description of your changes"
-git push origin feature/your-feature-name
-```
+| Check | Tool | Auto-fixable |
+|---|---|---|
+| Linting | Ruff | Yes |
+| Formatting | Ruff | Yes |
+| Type checking | mypy | No |
+| Security | Bandit | No |
+| Translations | Custom script | No |
+| Tests | Django | No |
 
-### 5. Create a Pull Request
+## Pre-commit hooks (optional)
 
-1. Go to GitHub and create a Pull Request
-2. Wait for CI checks to pass
-4. Merge when passed
-
----
-
-## Code Quality Requirements
-
-All code must pass these checks before merging:
-
-| Check          | Tool   | Command                                           | Auto-fixable |
-|----------------|--------|---------------------------------------------------|--------------|
-| Linting        | Ruff   | `ruff check .`                                    | Yes          |
-| Formatting     | Ruff   | `ruff format --check .`                           | Yes          |
-| Type Checking  | mypy   | `mypy .`                                          | No           |
-| Security       | Bandit | `bandit -r . -x ./warehouse/static,./venv -ll`    | No           |
-| Tests          | Django | `python manage.py test`                           | No           |
-
-## Pre-commit Hooks (Optional)
-
-For automatic checks before each commit, install pre-commit hooks:
+To run checks automatically on every commit:
 
 ```bash
 pip install pre-commit
 pre-commit install
 ```
 
-This will run checks automatically when you run `git commit`.
+Configuration is in `.pre-commit-config.yaml`. With this set up, you do not need to run `./scripts/check.sh` manually before committing.
 
-Configuration is in `.pre-commit-config.yaml`.
+## Resetting the development database
 
-Thanks to this you do not have to run the `./scripts/check.sh` manually.
-
----
-
-## Docker Development
-
-### Clearing Database Volumes
-
-If you need to reset your development database to a clean state:
+To wipe your local database and start fresh:
 
 ```bash
-# Stop and remove containers with volumes
 docker compose -f docker-compose.dev.yml down -v
-
-# Or remove specific volume
-docker volume rm hospital_dwh_postgres_data_dev
 ```
 
-**Warning:** This will delete all data in your development database.
+This deletes all data in the development database.
 
----
+## CI jobs
 
-## CI Jobs
-
-| Job              | Description                   | Failure Action                             |
-|------------------|-------------------------------|--------------------------------------------|
-| Quality Checks   | Lint, format, type, security  | Run `./scripts/check.sh`                   |
-| Type Checking    | Validates type hints          | Fix type errors manually                   |
-| Translations     | Checks i18n files             | Run `python manage.py makemessages`        |
-| Security         | Scans for vulnerabilities     | Fix security issues manually               |
-| Tests            | Runs the test suite           | Fix failing tests                          |
-| CI Success       | Final gate                    | All above must pass                        |
+| Job | What it checks | If it fails |
+|---|---|---|
+| Quality Checks | Linting, formatting, types, security | Run `./scripts/check.sh` |
+| Translations | Translation files are complete and compiled | Fix `.po` files and recompile |
+| Tests | Django test suite | Fix the failing tests |
+| CI Success | All above must pass | Fix whichever job failed |

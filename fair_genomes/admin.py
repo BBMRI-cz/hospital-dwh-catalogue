@@ -10,7 +10,6 @@ from django.contrib import admin, messages
 from django.core.cache import cache
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
-from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from fair_genomes.models import Distribution, StatDefinition, StatResult
@@ -48,16 +47,21 @@ class StatDefinitionForm(forms.ModelForm):
 
     class Meta:
         model = StatDefinition
-        fields = '__all__'
+        fields = [
+            'distribution',
+            'molgenis_table',
+            'molgenis_column',
+            'display_label',
+            'sort_order',
+            'is_active',
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         schema = _get_molgenis_schema()
 
         if schema:
-            table_choices = [('', '---------')] + [
-                (t, t) for t in sorted(schema.keys())
-            ]
+            table_choices = [('', '---------')] + [(t, t) for t in sorted(schema.keys())]
             self.fields['molgenis_table'] = forms.ChoiceField(
                 choices=table_choices,
                 label=_('MOLGENIS table'),
@@ -154,13 +158,11 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 summary_parts = [f'Status: {status}', f'Duration: {duration}s']
                 if stats:
                     summary_parts.append(
-                        f'Stats: {stats["updated"]} updated, '
-                        f'{stats["failed"]} failed'
+                        f'Stats: {stats["updated"]} updated, ' f'{stats["failed"]} failed'
                     )
                 messages.success(
                     request,
-                    _('Full sync completed. %(summary)s')
-                    % {'summary': ' | '.join(summary_parts)},
+                    _('Full sync completed. %(summary)s') % {'summary': ' | '.join(summary_parts)},
                 )
             except Exception as exc:
                 logger.exception('Full sync failed')
@@ -191,9 +193,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         ok_count = 0
         fail_count = 0
         for defn in queryset.filter(is_active=True):
-            success, err = svc.sync_single_stat(
-                defn.molgenis_table, defn.molgenis_column
-            )
+            success, err = svc.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
             if success:
                 ok_count += 1
             else:
@@ -201,8 +201,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
 
         messages.success(
             request,
-            _('Synced %(ok)d stats, %(fail)d failed.')
-            % {'ok': ok_count, 'fail': fail_count},
+            _('Synced %(ok)d stats, %(fail)d failed.') % {'ok': ok_count, 'fail': fail_count},
         )
 
 

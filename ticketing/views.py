@@ -127,7 +127,6 @@ class CartView(LoginRequiredMixin, View):
         return redirect('ticketing:ticket_history')
 
 
-
 # ── History view ──────────────────────────────────────────────────────────────
 
 

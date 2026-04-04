@@ -297,11 +297,21 @@ class BuildJsonldContextTest(TestCase):
 
     def test_context_is_first_key(self) -> None:
         result = self._build()
-        self.assertEqual(list(result.keys())[0], '@context')
+        self.assertEqual(next(iter(result.keys())), '@context')
 
     def test_full_dataset_contains_expected_prefixes(self) -> None:
         context = self._build()['@context']
-        expected = {'@base', 'dcat', 'dct', 'healthdcatap', 'dcatap', 'org', 'foaf', 'vcard', 'geodcatap'}
+        expected = {
+            '@base',
+            'dcat',
+            'dct',
+            'healthdcatap',
+            'dcatap',
+            'org',
+            'foaf',
+            'vcard',
+            'geodcatap',
+        }
         self.assertEqual(set(context.keys()), expected)
 
     def test_no_contact_point_drops_vcard(self) -> None:
@@ -316,8 +326,23 @@ class BuildJsonldContextTest(TestCase):
 
     def test_unused_ttl_prefixes_absent(self) -> None:
         context = self._build()['@context']
-        unused = {'prov', 'rdf', 'rdfs', 'shacl', 'skos', 'xsd', 'cc',
-                  'lcon', 'owl', 'odrl', 'schema', 'sh', 'spdx', 'time', 'dpv'}
+        unused = {
+            'prov',
+            'rdf',
+            'rdfs',
+            'shacl',
+            'skos',
+            'xsd',
+            'cc',
+            'lcon',
+            'owl',
+            'odrl',
+            'schema',
+            'sh',
+            'spdx',
+            'time',
+            'dpv',
+        }
         for prefix in unused:
             with self.subTest(prefix=prefix):
                 self.assertNotIn(prefix, context)
@@ -395,7 +420,9 @@ class BuildJsonldContextTest(TestCase):
         self.assertEqual(cols[0]['csvw:name'], 'encounter_id')
         self.assertEqual(cols[0]['csvw:datatype'], 'integer')
         self.assertNotIn('csvw:propertyUrl', cols[0])
-        self.assertEqual(cols[1]['csvw:propertyUrl'], {'@id': 'http://purl.bioontology.org/ontology/ICD10'})
+        self.assertEqual(
+            cols[1]['csvw:propertyUrl'], {'@id': 'http://purl.bioontology.org/ontology/ICD10'}
+        )
 
     def test_tables_add_csvw_and_adms_prefixes(self) -> None:
         context = self._build(self._DS_WITH_TABLES)['@context']
@@ -427,4 +454,3 @@ class BuildJsonldContextTest(TestCase):
 
         turtle = build_turtle(self._FULL_DS)
         self.assertIn('Test dataset', turtle)
-

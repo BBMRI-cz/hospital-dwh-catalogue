@@ -1,47 +1,104 @@
 # Hospital Data Warehouse Catalogue
 
-A Django-based web application for browsing and managing hospital data warehouse metadata.
+A HealthDCAT-AP v6 compliant data catalogue for hospital data warehouse metadata. Built with Django, PostgreSQL, and Docker.
 
-## Quick Start (Local Deployment)
+## Quick start
 
-1. **Setup environment:**
+1. Copy the example environment file:
+
    ```bash
    cp .env.dev.example .env
    ```
 
-2. **Start the application:**
+2. Start the application:
+
    ```bash
    sh ./deploy.sh
    ```
-   Or manually:
+
+   Or run it manually:
+
    ```bash
-   docker compose -f docker-compose.dev.yml up
+   docker compose -f docker-compose.dev.yml up -d --build
    ```
 
-3. **Access the application:**
-   - Main app: http://localhost
+3. Open http://localhost in a browser.
 
-4. **Creating users:**
-   - First login into the app will create a superuser.
-   - Other logins will create new user based on the given username when working in DEV environment.
+4. Log in with any username and password. The first login creates a superuser. Subsequent logins create regular users. This only works in dev mode with `MOCK_LDAP=True`.
 
 ## Documentation
 
-- [Admin Guide](docs/ADMIN.md) - Managing users and content
-- [Authentication Guide](docs/AUTHENTICATION.md) - Complete authentication setup (development and production)
-- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
-- [Contributing Guide](docs/CONTRIBUTING.md) - Development workflow and branch protection
-- [Internationalization](docs/INTERNATIONALIZATION.md) - Adding and updating translations
-- [FAIR Genomes](docs/FAIR_GENOMES.md) - FAIR Genomes API integration and data sync
-- [Ticketing](docs/TICKETING.md) - Alvao Ticketing integration
+- [Admin Guide](docs/ADMIN.md) -- managing users, content, and the admin panel
+- [Authentication](docs/AUTHENTICATION.md) -- dev auth backend and production LDAP setup
+- [Deployment](docs/DEPLOYMENT.md) -- deploying to dev, test, and production
+- [Contributing](docs/CONTRIBUTING.md) -- development workflow and code quality checks
+- [Internationalization](docs/INTERNATIONALIZATION.md) -- adding and updating translations
+- [FAIR Genomes](docs/FAIR_GENOMES.md) -- MOLGENIS integration, data sync, and scheduling
+- [Stats Setup](docs/STATS.md) -- configuring statistics and charts for FAIR Genomes distributions
+- [Ticketing](docs/TICKETING.md) -- Alvao Service Desk integration
 
-## Project Structure
+## Project structure
 
-- `catalogue/` - Django project settings and configuration
-- `warehouse/` - Main warehouse catalogue application
-- `fair_genomes/` - FAIR Genomes integration
-- `ticketing/` - Ticket request system
-- `docs/` - Project documentation
-- `docker/` - Docker configuration files
-- `locale/` - Translation files (i18n)
-- `scripts/` - Development utility scripts
+```
+catalogue/          Django project settings, middleware, URL config, DB routers
+warehouse/          Main catalogue app (models, views, templates, static files)
+fair_genomes/       FAIR Genomes integration (models, sync service, admin, stats)
+ticketing/          Ticket request system (cart, Alvao API client)
+shared/             Abstract models, DTOs, mappers, unified catalog service
+schema_registry/    HealthDCAT-AP SHACL schema loader (from git submodule)
+health_dcat_ap/     Git submodule with HealthDCAT-AP release files
+docker/             Dockerfile, entrypoint scripts, Nginx, Postgres, Grafana configs
+locale/             Translation files (Czech and English)
+scripts/            Code quality and CI check scripts
+docs/               Project documentation
+```
+
+## Databases
+
+The application uses four databases:
+
+| Alias | Default name | Contents |
+|---|---|---|
+| `auth_db` | `hospital_dwh_auth` | Users, groups, permissions, sessions, admin logs |
+| `metadata_db` | `hospital_dwh` | Warehouse catalogue tables (managed externally, read-only) |
+| `fair_genomes_db` | `fair_genomes` | FAIR Genomes datasets, distributions, stat definitions, stat results |
+| `default` | SQLite (dev) | Ticketing models |
+
+## Environment variables
+
+Each environment has its own example file:
+
+- `.env.dev.example` -- local development with mock services
+- `.env.test.example` -- test server deployment
+- `.env.prod.example` -- production deployment
+
+Copy the appropriate file to `.env` and fill in the values. See the example files for the full list of variables. Key settings:
+
+| Variable | Purpose |
+|---|---|
+| `DEPLOY_ENV` | `dev`, `test`, or `prod` -- selects docker-compose file |
+| `SECRET_KEY` | Django secret key (generate a strong random string for prod) |
+| `MOCK_LDAP` | `True` to use the dev auth backend, `False` for LDAP |
+| `MOCK_FAIR_GENOMES` | `True` to seed sample data instead of syncing from MOLGENIS |
+| `MOCK_ALVAO` | `True` to use the mock ticketing service |
+| `DJANGO_SUPERUSER_USERNAME` | Bootstrap superuser username (created on startup) |
+| `DJANGO_SUPERUSER_PASSWORD` | Bootstrap superuser password |
+| `FAIR_GENOMES_RDF_URL` | FAIR Data Point RDF endpoint for metadata sync |
+| `FAIR_GENOMES_API_URL` | MOLGENIS GraphQL endpoint for stats and data sync |
+| `FAIR_GENOMES_API_TOKEN` | Authentication token for the MOLGENIS API |
+| `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | How often the scheduler syncs data (default: 24) |
+| `SITE_URL` | Public base URL for JSON-LD export (e.g. `https://your-domain.com`) |
+| `HEALTH_DCAT_VERSION` | HealthDCAT-AP release to use (default: `release-6`) |
+
+## Docker services
+
+| Service | Purpose |
+|---|---|
+| `db` | PostgreSQL 17 database server |
+| `web` | Django application (runserver in dev, Gunicorn in test/prod) |
+| `scheduler` | Cron-based FAIR Genomes sync service |
+| `nginx` | Reverse proxy, serves static files |
+| `redis` | Cache and sessions (test/prod only) |
+| `loki` | Log aggregation |
+| `promtail` | Log collector |
+| `grafana` | Monitoring dashboards |

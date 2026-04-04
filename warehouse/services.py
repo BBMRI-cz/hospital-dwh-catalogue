@@ -40,9 +40,7 @@ class WarehouseMetadataService:
 
     # ── Sidebar column counts ───────────────────────────────────────────────
 
-    def get_column_counts_for_distributions(
-        self, dist_names: list[str]
-    ) -> list[tuple[str, str]]:
+    def get_column_counts_for_distributions(self, dist_names: list[str]) -> list[tuple[str, str]]:
         """Return ``(column_title, distribution_name)`` pairs for the given distributions.
 
         Only non-empty column titles are included.  Results are distinct.
@@ -76,13 +74,15 @@ class WarehouseMetadataService:
             .filter(table_id__in=table_names)
             .order_by('table_id', 'var_order', 'name')
         ):
-            col_by_table[c.table_id].append({
-                'name': c.name,
-                'title': c.title,
-                'description': c.description,
-                'datatype': c.datatype,
-                'property_url': c.property_url,
-            })
+            col_by_table[c.table_id].append(
+                {
+                    'name': c.name,
+                    'title': c.title,
+                    'description': c.description,
+                    'datatype': c.datatype,
+                    'property_url': c.property_url,
+                }
+            )
 
         return [
             {
@@ -115,23 +115,27 @@ class WarehouseMetadataService:
             .filter(table_id__in=all_table_names)
             .order_by('table_id', 'var_order', 'name')
         ):
-            col_by_table[c.table_id].append({
-                'name': c.name,
-                'title': c.title,
-                'description': c.description,
-                'datatype': c.datatype,
-                'property_url': c.property_url,
-            })
+            col_by_table[c.table_id].append(
+                {
+                    'name': c.name,
+                    'title': c.title,
+                    'description': c.description,
+                    'datatype': c.datatype,
+                    'property_url': c.property_url,
+                }
+            )
 
         tables_by_dist: dict[str, list[dict]] = defaultdict(list)
         for t in table_qs:
-            tables_by_dist[t.distribution_id].append({
-                'name': t.name,
-                'title': t.title or t.name,
-                'description': t.description or '',
-                'url': t.url,
-                'columns': col_by_table.get(t.name, []),
-            })
+            tables_by_dist[t.distribution_id].append(
+                {
+                    'name': t.name,
+                    'title': t.title or t.name,
+                    'description': t.description or '',
+                    'url': t.url,
+                    'columns': col_by_table.get(t.name, []),
+                }
+            )
 
         return dict(tables_by_dist)
 
@@ -155,12 +159,14 @@ class WarehouseMetadataService:
                 .first()
             )
             if sr and sr.distribution:
-                charts.append({
-                    'label': sd.chart_label,
-                    'table_name': sr.table_name,
-                    'column_name': sr.column_name,
-                    'data': sr.distribution,
-                })
+                charts.append(
+                    {
+                        'label': sd.chart_label,
+                        'table_name': sr.table_name,
+                        'column_name': sr.column_name,
+                        'data': sr.distribution,
+                    }
+                )
         return charts
 
     # ── Derive status (business logic) ──────────────────────────────────────
@@ -206,9 +212,7 @@ class WarehouseMetadataService:
             return col_counter
 
         dist_to_dataset: dict[str, str] = {
-            d['name']: ds['name']
-            for ds in filtered_datasets
-            for d in ds.get('distributions', [])
+            d['name']: ds['name'] for ds in filtered_datasets for d in ds.get('distributions', [])
         }
         seen_col_ds: set[tuple[str, str]] = set()
         attr_rows = self.get_column_counts_for_distributions(filtered_dist_names)

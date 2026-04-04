@@ -7,7 +7,6 @@ Called by docker/entrypoint.sh before the main server command.
 
 import logging
 import os
-import sys
 from pathlib import Path
 
 import django
@@ -47,7 +46,10 @@ def _ensure_env_superuser() -> None:
     password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '').strip()
 
     if not username or not password:
-        print('DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser bootstrap.', flush=True)
+        print(
+            'DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser bootstrap.',
+            flush=True,
+        )
         return
 
     User = get_user_model()
@@ -86,7 +88,7 @@ def _ensure_env_superuser() -> None:
         # Pure LDAP user (no usable local password, no sentinel): leave alone.
         print(
             f"Env superuser: '{username}' exists as an LDAP-only user — skipping to avoid conflict. "
-            f"Choose a username that does not exist in Active Directory.",
+            f'Choose a username that does not exist in Active Directory.',
             flush=True,
         )
         return
@@ -140,8 +142,12 @@ def main() -> None:
             flush=True,
         )
         call_command(
-            'migrate', 'fair_genomes', 'zero',
-            database='fair_genomes_db', fake=True, interactive=False,
+            'migrate',
+            'fair_genomes',
+            'zero',
+            database='fair_genomes_db',
+            fake=True,
+            interactive=False,
         )
         call_command('migrate', 'fair_genomes', database='fair_genomes_db', interactive=False)
 

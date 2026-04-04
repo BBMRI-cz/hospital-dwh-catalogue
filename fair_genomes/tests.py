@@ -250,10 +250,7 @@ class SyncStatsTest(TestCase):
         resp = MagicMock()
         resp.raise_for_status.return_value = None
         table_cap = table[0].upper() + table[1:]
-        rows = [
-            {'count': count, column: {'name': value}}
-            for value, count in dist.items()
-        ]
+        rows = [{'count': count, column: {'name': value}} for value, count in dist.items()]
         resp.json.return_value = {'data': {f'{table_cap}_groupBy': rows}}
         return resp
 
@@ -329,9 +326,7 @@ class StatDefinitionModelTest(TestCase):
         self.assertIn(('distribution', 'molgenis_table', 'molgenis_column'), constraint)
 
     def test_chart_label_uses_display_label(self):
-        sd = StatDefinition(
-            molgenis_table='seq', molgenis_column='col', display_label='My Label'
-        )
+        sd = StatDefinition(molgenis_table='seq', molgenis_column='col', display_label='My Label')
         self.assertEqual(sd.chart_label, 'My Label')
 
     def test_chart_label_falls_back_to_table_column(self):

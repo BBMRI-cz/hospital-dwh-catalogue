@@ -590,10 +590,7 @@ class FairGenomesService:
         from fair_genomes.models import StatResult
 
         table_cap = table[0].upper() + table[1:]
-        query = (
-            f'{{ {table_cap}_groupBy(column: "{column}") '
-            f'{{ count {column} {{ name }} }} }}'
-        )
+        query = f'{{ {table_cap}_groupBy(column: "{column}") ' f'{{ count {column} {{ name }} }} }}'
 
         headers: dict[str, str] = {'Content-Type': 'application/json'}
         if self.api_token:
@@ -657,9 +654,7 @@ class FairGenomesService:
         if not self.graphql_url:
             return {}
 
-        query = (
-            '{ __schema { types { name kind fields { name } } } }'
-        )
+        query = '{ __schema { types { name kind fields { name } } } }'
         headers: dict[str, str] = {'Content-Type': 'application/json'}
         if self.api_token:
             headers['x-molgenis-token'] = self.api_token
@@ -679,10 +674,28 @@ class FairGenomesService:
 
         types = data.get('data', {}).get('__schema', {}).get('types', [])
 
-        skip_suffixes = ('_groupBy', '_agg', '_aggregate', 'Input', 'OrderByInput',
-                         'FilterInput', 'Connection', 'Edge')
-        skip_names = {'Query', 'Mutation', 'Subscription', 'String', 'Int', 'Float',
-                      'Boolean', 'ID', 'DateTime', 'JSON'}
+        skip_suffixes = (
+            '_groupBy',
+            '_agg',
+            '_aggregate',
+            'Input',
+            'OrderByInput',
+            'FilterInput',
+            'Connection',
+            'Edge',
+        )
+        skip_names = {
+            'Query',
+            'Mutation',
+            'Subscription',
+            'String',
+            'Int',
+            'Float',
+            'Boolean',
+            'ID',
+            'DateTime',
+            'JSON',
+        }
 
         result: dict[str, list[str]] = {}
         for t in types:
@@ -696,11 +709,7 @@ class FairGenomesService:
                 continue
             if any(name.endswith(s) for s in skip_suffixes):
                 continue
-            fields = [
-                f['name']
-                for f in (t.get('fields') or [])
-                if not f['name'].startswith('_')
-            ]
+            fields = [f['name'] for f in (t.get('fields') or []) if not f['name'].startswith('_')]
             if fields:
                 result[name] = sorted(fields)
 

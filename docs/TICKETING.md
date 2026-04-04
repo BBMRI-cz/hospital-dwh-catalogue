@@ -1,67 +1,68 @@
-# Alvao Ticketing Integration
+# Ticketing
 
-This document describes the Alvao Service Desk integration for requesting data access through the catalogue.
+The ticketing system lets users request access to data through the catalogue. Users add datasets, distributions, or tables to a cart and submit a request, which creates a ticket in Alvao Service Desk.
 
-## Overview
+## How it works
 
-The ticketing system allows users to:
-1. Browse the data catalogue
-2. Add datasets, data classes, and tables to a "cart"
-3. Submit a data access request (ticket) to Alvao Service Desk
-4. View their submitted tickets
+1. A user browses the catalogue and adds items to their cart
+2. They go to `/cart/`, fill out the request form, and submit
+3. The application creates a `TicketRequest` record in the local database
+4. It sends the request to the Alvao Service Desk API
+5. The user can view their submitted tickets at `/tickets/`
 
-## Environment Setup
+The cart is stored in the user's session and holds up to 50 items.
 
-### Development Environment
+## Configuration
 
-For development, the mock service is used:
+### Development
 
-```env
+For local development, use the mock service:
+
+```bash
 MOCK_ALVAO=True
 ```
 
-The mock service:
-- Stores tickets in memory and local database
-- Generates mock ticket IDs (MOCK-XXXXXXXX)
-- Simulates all Alvao API responses locally
-- Simulates network delays for realistic testing
+The mock stores tickets locally, generates fake ticket IDs (`MOCK-XXXXXXXX`), and simulates API responses with realistic delays. No external service needed.
 
-### Test Environment
+### Test environment
 
-For testing against a real Alvao test instance:
+To test against a real Alvao instance:
 
-```env
+```bash
 MOCK_ALVAO=False
-ALVAO_API_URL=https://test-alvao.yourcompany.com/api/v1
-ALVAO_API_TOKEN=your-test-api-token
-```
-
-### Production Environment
-
-For production with the real Alvao server:
-
-```env
-MOCK_ALVAO=False
-ALVAO_API_URL=https://alvao.yourcompany.com/api/v1
-ALVAO_API_TOKEN=your-production-api-token
-ALVAO_DEFAULT_SERVICE_ID=123  # Optional: default service for tickets
-```
-
-## Authentication
-
-The integration supports two authentication methods:
-
-### Bearer Token (Recommended)
-
-```env
-ALVAO_API_TOKEN=your-bearer-token
-```
-
-### Basic Authentication (Alternative)
-
-```env
-ALVAO_SERVICE_ACCOUNT_USERNAME=service_user
+ALVAO_API_URL=https://test-alvao.yourcompany.com/AlvaoRestApi/v1
+ALVAO_SERVICE_ACCOUNT_USERNAME=service-account
 ALVAO_SERVICE_ACCOUNT_PASSWORD=password
 ```
 
-One service account creates tickets for all users. The requester's email is included in the ticket data.
+### Production
+
+```bash
+MOCK_ALVAO=False
+ALVAO_API_URL=https://alvao.yourcompany.com/AlvaoRestApi/v1
+ALVAO_SERVICE_ACCOUNT_USERNAME=your-service-account
+ALVAO_SERVICE_ACCOUNT_PASSWORD=your-password
+ALVAO_DEFAULT_SERVICE_ID=109
+```
+
+## Authentication with Alvao
+
+The application uses HTTP Basic Authentication with a single service account to create tickets on behalf of all users. The requester's email is included in the ticket data so Alvao knows who made the request.
+
+Set the service account credentials in your `.env`:
+
+```bash
+ALVAO_SERVICE_ACCOUNT_USERNAME=service-account
+ALVAO_SERVICE_ACCOUNT_PASSWORD=password
+```
+
+The Alvao client has built-in retry logic with exponential backoff for transient errors (HTTP 429 and 5xx status codes, up to 3 retries).
+
+## URL routes
+
+| URL | Purpose |
+|---|---|
+| `/cart/` | View cart and submit a request |
+| `/cart/add/` | Add an item to the cart (POST) |
+| `/cart/remove/` | Remove an item from the cart (POST) |
+| `/tickets/` | View submitted ticket history |
