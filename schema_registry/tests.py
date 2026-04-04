@@ -261,3 +261,170 @@ class ServiceLayerTest(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('dct', result)
         self.assertTrue(result['dct'].startswith('http'))
+
+
+class BuildJsonldContextTest(TestCase):
+    """Tests for the prefix-filtering behaviour of build_jsonld() in shared.export."""
+
+    _FULL_DS: dict = {
+        'app': 'warehouse',
+        'name': 'test-ds',
+        'title': 'Test dataset',
+        'description': 'A test dataset',
+        'keywords': ['health'],
+        'custodian': 'Acme Hospital',
+        'publisher': 'Acme Hospital',
+        'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+        'health_category': 'http://healthdataportal.eu/ns/health#clinical',
+        'applicable_legislation': 'http://data.europa.eu/eli/reg/2022/868/oj',
+        'contact_point': 'data@acme.example',
+        'distributions': [
+            {
+                'name': 'dist-1',
+                'title': 'CSV file',
+                'access_url': 'http://example.com/dist',
+                'format': 'CSV',
+                'applicable_legislation': '',
+                'db_layer': '',
+            }
+        ],
+    }
+
+    def _build(self, ds: dict | None = None) -> dict:
+        from shared.export import build_jsonld
+
+        return build_jsonld(ds if ds is not None else self._FULL_DS)
+
+    def test_context_is_first_key(self) -> None:
+        result = self._build()
+        self.assertEqual(list(result.keys())[0], '@context')
+
+    def test_full_dataset_contains_expected_prefixes(self) -> None:
+        context = self._build()['@context']
+        expected = {'@base', 'dcat', 'dct', 'healthdcatap', 'dcatap', 'org', 'foaf', 'vcard', 'geodcatap'}
+        self.assertEqual(set(context.keys()), expected)
+
+    def test_no_contact_point_drops_vcard(self) -> None:
+        ds = {**self._FULL_DS, 'contact_point': ''}
+        context = self._build(ds)['@context']
+        self.assertNotIn('vcard', context)
+
+    def test_no_custodian_drops_geodcatap(self) -> None:
+        ds = {**self._FULL_DS, 'custodian': ''}
+        context = self._build(ds)['@context']
+        self.assertNotIn('geodcatap', context)
+
+    def test_unused_ttl_prefixes_absent(self) -> None:
+        context = self._build()['@context']
+        unused = {'prov', 'rdf', 'rdfs', 'shacl', 'skos', 'xsd', 'cc',
+                  'lcon', 'owl', 'odrl', 'schema', 'sh', 'spdx', 'time', 'dpv'}
+        for prefix in unused:
+            with self.subTest(prefix=prefix):
+                self.assertNotIn(prefix, context)
+
+    def test_context_values_are_uris(self) -> None:
+        context = self._build()['@context']
+        for prefix, uri in context.items():
+            with self.subTest(prefix=prefix):
+                self.assertTrue(uri.startswith('http'), f'{prefix!r} → {uri!r} is not an http URI')
+
+    # ── CSVW table/column export ─────────────────────────────────────────────
+
+    _DS_WITH_TABLES: dict = {
+        'app': 'warehouse',
+        'name': 'test-ds',
+        'title': 'Test dataset',
+        'description': 'A test dataset',
+        'keywords': ['health'],
+        'custodian': 'Acme Hospital',
+        'publisher': 'Acme Hospital',
+        'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+        'health_category': 'http://healthdataportal.eu/ns/health#clinical',
+        'applicable_legislation': 'http://data.europa.eu/eli/reg/2022/868/oj',
+        'contact_point': 'data@acme.example',
+        'distributions': [
+            {
+                'name': 'dist-1',
+                'title': 'CSV file',
+                'access_url': 'http://example.com/dist',
+                'format': 'CSV',
+                'applicable_legislation': '',
+                'db_layer': '',
+                'tables': [
+                    {
+                        'name': 'patient_encounters',
+                        'title': 'Patient Encounters',
+                        'description': 'Encounter records',
+                        'url': 'http://example.com/patient_encounters',
+                        'columns': [
+                            {
+                                'name': 'encounter_id',
+                                'title': 'Encounter ID',
+                                'description': 'Unique encounter identifier',
+                                'datatype': 'integer',
+                                'property_url': '',
+                            },
+                            {
+                                'name': 'diagnosis_code',
+                                'title': 'Diagnosis Code',
+                                'description': 'ICD-10 code',
+                                'datatype': 'string',
+                                'property_url': 'http://purl.bioontology.org/ontology/ICD10',
+                            },
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+
+    def test_tables_emit_csvw_hierarchy(self) -> None:
+        result = self._build(self._DS_WITH_TABLES)
+        dist = result['dcat:distribution'][0]
+        self.assertIn('adms:sample', dist)
+        tg = dist['adms:sample']
+        self.assertEqual(tg['@type'], 'csvw:TableGroup')
+        tables = tg['csvw:table']
+        self.assertEqual(len(tables), 1)
+        table = tables[0]
+        self.assertEqual(table['@type'], 'csvw:Table')
+        self.assertEqual(table['dct:title'], 'Patient Encounters')
+        self.assertEqual(table['csvw:url'], {'@id': 'http://example.com/patient_encounters'})
+        cols = table['csvw:column']
+        self.assertEqual(len(cols), 2)
+        self.assertEqual(cols[0]['csvw:name'], 'encounter_id')
+        self.assertEqual(cols[0]['csvw:datatype'], 'integer')
+        self.assertNotIn('csvw:propertyUrl', cols[0])
+        self.assertEqual(cols[1]['csvw:propertyUrl'], {'@id': 'http://purl.bioontology.org/ontology/ICD10'})
+
+    def test_tables_add_csvw_and_adms_prefixes(self) -> None:
+        context = self._build(self._DS_WITH_TABLES)['@context']
+        self.assertIn('csvw', context)
+        self.assertIn('adms', context)
+
+    def test_no_tables_omits_csvw(self) -> None:
+        context = self._build()['@context']
+        self.assertNotIn('csvw', context)
+        self.assertNotIn('adms', context)
+
+    def test_empty_tables_list_omits_sample(self) -> None:
+        ds = {**self._FULL_DS}
+        ds['distributions'] = [{**self._FULL_DS['distributions'][0], 'tables': []}]
+        dist = self._build(ds)['dcat:distribution'][0]
+        self.assertNotIn('adms:sample', dist)
+
+    # ── RDF Turtle export ────────────────────────────────────────────────────
+
+    def test_build_turtle_returns_valid_turtle(self) -> None:
+        from shared.export import build_turtle
+
+        turtle = build_turtle(self._FULL_DS)
+        self.assertIsInstance(turtle, str)
+        self.assertIn('dcat:Dataset', turtle)
+
+    def test_build_turtle_contains_dataset_title(self) -> None:
+        from shared.export import build_turtle
+
+        turtle = build_turtle(self._FULL_DS)
+        self.assertIn('Test dataset', turtle)
+

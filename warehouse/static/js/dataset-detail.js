@@ -34,9 +34,22 @@ function downloadJsonLd() {
   URL.revokeObjectURL(url);
 }
 
+function toggleExportMenu() {
+  var menu = document.getElementById('export-menu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   if (location.hash) {
-    const el = document.querySelector(location.hash);
+    var el = document.querySelector(location.hash);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+  // Close export dropdown when clicking outside
+  document.addEventListener('click', function (e) {
+    var container = document.getElementById('export-split-btn');
+    var menu = document.getElementById('export-menu');
+    if (container && menu && !container.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
 });

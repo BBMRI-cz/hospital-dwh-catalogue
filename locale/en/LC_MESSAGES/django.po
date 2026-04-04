@@ -984,6 +984,10 @@ msgstr "Data source"
 msgid "JSON-LD"
 msgstr "JSON-LD"
 
+#: warehouse/templates/catalogue/dataset_detail.html:48
+msgid "RDF"
+msgstr "RDF"
+
 #: warehouse/templates/catalogue/dataset_detail.html:51
 msgid "Dataset Metadata"
 msgstr "Dataset Metadata"

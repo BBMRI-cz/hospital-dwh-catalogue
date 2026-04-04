@@ -25,17 +25,36 @@
         {% endif %}
       </div>
       <div class="flex flex-col gap-2 shrink-0 w-44">
-        <!-- JSON-LD Download -->
-        <button onclick="downloadJsonLd()"
-          data-jsonld-filename="healthdcatap_{{ dataset.app }}_{{ dataset.name }}.jsonld"
-          class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          {% trans "JSON-LD" %}
-        </button>
+        <!-- Export Download (split button) -->
+        <div class="relative" id="export-split-btn">
+          <div class="flex">
+            <button onclick="downloadJsonLd()"
+              data-jsonld-filename="healthdcatap_{{ dataset.app }}_{{ dataset.name }}.jsonld"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-l-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              {% trans "JSON-LD" %}
+            </button>
+            <button onclick="toggleExportMenu()" type="button" aria-haspopup="true"
+              class="inline-flex items-center justify-center h-8 w-7 rounded-r-md border-l border-white/30 text-white text-xs transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan">
+              <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+          <div id="export-menu" class="hidden absolute right-0 mt-1 w-full rounded-md bg-white shadow-lg border border-site-border z-10">
+            <a href="{% url 'warehouse:dataset_rdf_export' app=dataset.app name=dataset.name %}"
+              class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-txt hover:bg-gray-50 rounded-md transition-colors">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              {% trans "RDF" %}
+            </a>
+          </div>
+        </div>
         <!-- Add to cart -->
         {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
       </div>

@@ -15,14 +15,14 @@ from collections.abc import Callable
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
 from fair_genomes.models import StatDefinition as FGStatDefinition
 from fair_genomes.models import StatResult as FGStatResult
 from shared.dtos import UnifiedDataset, UnifiedDistribution
-from shared.export import build_jsonld, has_distributions
+from shared.export import build_jsonld, build_turtle, has_distributions
 from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService as CartService
 from warehouse.models import Column, Distribution, Table
@@ -116,6 +116,55 @@ def _dataset_to_dict(ds) -> dict:
             for d in dists
         ],
     }
+
+
+def _load_tables_for_distributions(ds_dict: dict) -> None:
+    """Enrich warehouse distribution dicts with table/column data for JSON-LD export.
+
+    Mutates each distribution sub-dict in *ds_dict* by adding a ``'tables'``
+    key containing a list of table dicts, each with a nested ``'columns'`` list.
+    Non-warehouse distributions are skipped.
+    """
+    wh_dist_names = [
+        d['name'] for d in ds_dict.get('distributions', []) if d.get('app') == 'warehouse'
+    ]
+    if not wh_dist_names:
+        return
+
+    table_qs = (
+        Table.objects.using('metadata_db')
+        .filter(distribution_id__in=wh_dist_names)
+        .order_by('distribution_id', 'name')
+    )
+
+    all_table_names = [t.name for t in table_qs]
+    col_by_table: dict[str, list[dict]] = defaultdict(list)
+    for c in (
+        Column.objects.using('metadata_db')
+        .filter(table_id__in=all_table_names)
+        .order_by('table_id', 'var_order', 'name')
+    ):
+        col_by_table[c.table_id].append({
+            'name': c.name,
+            'title': c.title,
+            'description': c.description,
+            'datatype': c.datatype,
+            'property_url': c.property_url,
+        })
+
+    tables_by_dist: dict[str, list[dict]] = defaultdict(list)
+    for t in table_qs:
+        tables_by_dist[t.distribution_id].append({
+            'name': t.name,
+            'title': t.title or t.name,
+            'description': t.description or '',
+            'url': t.url,
+            'columns': col_by_table.get(t.name, []),
+        })
+
+    for d in ds_dict.get('distributions', []):
+        if d.get('app') == 'warehouse':
+            d['tables'] = tables_by_dist.get(d['name'], [])
 
 
 def _filter_datasets(datasets: list, get_params) -> list:
@@ -427,6 +476,9 @@ class DatasetDetailView(LoginRequiredMixin, View):
             raise Http404('Dataset has no distributions')
 
         schema_json = cache.get_or_set(_CACHE_KEY_SCHEMA, service.get_schema_json, _CACHE_TTL)
+
+        # Enrich distributions with table/column data for the JSON-LD export.
+        _load_tables_for_distributions(ds_dict)
         jsonld = build_jsonld(ds_dict)
 
         # Build an inverse schema map: DTO field name → DCAT term.
@@ -456,6 +508,34 @@ class DatasetDetailView(LoginRequiredMixin, View):
                 'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
             },
         )
+
+
+class DatasetRdfExportView(LoginRequiredMixin, View):
+    """Download a dataset's HealthDCAT-AP metadata as RDF Turtle."""
+
+    def get(self, request, app: str, name: str):
+        service = UnifiedCatalogService()
+        cache_key = f'dataset:{app}:{name}'
+        ds_dict: dict | None = cache.get(cache_key)
+
+        if ds_dict is None:
+            ds, dist_objs = service.get_single_dataset(app, name)
+            if ds is None:
+                raise Http404('Dataset not found')
+            if not ds.distributions:
+                ds.distributions = dist_objs
+            ds_dict = _dataset_to_dict(ds)
+            cache.set(cache_key, ds_dict, _CACHE_TTL)
+
+        if not has_distributions(ds_dict):
+            raise Http404('Dataset has no distributions')
+
+        _load_tables_for_distributions(ds_dict)
+        turtle = build_turtle(ds_dict)
+        filename = f'healthdcatap_{app}_{name}.ttl'
+        response = HttpResponse(turtle, content_type='text/turtle')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
 
 class DistributionDetailView(LoginRequiredMixin, View):
