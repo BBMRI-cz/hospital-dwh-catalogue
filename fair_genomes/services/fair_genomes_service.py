@@ -570,7 +570,7 @@ class FairGenomesService:
         errors: list[str] = []
 
         for defn in definitions:
-            ok, err = self._sync_single_stat(defn.molgenis_table, defn.molgenis_column)
+            ok, err = self.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
             if ok:
                 updated += 1
             else:
@@ -579,7 +579,7 @@ class FairGenomesService:
 
         return {'updated': updated, 'failed': failed, 'errors': errors}
 
-    def _sync_single_stat(self, table: str, column: str) -> tuple[bool, str]:
+    def sync_single_stat(self, table: str, column: str) -> tuple[bool, str]:
         """
         Fetch a single _groupBy aggregation and persist the result.
 

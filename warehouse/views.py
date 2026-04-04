@@ -9,7 +9,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 from collections.abc import Callable
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,13 +19,11 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
-from fair_genomes.models import StatDefinition as FGStatDefinition
-from fair_genomes.models import StatResult as FGStatResult
 from shared.dtos import UnifiedDataset, UnifiedDistribution
 from shared.export import build_jsonld, build_turtle, has_distributions
 from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService as CartService
-from warehouse.models import Column, Distribution, Table
+from warehouse.services import WarehouseMetadataService
 
 PAGE_SIZE = 15
 _CACHE_TTL = 300  # 5 minutes
@@ -51,22 +49,7 @@ def _parse_keywords(keyword_str: str | None) -> list[str]:
     return [k.strip() for k in (keyword_str or '').split(',') if k.strip()]
 
 
-def _derive_status(access_rights: str | None) -> str:
-    """
-    Derive a simple three-way status from an access-rights URI or label.
-
-    ready       → PUBLIC / open access
-    raw         → RESTRICTED / limited / unknown
-    unavailable → NON_PUBLIC / closed
-    """
-    if not access_rights:
-        return 'raw'
-    ar = access_rights.upper()
-    if 'PUBLIC' in ar and 'NON' not in ar:
-        return 'ready'
-    if 'NON_PUBLIC' in ar or 'NONPUBLIC' in ar or 'CLOSED' in ar:
-        return 'unavailable'
-    return 'raw'
+_derive_status = WarehouseMetadataService.derive_status
 
 
 def _dataset_to_dict(ds) -> dict:
@@ -131,36 +114,8 @@ def _load_tables_for_distributions(ds_dict: dict) -> None:
     if not wh_dist_names:
         return
 
-    table_qs = (
-        Table.objects.using('metadata_db')
-        .filter(distribution_id__in=wh_dist_names)
-        .order_by('distribution_id', 'name')
-    )
-
-    all_table_names = [t.name for t in table_qs]
-    col_by_table: dict[str, list[dict]] = defaultdict(list)
-    for c in (
-        Column.objects.using('metadata_db')
-        .filter(table_id__in=all_table_names)
-        .order_by('table_id', 'var_order', 'name')
-    ):
-        col_by_table[c.table_id].append({
-            'name': c.name,
-            'title': c.title,
-            'description': c.description,
-            'datatype': c.datatype,
-            'property_url': c.property_url,
-        })
-
-    tables_by_dist: dict[str, list[dict]] = defaultdict(list)
-    for t in table_qs:
-        tables_by_dist[t.distribution_id].append({
-            'name': t.name,
-            'title': t.title or t.name,
-            'description': t.description or '',
-            'url': t.url,
-            'columns': col_by_table.get(t.name, []),
-        })
+    metadata_svc = WarehouseMetadataService()
+    tables_by_dist = metadata_svc.get_tables_for_distributions(wh_dist_names)
 
     for d in ds_dict.get('distributions', []):
         if d.get('app') == 'warehouse':
@@ -183,27 +138,11 @@ def _filter_datasets(datasets: list, get_params) -> list:
     if not status_filter:
         status_filter = all_statuses
 
-    # Resolve column filter → matching dataset names via Column + Distribution
-    # Query metadata_db so the filter works for warehouse sources.
+    # Resolve column filter → matching dataset names via service layer.
     matching_dataset_names: frozenset | None = None
     if column_filter:
-        all_dataset_names: set[str] = set()
-
-        # Warehouse (metadata_db)
-        wh_dist_names = (
-            Column.objects.using('metadata_db')
-            .filter(title__in=column_filter)
-            .values_list('table__distribution_id', flat=True)
-            .distinct()
-        )
-        all_dataset_names.update(
-            Distribution.objects.using('metadata_db')
-            .filter(name__in=wh_dist_names)
-            .values_list('dataset_name', flat=True)
-            .distinct()
-        )
-
-        matching_dataset_names = frozenset(all_dataset_names)
+        metadata_svc = WarehouseMetadataService()
+        matching_dataset_names = metadata_svc.get_dataset_names_by_columns(column_filter)
 
     result = []
     for ds in datasets:
@@ -332,30 +271,8 @@ def _build_sidebar_context(
         status_counter[ds['status']] += 1
 
     # Distribution column counter (from warehouse filtered datasets)
-    col_counter: Counter = Counter()
-    filtered_dist_names = [
-        d['name']
-        for ds in filtered
-        if ds.get('app') == 'warehouse'
-        for d in ds.get('distributions', [])
-    ]
-    if filtered_dist_names:
-        dist_to_dataset: dict[str, str] = {
-            d['name']: ds['name'] for ds in filtered for d in ds.get('distributions', [])
-        }
-        seen_col_ds: set[tuple] = set()
-        attr_rows = (
-            Column.objects.using('metadata_db')
-            .filter(table__distribution__in=filtered_dist_names)
-            .exclude(title='')
-            .values_list('title', 'table__distribution_id')
-            .distinct()
-        )
-        for title, dist_name in attr_rows:
-            ds_name = dist_to_dataset.get(dist_name)
-            if ds_name and (title, ds_name) not in seen_col_ds:
-                col_counter[title] += 1
-                seen_col_ds.add((title, ds_name))
+    metadata_svc = WarehouseMetadataService()
+    col_counter = metadata_svc.build_column_counter(filtered)
 
     return {
         'sidebar_keywords': _make_sidebar_items(kw_counter, active_keywords),
@@ -584,60 +501,15 @@ class DistributionDetailView(LoginRequiredMixin, View):
 
         # ── Table + column data — only for warehouse distributions ──────────────
         # Fair genomes distributions do not have tables/columns.
+        metadata_svc = WarehouseMetadataService()
         tables = []
         if app != 'fair_genomes':
-            table_qs = Table.objects.using('metadata_db').filter(distribution_id=name).order_by('name')
-            table_names = [t.name for t in table_qs]
-
-            col_by_table: dict[str, list] = defaultdict(list)
-            for c in (
-                Column.objects.using('metadata_db')
-                .filter(table_id__in=table_names)
-                .order_by('table_id', 'var_order', 'name')
-            ):
-                col_by_table[c.table_id].append(
-                    {
-                        'name': c.name,
-                        'title': c.title,
-                        'description': c.description,
-                        'datatype': c.datatype,
-                        'property_url': c.property_url,
-                    }
-                )
-
-            tables = [
-                {
-                    'name': t.name,
-                    'title': t.title or t.name,
-                    'description': t.description or '',
-                    'url': t.url,
-                    'columns': col_by_table.get(t.name, []),
-                    'stats': [],
-                }
-                for t in table_qs
-            ]
+            tables = metadata_svc.get_tables_with_columns(name)
 
         # ── Stat charts — DB-driven mapping of aggregation results ───────────
         charts: list[dict] = []
         if app == 'fair_genomes':
-            stat_defs = (
-                FGStatDefinition.objects.using('fair_genomes_db')
-                .filter(distribution__name=name, is_active=True)
-                .order_by('sort_order', 'molgenis_table', 'molgenis_column')
-            )
-            for sd in stat_defs:
-                sr = (
-                    FGStatResult.objects.using('fair_genomes_db')
-                    .filter(table_name=sd.molgenis_table, column_name=sd.molgenis_column)
-                    .first()
-                )
-                if sr and sr.distribution:
-                    charts.append({
-                        'label': sd.chart_label,
-                        'table_name': sr.table_name,
-                        'column_name': sr.column_name,
-                        'data': sr.distribution,
-                    })
+            charts = metadata_svc.get_stat_charts(name)
 
         # Group charts by MOLGENIS table, preserving order of first appearance.
         # Assign each chart a stable canvas_idx (1-based flat position) so the

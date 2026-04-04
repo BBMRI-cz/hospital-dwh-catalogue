@@ -191,7 +191,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         ok_count = 0
         fail_count = 0
         for defn in queryset.filter(is_active=True):
-            success, err = svc._sync_single_stat(
+            success, err = svc.sync_single_stat(
                 defn.molgenis_table, defn.molgenis_column
             )
             if success:
