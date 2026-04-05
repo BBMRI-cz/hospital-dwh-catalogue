@@ -43,7 +43,12 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
     fi
 done
 
-# Check that .mo files exist and are not older than their .po files
+# Check that .mo files exist and are not older than their .po files.
+# Strategy:
+#   - If the .po file has uncommitted local changes (or is untracked), use
+#     filesystem mtime — the developer may have just edited it without committing.
+#   - Otherwise compare the last git commit timestamps, which is reliable after
+#     a fresh git checkout where all file mtimes are reset to the current time.
 echo "Checking that .mo files are compiled and up to date..."
 for po_file in locale/*/LC_MESSAGES/django.po; do
     if [ -f "$po_file" ]; then
@@ -52,10 +57,30 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
             echo "FAILED: Missing compiled translation: $mo_file"
             echo "  Run: python manage.py compilemessages"
             TRANSLATION_ISSUES=true
-        elif [ "$po_file" -nt "$mo_file" ]; then
-            echo "FAILED: Stale compiled translation: $mo_file is older than $po_file"
-            echo "  Run: python manage.py compilemessages"
-            TRANSLATION_ISSUES=true
+        else
+            stale=false
+            # Check whether the .po has uncommitted or untracked changes in git.
+            po_dirty=$(git status --porcelain "$po_file" 2>/dev/null)
+            po_commit=$(git log -1 --format="%ct" -- "$po_file" 2>/dev/null)
+            mo_commit=$(git log -1 --format="%ct" -- "$mo_file" 2>/dev/null)
+
+            if [ -n "$po_dirty" ] || [ -z "$po_commit" ] || [ -z "$mo_commit" ]; then
+                # .po is dirty / untracked, or we're outside a git repo — use filesystem mtime.
+                if [ "$po_file" -nt "$mo_file" ]; then
+                    stale=true
+                fi
+            else
+                # Both files are clean in git — compare commit timestamps.
+                if [ "$po_commit" -gt "$mo_commit" ]; then
+                    stale=true
+                fi
+            fi
+
+            if [ "$stale" = true ]; then
+                echo "FAILED: Stale compiled translation: $mo_file is older than $po_file"
+                echo "  Run: python manage.py compilemessages"
+                TRANSLATION_ISSUES=true
+            fi
         fi
     fi
 done
