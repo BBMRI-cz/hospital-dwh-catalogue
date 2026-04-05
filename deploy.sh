@@ -77,8 +77,8 @@ echo -e "${GREEN}Fetching latest submodule commits...${NC}"
 git submodule update --init --remote
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to update submodules${NC}"
-    exit 1
 fi
+
 # Verify the configured release directory exists after fetch
 HEALTH_DCAT_RELEASE_DIR="health_dcat_ap/public/releases/${HEALTH_DCAT_VERSION:-release-6}"
 if [ ! -d "$HEALTH_DCAT_RELEASE_DIR" ]; then
