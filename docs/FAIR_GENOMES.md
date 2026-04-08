@@ -11,7 +11,6 @@ FAIR_GENOMES_RDF_URL=https://your-fdp-endpoint.example.com
 FAIR_GENOMES_API_URL=https://your-molgenis.example.com/graphql
 FAIR_GENOMES_API_TOKEN=your-molgenis-api-token
 FAIR_GENOMES_SYNC_INTERVAL_HOURS=24
-FAIR_GENOMES_FETCH_ON_STARTUP=True
 ```
 
 | Variable | Purpose |
@@ -20,7 +19,10 @@ FAIR_GENOMES_FETCH_ON_STARTUP=True
 | `FAIR_GENOMES_API_URL` | MOLGENIS GraphQL endpoint for statistics aggregation |
 | `FAIR_GENOMES_API_TOKEN` | Authentication token for the MOLGENIS API |
 | `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | How often the scheduler runs the sync (in hours, default: 24) |
-| `FAIR_GENOMES_FETCH_ON_STARTUP` | Used in test settings to skip sync during test setup (the scheduler always syncs on startup regardless) |
+
+`FAIR_GENOMES_RDF_URL` and `FAIR_GENOMES_API_URL` can point to different services or hosts.
+
+`FAIR_GENOMES_RDF_URL` must point to a FAIR Data Point/DCAT metadata feed. A generic MOLGENIS schema RDF endpoint such as `/api/rdf` is not sufficient unless it exposes `Catalog`, `Dataset`, `Distribution`, `Agent`, and `ContactPoint` resources.
 
 In development, set `MOCK_FAIR_GENOMES=True` to use sample data instead of connecting to a real API.
 

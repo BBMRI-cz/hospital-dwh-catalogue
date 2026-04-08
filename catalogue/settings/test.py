@@ -66,9 +66,6 @@ else:
         }
     }
 
-# Fair Genomes API settings (mocked in tests)
-FAIR_GENOMES_FETCH_ON_STARTUP = False
-
 # Alvao settings (always use mock in tests)
 MOCK_ALVAO = True
 
