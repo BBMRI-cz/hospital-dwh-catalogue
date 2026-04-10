@@ -3,9 +3,8 @@
   Expects: tables — list of typed frontend table payloads:
     name, title, description, url, columns
   Each table gets a DaisyUI <dialog> modal for its columns.
-  Pass app=app from the including template so footer link can be labelled correctly.
 {% endcomment %}
-<div class="card bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8">
+<div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8">
   <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
     <div class="w-0.5 h-4 rounded shrink-0 bg-mou-blue"></div>
     <span class="font-mono text-[10px] uppercase tracking-wider shrink-0 text-mou-blue">
@@ -64,7 +63,7 @@
 
 {# ── Per-table column modals ──────────────────────────────────────────────── #}
 {% for tbl in tables %}
-{% include 'catalogue/components/_table_modal.html' with tbl=tbl idx=forloop.counter app=app %}
+{% include 'catalogue/components/_table_modal.html' with tbl=tbl idx=forloop.counter %}
 {% endfor %}
 
 <script src="{% static 'js/table-list.js' %}"></script>

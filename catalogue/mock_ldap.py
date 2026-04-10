@@ -6,6 +6,7 @@ username/password combination for easy testing without a real AD server.
 """
 
 import logging
+import os
 from typing import cast
 
 from django.conf import settings
@@ -50,6 +51,9 @@ class MockLDAPBackend(ModelBackend):
         logger.info(f'Mock LDAP: Authenticated {username}')
 
         # Get or create user - Django router will direct to correct database
+        superuser_username = os.environ.get('DJANGO_SUPERUSER_USERNAME', '').strip()
+        is_admin = bool(superuser_username) and username == superuser_username
+
         try:
             user, created = User.objects.get_or_create(
                 username=username,
@@ -57,21 +61,21 @@ class MockLDAPBackend(ModelBackend):
                     'first_name': username.capitalize(),
                     'last_name': 'User',
                     'email': f'{username}@example.com',
+                    'is_staff': is_admin,
+                    'is_superuser': is_admin,
                 },
             )
             user = cast(AbstractUser, user)
 
             if created:
                 logger.info(f'Mock LDAP: Created new user {username}')
-                # Make first user a superuser
-                if User.objects.count() == 1:
+            else:
+                logger.debug(f'Mock LDAP: User {username} already exists')
+                if is_admin and not user.is_staff:
                     user.is_staff = True
                     user.is_superuser = True
-                    user.save()
-                    logger.info(f'Mock LDAP: First user {username} promoted to superuser')
-            else:
-                # User already exists
-                logger.debug(f'Mock LDAP: User {username} already exists')
+                    user.save(update_fields=['is_staff', 'is_superuser'])
+                    logger.info(f'Mock LDAP: Granted staff/superuser to {username}')
 
             return user
 

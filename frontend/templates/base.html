@@ -1,12 +1,10 @@
 {% load i18n static %}<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'cs' }}" data-theme="light">
+<html lang="{{ LANGUAGE_CODE|default:'cs' }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{% trans "Data Catalogue" %}{% endblock %} · MOU</title>
-
-  <!-- DaisyUI (must come before Tailwind so Tailwind can override) -->
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/dist/full.min.css" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/mmci_logo.svg' %}" type="image/svg+xml">
 
   <!-- Google Fonts: Inter + Merriweather + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,10 +14,8 @@
   <!-- Custom fonts override -->
   <link href="{% static 'css/custom-fonts.css' %}" rel="stylesheet">
 
-  <!-- Tailwind CDN (Play CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  {% include "includes/_tailwind_config.html" %}
+  <!-- Tailwind CSS (compiled — built by docker/startup.py via tailwind.config.js) -->
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
 
   <!-- Base styles (animations, scrollbar, texture) -->
   <link href="{% static 'css/base.css' %}" rel="stylesheet">

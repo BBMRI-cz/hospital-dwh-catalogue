@@ -16,7 +16,8 @@ body::after {
 
 /* ── Ensure content is above texture ──────────────────────── */
 .site-header, .site-content, .site-outer,
-.cat-header,  .cat-content  { position: relative; z-index: 1; }
+.cat-content  { position: relative; z-index: 1; }
+.cat-header   { position: relative; z-index: 10; }
 
 /* ── Chevron transition ───────────────────────────────────── */
 .chevron-icon { transition: transform .22s ease; }
@@ -46,4 +47,32 @@ body::after {
 .modal-gradient-header {
   background: linear-gradient(135deg, #e8f7fb 0%, #f4fbfd 100%);
   border-bottom: 1px solid #9ddcea;
+}
+
+dialog.modal {
+  position: fixed; inset: 0; margin: 0; padding: 0; border: none;
+  width: 100%; max-width: none; height: 100%; max-height: none;
+  display: grid; place-items: center;
+  background: transparent;
+  overflow: clip; overscroll-behavior: contain; z-index: 999;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.2s ease-out, background-color 0.25s ease-out;
+}
+dialog.modal::backdrop { display: none; }
+dialog.modal[open] {
+  pointer-events: auto; opacity: 1;
+  background-color: rgb(0 0 0 / 0.4);
+}
+.modal-box {
+  grid-column: 1; grid-row: 1;
+  transform: scale(0.97); opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+  background: #fff;
+}
+dialog.modal[open] .modal-box {
+  transform: scale(1); opacity: 1;
+}
+@starting-style {
+  dialog.modal[open] { opacity: 0; background-color: transparent; }
+  dialog.modal[open] .modal-box { transform: scale(0.97); opacity: 0; }
 }

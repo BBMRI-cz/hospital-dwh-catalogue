@@ -50,7 +50,9 @@
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
-        <span class="max-w-28 truncate hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+        {% if user.is_staff %}
+        <span class="hidden sm:inline font-mono text-[11px] font-semibold text-mou-orange uppercase tracking-wide">{% trans "Admin" %}</span>
+        {% endif %}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="cat-user-panel" class="hidden absolute right-0 top-full mt-1 w-52 bg-white rounded-lg border border-gray-200 shadow-xl z-50 py-1 text-sm">

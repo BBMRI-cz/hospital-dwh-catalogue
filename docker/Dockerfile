@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     libldap2-dev \
     libsasl2-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
@@ -24,6 +25,23 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy project files
 COPY . /app/
+
+# Install Tailwind CSS standalone CLI (no Node.js required) and pre-build CSS.
+# TARGETARCH is set automatically by Docker BuildKit for multi-platform builds.
+ARG TAILWIND_VERSION=v3.4.17
+ARG TARGETARCH
+RUN ARCH="${TARGETARCH:-amd64}"; \
+    if [ "$ARCH" = "arm64" ]; then BIN="tailwindcss-linux-arm64"; \
+    else BIN="tailwindcss-linux-x64"; fi && \
+    curl -fsSL "https://github.com/tailwindlabs/tailwindcss/releases/download/${TAILWIND_VERSION}/${BIN}" \
+         -o /usr/local/bin/tailwindcss \
+    && chmod +x /usr/local/bin/tailwindcss
+
+RUN tailwindcss \
+    -c /app/tailwind.config.js \
+    -i /app/frontend/static/css/tailwind.input.css \
+    -o /app/frontend/static/css/tailwind.css \
+    --minify
 
 EXPOSE 8000
 

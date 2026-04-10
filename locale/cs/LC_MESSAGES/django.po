@@ -1,12 +1,12 @@
 # Czech translation for Hospital DWH Catalogue
 # Copyright (C) 2026
 # This file is distributed under the same license as the catalogue package.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-28 20:17+0100\n"
+"POT-Creation-Date: 2026-04-10 22:43+0200\n"
 "PO-Revision-Date: 2026-01-02 12:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: Czech\n"
@@ -16,127 +16,506 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: catalogue/settings/base.py:233
+#: catalogue/settings/base.py:85
 msgid "Czech"
 msgstr "Čeština"
 
-#: catalogue/settings/base.py:234
+#: catalogue/settings/base.py:86
 msgid "English"
 msgstr "Angličtina"
+
+#: fair_genomes/admin.py:67 fair_genomes/models.py:137
+msgid "MOLGENIS table"
+msgstr ""
+
+#: fair_genomes/admin.py:68 fair_genomes/models.py:138
+#: fair_genomes/models.py:191
+msgid "MOLGENIS table name, e.g. \"sequencing\""
+msgstr "Název tabulky v MOLGENIS, např. \"sequencing\""
+
+#: fair_genomes/admin.py:80 fair_genomes/models.py:142
+msgid "MOLGENIS column"
+msgstr ""
+
+#: fair_genomes/admin.py:81
+msgid "Column name within the table."
+msgstr ""
+
+#: fair_genomes/admin.py:145
+msgid "Only superusers can trigger a full sync."
+msgstr ""
+
+#: fair_genomes/admin.py:165
+#, python-format
+msgid "Full sync completed. %(summary)s"
+msgstr ""
+
+#: fair_genomes/admin.py:171
+#, python-format
+msgid "Full sync failed: %(error)s"
+msgstr ""
+
+#: fair_genomes/admin.py:179
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:4
+msgid "Full Sync (RDF + Stats)"
+msgstr ""
+
+#: fair_genomes/admin.py:182
+msgid "Sync selected stat aggregations now"
+msgstr ""
+
+#: fair_genomes/admin.py:189
+msgid "FAIR_GENOMES_API_URL is not configured."
+msgstr ""
+
+#: fair_genomes/admin.py:204
+#, python-format
+msgid "Synced %(ok)d stats, %(fail)d failed."
+msgstr ""
 
 #: fair_genomes/apps.py:10
 msgid "Fair Genomes Integration"
 msgstr "Integrace Fair Genomes"
 
-#: fair_genomes/models.py:49 shared/abstract_models.py:116
+#: fair_genomes/models.py:47 shared/abstract_models.py:116
 #: shared/abstract_models.py:319 warehouse/models.py:51
 msgid "Contact Point"
 msgstr "Kontaktní bod"
 
-#: fair_genomes/models.py:50 warehouse/models.py:52
+#: fair_genomes/models.py:48 warehouse/models.py:52
 msgid "Contact Points"
 msgstr "Kontaktní body"
 
-#: fair_genomes/models.py:64 warehouse/models.py:66
+#: fair_genomes/models.py:62 warehouse/models.py:66
 msgid "Agent"
 msgstr "Agent"
 
-#: fair_genomes/models.py:65 warehouse/models.py:67
+#: fair_genomes/models.py:63 warehouse/models.py:67
 msgid "Agents"
 msgstr "Agenti"
 
-#: fair_genomes/models.py:79 shared/abstract_models.py:334
+#: fair_genomes/models.py:77 shared/abstract_models.py:334
 #: warehouse/models.py:81
 msgid "Catalog"
 msgstr "Katalog"
 
-#: fair_genomes/models.py:80 warehouse/models.py:82
+#: fair_genomes/models.py:78 warehouse/models.py:82
 msgid "Catalogs"
 msgstr "Katalogy"
 
-#: fair_genomes/models.py:99 shared/abstract_models.py:467
-#: ticketing/models.py:125 warehouse/models.py:101
+#: fair_genomes/models.py:97 shared/abstract_models.py:467
+#: ticketing/models.py:135 warehouse/models.py:101
 msgid "Dataset"
 msgstr "Datová sada"
 
-#: fair_genomes/models.py:100 warehouse/models.py:102
-#: warehouse/templates/catalogue/components/_stats_bar.html:6
+#: fair_genomes/models.py:98
+#: frontend/templates/catalogue/components/_stats_bar.html:6
+#: warehouse/models.py:102
 msgid "Datasets"
 msgstr "Datové sady"
 
-#: fair_genomes/models.py:115 shared/abstract_models.py:578
-#: warehouse/models.py:132
-#: warehouse/templates/catalogue/distribution_detail.html:4
+#: fair_genomes/models.py:113 fair_genomes/models.py:132
+#: fair_genomes/models.py:201
+#: frontend/templates/catalogue/distribution_detail.html:4
+#: shared/abstract_models.py:578 warehouse/models.py:132
 msgid "Distribution"
 msgstr "Distribuce"
 
-#: fair_genomes/models.py:116 warehouse/models.py:133
-#: warehouse/templates/catalogue/components/_stats_bar.html:10
+#: fair_genomes/models.py:114
+#: frontend/templates/catalogue/components/_stats_bar.html:10
+#: warehouse/models.py:133
 msgid "Distributions"
 msgstr "Distribuce"
 
-#: fair_genomes/models.py:132 shared/abstract_models.py:634
-#: warehouse/models.py:152
-msgid "Table"
-msgstr "Tabulka"
+#: fair_genomes/models.py:133
+msgid "DCAT Distribution whose detail page should show this chart."
+msgstr ""
 
-#: fair_genomes/models.py:133 warehouse/models.py:153
-msgid "Tables"
-msgstr "Tabulky"
+#: fair_genomes/models.py:143
+#, fuzzy
+#| msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
+msgid "Column name within the table, e.g. \"sequencinginstrumentmodel\""
+msgstr "Nekvalifikovaný název sloupce, např. \"sequencinginstrumentmodel\""
 
-#: fair_genomes/models.py:150 warehouse/models.py:213
-#: warehouse/templates/catalogue/index.html:56
-msgid "Column"
-msgstr "Sloupec"
+#: fair_genomes/models.py:149
+#, fuzzy
+#| msgid "Display Order"
+msgid "Display label"
+msgstr "Pořadí zobrazení"
 
-#: fair_genomes/models.py:151 warehouse/models.py:214
-#: warehouse/templates/catalogue/components/_table_list.html:37
-msgid "Columns"
-msgstr "Sloupce"
+#: fair_genomes/models.py:150
+msgid "Optional label for the chart. If blank, \"table.column\" is used."
+msgstr ""
 
-#: fair_genomes/models.py:168
+#: fair_genomes/models.py:154
+msgid "Sort order"
+msgstr ""
+
+#: fair_genomes/models.py:155
+msgid "Lower numbers are shown first on the distribution page."
+msgstr ""
+
+#: fair_genomes/models.py:159
+msgid "Active"
+msgstr "Aktivní"
+
+#: fair_genomes/models.py:160
+msgid "Inactive definitions are not synced or displayed."
+msgstr ""
+
+#: fair_genomes/models.py:166
+#, fuzzy
+#| msgid "PK Definition"
+msgid "Stat Definition"
+msgstr "Definice PK"
+
+#: fair_genomes/models.py:167
+#, fuzzy
+#| msgid "PK Definition"
+msgid "Stat Definitions"
+msgstr "Definice PK"
+
+#: fair_genomes/models.py:190
 msgid "Table name"
 msgstr "Název tabulky"
 
-#: fair_genomes/models.py:169
-msgid "MOLGENIS table name, e.g. \"sequencing\""
-msgstr "Název tabulky v MOLGENIS, např. \"sequencing\""
-
-#: fair_genomes/models.py:173
+#: fair_genomes/models.py:195
 msgid "Column name"
 msgstr "Název sloupce"
 
-#: fair_genomes/models.py:174
+#: fair_genomes/models.py:196
 msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
 msgstr "Nekvalifikovaný název sloupce, např. \"sequencinginstrumentmodel\""
 
-#: fair_genomes/models.py:178
-msgid "Filter value"
-msgstr "Hodnota filtru"
+#: fair_genomes/models.py:202
+msgid "JSON object mapping each distinct value to its record count"
+msgstr ""
 
-#: fair_genomes/models.py:179
-msgid "The value that was counted, e.g. \"MiSeq\""
-msgstr "Počíaná hodnota, např. \"MiSeq\""
-
-#: fair_genomes/models.py:184
-msgid "Count"
-msgstr "Počet"
-
-#: fair_genomes/models.py:185
-msgid "Number of records matching the filter; null means not yet synced"
-msgstr "Počet záznamů odpovídajících filtru; null znamená dosud nesynchronizováno"
-
-#: fair_genomes/models.py:190
+#: fair_genomes/models.py:207
 msgid "Last synced"
 msgstr "Naposledy synchronizováno"
 
-#: fair_genomes/models.py:196
+#: fair_genomes/models.py:213
 msgid "Stat Result"
 msgstr "Výsledek statistiky"
 
-#: fair_genomes/models.py:197
+#: fair_genomes/models.py:214
 msgid "Stat Results"
 msgstr "Výsledky statistik"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html:9
+msgid "Full Resync (RDF + Stats)"
+msgstr ""
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:8
+msgid ""
+"This will re-sync all RDF metadata from the FAIR Data Point and re-run all "
+"active stat aggregations from MOLGENIS GraphQL."
+msgstr ""
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:9
+msgid ""
+"This may take a few seconds depending on the number of datasets and stat "
+"definitions."
+msgstr ""
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:13
+msgid "Run Full Sync"
+msgstr ""
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:14
+msgid "Cancel"
+msgstr ""
+
+#: frontend/apps.py:8
+#, fuzzy
+#| msgid "Catalogue"
+msgid "Catalogue Frontend"
+msgstr "Katalog"
+
+#: frontend/templates/404.html:3 frontend/templates/404.html:13
+msgid "Page Not Found"
+msgstr "Stránka nenalezena"
+
+#: frontend/templates/404.html:18
+msgid "The page you are looking for does not exist or has been moved."
+msgstr "Stránka, kterou hledáte, neexistuje nebo byla přesunuta."
+
+#: frontend/templates/base.html:6 frontend/templates/base_minimal.html:6
+#: frontend/templates/catalogue/components/_header.html:7
+msgid "Data Catalogue"
+msgstr "Katalog Metadat"
+
+#: frontend/templates/catalogue/base_catalogue.html:9
+#: frontend/templates/catalogue/components/_distribution_card.html:34
+#: frontend/templates/catalogue/index.html:89
+#: frontend/templates/includes/_cart_add_btn.html:21
+#: frontend/templates/includes/_cart_add_btn.html:23
+#: frontend/templates/includes/_cart_add_btn.html:36
+msgid "Add to cart"
+msgstr "Přidat do košíku"
+
+#: frontend/templates/catalogue/base_catalogue.html:10
+#: frontend/templates/catalogue/components/_distribution_card.html:34
+#: frontend/templates/catalogue/index.html:89
+#: frontend/templates/includes/_cart_add_btn.html:22
+#: frontend/templates/includes/_cart_add_btn.html:23
+#: frontend/templates/includes/_cart_add_btn.html:30
+msgid "Remove from cart"
+msgstr "Odebrat z košíku"
+
+#: frontend/templates/catalogue/components/_distribution_card.html:50
+#: frontend/templates/catalogue/index.html:100
+msgid "View full detail"
+msgstr "Zobrazit celý detail"
+
+#: frontend/templates/catalogue/components/_header.html:18
+msgid "View cart"
+msgstr "Zobrazit košík"
+
+#: frontend/templates/catalogue/components/_header.html:54
+msgid "Admin"
+msgstr "Admin"
+
+#: frontend/templates/catalogue/components/_header.html:66
+msgid "Admin Panel"
+msgstr "Administrační panel"
+
+#: frontend/templates/catalogue/components/_header.html:70
+msgid "Logs"
+msgstr "Logy"
+
+#: frontend/templates/catalogue/components/_header.html:76
+msgid "Request history"
+msgstr "Historie žádostí"
+
+#: frontend/templates/catalogue/components/_header.html:83
+msgid "Sign out"
+msgstr "Odhlásit se"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:11
+#: frontend/templates/catalogue/components/_sidebar_filters.html:33
+#: frontend/templates/catalogue/index.html:50
+msgid "Search"
+msgstr "Vyhledávání"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:12
+msgid "Datasets, distributions…"
+msgstr "Datové sady, distribuce…"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+#: shared/abstract_models.py:287
+msgid "Keywords"
+msgstr "Klíčová slova"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+#: frontend/templates/catalogue/index.html:52 shared/abstract_models.py:379
+msgid "Custodian"
+msgstr "Správce"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+#: frontend/templates/catalogue/index.html:53 shared/abstract_models.py:357
+msgid "Health Category"
+msgstr "Zdravotní kategorie"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+#: frontend/templates/catalogue/index.html:54 shared/abstract_models.py:300
+msgid "Source"
+msgstr "Zdroj"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+#: frontend/templates/catalogue/index.html:55 shared/abstract_models.py:250
+msgid "Theme"
+msgstr "Téma"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:16
+msgid "Distribution Columns"
+msgstr "Sloupce distribuce"
+
+#: frontend/templates/catalogue/components/_sidebar_filters.html:40
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:527
+#: venv/Lib/site-packages/django/forms/widgets.py:527
+msgid "Clear"
+msgstr "Vymazat"
+
+#: frontend/templates/catalogue/components/_stat_charts.html:12
+msgid "Value Distributions"
+msgstr "Rozdělení hodnot"
+
+#: frontend/templates/catalogue/components/_stat_charts.html:50
+msgid "total"
+msgstr "celkem"
+
+#: frontend/templates/catalogue/components/_table_list.html:15
+msgid "Search tables…"
+msgstr "Hledat ve sloupcích…"
+
+#: frontend/templates/catalogue/components/_table_list.html:29
+#: warehouse/models.py:214
+msgid "Columns"
+msgstr "Sloupce"
+
+#: frontend/templates/catalogue/components/_table_list.html:58
+msgid "No tables available."
+msgstr "Žádné sloupce k dispozici."
+
+#: frontend/templates/catalogue/components/_table_modal.html:59
+msgid "Search columns…"
+msgstr "Hledat ve sloupcích…"
+
+#: frontend/templates/catalogue/components/_table_modal.html:100
+msgid "View"
+msgstr "Zobrazit"
+
+#: frontend/templates/catalogue/components/_table_modal.html:126
+#: frontend/templates/catalogue/components/_table_modal.html:133
+msgid "No columns available."
+msgstr "Žádné sloupce k dispozici."
+
+#: frontend/templates/catalogue/dataset_detail.html:13
+#: frontend/templates/catalogue/distribution_detail.html:19
+#: frontend/templates/catalogue/index.html:4
+#: frontend/templates/catalogue/index.html:26
+#: ticketing/templates/ticketing/cart.html:10
+#: ticketing/templates/ticketing/history.html:10
+msgid "Catalogue"
+msgstr "Katalog"
+
+#: frontend/templates/catalogue/dataset_detail.html:40
+msgid "JSON-LD"
+msgstr "JSON-LD"
+
+#: frontend/templates/catalogue/dataset_detail.html:60
+msgid "RDF"
+msgstr "RDF"
+
+#: frontend/templates/catalogue/dataset_detail.html:75
+msgid "Dataset Metadata"
+msgstr "Metadata datové sady"
+
+#: frontend/templates/catalogue/dataset_detail.html:105
+msgid "distribution(s)"
+msgstr "distribuce"
+
+#: frontend/templates/catalogue/distribution_detail.html:37
+msgid "Adds the entire dataset"
+msgstr "Přidá celou datovou sadu"
+
+#: frontend/templates/catalogue/distribution_detail.html:48
+msgid "Distribution Metadata"
+msgstr "Metadata distribuce"
+
+#: frontend/templates/catalogue/index.html:26
+msgid "Data"
+msgstr "Metadatový"
+
+#: frontend/templates/catalogue/index.html:29
+msgid ""
+"Evidence and description of data sources of Masaryk Oncology Institute for "
+"secondary use. Each record is based on the Health DCAT-AP schema — click"
+msgstr ""
+"Přehled a popis datových zdrojů Masarykova onkologického ústavu pro "
+"sekundární využití. Každý záznam vychází ze schématu Health DCAT-AP — "
+"klikněte"
+
+#: frontend/templates/catalogue/index.html:29
+msgid "to display the field definition and ontology link."
+msgstr "pro zobrazení definice pole a odkazu na ontologii."
+
+#: frontend/templates/catalogue/index.html:39
+msgid "datasets matching filters"
+msgstr "datových sad odpovídá filtrům"
+
+#: frontend/templates/catalogue/index.html:46
+msgid "page"
+msgstr "stránka"
+
+#: frontend/templates/catalogue/index.html:46
+msgid "of"
+msgstr "z"
+
+#: frontend/templates/catalogue/index.html:51
+msgid "Keyword"
+msgstr "Klíčové slovo"
+
+#: frontend/templates/catalogue/index.html:56 warehouse/models.py:213
+msgid "Column"
+msgstr "Sloupec"
+
+#: frontend/templates/catalogue/index.html:159
+#: frontend/templates/catalogue/index.html:174
+msgid "No datasets found"
+msgstr "Žádné datové sady nenalezeny"
+
+#: frontend/templates/catalogue/index.html:160
+msgid "Try a different query or adjust the sidebar filters."
+msgstr "Zkuste jiný dotaz nebo upravte filtry v postranním panelu."
+
+#: frontend/templates/catalogue/index.html:175
+msgid "Clear all filters"
+msgstr "Vymazat všechny filtry"
+
+#: frontend/templates/includes/_filter_group.html:6
+msgid "Filter…"
+msgstr "Filtrovat…"
+
+#: frontend/templates/includes/_filter_group.html:18
+msgid "No options"
+msgstr "Žádné možnosti"
+
+#: frontend/templates/includes/_toast_item.html:28
+msgid "Dismiss"
+msgstr "Zavřít"
+
+#: frontend/templates/includes/_toast_messages.html:6
+msgid "Error"
+msgstr "Chyba"
+
+#: frontend/templates/includes/_toast_messages.html:11
+msgid "Warning"
+msgstr "Upozornění"
+
+#: frontend/templates/includes/_toast_messages.html:16
+msgid "Success"
+msgstr "Úspěch"
+
+#: frontend/templates/includes/schema_modal.html:11
+msgid "DCAT-AP term"
+msgstr "Termín DCAT-AP"
+
+#: frontend/templates/includes/schema_modal.html:30
+#: shared/abstract_models.py:106 shared/abstract_models.py:153
+#: shared/abstract_models.py:225 shared/abstract_models.py:479
+#: shared/abstract_models.py:596 shared/abstract_models.py:643
+#: ticketing/models.py:60 ticketing/templates/ticketing/_ticket_row.html:23
+msgid "Description"
+msgstr "Popis"
+
+#: frontend/templates/registration/login.html:4
+msgid "Login"
+msgstr "Přihlášení"
+
+#: frontend/templates/registration/login.html:14
+#, fuzzy
+#| msgid "Data Catalogue"
+msgid "Metadata Catalogue"
+msgstr "Katalog Metadat"
+
+#: frontend/templates/registration/login.html:23
+msgid "Invalid username or password. Please try again."
+msgstr "Neplatné uživatelské jméno nebo heslo. Zkuste to prosím znovu."
+
+#: frontend/templates/registration/login.html:32
+msgid "Username"
+msgstr "Uživatelské jméno"
+
+#: frontend/templates/registration/login.html:39
+msgid "Password"
+msgstr "Heslo"
+
+#: frontend/templates/registration/login.html:45
+msgid "Sign in"
+msgstr "Přihlásit se"
 
 #: schema_registry/apps.py:8
 msgid "Schema Registry"
@@ -178,15 +557,6 @@ msgstr "Název"
 #: shared/abstract_models.py:101
 msgid "Unique identifier / name for this agent"
 msgstr "Jedinečný identifikátor / jméno tohoto agenta"
-
-#: shared/abstract_models.py:106 shared/abstract_models.py:153
-#: shared/abstract_models.py:225 shared/abstract_models.py:479
-#: shared/abstract_models.py:596 shared/abstract_models.py:643
-#: ticketing/models.py:50 ticketing/templates/ticketing/_ticket_row.html:20
-#: warehouse/templates/catalogue/components/_dcat_tooltip.html:28
-#: warehouse/templates/includes/schema_modal.html:29
-msgid "Description"
-msgstr "Popis"
 
 #: shared/abstract_models.py:107
 msgid "dct:description — description of the agent's activities (0..*)"
@@ -263,12 +633,6 @@ msgid ""
 "type/STATISTICAL (mandatory per HealthDCAT-AP v6, 1..*)"
 msgstr ""
 
-#: shared/abstract_models.py:250
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#: warehouse/templates/catalogue/index.html:55
-msgid "Theme"
-msgstr "Téma"
-
 #: shared/abstract_models.py:252
 msgid ""
 "dcat:theme — must be a URI/IRI from the EU data-theme vocabulary; mandatory "
@@ -300,22 +664,11 @@ msgstr "Upraveno"
 msgid "dct:modified — date of last modification"
 msgstr "dct:modified — datum poslední úpravy"
 
-#: shared/abstract_models.py:287
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-msgid "Keywords"
-msgstr "Klíčová slova"
-
 #: shared/abstract_models.py:289
 msgid ""
 "dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, "
 "1..*)"
 msgstr "dcat:keyword — klíčová slova oddělená čárkou"
-
-#: shared/abstract_models.py:300
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#: warehouse/templates/catalogue/index.html:54
-msgid "Source"
-msgstr "Zdroj"
 
 #: shared/abstract_models.py:301
 msgid "dct:source — source dataset this one is derived from"
@@ -357,12 +710,6 @@ msgid ""
 "v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)"
 msgstr "dct:applicableLegislation (povinné dle HealthDCAT-AP v6)"
 
-#: shared/abstract_models.py:357
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#: warehouse/templates/catalogue/index.html:53
-msgid "Health Category"
-msgstr "Zdravotní kategorie"
-
 #: shared/abstract_models.py:359
 msgid ""
 "healthdcat:healthCategory — must be a URI/IRI (mandatory per HealthDCAT-AP "
@@ -380,12 +727,6 @@ msgid ""
 msgstr ""
 "healthdcat:hdab — Orgán pro přístup ke zdravotním datům zodpovědný za tento "
 "soubor dat (povinné dle HealthDCAT-AP v6)"
-
-#: shared/abstract_models.py:379
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-#: warehouse/templates/catalogue/index.html:52
-msgid "Custodian"
-msgstr "Správce"
 
 #: shared/abstract_models.py:381
 msgid ""
@@ -478,6 +819,8 @@ msgid "Distribution this table belongs to"
 msgstr "Distribuce, ke které tato tabulka patří"
 
 #: shared/abstract_models.py:583
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2642
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2642
 msgid "URL"
 msgstr "URL"
 
@@ -496,6 +839,10 @@ msgstr "dct:description"
 #: shared/abstract_models.py:626
 msgid "csvw:name — unique column identifier"
 msgstr "csvw:name — jedinečný identifikátor sloupce"
+
+#: shared/abstract_models.py:634 warehouse/models.py:152
+msgid "Table"
+msgstr "Tabulka"
 
 #: shared/abstract_models.py:635
 msgid "Table this column belongs to"
@@ -531,170 +878,172 @@ msgstr "%(field)s je povinné (HealthDCAT-AP v6)."
 msgid "Ticketing"
 msgstr "Ticketing"
 
-#: ticketing/models.py:28
+#: ticketing/models.py:29
 msgid "Draft"
 msgstr "Koncept"
 
-#: ticketing/models.py:29
+#: ticketing/models.py:30
 msgid "Submitted"
 msgstr "Odesláno"
 
-#: ticketing/models.py:30
+#: ticketing/models.py:31
 msgid "Confirmed by Alvao"
 msgstr "Potvrzeno Alvao"
 
-#: ticketing/models.py:31
+#: ticketing/models.py:32
 msgid "Submission Failed"
 msgstr "Odeslání se nezdařilo"
 
-#: ticketing/models.py:35
+#: ticketing/models.py:41
+#, fuzzy
+#| msgid "Requester Name"
+msgid "Requester"
+msgstr "Jméno žadatele"
+
+#: ticketing/models.py:45
 msgid "Requester Email"
 msgstr "Email žadatele"
 
-#: ticketing/models.py:35
+#: ticketing/models.py:45
 msgid "Email of the person requesting data access"
 msgstr "Email osoby žádající o přístup k datům"
 
-#: ticketing/models.py:40
+#: ticketing/models.py:50
 msgid "Requester Name"
 msgstr "Jméno žadatele"
 
-#: ticketing/models.py:41
+#: ticketing/models.py:51
 msgid "Full name of the requester"
 msgstr "Celé jméno žadatele"
 
-#: ticketing/models.py:46 ticketing/templates/ticketing/history.html:29
+#: ticketing/models.py:56 ticketing/templates/ticketing/history.html:29
 msgid "Subject"
 msgstr "Předmět"
 
-#: ticketing/models.py:46
+#: ticketing/models.py:56
 msgid "Ticket subject/title"
 msgstr "Předmět/název ticketu"
 
-#: ticketing/models.py:51
+#: ticketing/models.py:61
 msgid "Additional details or notes for the request"
 msgstr "Další podrobnosti nebo poznámky k požadavku"
 
-#: ticketing/models.py:56
+#: ticketing/models.py:66
 msgid "Status"
 msgstr "Stav"
 
-#: ticketing/models.py:64
+#: ticketing/models.py:74
 msgid "Alvao Ticket ID"
 msgstr "ID ticketu v Alvao"
 
-#: ticketing/models.py:65
+#: ticketing/models.py:75
 msgid "Ticket ID returned by Alvao after submission"
 msgstr "ID ticketu vrácené Alvao po odeslání"
 
-#: ticketing/models.py:70
+#: ticketing/models.py:80
 msgid "Alvao Response"
 msgstr "Odpověď Alvao"
 
-#: ticketing/models.py:71
+#: ticketing/models.py:81
 msgid "Full response from Alvao API"
 msgstr "Úplná odpověď z API Alvao"
 
-#: ticketing/models.py:80
+#: ticketing/models.py:90
 msgid "Session Key"
 msgstr "Klíč relace"
 
-#: ticketing/models.py:81
+#: ticketing/models.py:91
 msgid "Session key for tracking cart before submission"
 msgstr "Klíč relace pro sledování košíku před odesláním"
 
-#: ticketing/models.py:85
+#: ticketing/models.py:95
 msgid "Created At"
 msgstr "Vytvořeno"
 
-#: ticketing/models.py:86
+#: ticketing/models.py:96
 msgid "Updated At"
 msgstr "Aktualizováno"
 
-#: ticketing/models.py:87
+#: ticketing/models.py:97
 msgid "Submitted At"
 msgstr "Odesláno"
 
-#: ticketing/models.py:91 ticketing/models.py:133
+#: ticketing/models.py:101 ticketing/models.py:143
 msgid "Ticket Request"
 msgstr "Požadavek ticketu"
 
-#: ticketing/models.py:92
+#: ticketing/models.py:102
 msgid "Ticket Requests"
 msgstr "Požadavky ticketů"
 
-#: ticketing/models.py:126
+#: ticketing/models.py:136
 msgid "Data Class"
 msgstr "Datová třída"
 
-#: ticketing/models.py:127
+#: ticketing/models.py:137
 msgid "Database Table"
 msgstr "Databázová tabulka"
 
-#: ticketing/models.py:137
+#: ticketing/models.py:147
 msgid "Item Type"
 msgstr "Typ položky"
 
-#: ticketing/models.py:140
+#: ticketing/models.py:150
 msgid "Item ID"
 msgstr "ID položky"
 
-#: ticketing/models.py:140
+#: ticketing/models.py:150
 msgid "Primary key of the requested item"
 msgstr "Primární klíč požadované položky"
 
-#: ticketing/models.py:144
+#: ticketing/models.py:154
 msgid "Item Name"
 msgstr "Název položky"
 
-#: ticketing/models.py:145
+#: ticketing/models.py:155
 msgid "Display name of the requested item"
 msgstr "Zobrazovaný název požadované položky"
 
-#: ticketing/models.py:147
+#: ticketing/models.py:157
 msgid "Item Description"
 msgstr "Popis položky"
 
-#: ticketing/models.py:153
+#: ticketing/models.py:163
 msgid "Parent Dataset"
 msgstr "Nadřazená datová sada"
 
-#: ticketing/models.py:154
+#: ticketing/models.py:164
 msgid "Parent dataset ID for dataclasses and tables"
 msgstr "ID nadřazené datové sady pro datové třídy a tabulky"
 
-#: ticketing/models.py:157
+#: ticketing/models.py:167
 msgid "Added At"
 msgstr "Přidáno"
 
-#: ticketing/models.py:161
+#: ticketing/models.py:171
 msgid "Ticket Request Item"
 msgstr "Položka požadavku"
 
-#: ticketing/models.py:162
+#: ticketing/models.py:172
 msgid "Ticket Request Items"
 msgstr "Položky požadavku"
 
-#: ticketing/templates/ticketing/_ticket_row.html:23
+#: ticketing/services/ticketing_service.py:42
+#: ticketing/services/ticketing_service.py:44
+msgid "Data access request"
+msgstr "Žádost o přístup k datům"
+
+#: ticketing/templates/ticketing/_ticket_row.html:26
 msgid "Requested datasets"
 msgstr "Požadované datové sady"
 
-#: ticketing/templates/ticketing/_ticket_row.html:39
+#: ticketing/templates/ticketing/_ticket_row.html:42
 msgid "No items"
 msgstr "Žádné položky"
 
 #: ticketing/templates/ticketing/cart.html:4
 msgid "Cart"
 msgstr "Košík"
-
-#: ticketing/templates/ticketing/cart.html:10
-#: ticketing/templates/ticketing/history.html:10
-#: warehouse/templates/catalogue/dataset_detail.html:13
-#: warehouse/templates/catalogue/distribution_detail.html:13
-#: warehouse/templates/catalogue/index.html:4
-#: warehouse/templates/catalogue/index.html:26
-msgid "Catalogue"
-msgstr "Katalog"
 
 #: ticketing/templates/ticketing/cart.html:11
 msgid "Data Request Cart"
@@ -716,7 +1065,7 @@ msgstr "Odebrat"
 msgid "Submit request"
 msgstr "Odeslat žádost"
 
-#: ticketing/templates/ticketing/cart.html:72
+#: ticketing/templates/ticketing/cart.html:71
 msgid "Submit to Alvao"
 msgstr "Odeslat do Alvao"
 
@@ -749,34 +1098,1864 @@ msgstr "Zde se zobrazí vaše odeslané žádosti o přístup k datům."
 msgid "Go to catalogue"
 msgstr "Přejít do katalogu"
 
-#: ticketing/views.py:34
+#: ticketing/views.py:27
 msgid "Request description"
 msgstr "Popis žádosti"
 
-#: ticketing/views.py:39
+#: ticketing/views.py:32
 msgid "Describe your request…"
 msgstr "Popište vaši žádost…"
 
-#: ticketing/views.py:108 ticketing/views.py:110
-msgid "Data access request"
-msgstr "Žádost o přístup k datům"
-
-#: ticketing/views.py:157
+#: ticketing/views.py:114
 #, python-format
 msgid "Your request has been submitted — ticket #%(ticket_id)s"
 msgstr "Váš požadavek byl odeslán — ticket #%(ticket_id)s"
 
-#: ticketing/views.py:161
+#: ticketing/views.py:118
 msgid "Your request has been submitted."
 msgstr "Váš požadavek byl odeslán."
 
-#: ticketing/views.py:171
+#: ticketing/views.py:123
 msgid ""
 "Submission to the ticketing system failed. Your request has been saved and "
 "our team will follow up."
 msgstr ""
 "Odeslání do ticketovacího systému se nezdařilo. Váš požadavek byl uložen a "
 "náš tým se vám ozve."
+
+#: venv/Lib/python3.12/site-packages/click/_termui_impl.py:613
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr "{editor}: Úpravy selhaly"
+
+#: venv/Lib/python3.12/site-packages/click/_termui_impl.py:617
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr "{editor}: Úpravy selhaly: {e}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1114
+#: venv/Lib/python3.12/site-packages/click/core.py:1151
+#, python-brace-format
+msgid "{text} {deprecated_message}"
+msgstr "{text} {deprecated_message}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1170
+msgid "Options"
+msgstr "Možnosti"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1245
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1264
+msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgstr "DeprecationWarning: Příkaz {name!r} je zastaralý.{extra_message}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1448
+msgid "Aborted!"
+msgstr "Přerušeno!"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1822
+msgid "Commands"
+msgstr "Příkazy"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1853
+msgid "Missing command."
+msgstr "Chybí příkaz."
+
+#: venv/Lib/python3.12/site-packages/click/core.py:1931
+msgid "No such command {name!r}."
+msgstr "Příkaz {name!r} neexistuje."
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2355
+msgid "Value must be an iterable."
+msgstr "Hodnota musí být iterovatelná."
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2378
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/click/core.py:2567
+#, fuzzy
+#| msgid ""
+#| "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgstr "DeprecationWarning: Příkaz {name!r} je zastaralý.{extra_message}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3015
+#, python-brace-format
+msgid "env var: {var}"
+msgstr "proměnná prostředí: {var}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3018
+#, python-brace-format
+msgid "default: {default}"
+msgstr "výchozí: {default}"
+
+#: venv/Lib/python3.12/site-packages/click/core.py:3082
+msgid "(dynamic)"
+msgstr "(dynamické)"
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:465
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr "%(prog)s, verze %(version)s"
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:522
+msgid "Show the version and exit."
+msgstr "Zobrazit verzi a ukončit."
+
+#: venv/Lib/python3.12/site-packages/click/decorators.py:548
+msgid "Show this message and exit."
+msgstr "Zobrazit tuto zprávu a ukončit."
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:50
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:89
+#, python-brace-format
+msgid "Error: {message}"
+msgstr "Chyba: {message}"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:81
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr "Zkuste '{command} {option}' pro nápovědu."
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:130
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr "Neplatná hodnota: {message}"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:132
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr "Neplatná hodnota pro {param_hint}: {message}"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:190
+msgid "Missing argument"
+msgstr "Chybí argument"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:192
+msgid "Missing option"
+msgstr "Chybí volba"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:194
+msgid "Missing parameter"
+msgstr "Chybí parametr"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:196
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr "Chybí {param_type}"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:203
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr "Chybí parametr: {param_name}"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:223
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr "Volba {name} neexistuje."
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:235
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:282
+msgid "unknown error"
+msgstr "neznámá chyba"
+
+#: venv/Lib/python3.12/site-packages/click/exceptions.py:289
+msgid "Could not open file {filename!r}: {message}"
+msgstr "Nelze otevřít soubor {filename!r}: {message}"
+
+#: venv/Lib/python3.12/site-packages/click/formatting.py:156
+msgid "Usage:"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:199
+msgid "Argument {name!r} takes {nargs} values."
+msgstr "Argument {name!r} přijímá {nargs} hodnot."
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:381
+msgid "Option {name!r} does not take a value."
+msgstr "Volba {name!r} nepřijímá hodnotu."
+
+#: venv/Lib/python3.12/site-packages/click/parser.py:444
+#, fuzzy
+#| msgid "Option {name!r} does not take a value."
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] "Volba {name!r} nepřijímá hodnotu."
+msgstr[1] "Volba {name!r} nepřijímá hodnotu."
+msgstr[2] "Volba {name!r} nepřijímá hodnotu."
+
+#: venv/Lib/python3.12/site-packages/click/shell_completion.py:332
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr "Doplňování pro shell není podporováno pro verze Bash starší než 4.4."
+
+#: venv/Lib/python3.12/site-packages/click/shell_completion.py:339
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+"Nepodařilo se zjistit verzi Bash, doplňování pro shell není podporováno."
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:165
+msgid "Repeat for confirmation"
+msgstr "Zopakujte pro potvrzení"
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:181
+msgid "Error: The value you entered was invalid."
+msgstr "Chyba: Zadaná hodnota je neplatná."
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:183
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr "Chyba: {e.message}"
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:194
+msgid "Error: The two entered values do not match."
+msgstr "Chyba: Zadané hodnoty se neshodují."
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:253
+msgid "Error: invalid input"
+msgstr "Chyba: neplatný vstup"
+
+#: venv/Lib/python3.12/site-packages/click/termui.py:872
+msgid "Press any key to continue..."
+msgstr "Stiskněte libovolnou klávesu pro pokračování..."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:332
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/click/types.py:369
+#, fuzzy
+#| msgid "{value!r} is not a valid UUID."
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] "{value!r} není platné UUID."
+msgstr[1] "{value!r} není platné UUID."
+msgstr[2] "{value!r} není platné UUID."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:460
+#, fuzzy
+#| msgid "{value} is not in the range {range}."
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] "{value} není v rozsahu {range}."
+msgstr[1] "{value} není v rozsahu {range}."
+msgstr[2] "{value} není v rozsahu {range}."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:482
+msgid "{value!r} is not a valid {number_type}."
+msgstr "{value!r} není platné číslo typu {number_type}."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:538
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr "{value} není v rozsahu {range}."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:719
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr "{value!r} není platná logická hodnota. Rozpoznané hodnoty: {states}"
+
+#: venv/Lib/python3.12/site-packages/click/types.py:747
+msgid "{value!r} is not a valid UUID."
+msgstr "{value!r} není platné UUID."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:937
+msgid "file"
+msgstr "soubor"
+
+#: venv/Lib/python3.12/site-packages/click/types.py:939
+msgid "directory"
+msgstr "adresář"
+
+#: venv/Lib/python3.12/site-packages/click/types.py:941
+msgid "path"
+msgstr "cesta"
+
+#: venv/Lib/python3.12/site-packages/click/types.py:988
+msgid "{name} {filename!r} does not exist."
+msgstr "{name} {filename!r} neexistuje."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:997
+msgid "{name} {filename!r} is a file."
+msgstr "{name} {filename!r} je soubor."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1005
+msgid "{name} {filename!r} is a directory."
+msgstr "{name} {filename!r} je adresář."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1014
+msgid "{name} {filename!r} is not readable."
+msgstr "{name} {filename!r} není čitelný."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1023
+msgid "{name} {filename!r} is not writable."
+msgstr "{name} {filename!r} není zapisovatelný."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1032
+msgid "{name} {filename!r} is not executable."
+msgstr "{name} {filename!r} není spustitelný."
+
+#: venv/Lib/python3.12/site-packages/click/types.py:1099
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/contrib/messages/apps.py:16
+#: venv/Lib/site-packages/django/contrib/messages/apps.py:16
+msgid "Messages"
+msgstr "Zprávy"
+
+#: venv/Lib/python3.12/site-packages/django/contrib/sitemaps/apps.py:8
+#: venv/Lib/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr "Mapy stránek"
+
+#: venv/Lib/python3.12/site-packages/django/contrib/staticfiles/apps.py:9
+#: venv/Lib/site-packages/django/contrib/staticfiles/apps.py:9
+#, fuzzy
+#| msgid "Stat Result"
+msgid "Static Files"
+msgstr "Výsledek statistiky"
+
+#: venv/Lib/python3.12/site-packages/django/contrib/syndication/apps.py:7
+#: venv/Lib/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr "Syndikace"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:30
+#: venv/Lib/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr "…"
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:32
+#: venv/Lib/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr "Číslo stránky není celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:33
+#: venv/Lib/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr "Číslo stránky je menší než 1"
+
+#: venv/Lib/python3.12/site-packages/django/core/paginator.py:34
+#: venv/Lib/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr "Tato stránka neobsahuje žádné výsledky"
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:22
+#: venv/Lib/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr "Zadejte platnou hodnotu."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:70
+#: venv/Lib/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr "Zadejte platný název domény."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:153
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:775
+#: venv/Lib/site-packages/django/core/validators.py:153
+#: venv/Lib/site-packages/django/forms/fields.py:775
+msgid "Enter a valid URL."
+msgstr "Zadejte platnou URL."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:200
+#: venv/Lib/site-packages/django/core/validators.py:200
+msgid "Enter a valid integer."
+msgstr "Zadejte platné celé číslo."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:211
+#: venv/Lib/site-packages/django/core/validators.py:211
+msgid "Enter a valid email address."
+msgstr "Zadejte platnou e-mailovou adresu."
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:289
+#: venv/Lib/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:297
+#: venv/Lib/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:309
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:318
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:332
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2220
+#: venv/Lib/site-packages/django/core/validators.py:309
+#: venv/Lib/site-packages/django/core/validators.py:318
+#: venv/Lib/site-packages/django/core/validators.py:332
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2220
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr "Zadejte platnou %(protocol)s adresu."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:311
+#: venv/Lib/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr "IPv4"
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:320
+#: venv/Lib/python3.12/site-packages/django/utils/ipv6.py:43
+#: venv/Lib/site-packages/django/core/validators.py:320
+#: venv/Lib/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr "IPv6"
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:334
+#: venv/Lib/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr "IPv4 nebo IPv6"
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:375
+#: venv/Lib/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr "Zadejte pouze číslice oddělené čárkami."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:381
+#: venv/Lib/site-packages/django/core/validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr "Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:416
+#: venv/Lib/site-packages/django/core/validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "Ujistěte se, že tato hodnota je menší nebo rovna %(limit_value)s."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:425
+#: venv/Lib/site-packages/django/core/validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Ujistěte se, že tato hodnota je větší nebo rovna %(limit_value)s."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:434
+#: venv/Lib/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Ujistěte se, že tato hodnota je násobkem kroku %(limit_value)s."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:441
+#: venv/Lib/site-packages/django/core/validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:473
+#: venv/Lib/site-packages/django/core/validators.py:473
+#, fuzzy, python-format
+#| msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+msgstr[1] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+msgstr[2] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:491
+#: venv/Lib/site-packages/django/core/validators.py:491
+#, fuzzy, python-format
+#| msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+msgstr[1] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+msgstr[2] ""
+"Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:514
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:366
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:405
+#: venv/Lib/site-packages/django/core/validators.py:514
+#: venv/Lib/site-packages/django/forms/fields.py:366
+#: venv/Lib/site-packages/django/forms/fields.py:405
+msgid "Enter a number."
+msgstr "Zadejte číslo."
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:516
+#: venv/Lib/site-packages/django/core/validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:521
+#: venv/Lib/site-packages/django/core/validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:526
+#: venv/Lib/site-packages/django/core/validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:597
+#: venv/Lib/site-packages/django/core/validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/core/validators.py:659
+#: venv/Lib/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr "Nulové znaky nejsou povoleny."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/base.py:1600
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:908
+#: venv/Lib/site-packages/django/db/models/base.py:1600
+#: venv/Lib/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr "a"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/base.py:1602
+#: venv/Lib/site-packages/django/db/models/base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "%(model_name)s s těmito hodnotami %(field_labels)s již existuje."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/constraints.py:22
+#: venv/Lib/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr "Omezení „%(name)s“ není splněno."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:134
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr "Hodnota %(value)r není platnou volbou."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:135
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr "Toto pole nesmí obsahovat prázdnou hodnotu."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:136
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr "Toto pole nesmí být prázdné."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:137
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "%(model_name)s s touto hodnotou %(field_label)s již existuje."
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:141
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:180
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr "Pole typu: %(field_type)s"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1162
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr "Hodnota „%(value)s“ musí být True nebo False."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1163
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "Hodnota „%(value)s“ musí být True, False nebo None."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1165
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr "Logická hodnota (True nebo False)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1215
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "Řetězec (až %(max_length)s znaků)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1217
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1217
+msgid "String (unlimited)"
+msgstr "Řetězec (neomezený)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1326
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1326
+msgid "Comma-separated integers"
+msgstr "Celá čísla oddělená čárkami"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1427
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1427
+#, fuzzy, python-format
+#| msgid "“%(value)s” value must be a float."
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr "Hodnota „%(value)s“ musí být číslo s plovoucí desetinnou čárkou."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1566
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1435
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr "Datum (bez času)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1562
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1570
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1575
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr "Datum (s časem)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1702
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr "Hodnota „%(value)s“ musí být desetinné číslo."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1704
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1704
+msgid "Decimal number"
+msgstr "Desetinné číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1864
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1868
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1868
+msgid "Duration"
+msgstr "Trvání"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1920
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1920
+msgid "Email address"
+msgstr "E-mailová adresa"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:1945
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:1945
+msgid "File path"
+msgstr "Cesta k souboru"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2023
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr "Hodnota „%(value)s“ musí být číslo s plovoucí desetinnou čárkou."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2025
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2025
+msgid "Floating point number"
+msgstr "Číslo s plovoucí desetinnou čárkou"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2065
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr "Hodnota „%(value)s“ musí být celé číslo."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2067
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2067
+msgid "Integer"
+msgstr "Celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2163
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr "Velké celé číslo (8 bytů)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2180
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Small integer"
+msgstr "Malé celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2188
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2188
+msgid "IPv4 address"
+msgstr "IPv4 adresa"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2219
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2219
+msgid "IP address"
+msgstr "IP adresa"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2311
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "Hodnota „%(value)s“ musí být None, True nebo False."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2313
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr "Logická hodnota (True, False nebo None)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2364
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2364
+msgid "Positive big integer"
+msgstr "Kladné velké celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2379
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2379
+msgid "Positive integer"
+msgstr "Kladné celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2394
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2394
+msgid "Positive small integer"
+msgstr "Kladné malé celé číslo"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2410
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr "Slug (až %(max_length)s znaků)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2446
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2446
+msgid "Text"
+msgstr "Text"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2526
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2530
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2534
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2534
+msgid "Time"
+msgstr "Čas"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2666
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2666
+msgid "Raw binary data"
+msgstr "Surová binární data"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2731
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr "„%(value)s“ není platné UUID."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/__init__.py:2733
+#: venv/Lib/site-packages/django/db/models/fields/__init__.py:2733
+msgid "Universally unique identifier"
+msgstr "Univerzálně jedinečný identifikátor"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/files.py:244
+#: venv/Lib/site-packages/django/db/models/fields/files.py:244
+msgid "File"
+msgstr "Soubor"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/files.py:420
+#: venv/Lib/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr "Obrázek"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/json.py:24
+#: venv/Lib/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr "JSON objekt"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/json.py:26
+#: venv/Lib/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr "Hodnota musí být platný JSON."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:979
+#: venv/Lib/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr "Instance %(model)s s %(field)s %(value)r není platnou volbou."
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:982
+#: venv/Lib/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr "Cizí klíč (typ určen odkazovaným polem)"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1276
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr "Vztah 1:1"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1333
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr "Vztah %(from)s-%(to)s"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1335
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr "Vztahy %(from)s-%(to)s"
+
+#: venv/Lib/python3.12/site-packages/django/db/models/fields/related.py:1383
+#: venv/Lib/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr "Vztah N:M"
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/Lib/python3.12/site-packages/django/forms/boundfield.py:185
+#: venv/Lib/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ":?.!"
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:95
+#: venv/Lib/site-packages/django/forms/fields.py:95
+msgid "This field is required."
+msgstr "Toto pole je povinné."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:315
+#: venv/Lib/site-packages/django/forms/fields.py:315
+msgid "Enter a whole number."
+msgstr "Zadejte celé číslo."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:486
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1267
+#: venv/Lib/site-packages/django/forms/fields.py:486
+#: venv/Lib/site-packages/django/forms/fields.py:1267
+msgid "Enter a valid date."
+msgstr "Zadejte platné datum."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:509
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1268
+#: venv/Lib/site-packages/django/forms/fields.py:509
+#: venv/Lib/site-packages/django/forms/fields.py:1268
+msgid "Enter a valid time."
+msgstr "Zadejte platný čas."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:536
+#: venv/Lib/site-packages/django/forms/fields.py:536
+msgid "Enter a valid date/time."
+msgstr "Zadejte platné datum a čas."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:570
+#: venv/Lib/site-packages/django/forms/fields.py:570
+msgid "Enter a valid duration."
+msgstr "Zadejte platnou dobu trvání."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:571
+#: venv/Lib/site-packages/django/forms/fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Počet dní musí být mezi {min_days} a {max_days}."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:640
+#: venv/Lib/site-packages/django/forms/fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr "Nebyl odeslán žádný soubor. Zkontrolujte typ kódování formuláře."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:641
+#: venv/Lib/site-packages/django/forms/fields.py:641
+msgid "No file was submitted."
+msgstr "Nebyl odeslán žádný soubor."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:642
+#: venv/Lib/site-packages/django/forms/fields.py:642
+msgid "The submitted file is empty."
+msgstr "Zatím jste neodeslali žádné požadavky."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:644
+#: venv/Lib/site-packages/django/forms/fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:649
+#: venv/Lib/site-packages/django/forms/fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+"Prosím odeslete soubor nebo zaškrtněte políčko pro smazání, ale ne obojí."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:717
+#: venv/Lib/site-packages/django/forms/fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:889
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:975
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1592
+#: venv/Lib/site-packages/django/forms/fields.py:889
+#: venv/Lib/site-packages/django/forms/fields.py:975
+#: venv/Lib/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr "Vyberte platnou možnost. %(value)s není jednou z dostupných možností."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:977
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1096
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1590
+#: venv/Lib/site-packages/django/forms/fields.py:977
+#: venv/Lib/site-packages/django/forms/fields.py:1096
+#: venv/Lib/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr "Zadejte seznam hodnot."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1097
+#: venv/Lib/site-packages/django/forms/fields.py:1097
+msgid "Enter a complete value."
+msgstr "Zadejte úplnou hodnotu."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1339
+#: venv/Lib/site-packages/django/forms/fields.py:1339
+msgid "Enter a valid UUID."
+msgstr "Zadejte platné UUID."
+
+#: venv/Lib/python3.12/site-packages/django/forms/fields.py:1369
+#: venv/Lib/site-packages/django/forms/fields.py:1369
+msgid "Enter a valid JSON."
+msgstr "Zadejte platný JSON."
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/Lib/python3.12/site-packages/django/forms/forms.py:97
+#: venv/Lib/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ":"
+
+#: venv/Lib/python3.12/site-packages/django/forms/forms.py:239
+#: venv/Lib/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Skryté pole %(name)s) %(error)s"
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:61
+#: venv/Lib/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:65
+#: venv/Lib/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:70
+#: venv/Lib/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:484
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:491
+#: venv/Lib/site-packages/django/forms/formsets.py:484
+#: venv/Lib/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr "Pořadí"
+
+#: venv/Lib/python3.12/site-packages/django/forms/formsets.py:499
+#: venv/Lib/site-packages/django/forms/formsets.py:499
+msgid "Delete"
+msgstr "Smazat"
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:901
+#: venv/Lib/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Opravte prosím duplicitní data pro %(field)s."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:906
+#: venv/Lib/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+"Opravte prosím duplicitní data pro %(field)s, která musí být jedinečná."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:913
+#: venv/Lib/site-packages/django/forms/models.py:913
+#, fuzzy, python-format
+#| msgid ""
+#| "Please correct the duplicate data for %(field)s, which must be unique."
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+"Opravte prosím duplicitní data pro %(field)s, která musí být jedinečná."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:922
+#: venv/Lib/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr "Opravte prosím níže uvedené duplicitní hodnoty."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1359
+#: venv/Lib/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr "Vložená hodnota neodpovídá nadřazené instanci."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1450
+#: venv/Lib/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr "Vyberte platnou možnost. Tato možnost není k dispozici."
+
+#: venv/Lib/python3.12/site-packages/django/forms/models.py:1594
+#: venv/Lib/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr "„%(pk)s“ není platnou hodnotou."
+
+#: venv/Lib/python3.12/site-packages/django/forms/utils.py:229
+#: venv/Lib/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:528
+#: venv/Lib/site-packages/django/forms/widgets.py:528
+msgid "Currently"
+msgstr "Aktuálně"
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:529
+#: venv/Lib/site-packages/django/forms/widgets.py:529
+msgid "Change"
+msgstr "Změnit"
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:866
+#: venv/Lib/site-packages/django/forms/widgets.py:866
+msgid "Unknown"
+msgstr "Neznámý"
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:867
+#: venv/Lib/site-packages/django/forms/widgets.py:867
+msgid "Yes"
+msgstr "Ano"
+
+#: venv/Lib/python3.12/site-packages/django/forms/widgets.py:868
+#: venv/Lib/site-packages/django/forms/widgets.py:868
+msgid "No"
+msgstr "Ne"
+
+#. Translators: Please do not add spaces around commas.
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:873
+#: venv/Lib/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr "ano,ne,možná"
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:903
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:920
+#: venv/Lib/site-packages/django/template/defaultfilters.py:903
+#: venv/Lib/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:922
+#: venv/Lib/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr "%s KB"
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:924
+#: venv/Lib/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr "%s MB"
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:926
+#: venv/Lib/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr "%s GB"
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:928
+#: venv/Lib/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr "%s TB"
+
+#: venv/Lib/python3.12/site-packages/django/template/defaultfilters.py:930
+#: venv/Lib/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr "%s PB"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:74
+#: venv/Lib/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr "odp."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:75
+#: venv/Lib/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr "dop."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:80
+#: venv/Lib/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr "odp."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:81
+#: venv/Lib/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr "dop."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:153
+#: venv/Lib/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr "půlnoc"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dateformat.py:155
+#: venv/Lib/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr "poledne"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:7
+#: venv/Lib/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr "Pondělí"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:8
+#: venv/Lib/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr "Úterý"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:9
+#: venv/Lib/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr "Středa"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:10
+#: venv/Lib/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr "Čtvrtek"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:11
+#: venv/Lib/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr "Pátek"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:12
+#: venv/Lib/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr "Sobota"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:13
+#: venv/Lib/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr "Neděle"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:16
+#: venv/Lib/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr "Po"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:17
+#: venv/Lib/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr "Út"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:18
+#: venv/Lib/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr "St"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:19
+#: venv/Lib/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr "Čt"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:20
+#: venv/Lib/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr "Pá"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:21
+#: venv/Lib/site-packages/django/utils/dates.py:21
+msgid "Sat"
+msgstr "So"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:22
+#: venv/Lib/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr "Ne"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:25
+#: venv/Lib/site-packages/django/utils/dates.py:25
+msgid "January"
+msgstr "Leden"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:26
+#: venv/Lib/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr "Únor"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:27
+#: venv/Lib/site-packages/django/utils/dates.py:27
+msgid "March"
+msgstr "Březen"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:28
+#: venv/Lib/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr "Duben"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:29
+#: venv/Lib/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr "Květen"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:30
+#: venv/Lib/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr "Červen"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:31
+#: venv/Lib/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr "Červenec"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:32
+#: venv/Lib/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr "Srpen"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:33
+#: venv/Lib/site-packages/django/utils/dates.py:33
+msgid "September"
+msgstr "Září"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:34
+#: venv/Lib/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr "Říjen"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:35
+#: venv/Lib/site-packages/django/utils/dates.py:35
+msgid "November"
+msgstr "Listopad"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:36
+#: venv/Lib/site-packages/django/utils/dates.py:36
+msgid "December"
+msgstr "Prosinec"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:39
+#: venv/Lib/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr "led"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:40
+#: venv/Lib/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr "ún"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:41
+#: venv/Lib/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr "bře"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:42
+#: venv/Lib/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr "dub"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:43
+#: venv/Lib/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr "kvě"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:44
+#: venv/Lib/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr "čvn"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:45
+#: venv/Lib/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr "čvc"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:46
+#: venv/Lib/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr "srp"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:47
+#: venv/Lib/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr "zář"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:48
+#: venv/Lib/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr "říj"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:49
+#: venv/Lib/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr "lis"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:50
+#: venv/Lib/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr "pro"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:53
+#: venv/Lib/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr "Led."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:54
+#: venv/Lib/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr "Ún."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:55
+#: venv/Lib/site-packages/django/utils/dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Bře."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:56
+#: venv/Lib/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "Dub."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:57
+#: venv/Lib/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Kvě."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:58
+#: venv/Lib/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "Čer."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:59
+#: venv/Lib/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "Čvc."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:60
+#: venv/Lib/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr "Srp."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:61
+#: venv/Lib/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr "Zář."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:62
+#: venv/Lib/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr "Říj."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:63
+#: venv/Lib/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr "Lis."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:64
+#: venv/Lib/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr "Pro."
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:67
+#: venv/Lib/site-packages/django/utils/dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr "ledna"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:68
+#: venv/Lib/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr "února"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:69
+#: venv/Lib/site-packages/django/utils/dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr "března"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:70
+#: venv/Lib/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr "dubna"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:71
+#: venv/Lib/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr "května"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:72
+#: venv/Lib/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr "června"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:73
+#: venv/Lib/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr "července"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:74
+#: venv/Lib/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr "srpna"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:75
+#: venv/Lib/site-packages/django/utils/dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr "září"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:76
+#: venv/Lib/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr "října"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:77
+#: venv/Lib/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr "listopadu"
+
+#: venv/Lib/python3.12/site-packages/django/utils/dates.py:78
+#: venv/Lib/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr "prosince"
+
+#: venv/Lib/python3.12/site-packages/django/utils/ipv6.py:20
+#: venv/Lib/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr "Toto není platná adresa IPv6."
+
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:76
+#: venv/Lib/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr "%(truncated_text)s…"
+
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:287
+#: venv/Lib/site-packages/django/utils/text.py:287
+msgid "or"
+msgstr "nebo"
+
+#. Translators: This string is used as a separator between list elements
+#: venv/Lib/python3.12/site-packages/django/utils/text.py:306
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:135
+#: venv/Lib/site-packages/django/utils/text.py:306
+#: venv/Lib/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ", "
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:8
+#: venv/Lib/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:9
+#: venv/Lib/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:10
+#: venv/Lib/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:11
+#: venv/Lib/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:12
+#: venv/Lib/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/utils/timesince.py:13
+#: venv/Lib/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:29
+#: venv/Lib/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr "Zakázáno"
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:30
+#: venv/Lib/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr "Ověření CSRF selhalo. Požadavek byl zamítnut."
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:34
+#: venv/Lib/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:40
+#: venv/Lib/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:45
+#: venv/Lib/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:54
+#: venv/Lib/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:60
+#: venv/Lib/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/csrf.py:66
+#: venv/Lib/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr "Více informací je dostupných s DEBUG=True."
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:44
+#: venv/Lib/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr "Nebyl zadán rok"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:64
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:115
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:214
+#: venv/Lib/site-packages/django/views/generic/dates.py:64
+#: venv/Lib/site-packages/django/views/generic/dates.py:115
+#: venv/Lib/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr "Datum je mimo rozsah"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:94
+#: venv/Lib/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr "Nebyl zadán měsíc"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:147
+#: venv/Lib/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr "Nebyl zadán den"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:194
+#: venv/Lib/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr "Nebyl zadán týden"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:353
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:384
+#: venv/Lib/site-packages/django/views/generic/dates.py:353
+#: venv/Lib/site-packages/django/views/generic/dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr "Žádné %(verbose_name_plural)s k dispozici"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:680
+#: venv/Lib/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/dates.py:720
+#: venv/Lib/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr "Neplatný formát data „%(datestr)s“ pro formát „%(format)s“"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/detail.py:56
+#: venv/Lib/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Nebylo nalezeno žádné %(verbose_name)s odpovídající dotazu"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:70
+#: venv/Lib/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Stránka není „poslední“ a nelze ji převést na celé číslo."
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:77
+#: venv/Lib/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Neplatná stránka (%(page_number)s): %(message)s"
+
+#: venv/Lib/python3.12/site-packages/django/views/generic/list.py:173
+#: venv/Lib/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Prázdný seznam a „%(class_name)s.allow_empty“ je False."
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:49
+#: venv/Lib/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr "Indexy adresářů zde nejsou povoleny."
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:51
+#: venv/Lib/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr "„%(path)s“ neexistuje"
+
+#: venv/Lib/python3.12/site-packages/django/views/static.py:68
+#: venv/Lib/python3.12/site-packages/django/views/templates/directory_index.html:8
+#: venv/Lib/python3.12/site-packages/django/views/templates/directory_index.html:11
+#: venv/Lib/site-packages/django/views/static.py:68
+#: venv/Lib/site-packages/django/views/templates/directory_index.html:8
+#: venv/Lib/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr "Obsah adresáře %(directory)s"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:204
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr "Instalace proběhla úspěšně! Blahopřejeme!"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:206
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr "Dokumentace Django"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:218
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Témata, reference a návody"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:226
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr "Tutoriál: Hlasovací aplikace"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:227
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr "Začněte s Djangem"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:235
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr "Komunita Django"
+
+#: venv/Lib/python3.12/site-packages/django/views/templates/default_urlconf.html:236
+#: venv/Lib/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr "Připojte se, získejte pomoc nebo přispějte"
+
+#: venv/Lib/python3.12/site-packages/mypy/main.py:440
+#: venv/Lib/site-packages/mypy/main.py:440
+#, python-format
+msgid "%(prog)s: error: %(message)s\n"
+msgstr "%(prog)s: chyba: %(message)s\n"
+
+#: venv/Lib/site-packages/_pytest/config/argparsing.py:474
+#, python-format
+msgid "ambiguous option: %(option)s could match %(matches)s"
+msgstr "nejednoznačná volba: %(option)s by odpovídala %(matches)s"
+
+#: venv/Lib/site-packages/include_by_ajax/apps.py:13
+msgid "Include by Ajax"
+msgstr "Zahrnout přes Ajax"
 
 #: warehouse/apps.py:8
 msgid "Data Warehouse Catalogue"
@@ -793,6 +2972,10 @@ msgid ""
 msgstr ""
 "Fyzická vrstva DWH, ve které se tato distribuce nachází (např. raw, clean, "
 "analytical). Pole specifické pro lokální metadata."
+
+#: warehouse/models.py:153
+msgid "Tables"
+msgstr "Tabulky"
 
 #: warehouse/models.py:170
 msgid "Variable Order"
@@ -842,280 +3025,55 @@ msgstr "Definice PK"
 msgid "Primary key definition expression"
 msgstr "Výraz definice primárního klíče"
 
-#: warehouse/templates/404.html:3 warehouse/templates/404.html:13
-msgid "Page Not Found"
-msgstr "Stránka nenalezena"
+#~ msgid "Filter value"
+#~ msgstr "Hodnota filtru"
 
-#: warehouse/templates/404.html:18
-msgid "The page you are looking for does not exist or has been moved."
-msgstr "Stránka, kterou hledáte, neexistuje nebo byla přesunuta."
+#~ msgid "The value that was counted, e.g. \"MiSeq\""
+#~ msgstr "Počíaná hodnota, např. \"MiSeq\""
 
-#: warehouse/templates/base.html:6
-#: warehouse/templates/catalogue/components/_header.html:7
-msgid "Data Catalogue"
-msgstr "Katalog Metadat"
+#~ msgid "Count"
+#~ msgstr "Počet"
 
-#: warehouse/templates/catalogue/base_catalogue.html:9
-#: warehouse/templates/catalogue/components/_distribution_card.html:33
-#: warehouse/templates/catalogue/components/_distribution_grid.html:31
-#: warehouse/templates/catalogue/index.html:88
-#: warehouse/templates/includes/_cart_add_btn.html:21
-#: warehouse/templates/includes/_cart_add_btn.html:23
-#: warehouse/templates/includes/_cart_add_btn.html:37
-msgid "Add to cart"
-msgstr "Přidat do košíku"
+#~ msgid "Number of records matching the filter; null means not yet synced"
+#~ msgstr ""
+#~ "Počet záznamů odpovídajících filtru; null znamená dosud nesynchronizováno"
 
-#: warehouse/templates/catalogue/base_catalogue.html:10
-#: warehouse/templates/catalogue/components/_distribution_card.html:33
-#: warehouse/templates/catalogue/index.html:88
-#: warehouse/templates/includes/_cart_add_btn.html:22
-#: warehouse/templates/includes/_cart_add_btn.html:23
-#: warehouse/templates/includes/_cart_add_btn.html:31
-msgid "Remove from cart"
-msgstr "Odebrat z košíku"
+#~ msgid "Key"
+#~ msgstr "Klíč DB"
 
-#: warehouse/templates/catalogue/components/_column_table.html:13
-#: warehouse/templates/catalogue/components/_table_modal.html:78
-msgid "Search columns…"
-msgstr "Hledat ve sloupcích…"
+#~ msgid "R type"
+#~ msgstr "Typ R"
 
-#: warehouse/templates/catalogue/components/_column_table.html:27
-msgid "Key"
-msgstr "Klíč DB"
+#~ msgid "Expected type"
+#~ msgstr "Očekávaný typ"
 
-#: warehouse/templates/catalogue/components/_column_table.html:31
-msgid "R type"
-msgstr "Typ R"
+#~ msgid "Close"
+#~ msgstr "Zavřít"
 
-#: warehouse/templates/catalogue/components/_column_table.html:63
-#: warehouse/templates/catalogue/components/_table_modal.html:114
-msgid "View"
-msgstr "Zobrazit"
+#~ msgid "No distributions available."
+#~ msgstr "Žádné distribuce k dispozici."
 
-#: warehouse/templates/catalogue/components/_column_table.html:89
-#: warehouse/templates/catalogue/components/_table_modal.html:140
-#: warehouse/templates/catalogue/components/_table_modal.html:147
-msgid "No columns available."
-msgstr "Žádné sloupce k dispozici."
+#~ msgid "Record counts"
+#~ msgstr "Počty záznamů"
 
-#: warehouse/templates/catalogue/components/_dcat_tooltip.html:32
-msgid "Expected type"
-msgstr "Očekávaný typ"
-
-#: warehouse/templates/catalogue/components/_dcat_tooltip.html:51
-msgid "Close"
-msgstr "Zavřít"
-
-#: warehouse/templates/catalogue/components/_distribution_card.html:49
-#: warehouse/templates/catalogue/index.html:99
-msgid "View full detail"
-msgstr "Zobrazit celý detail"
-
-#: warehouse/templates/catalogue/components/_distribution_grid.html:79
-msgid "No distributions available."
-msgstr "Žádné distribuce k dispozici."
-
-#: warehouse/templates/catalogue/components/_header.html:18
-msgid "View cart"
-msgstr "Zobrazit košík"
-
-#: warehouse/templates/catalogue/components/_header.html:57
-msgid "Admin Panel"
-msgstr "Administrační panel"
-
-#: warehouse/templates/catalogue/components/_header.html:61
-msgid "Logs"
-msgstr "Logy"
-
-#: warehouse/templates/catalogue/components/_header.html:67
-msgid "Request history"
-msgstr "Historie žádostí"
-
-#: warehouse/templates/catalogue/components/_header.html:74
-msgid "Sign out"
-msgstr "Odhlásit se"
-
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:11
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:40
-#: warehouse/templates/catalogue/index.html:50
-msgid "Search"
-msgstr "Vyhledávání"
-
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:17
-msgid "Datasets, distributions…"
-msgstr "Datové sady, distribuce…"
-
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:22
-msgid "Distribution Columns"
-msgstr "Sloupce distribuce"
-
-#: warehouse/templates/catalogue/components/_sidebar_filters.html:47
-msgid "Clear"
-msgstr "Vymazat"
-
-#: warehouse/templates/catalogue/components/_table_list.html:21
-msgid "Search tables…"
-msgstr "Hledat ve sloupcích…"
-
-#: warehouse/templates/catalogue/components/_table_list.html:64
-msgid "No tables available."
-msgstr "Žádné sloupce k dispozici."
-
-#: warehouse/templates/catalogue/components/_table_modal.html:40
-msgid "Record counts"
-msgstr "Počty záznamů"
-
-#: warehouse/templates/catalogue/components/_table_modal.html:44
 #, python-format
-msgid "Count of records where %(col)s = %(val)s"
-msgstr "Počet záznamů, kde %(col)s = %(val)s"
+#~ msgid "Count of records where %(col)s = %(val)s"
+#~ msgstr "Počet záznamů, kde %(col)s = %(val)s"
 
-#: warehouse/templates/catalogue/components/_table_modal.html:161
-msgid "Open in MOLGENIS"
-msgstr "Otevřít v MOLGENIS"
+#~ msgid "Open in MOLGENIS"
+#~ msgstr "Otevřít v MOLGENIS"
 
-#: warehouse/templates/catalogue/components/_table_modal.html:161
-msgid "View source"
-msgstr "Zdroj dat"
+#~ msgid "View source"
+#~ msgstr "Zdroj dat"
 
-#: warehouse/templates/catalogue/dataset_detail.html:38
-msgid "JSON-LD"
-msgstr "JSON-LD"
+#~ msgid "No distributions available for this dataset."
+#~ msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
 
-#: warehouse/templates/catalogue/dataset_detail.html:48
-msgid "RDF"
-msgstr "RDF"
+#~ msgid "No tables available for this distribution."
+#~ msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
 
-#: warehouse/templates/catalogue/dataset_detail.html:51
-msgid "Dataset Metadata"
-msgstr "Metadata datové sady"
-
-#: warehouse/templates/catalogue/dataset_detail.html:81
-msgid "distribution(s)"
-msgstr "distribuce"
-
-#: warehouse/templates/catalogue/dataset_detail.html:90
-#: warehouse/templates/catalogue/dataset_detail.html:95
-msgid "No distributions available for this dataset."
-msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
-
-#: warehouse/templates/catalogue/distribution_detail.html:31
-msgid "Adds the entire dataset"
-msgstr "Přidá celou datovou sadu"
-
-#: warehouse/templates/catalogue/distribution_detail.html:42
-msgid "Distribution Metadata"
-msgstr "Metadata distribuce"
-
-#: warehouse/templates/catalogue/distribution_detail.html:61
-msgid "No tables available for this distribution."
-msgstr "Pro tuto datovou sadu nejsou k dispozici žádné distribuce."
-
-#: warehouse/templates/catalogue/index.html:26
-msgid "Data"
-msgstr "Metadatový"
-
-#: warehouse/templates/catalogue/index.html:29
-msgid ""
-"Evidence and description of data sources of Masaryk Oncology Institute for "
-"secondary use. Each record is based on the Health DCAT-AP schema — click"
-msgstr ""
-"Přehled a popis datových zdrojů Masarykova onkologického ústavu pro "
-"sekundární využití. Každý záznam vychází ze schématu Health DCAT-AP — "
-"klikněte"
-
-#: warehouse/templates/catalogue/index.html:29
-msgid "to display the field definition and ontology link."
-msgstr "pro zobrazení definice pole a odkazu na ontologii."
-
-#: warehouse/templates/catalogue/index.html:39
-msgid "datasets matching filters"
-msgstr "datových sad odpovídá filtrům"
-
-#: warehouse/templates/catalogue/index.html:46
-msgid "page"
-msgstr "stránka"
-
-#: warehouse/templates/catalogue/index.html:46
-msgid "of"
-msgstr "z"
-
-#: warehouse/templates/catalogue/index.html:51
-msgid "Keyword"
-msgstr "Klíčové slovo"
-
-#: warehouse/templates/catalogue/index.html:189
-#: warehouse/templates/catalogue/index.html:257
-msgid "No datasets found"
-msgstr "Žádné datové sady nenalezeny"
-
-#: warehouse/templates/catalogue/index.html:190
-msgid "Try a different query or adjust the sidebar filters."
-msgstr "Zkuste jiný dotaz nebo upravte filtry v postranním panelu."
-
-#: warehouse/templates/catalogue/index.html:258
-msgid "Clear all filters"
-msgstr "Vymazat všechny filtry"
-
-#: warehouse/templates/includes/_filter_group.html:10
-msgid "Filter…"
-msgstr "Filtrovat…"
-
-#: warehouse/templates/includes/_filter_group.html:23
-msgid "No options"
-msgstr "Žádné možnosti"
-
-#: warehouse/templates/includes/_toast_messages.html:15
-msgid "Error"
-msgstr "Chyba"
-
-#: warehouse/templates/includes/_toast_messages.html:18
-#: warehouse/templates/includes/_toast_messages.html:38
-#: warehouse/templates/includes/_toast_messages.html:57
-msgid "Dismiss"
-msgstr "Zavřít"
-
-#: warehouse/templates/includes/_toast_messages.html:35
-msgid "Warning"
-msgstr "Upozornění"
-
-#: warehouse/templates/includes/_toast_messages.html:54
-msgid "Success"
-msgstr "Úspěch"
-
-#: warehouse/templates/includes/schema_modal.html:12
-msgid "DCAT-AP term"
-msgstr "Termín DCAT-AP"
-
-#: warehouse/templates/registration/login.html:6
-msgid "Login"
-msgstr "Přihlášení"
-
-#: warehouse/templates/registration/login.html:6
-msgid "MOU Data Catalogue"
-msgstr "Katalog dat MOÚ"
-
-#: warehouse/templates/registration/login.html:37
-msgid "Invalid username or password. Please try again."
-msgstr "Neplatné uživatelské jméno nebo heslo. Zkuste to prosím znovu."
-
-#: warehouse/templates/registration/login.html:46
-msgid "Username"
-msgstr "Uživatelské jméno"
-
-#: warehouse/templates/registration/login.html:53
-msgid "Password"
-msgstr "Heslo"
-
-#: warehouse/templates/registration/login.html:59
-msgid "Sign in"
-msgstr "Přihlásit se"
-
-msgid "Value Distributions"
-msgstr "Rozdělení hodnot"
-
-msgid "total"
-msgstr "celkem"
+#~ msgid "MOU Data Catalogue"
+#~ msgstr "Katalog dat MOÚ"
 
 #~ msgid "Slug"
 #~ msgstr "Slug"
@@ -1128,9 +3086,6 @@ msgstr "celkem"
 
 #~ msgid "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
 #~ msgstr "Lidsky čitelný popisek verze, např. \"Health DCAT-AP v6\"."
-
-#~ msgid "Active"
-#~ msgstr "Aktivní"
 
 #~ msgid ""
 #~ "Whether this is the currently active schema version used by the service "
@@ -1244,9 +3199,6 @@ msgstr "celkem"
 #~ "Seznam názvů tabulek/entit, kde je termín použitelný, např. [\"Catalog\", "
 #~ "\"Dataset\"]."
 
-#~ msgid "Display Order"
-#~ msgstr "Pořadí zobrazení"
-
 #~ msgid ""
 #~ "Controls the order in which terms are listed within a schema version."
 #~ msgstr "Řídí pořadí zobrazení termínů v rámci verze schématu."
@@ -1337,882 +3289,6 @@ msgstr "celkem"
 
 #~ msgid "Your cart is empty."
 #~ msgstr "Váš košík je prázdný."
-
-#, python-brace-format
-#~ msgid "{editor}: Editing failed"
-#~ msgstr "{editor}: Úpravy selhaly"
-
-#, python-brace-format
-#~ msgid "{editor}: Editing failed: {e}"
-#~ msgstr "{editor}: Úpravy selhaly: {e}"
-
-#, python-brace-format
-#~ msgid "{text} {deprecated_message}"
-#~ msgstr "{text} {deprecated_message}"
-
-#~ msgid "Options"
-#~ msgstr "Možnosti"
-
-#~ msgid ""
-#~ "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-#~ msgstr "DeprecationWarning: Příkaz {name!r} je zastaralý.{extra_message}"
-
-#~ msgid "Aborted!"
-#~ msgstr "Přerušeno!"
-
-#~ msgid "Commands"
-#~ msgstr "Příkazy"
-
-#~ msgid "Missing command."
-#~ msgstr "Chybí příkaz."
-
-#~ msgid "No such command {name!r}."
-#~ msgstr "Příkaz {name!r} neexistuje."
-
-#~ msgid "Value must be an iterable."
-#~ msgstr "Hodnota musí být iterovatelná."
-
-#, python-brace-format
-#~ msgid "env var: {var}"
-#~ msgstr "proměnná prostředí: {var}"
-
-#, python-brace-format
-#~ msgid "default: {default}"
-#~ msgstr "výchozí: {default}"
-
-#~ msgid "(dynamic)"
-#~ msgstr "(dynamické)"
-
-#, python-format
-#~ msgid "%(prog)s, version %(version)s"
-#~ msgstr "%(prog)s, verze %(version)s"
-
-#~ msgid "Show the version and exit."
-#~ msgstr "Zobrazit verzi a ukončit."
-
-#~ msgid "Show this message and exit."
-#~ msgstr "Zobrazit tuto zprávu a ukončit."
-
-#, python-brace-format
-#~ msgid "Error: {message}"
-#~ msgstr "Chyba: {message}"
-
-#, python-brace-format
-#~ msgid "Try '{command} {option}' for help."
-#~ msgstr "Zkuste '{command} {option}' pro nápovědu."
-
-#, python-brace-format
-#~ msgid "Invalid value: {message}"
-#~ msgstr "Neplatná hodnota: {message}"
-
-#, python-brace-format
-#~ msgid "Invalid value for {param_hint}: {message}"
-#~ msgstr "Neplatná hodnota pro {param_hint}: {message}"
-
-#~ msgid "Missing argument"
-#~ msgstr "Chybí argument"
-
-#~ msgid "Missing option"
-#~ msgstr "Chybí volba"
-
-#~ msgid "Missing parameter"
-#~ msgstr "Chybí parametr"
-
-#, python-brace-format
-#~ msgid "Missing {param_type}"
-#~ msgstr "Chybí {param_type}"
-
-#, python-brace-format
-#~ msgid "Missing parameter: {param_name}"
-#~ msgstr "Chybí parametr: {param_name}"
-
-#, python-brace-format
-#~ msgid "No such option: {name}"
-#~ msgstr "Volba {name} neexistuje."
-
-#~ msgid "unknown error"
-#~ msgstr "neznámá chyba"
-
-#~ msgid "Could not open file {filename!r}: {message}"
-#~ msgstr "Nelze otevřít soubor {filename!r}: {message}"
-
-#~ msgid "Argument {name!r} takes {nargs} values."
-#~ msgstr "Argument {name!r} přijímá {nargs} hodnot."
-
-#~ msgid "Option {name!r} does not take a value."
-#~ msgstr "Volba {name!r} nepřijímá hodnotu."
-
-#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
-#~ msgstr ""
-#~ "Doplňování pro shell není podporováno pro verze Bash starší než 4.4."
-
-#~ msgid "Couldn't detect Bash version, shell completion is not supported."
-#~ msgstr ""
-#~ "Nepodařilo se zjistit verzi Bash, doplňování pro shell není podporováno."
-
-#~ msgid "Repeat for confirmation"
-#~ msgstr "Zopakujte pro potvrzení"
-
-#~ msgid "Error: The value you entered was invalid."
-#~ msgstr "Chyba: Zadaná hodnota je neplatná."
-
-#, python-brace-format
-#~ msgid "Error: {e.message}"
-#~ msgstr "Chyba: {e.message}"
-
-#~ msgid "Error: The two entered values do not match."
-#~ msgstr "Chyba: Zadané hodnoty se neshodují."
-
-#~ msgid "Error: invalid input"
-#~ msgstr "Chyba: neplatný vstup"
-
-#~ msgid "Press any key to continue..."
-#~ msgstr "Stiskněte libovolnou klávesu pro pokračování..."
-
-#~ msgid "{value!r} is not a valid {number_type}."
-#~ msgstr "{value!r} není platné číslo typu {number_type}."
-
-#, python-brace-format
-#~ msgid "{value} is not in the range {range}."
-#~ msgstr "{value} není v rozsahu {range}."
-
-#~ msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-#~ msgstr "{value!r} není platná logická hodnota. Rozpoznané hodnoty: {states}"
-
-#~ msgid "{value!r} is not a valid UUID."
-#~ msgstr "{value!r} není platné UUID."
-
-#~ msgid "file"
-#~ msgstr "soubor"
-
-#~ msgid "directory"
-#~ msgstr "adresář"
-
-#~ msgid "path"
-#~ msgstr "cesta"
-
-#~ msgid "{name} {filename!r} does not exist."
-#~ msgstr "{name} {filename!r} neexistuje."
-
-#~ msgid "{name} {filename!r} is a file."
-#~ msgstr "{name} {filename!r} je soubor."
-
-#~ msgid "{name} {filename!r} is a directory."
-#~ msgstr "{name} {filename!r} je adresář."
-
-#~ msgid "{name} {filename!r} is not readable."
-#~ msgstr "{name} {filename!r} není čitelný."
-
-#~ msgid "{name} {filename!r} is not writable."
-#~ msgstr "{name} {filename!r} není zapisovatelný."
-
-#~ msgid "{name} {filename!r} is not executable."
-#~ msgstr "{name} {filename!r} není spustitelný."
-
-#~ msgid "Messages"
-#~ msgstr "Zprávy"
-
-#~ msgid "Site Maps"
-#~ msgstr "Mapy stránek"
-
-#~ msgid "Syndication"
-#~ msgstr "Syndikace"
-
-#~ msgid "…"
-#~ msgstr "…"
-
-#~ msgid "That page number is not an integer"
-#~ msgstr "Číslo stránky není celé číslo"
-
-#~ msgid "That page number is less than 1"
-#~ msgstr "Číslo stránky je menší než 1"
-
-#~ msgid "That page contains no results"
-#~ msgstr "Tato stránka neobsahuje žádné výsledky"
-
-#~ msgid "Enter a valid value."
-#~ msgstr "Zadejte platnou hodnotu."
-
-#~ msgid "Enter a valid domain name."
-#~ msgstr "Zadejte platný název domény."
-
-#~ msgid "Enter a valid URL."
-#~ msgstr "Zadejte platnou URL."
-
-#~ msgid "Enter a valid integer."
-#~ msgstr "Zadejte platné celé číslo."
-
-#~ msgid "Enter a valid email address."
-#~ msgstr "Zadejte platnou e-mailovou adresu."
-
-#, python-format
-#~ msgid "Enter a valid %(protocol)s address."
-#~ msgstr "Zadejte platnou %(protocol)s adresu."
-
-#~ msgid "IPv4"
-#~ msgstr "IPv4"
-
-#~ msgid "IPv6"
-#~ msgstr "IPv6"
-
-#~ msgid "IPv4 or IPv6"
-#~ msgstr "IPv4 nebo IPv6"
-
-#~ msgid "Enter only digits separated by commas."
-#~ msgstr "Zadejte pouze číslice oddělené čárkami."
-
-#, python-format
-#~ msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-#~ msgstr ""
-#~ "Ujistěte se, že tato hodnota je %(limit_value)s (je %(show_value)s)."
-
-#, python-format
-#~ msgid "Ensure this value is less than or equal to %(limit_value)s."
-#~ msgstr "Ujistěte se, že tato hodnota je menší nebo rovna %(limit_value)s."
-
-#, python-format
-#~ msgid "Ensure this value is greater than or equal to %(limit_value)s."
-#~ msgstr "Ujistěte se, že tato hodnota je větší nebo rovna %(limit_value)s."
-
-#, python-format
-#~ msgid "Ensure this value is a multiple of step size %(limit_value)s."
-#~ msgstr "Ujistěte se, že tato hodnota je násobkem kroku %(limit_value)s."
-
-#~ msgid "Enter a number."
-#~ msgstr "Zadejte číslo."
-
-#~ msgid "Null characters are not allowed."
-#~ msgstr "Nulové znaky nejsou povoleny."
-
-#~ msgid "and"
-#~ msgstr "a"
-
-#, python-format
-#~ msgid "%(model_name)s with this %(field_labels)s already exists."
-#~ msgstr "%(model_name)s s těmito hodnotami %(field_labels)s již existuje."
-
-#, python-format
-#~ msgid "Constraint “%(name)s” is violated."
-#~ msgstr "Omezení „%(name)s“ není splněno."
-
-#, python-format
-#~ msgid "Value %(value)r is not a valid choice."
-#~ msgstr "Hodnota %(value)r není platnou volbou."
-
-#~ msgid "This field cannot be null."
-#~ msgstr "Toto pole nesmí obsahovat prázdnou hodnotu."
-
-#~ msgid "This field cannot be blank."
-#~ msgstr "Toto pole nesmí být prázdné."
-
-#, python-format
-#~ msgid "%(model_name)s with this %(field_label)s already exists."
-#~ msgstr "%(model_name)s s touto hodnotou %(field_label)s již existuje."
-
-#, python-format
-#~ msgid "Field of type: %(field_type)s"
-#~ msgstr "Pole typu: %(field_type)s"
-
-#, python-format
-#~ msgid "“%(value)s” value must be either True or False."
-#~ msgstr "Hodnota „%(value)s“ musí být True nebo False."
-
-#, python-format
-#~ msgid "“%(value)s” value must be either True, False, or None."
-#~ msgstr "Hodnota „%(value)s“ musí být True, False nebo None."
-
-#~ msgid "Boolean (Either True or False)"
-#~ msgstr "Logická hodnota (True nebo False)"
-
-#, python-format
-#~ msgid "String (up to %(max_length)s)"
-#~ msgstr "Řetězec (až %(max_length)s znaků)"
-
-#~ msgid "String (unlimited)"
-#~ msgstr "Řetězec (neomezený)"
-
-#~ msgid "Comma-separated integers"
-#~ msgstr "Celá čísla oddělená čárkami"
-
-#~ msgid "Date (without time)"
-#~ msgstr "Datum (bez času)"
-
-#~ msgid "Date (with time)"
-#~ msgstr "Datum (s časem)"
-
-#, python-format
-#~ msgid "“%(value)s” value must be a decimal number."
-#~ msgstr "Hodnota „%(value)s“ musí být desetinné číslo."
-
-#~ msgid "Decimal number"
-#~ msgstr "Desetinné číslo"
-
-#~ msgid "Duration"
-#~ msgstr "Trvání"
-
-#~ msgid "Email address"
-#~ msgstr "E-mailová adresa"
-
-#~ msgid "File path"
-#~ msgstr "Cesta k souboru"
-
-#, python-format
-#~ msgid "“%(value)s” value must be a float."
-#~ msgstr "Hodnota „%(value)s“ musí být číslo s plovoucí desetinnou čárkou."
-
-#~ msgid "Floating point number"
-#~ msgstr "Číslo s plovoucí desetinnou čárkou"
-
-#, python-format
-#~ msgid "“%(value)s” value must be an integer."
-#~ msgstr "Hodnota „%(value)s“ musí být celé číslo."
-
-#~ msgid "Integer"
-#~ msgstr "Celé číslo"
-
-#~ msgid "Big (8 byte) integer"
-#~ msgstr "Velké celé číslo (8 bytů)"
-
-#~ msgid "Small integer"
-#~ msgstr "Malé celé číslo"
-
-#~ msgid "IPv4 address"
-#~ msgstr "IPv4 adresa"
-
-#~ msgid "IP address"
-#~ msgstr "IP adresa"
-
-#, python-format
-#~ msgid "“%(value)s” value must be either None, True or False."
-#~ msgstr "Hodnota „%(value)s“ musí být None, True nebo False."
-
-#~ msgid "Boolean (Either True, False or None)"
-#~ msgstr "Logická hodnota (True, False nebo None)"
-
-#~ msgid "Positive big integer"
-#~ msgstr "Kladné velké celé číslo"
-
-#~ msgid "Positive integer"
-#~ msgstr "Kladné celé číslo"
-
-#~ msgid "Positive small integer"
-#~ msgstr "Kladné malé celé číslo"
-
-#, python-format
-#~ msgid "Slug (up to %(max_length)s)"
-#~ msgstr "Slug (až %(max_length)s znaků)"
-
-#~ msgid "Text"
-#~ msgstr "Text"
-
-#~ msgid "Time"
-#~ msgstr "Čas"
-
-#~ msgid "Raw binary data"
-#~ msgstr "Surová binární data"
-
-#, python-format
-#~ msgid "“%(value)s” is not a valid UUID."
-#~ msgstr "„%(value)s“ není platné UUID."
-
-#~ msgid "Universally unique identifier"
-#~ msgstr "Univerzálně jedinečný identifikátor"
-
-#~ msgid "File"
-#~ msgstr "Soubor"
-
-#~ msgid "Image"
-#~ msgstr "Obrázek"
-
-#~ msgid "A JSON object"
-#~ msgstr "JSON objekt"
-
-#~ msgid "Value must be valid JSON."
-#~ msgstr "Hodnota musí být platný JSON."
-
-#, python-format
-#~ msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
-#~ msgstr "Instance %(model)s s %(field)s %(value)r není platnou volbou."
-
-#~ msgid "Foreign Key (type determined by related field)"
-#~ msgstr "Cizí klíč (typ určen odkazovaným polem)"
-
-#~ msgid "One-to-one relationship"
-#~ msgstr "Vztah 1:1"
-
-#, python-format
-#~ msgid "%(from)s-%(to)s relationship"
-#~ msgstr "Vztah %(from)s-%(to)s"
-
-#, python-format
-#~ msgid "%(from)s-%(to)s relationships"
-#~ msgstr "Vztahy %(from)s-%(to)s"
-
-#~ msgid "Many-to-many relationship"
-#~ msgstr "Vztah N:M"
-
-#~ msgid ":?.!"
-#~ msgstr ":?.!"
-
-#~ msgid "This field is required."
-#~ msgstr "Toto pole je povinné."
-
-#~ msgid "Enter a whole number."
-#~ msgstr "Zadejte celé číslo."
-
-#~ msgid "Enter a valid date."
-#~ msgstr "Zadejte platné datum."
-
-#~ msgid "Enter a valid time."
-#~ msgstr "Zadejte platný čas."
-
-#~ msgid "Enter a valid date/time."
-#~ msgstr "Zadejte platné datum a čas."
-
-#~ msgid "Enter a valid duration."
-#~ msgstr "Zadejte platnou dobu trvání."
-
-#, python-brace-format
-#~ msgid "The number of days must be between {min_days} and {max_days}."
-#~ msgstr "Počet dní musí být mezi {min_days} a {max_days}."
-
-#~ msgid "No file was submitted. Check the encoding type on the form."
-#~ msgstr "Nebyl odeslán žádný soubor. Zkontrolujte typ kódování formuláře."
-
-#~ msgid "No file was submitted."
-#~ msgstr "Nebyl odeslán žádný soubor."
-
-#~ msgid "The submitted file is empty."
-#~ msgstr "Zatím jste neodeslali žádné požadavky."
-
-#~ msgid "Please either submit a file or check the clear checkbox, not both."
-#~ msgstr ""
-#~ "Prosím odeslete soubor nebo zaškrtněte políčko pro smazání, ale ne obojí."
-
-#, python-format
-#~ msgid ""
-#~ "Select a valid choice. %(value)s is not one of the available choices."
-#~ msgstr ""
-#~ "Vyberte platnou možnost. %(value)s není jednou z dostupných možností."
-
-#~ msgid "Enter a list of values."
-#~ msgstr "Zadejte seznam hodnot."
-
-#~ msgid "Enter a complete value."
-#~ msgstr "Zadejte úplnou hodnotu."
-
-#~ msgid "Enter a valid UUID."
-#~ msgstr "Zadejte platné UUID."
-
-#~ msgid "Enter a valid JSON."
-#~ msgstr "Zadejte platný JSON."
-
-#~ msgid ":"
-#~ msgstr ":"
-
-#, python-format
-#~ msgid "(Hidden field %(name)s) %(error)s"
-#~ msgstr "(Skryté pole %(name)s) %(error)s"
-
-#~ msgid "Order"
-#~ msgstr "Pořadí"
-
-#~ msgid "Delete"
-#~ msgstr "Smazat"
-
-#, python-format
-#~ msgid "Please correct the duplicate data for %(field)s."
-#~ msgstr "Opravte prosím duplicitní data pro %(field)s."
-
-#, python-format
-#~ msgid ""
-#~ "Please correct the duplicate data for %(field)s, which must be unique."
-#~ msgstr ""
-#~ "Opravte prosím duplicitní data pro %(field)s, která musí být jedinečná."
-
-#~ msgid "Please correct the duplicate values below."
-#~ msgstr "Opravte prosím níže uvedené duplicitní hodnoty."
-
-#~ msgid "The inline value did not match the parent instance."
-#~ msgstr "Vložená hodnota neodpovídá nadřazené instanci."
-
-#~ msgid ""
-#~ "Select a valid choice. That choice is not one of the available choices."
-#~ msgstr "Vyberte platnou možnost. Tato možnost není k dispozici."
-
-#, python-format
-#~ msgid "“%(pk)s” is not a valid value."
-#~ msgstr "„%(pk)s“ není platnou hodnotou."
-
-#~ msgid "Currently"
-#~ msgstr "Aktuálně"
-
-#~ msgid "Change"
-#~ msgstr "Změnit"
-
-#~ msgid "Unknown"
-#~ msgstr "Neznámý"
-
-#~ msgid "Yes"
-#~ msgstr "Ano"
-
-#~ msgid "No"
-#~ msgstr "Ne"
-
-#~ msgid "yes,no,maybe"
-#~ msgstr "ano,ne,možná"
-
-#, python-format
-#~ msgid "%s KB"
-#~ msgstr "%s KB"
-
-#, python-format
-#~ msgid "%s MB"
-#~ msgstr "%s MB"
-
-#, python-format
-#~ msgid "%s GB"
-#~ msgstr "%s GB"
-
-#, python-format
-#~ msgid "%s TB"
-#~ msgstr "%s TB"
-
-#, python-format
-#~ msgid "%s PB"
-#~ msgstr "%s PB"
-
-#~ msgid "p.m."
-#~ msgstr "odp."
-
-#~ msgid "a.m."
-#~ msgstr "dop."
-
-#~ msgid "PM"
-#~ msgstr "odp."
-
-#~ msgid "AM"
-#~ msgstr "dop."
-
-#~ msgid "midnight"
-#~ msgstr "půlnoc"
-
-#~ msgid "noon"
-#~ msgstr "poledne"
-
-#~ msgid "Monday"
-#~ msgstr "Pondělí"
-
-#~ msgid "Tuesday"
-#~ msgstr "Úterý"
-
-#~ msgid "Wednesday"
-#~ msgstr "Středa"
-
-#~ msgid "Thursday"
-#~ msgstr "Čtvrtek"
-
-#~ msgid "Friday"
-#~ msgstr "Pátek"
-
-#~ msgid "Saturday"
-#~ msgstr "Sobota"
-
-#~ msgid "Sunday"
-#~ msgstr "Neděle"
-
-#~ msgid "Mon"
-#~ msgstr "Po"
-
-#~ msgid "Tue"
-#~ msgstr "Út"
-
-#~ msgid "Wed"
-#~ msgstr "St"
-
-#~ msgid "Thu"
-#~ msgstr "Čt"
-
-#~ msgid "Fri"
-#~ msgstr "Pá"
-
-#~ msgid "Sat"
-#~ msgstr "So"
-
-#~ msgid "Sun"
-#~ msgstr "Ne"
-
-#~ msgid "January"
-#~ msgstr "Leden"
-
-#~ msgid "February"
-#~ msgstr "Únor"
-
-#~ msgid "March"
-#~ msgstr "Březen"
-
-#~ msgid "April"
-#~ msgstr "Duben"
-
-#~ msgid "May"
-#~ msgstr "Květen"
-
-#~ msgid "June"
-#~ msgstr "Červen"
-
-#~ msgid "July"
-#~ msgstr "Červenec"
-
-#~ msgid "August"
-#~ msgstr "Srpen"
-
-#~ msgid "September"
-#~ msgstr "Září"
-
-#~ msgid "October"
-#~ msgstr "Říjen"
-
-#~ msgid "November"
-#~ msgstr "Listopad"
-
-#~ msgid "December"
-#~ msgstr "Prosinec"
-
-#~ msgid "jan"
-#~ msgstr "led"
-
-#~ msgid "feb"
-#~ msgstr "ún"
-
-#~ msgid "mar"
-#~ msgstr "bře"
-
-#~ msgid "apr"
-#~ msgstr "dub"
-
-#~ msgid "may"
-#~ msgstr "kvě"
-
-#~ msgid "jun"
-#~ msgstr "čvn"
-
-#~ msgid "jul"
-#~ msgstr "čvc"
-
-#~ msgid "aug"
-#~ msgstr "srp"
-
-#~ msgid "sep"
-#~ msgstr "zář"
-
-#~ msgid "oct"
-#~ msgstr "říj"
-
-#~ msgid "nov"
-#~ msgstr "lis"
-
-#~ msgid "dec"
-#~ msgstr "pro"
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Jan."
-#~ msgstr "Led."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Feb."
-#~ msgstr "Ún."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "March"
-#~ msgstr "Bře."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "April"
-#~ msgstr "Dub."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "May"
-#~ msgstr "Kvě."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "June"
-#~ msgstr "Čer."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "July"
-#~ msgstr "Čvc."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Aug."
-#~ msgstr "Srp."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Sept."
-#~ msgstr "Zář."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Oct."
-#~ msgstr "Říj."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Nov."
-#~ msgstr "Lis."
-
-#~ msgctxt "abbrev. month"
-#~ msgid "Dec."
-#~ msgstr "Pro."
-
-#~ msgctxt "alt. month"
-#~ msgid "January"
-#~ msgstr "ledna"
-
-#~ msgctxt "alt. month"
-#~ msgid "February"
-#~ msgstr "února"
-
-#~ msgctxt "alt. month"
-#~ msgid "March"
-#~ msgstr "března"
-
-#~ msgctxt "alt. month"
-#~ msgid "April"
-#~ msgstr "dubna"
-
-#~ msgctxt "alt. month"
-#~ msgid "May"
-#~ msgstr "května"
-
-#~ msgctxt "alt. month"
-#~ msgid "June"
-#~ msgstr "června"
-
-#~ msgctxt "alt. month"
-#~ msgid "July"
-#~ msgstr "července"
-
-#~ msgctxt "alt. month"
-#~ msgid "August"
-#~ msgstr "srpna"
-
-#~ msgctxt "alt. month"
-#~ msgid "September"
-#~ msgstr "září"
-
-#~ msgctxt "alt. month"
-#~ msgid "October"
-#~ msgstr "října"
-
-#~ msgctxt "alt. month"
-#~ msgid "November"
-#~ msgstr "listopadu"
-
-#~ msgctxt "alt. month"
-#~ msgid "December"
-#~ msgstr "prosince"
-
-#~ msgid "This is not a valid IPv6 address."
-#~ msgstr "Toto není platná adresa IPv6."
-
-#, python-format
-#~ msgctxt "String to return when truncating text"
-#~ msgid "%(truncated_text)s…"
-#~ msgstr "%(truncated_text)s…"
-
-#~ msgid "or"
-#~ msgstr "nebo"
-
-#~ msgid ", "
-#~ msgstr ", "
-
-#~ msgid "Forbidden"
-#~ msgstr "Zakázáno"
-
-#~ msgid "CSRF verification failed. Request aborted."
-#~ msgstr "Ověření CSRF selhalo. Požadavek byl zamítnut."
-
-#~ msgid "More information is available with DEBUG=True."
-#~ msgstr "Více informací je dostupných s DEBUG=True."
-
-#~ msgid "No year specified"
-#~ msgstr "Nebyl zadán rok"
-
-#~ msgid "Date out of range"
-#~ msgstr "Datum je mimo rozsah"
-
-#~ msgid "No month specified"
-#~ msgstr "Nebyl zadán měsíc"
-
-#~ msgid "No day specified"
-#~ msgstr "Nebyl zadán den"
-
-#~ msgid "No week specified"
-#~ msgstr "Nebyl zadán týden"
-
-#, python-format
-#~ msgid "No %(verbose_name_plural)s available"
-#~ msgstr "Žádné %(verbose_name_plural)s k dispozici"
-
-#, python-format
-#~ msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
-#~ msgstr "Neplatný formát data „%(datestr)s“ pro formát „%(format)s“"
-
-#, python-format
-#~ msgid "No %(verbose_name)s found matching the query"
-#~ msgstr "Nebylo nalezeno žádné %(verbose_name)s odpovídající dotazu"
-
-#~ msgid "Page is not “last”, nor can it be converted to an int."
-#~ msgstr "Stránka není „poslední“ a nelze ji převést na celé číslo."
-
-#, python-format
-#~ msgid "Invalid page (%(page_number)s): %(message)s"
-#~ msgstr "Neplatná stránka (%(page_number)s): %(message)s"
-
-#, python-format
-#~ msgid "Empty list and “%(class_name)s.allow_empty” is False."
-#~ msgstr "Prázdný seznam a „%(class_name)s.allow_empty“ je False."
-
-#~ msgid "Directory indexes are not allowed here."
-#~ msgstr "Indexy adresářů zde nejsou povoleny."
-
-#, python-format
-#~ msgid "“%(path)s” does not exist"
-#~ msgstr "„%(path)s“ neexistuje"
-
-#, python-format
-#~ msgid "Index of %(directory)s"
-#~ msgstr "Obsah adresáře %(directory)s"
-
-#~ msgid "The install worked successfully! Congratulations!"
-#~ msgstr "Instalace proběhla úspěšně! Blahopřejeme!"
-
-#~ msgid "Django Documentation"
-#~ msgstr "Dokumentace Django"
-
-#~ msgid "Topics, references, &amp; how-to’s"
-#~ msgstr "Témata, reference a návody"
-
-#~ msgid "Tutorial: A Polling App"
-#~ msgstr "Tutoriál: Hlasovací aplikace"
-
-#~ msgid "Get started with Django"
-#~ msgstr "Začněte s Djangem"
-
-#~ msgid "Django Community"
-#~ msgstr "Komunita Django"
-
-#~ msgid "Connect, get help, or contribute"
-#~ msgstr "Připojte se, získejte pomoc nebo přispějte"
-
-#, python-format
-#~ msgid "%(prog)s: error: %(message)s\n"
-#~ msgstr "%(prog)s: chyba: %(message)s\n"
-
-#, python-format
-#~ msgid "ambiguous option: %(option)s could match %(matches)s"
-#~ msgstr "nejednoznačná volba: %(option)s by odpovídala %(matches)s"
-
-#~ msgid "Include by Ajax"
-#~ msgstr "Zahrnout přes Ajax"
 
 #~ msgid "Semantic property URI (e.g. from a biomedical ontology)"
 #~ msgstr "Sémantické URI vlastnosti (např. z biomedicínské ontologie)"

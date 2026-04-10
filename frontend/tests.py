@@ -380,6 +380,109 @@ class DatasetDetailViewTest(TestCase):
         self.assertIn('patient_id', response.content.decode())
 
 
+class DistributionDetailViewTest(TestCase):
+    """Tests for the distribution detail view."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        django_cache.clear()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='viewer-dist', email='vd@example.com', password='secret'
+        )
+
+    @patch('frontend.views.get_cached_schema_json')
+    @patch('frontend.views.get_cached_all_datasets')
+    @patch(_SERVICE_PATH)
+    def test_distribution_detail_requests_tables_and_charts(
+        self,
+        mock_cls,
+        mock_get_all_datasets,
+        mock_get_schema,
+    ):
+        dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
+        dataset.distributions[0].name = 'warehouse-dist'
+        dataset.distributions[0].title = 'Warehouse Distribution'
+
+        mock_get_all_datasets.return_value = [dataset_to_dict(dataset)]
+        mock_get_schema.return_value = _mock_schema()
+
+        mock_svc = mock_cls.return_value
+        mock_svc.get_tables_with_columns.return_value = [
+            UnifiedTable(
+                name='encounter',
+                title='Encounter',
+                description='Encounter table',
+                url='https://example.com/tables/encounter',
+                columns=[
+                    UnifiedTableColumn(
+                        name='patient_id',
+                        title='Patient ID',
+                        description='Patient identifier',
+                        datatype='string',
+                        property_url='https://example.com/props/patient-id',
+                    )
+                ],
+            )
+        ]
+        mock_svc.get_stat_charts.return_value = [
+            UnifiedStatChart(
+                label='Instrument',
+                table_name='sequencing',
+                column_name='sequencinginstrumentmodel',
+                data={'MiSeq': 10, 'NovaSeq': 5},
+            )
+        ]
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dist'},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Encounter')
+        self.assertContains(response, 'Instrument')
+        mock_svc.get_tables_with_columns.assert_called_once_with('warehouse', 'warehouse-dist')
+        mock_svc.get_stat_charts.assert_called_once_with('warehouse', 'warehouse-dist')
+
+    @patch('frontend.views.get_cached_schema_json')
+    @patch('frontend.views.get_cached_all_datasets')
+    @patch(_SERVICE_PATH)
+    def test_distribution_detail_handles_third_app_without_special_branches(
+        self,
+        mock_cls,
+        mock_get_all_datasets,
+        mock_get_schema,
+    ):
+        dataset = _make_test_dataset(app='third_source', name='third-dataset', title='Third Source')
+        dataset.distributions[0].name = 'third-dist'
+        dataset.distributions[0].title = 'Third Distribution'
+
+        mock_get_all_datasets.return_value = [dataset_to_dict(dataset)]
+        mock_get_schema.return_value = _mock_schema()
+
+        mock_svc = mock_cls.return_value
+        mock_svc.get_tables_with_columns.return_value = []
+        mock_svc.get_stat_charts.return_value = []
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'third_source', 'name': 'third-dist'},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Third Distribution')
+        mock_svc.get_tables_with_columns.assert_called_once_with('third_source', 'third-dist')
+        mock_svc.get_stat_charts.assert_called_once_with('third_source', 'third-dist')
+
+
 class MetadataApiViewTest(TestCase):
     """Tests for anonymous aggregate metadata API endpoints."""
 

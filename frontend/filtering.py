@@ -128,15 +128,16 @@ def _theme_label(value: str) -> str:
     return parts[-1] or value
 
 
-def _build_warehouse_distribution_index(
+def _build_distribution_index(
     datasets: list[FrontendDatasetDTO],
+    table_column_apps: set[str],
 ) -> tuple[list[str], dict[str, str]]:
-    """Build the minimal warehouse distribution inputs needed for column counting."""
+    """Build distribution inputs needed for structural column counting."""
     distribution_names: list[str] = []
     distribution_to_dataset: dict[str, str] = {}
 
     for dataset in datasets:
-        if dataset['app'] != 'warehouse':
+        if dataset['app'] not in table_column_apps:
             continue
         for distribution in dataset['distributions']:
             distribution_names.append(distribution['name'])
@@ -193,8 +194,9 @@ def build_sidebar_context(
             theme_counter[theme] += 1
         status_counter[dataset['status']] += 1
 
-    filtered_dist_names, dist_to_dataset = _build_warehouse_distribution_index(filtered)
     catalog_service = service or UnifiedCatalogService()
+    table_column_apps = set(catalog_service.get_apps_with_table_columns())
+    filtered_dist_names, dist_to_dataset = _build_distribution_index(filtered, table_column_apps)
     column_counter = catalog_service.build_column_counter(filtered_dist_names, dist_to_dataset)
     sidebar_counts: FrontendSidebarCountsDTO = {
         'ready': status_counter.get('ready', 0),

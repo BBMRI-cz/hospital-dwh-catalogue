@@ -141,13 +141,12 @@ class DistributionDetailView(LoginRequiredMixin, View):
         schema_json = get_cached_schema_json(service=service)
         dcat_rows = build_distribution_dcat_rows(schema_json, distribution)
 
-        tables: list[FrontendTableDTO] = []
-        if app != 'fair_genomes':
-            tables = normalise_tables(service.get_tables_with_columns(app, name))
-
-        charts: list[FrontendStatChartDTO] = []
-        if app == 'fair_genomes':
-            charts = normalise_stat_charts(service.get_stat_charts(app, name))
+        tables: list[FrontendTableDTO] = normalise_tables(
+            service.get_tables_with_columns(app, name)
+        )
+        charts: list[FrontendStatChartDTO] = normalise_stat_charts(
+            service.get_stat_charts(app, name)
+        )
 
         chart_groups = build_chart_groups(charts)
 

@@ -1,13 +1,11 @@
 {% load i18n %}
 {% comment %}
   Per-table column modal.
-  Variables expected (pass via {% include … with tbl=tbl idx=forloop.counter app=app %}):
+  Variables expected (pass via {% include … with tbl=tbl idx=forloop.counter %}):
     tbl  — typed frontend table payload (name, title, description, url, columns[])
     idx  — outer loop counter (integer) — used for unique element IDs
-    app  — source app name (e.g. 'fair_genomes' or 'warehouse')
 {% endcomment %}
 <dialog id="tbl-modal-{{ idx }}" class="modal modal-middle"
-  style="border:none;background:transparent;padding:0;"
   data-modal-dismiss>
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden"
        style="width:min(92vw,56rem);max-width:92vw;max-height:88vh;border-radius:0.75rem;display:flex;flex-direction:column;">
@@ -22,7 +20,7 @@
             <div class="w-0.5 h-4 rounded shrink-0 bg-mou-cyan"></div>
             <span class="font-mono text-[9.5px] uppercase tracking-widest text-mou-cyan">csvw:Table</span>
             {% include "includes/_info_btn.html" with semantics="csvw:Table" %}
-            <span class="badge font-mono text-[11px] px-2 py-0.5 rounded shrink-0 bg-mou-blue-light text-mou-blue border border-mou-blue-border">{{ tbl.name }}</span>
+            <span class="font-mono text-[11px] px-2 py-0.5 rounded shrink-0 bg-mou-blue-light text-mou-blue border border-mou-blue-border">{{ tbl.name }}</span>
           </div>
 
           <!-- title -->
@@ -38,7 +36,7 @@
         </div>
         <!-- close button -->
         <form method="dialog" class="shrink-0 -mt-1">
-          <button class="btn btn-sm btn-ghost btn-circle">
+          <button class="inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -135,20 +133,6 @@
       <p class="text-center py-10 text-sm text-txt-muted italic">{% trans "No columns available." %}</p>
       {% endif %}
     </div>
-
-    <!-- ── Footer ───────────────────────────────────────────────────── -->
-    {% if tbl.url %}
-    <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 shrink-0">
-      <a href="{{ tbl.url }}" target="_blank" rel="noopener"
-         class="inline-flex items-center gap-1.5 font-mono text-xs no-underline transition-colors text-mou-cyan">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-        {% if app == 'fair_genomes' %}{% trans "Open in MOLGENIS" %}{% else %}{% trans "View source" %}{% endif %}
-      </a>
-    </div>
-    {% endif %}
 
   </div>
 </dialog>

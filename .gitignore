@@ -10,6 +10,9 @@ staticfiles/
 logs/*.log
 logs/*.log.*
 
+# Tailwind compiled output — generated at container startup by startup.py
+frontend/static/css/tailwind.css
+
 
 # Backup files # 
 *.bak 

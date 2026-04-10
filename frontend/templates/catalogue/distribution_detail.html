@@ -43,8 +43,8 @@
   </div>
 
   <!-- DCAT Metadata card -->
-  <div class="card bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
-    <div class="card-body p-0">
+  <div class="bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
+    <div class="p-0">
       {% trans "Distribution Metadata" as t_dist_meta %}
       {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-orange" csh_text_class="text-mou-orange" csh_label=t_dist_meta %}
       <div class="grid grid-cols-1 sm:grid-cols-2">
@@ -57,14 +57,14 @@
     </div>
   </div>
 
-  <!-- Value distribution charts (fair_genomes aggregation data) -->
+  <!-- Value distribution charts -->
   {% if chart_groups %}
   {% include 'catalogue/components/_stat_charts.html' with chart_groups=chart_groups charts=charts %}
   {% endif %}
 
   <!-- Tables and columns — same component for all apps -->
   {% if tables %}
-  {% include 'catalogue/components/_table_list.html' with tables=tables app=app %}
+  {% include 'catalogue/components/_table_list.html' with tables=tables %}
   {% endif %}
 
 </div>

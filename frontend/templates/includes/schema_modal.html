@@ -1,7 +1,6 @@
 {% load i18n static %}
 <!-- Schema Info Modal — populated by showSchemaModal(semantics) JS function -->
 <dialog id="schema-modal" class="modal modal-middle"
-  style="border:none;background:transparent;padding:0;"
   data-schema-modal>
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden" style="width:32rem;max-width:calc(100vw - 2rem);border-radius:1rem;">
 
@@ -13,7 +12,7 @@
       </div>
       <div class="flex items-start gap-3">
         <span id="sm-prefix"
-          class="badge font-mono text-[11px] px-2 py-0.5 shrink-0 mt-1 rounded bg-mou-blue-light text-mou-blue border border-mou-blue-border"></span>
+          class="font-mono text-[11px] px-2 py-0.5 shrink-0 mt-1 rounded bg-mou-blue-light text-mou-blue border border-mou-blue-border"></span>
         <div class="min-w-0">
           <h3 id="sm-label" class="font-serif text-xl leading-tight text-gray-900"></h3>
           <p id="sm-name" class="font-mono text-[11px] text-txt-muted mt-0.5 truncate"></p>

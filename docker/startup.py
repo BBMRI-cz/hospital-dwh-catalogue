@@ -7,6 +7,8 @@ Called by docker/entrypoint.sh before the main server command.
 
 import logging
 import os
+import shutil
+import subprocess
 from pathlib import Path
 
 import django
@@ -117,6 +119,33 @@ def _translations_need_compile(locale_dir: Path) -> bool:
     return False
 
 
+def _build_tailwind_css(base_dir: Path) -> None:
+    """Build Tailwind CSS from source using the standalone CLI.
+
+    Runs on every startup so the compiled CSS stays in sync with template
+    changes when the source tree is volume-mounted in dev.  Skips gracefully
+    when the ``tailwindcss`` binary is not available (e.g. unit-test runners
+    that execute this script outside the container).
+    """
+    if not shutil.which('tailwindcss'):
+        print('tailwindcss binary not found — skipping CSS build.', flush=True)
+        return
+
+    result = subprocess.run(  # noqa: S603
+        [
+            'tailwindcss',
+            '-c', str(base_dir / 'tailwind.config.js'),
+            '-i', str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.input.css'),
+            '-o', str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.css'),
+            '--minify',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f'Tailwind CSS build failed:\n{result.stderr}', flush=True)
+    else:
+        print('Tailwind CSS built successfully.', flush=True)
 def main() -> None:
     django.setup()
 
@@ -131,6 +160,18 @@ def main() -> None:
 
     # default: ticketing and anything else
     call_command('migrate', interactive=False, verbosity=1)
+
+    # Repair drifted default migration state where ticketing 0001 is marked applied
+    # but the table is missing (DB was reset/replaced without clearing django_migrations).
+    default_tables = connections['default'].introspection.table_names()
+    if 'ticketing_ticket_request' not in default_tables:
+        print(
+            'default migration drift detected (missing ticketing_ticket_request). '
+            'Repairing migration state...',
+            flush=True,
+        )
+        call_command('migrate', 'ticketing', 'zero', fake=True, interactive=False)
+        call_command('migrate', 'ticketing', interactive=False)
 
     # fair_genomes_db: fair_genomes app
     call_command('migrate', database='fair_genomes_db', interactive=False, verbosity=1)
@@ -168,6 +209,10 @@ def main() -> None:
     if os.environ.get('MOCK_FAIR_GENOMES', 'False') == 'True':
         print('MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data...', flush=True)
         call_command('seed_fair_genomes_mock')
+
+    # ── Tailwind CSS ──────────────────────────────────────────────────────────
+    base_dir = Path(__file__).resolve().parent.parent
+    _build_tailwind_css(base_dir)
 
     # ── Translations ──────────────────────────────────────────────────────────
     locale_dir = Path(__file__).resolve().parent.parent / 'locale'

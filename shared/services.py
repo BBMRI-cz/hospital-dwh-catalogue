@@ -57,6 +57,11 @@ def derive_status(access_rights: str | None) -> str:
     return 'raw'
 
 
+# Apps whose distributions carry structural table/column metadata.
+# Used by the sidebar column filter and the export queryset prefetch.
+_APPS_WITH_TABLE_COLUMNS: frozenset[str] = frozenset({'warehouse'})
+
+
 class UnifiedCatalogService:
     """
     Aggregates catalogue data from all registered source apps.
@@ -67,6 +72,10 @@ class UnifiedCatalogService:
         datasets = service.get_datasets()
         distributions = service.get_distributions()
     """
+
+    def get_apps_with_table_columns(self) -> frozenset[str]:
+        """Return source app identifiers that provide structural table/column metadata."""
+        return _APPS_WITH_TABLE_COLUMNS
 
     def get_datasets(self) -> list[UnifiedDataset]:
         """
@@ -196,10 +205,9 @@ class UnifiedCatalogService:
             return {}
 
     def get_dataset_names_by_columns(self, column_titles: set[str]) -> frozenset[str]:
-        """Return dataset names with warehouse columns matching the requested titles."""
+        """Return dataset names whose distributions contain columns matching *column_titles*."""
         if not column_titles:
             return frozenset()
-
         try:
             from warehouse.services import WarehouseMetadataService
 
@@ -216,7 +224,6 @@ class UnifiedCatalogService:
         """Build sidebar column counts for warehouse distributions."""
         if not filtered_dist_names:
             return Counter()
-
         try:
             from warehouse.services import WarehouseMetadataService
 
@@ -225,16 +232,15 @@ class UnifiedCatalogService:
                 dist_to_dataset,
             )
         except Exception:
-            logger.exception('Failed to build warehouse column counter')
+            logger.exception('Failed to build column counter')
             return Counter()
 
     def get_tables_with_columns(self, app: str, distribution_name: str) -> list[UnifiedTable]:
-        """Return canonical table/column read models for a distribution."""
-        if app != 'warehouse':
-            if app != 'fair_genomes':
-                logger.warning('Unsupported table metadata app requested: %s', app)
-            return []
+        """Return canonical table/column read models for a distribution.
 
+        Calls WarehouseMetadataService unconditionally — it returns [] naturally
+        for distribution names that have no warehouse tables.
+        """
         try:
             from warehouse.services import WarehouseMetadataService
 
@@ -266,12 +272,11 @@ class UnifiedCatalogService:
         ]
 
     def get_stat_charts(self, app: str, distribution_name: str) -> list[UnifiedStatChart]:
-        """Return canonical stat chart read models for a distribution."""
-        if app != 'fair_genomes':
-            if app != 'warehouse':
-                logger.warning('Unsupported stat chart app requested: %s', app)
-            return []
+        """Return canonical stat chart read models for a distribution.
 
+        Calls WarehouseMetadataService unconditionally — it returns [] naturally
+        for distribution names that have no stat chart definitions.
+        """
         try:
             from warehouse.services import WarehouseMetadataService
 
@@ -319,7 +324,7 @@ class UnifiedCatalogService:
         )
 
         queryset = queryset.prefetch_related('distributions')
-        if app == 'warehouse':
+        if app in _APPS_WITH_TABLE_COLUMNS:
             queryset = queryset.prefetch_related('distributions__tables__columns')
 
         return queryset
