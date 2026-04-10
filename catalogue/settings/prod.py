@@ -144,3 +144,9 @@ SESSION_CACHE_ALIAS = 'default'
 
 ADMINS = [('Admin', config('ADMIN_EMAIL', default='admin@example.com'))]
 MANAGERS = ADMINS
+
+# Content-hashed filenames so browser caches are busted automatically on deploy.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'},
+}
