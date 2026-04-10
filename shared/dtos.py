@@ -66,3 +66,122 @@ class UnifiedDistribution:
     licence: str | None = None
     # Warehouse-specific; None for FAIR Genomes distributions
     db_layer: str | None = None
+
+
+@dataclass
+class UnifiedTableColumn:
+    name: str
+    title: str | None = None
+    description: str | None = None
+    datatype: str | None = None
+    property_url: str | None = None
+
+
+@dataclass
+class UnifiedTable:
+    name: str
+    title: str
+    description: str
+    url: str | None = None
+    columns: list[UnifiedTableColumn] = field(default_factory=list)
+
+
+@dataclass
+class UnifiedStatChart:
+    label: str
+    table_name: str
+    column_name: str
+    data: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass
+class ExportContactPoint:
+    app: str
+    identifier: str
+    email: str | None = None
+    contact_page: str | None = None
+
+
+@dataclass
+class ExportAgent:
+    app: str
+    name: str
+    description: str | None = None
+    contact_point: ExportContactPoint | None = None
+
+
+@dataclass
+class ExportColumn:
+    name: str
+    title: str | None = None
+    description: str | None = None
+    datatype: str | None = None
+    property_url: str | None = None
+
+
+@dataclass
+class ExportTable:
+    name: str
+    title: str | None = None
+    description: str | None = None
+    url: str | None = None
+    columns: list[ExportColumn] = field(default_factory=list)
+
+
+@dataclass
+class ExportDistribution:
+    app: str
+    name: str
+    title: str | None = None
+    description: str | None = None
+    access_url: str | None = None
+    applicable_legislation: str | None = None
+    format: str | None = None
+    conforms_to: str | None = None
+    byte_size: int | None = None
+    rights: str | None = None
+    release_date: str | None = None
+    modification_date: str | None = None
+    licence: str | None = None
+    db_layer: str | None = None
+    tables: list[ExportTable] = field(default_factory=list)
+
+
+@dataclass
+class ExportCatalog:
+    app: str
+    name: str
+    title: str | None = None
+    description: str | None = None
+    applicable_legislation: str | None = None
+    publisher: ExportAgent | None = None
+    datasets: list[ExportDataset] = field(default_factory=list)
+
+
+@dataclass
+class ExportDataset:
+    app: str
+    name: str
+    title: str | None = None
+    version: str | None = None
+    description: str | None = None
+    identifier: str | None = None
+    type: str | None = None
+    theme: str | None = None
+    publisher: ExportAgent | None = None
+    conforms_to: str | None = None
+    issued: str | None = None
+    modified: str | None = None
+    keywords: list[str] = field(default_factory=list)
+    source_name: str | None = None
+    source_identifier: str | None = None
+    creator: ExportAgent | None = None
+    contact_point: ExportContactPoint | None = None
+    provenance: str | None = None
+    catalog: ExportCatalog | None = None
+    access_rights: str | None = None
+    applicable_legislation: str | None = None
+    health_category: str | None = None
+    hdab: ExportAgent | None = None
+    custodian: ExportAgent | None = None
+    distributions: list[ExportDistribution] = field(default_factory=list)

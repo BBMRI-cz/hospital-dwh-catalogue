@@ -1,14 +1,4 @@
-"""
-Shared JSON-LD / RDF export utilities for HealthDCAT-AP datasets.
-
-Extracted from warehouse/views.py so that both warehouse and fair_genomes
-can produce identical JSON-LD output without duplicating logic.
-
-Public API:
-  build_jsonld(ds_dict)      — turns a serialised dataset dict into a JSON-LD document
-  build_turtle(ds_dict)      — turns a serialised dataset dict into Turtle (text/turtle)
-  has_distributions(ds_dict) — returns False when a dataset has no distributions
-"""
+"""HealthDCAT-AP Release 6 JSON-LD / Turtle export utilities."""
 
 from __future__ import annotations
 
@@ -16,45 +6,65 @@ import json
 import logging
 import re
 
-from django.conf import settings
+from shared.dtos import (
+    ExportAgent,
+    ExportCatalog,
+    ExportContactPoint,
+    ExportDataset,
+    ExportDistribution,
+)
+from shared.export_types import (
+    ExportResource,
+    JsonLdAgentNode,
+    JsonLdAgentValue,
+    JsonLdCatalogNode,
+    JsonLdColumnNode,
+    JsonLdContactPointNode,
+    JsonLdContactPointValue,
+    JsonLdContext,
+    JsonLdDatasetNode,
+    JsonLdDistributionNode,
+    JsonLdDocument,
+    JsonLdGraph,
+    JsonLdGraphNode,
+    JsonLdIdRef,
+    JsonLdIdRefList,
+    JsonLdLiteralOrUri,
+    JsonLdLiteralOrUriList,
+    JsonLdTableGroupNode,
+    JsonLdTableNode,
+    JsonLdTypedValue,
+)
 
 logger = logging.getLogger(__name__)
 
-# Matches a CURIE like ``dcat:Dataset`` or ``dct:title`` but NOT a full URI
-# (which contains ``://``).  Group 1 is the prefix name.
 _CURIE_RE = re.compile(r'^([A-Za-z][A-Za-z0-9_-]*):[^/]')
 
 
 def _collect_used_prefixes(obj: object, prefixes: set[str]) -> None:
-    """Recursively walk *obj* and add every CURIE prefix found to *prefixes*."""
+    """Recursively walk *obj* and collect CURIE prefixes used in keys and values."""
     if isinstance(obj, dict):
         for key, value in obj.items():
             if not key.startswith('@'):
-                m = _CURIE_RE.match(key)
-                if m:
-                    prefixes.add(m.group(1))
+                match = _CURIE_RE.match(key)
+                if match:
+                    prefixes.add(match.group(1))
             _collect_used_prefixes(value, prefixes)
-    elif isinstance(obj, list):
+        return
+
+    if isinstance(obj, list):
         for item in obj:
             _collect_used_prefixes(item, prefixes)
-    elif isinstance(obj, str) and not obj.startswith('@'):
-        m = _CURIE_RE.match(obj)
-        if m:
-            prefixes.add(m.group(1))
+        return
+
+    if isinstance(obj, str) and not obj.startswith('@'):
+        match = _CURIE_RE.match(obj)
+        if match:
+            prefixes.add(match.group(1))
 
 
-def _build_context() -> dict[str, str]:
-    """
-    Build the JSON-LD @context prefix map.
-
-    Loads namespace prefixes from the HealthDCAT-AP SHACL shape files via the
-    schema registry (base ``shacl/dcat-ap-SHACL.ttl`` + HealthDCAT-AP specific
-    ``html/shacl/public-shapes.ttl``), so the map stays in sync with whatever
-    version of the submodule is checked out.
-
-    Falls back gracefully to an empty dict if the registry is unavailable
-    (submodule absent, rdflib not installed, etc.).
-    """
+def _build_context() -> JsonLdContext:
+    """Load namespace prefixes from the schema registry."""
     try:
         from schema_registry.services import get_context_prefixes
 
@@ -66,142 +76,472 @@ def _build_context() -> dict[str, str]:
         return {}
 
 
-# ── CSVW / distribution helpers ──────────────────────────────────────────────
+def _catalog_iri(app: str, name: str) -> str | None:
+    if _is_http_uri(name):
+        return name
+    return None
 
 
-def _build_column(col: dict) -> dict:
-    """Build a ``csvw:Column`` node from a column dict."""
-    node: dict = {
-        '@type': 'csvw:Column',
-        'csvw:name': col['name'],
-        'csvw:titles': col.get('title') or col['name'],
-        'csvw:datatype': col.get('datatype') or '',
-        'dct:description': col.get('description') or '',
-    }
-    if col.get('property_url'):
-        node['csvw:propertyUrl'] = {'@id': col['property_url']}
+def _dataset_iri(identifier: str | None = None) -> str | None:
+    """Return the dataset IRI from its identifier, or None when absent."""
+    return identifier if identifier else None
+
+
+def _distribution_iri(access_url: str | None = None) -> str | None:
+    """Return the distribution IRI from its access URL, or None when absent."""
+    return access_url if access_url else None
+
+
+def _agent_iri(app: str, name: str) -> str | None:
+    if _is_http_uri(name):
+        return name
+    return None
+
+
+def _contact_point_iri(contact_point: ExportContactPoint) -> str | None:
+    if contact_point.contact_page:
+        return contact_point.contact_page
+    if contact_point.email:
+        return f'mailto:{contact_point.email}'
+    return None
+
+
+def _split_values(value: str | None) -> list[str]:
+    return [item.strip() for item in (value or '').split(',') if item.strip()]
+
+
+def _is_http_uri(value: str | None) -> bool:
+    if not value:
+        return False
+    return value.startswith('http://') or value.startswith('https://')
+
+
+def _id_ref(value: str) -> JsonLdIdRef:
+    return {'@id': value}
+
+
+def _maybe_uri_ref(value: str | None) -> JsonLdLiteralOrUri | None:
+    if not value:
+        return None
+    if _is_http_uri(value):
+        return _id_ref(value)
+    return value
+
+
+def _typed_value(value_type: str, value: str) -> JsonLdTypedValue:
+    return {'@type': value_type, '@value': value}
+
+
+def _typed_any_uri(value: str | None) -> JsonLdTypedValue | None:
+    if not value:
+        return None
+    return _typed_value('xsd:anyURI', value)
+
+
+def _typed_datetime(value: str | None) -> JsonLdTypedValue | None:
+    if not value:
+        return None
+    return _typed_value('xsd:dateTime', value)
+
+
+def _append_node(graph: JsonLdGraph, seen: set[str], node: JsonLdGraphNode) -> None:
+    iri = node.get('@id')
+    if iri is None:
+        graph.append(node)
+        return
+    if iri in seen:
+        return
+    graph.append(node)
+    seen.add(iri)
+
+
+def _build_contact_point_node(contact_point: ExportContactPoint) -> JsonLdContactPointNode:
+    node: JsonLdContactPointNode = {'@type': ['cv:ContactPoint', 'vcard:Kind']}
+    contact_point_iri = _contact_point_iri(contact_point)
+    if contact_point_iri is not None:
+        node['@id'] = contact_point_iri
+    if contact_point.email:
+        node['cv:email'] = contact_point.email
+        node['vcard:hasEmail'] = _id_ref(f'mailto:{contact_point.email}')
+    if contact_point.contact_page:
+        node['cv:contactPage'] = _id_ref(contact_point.contact_page)
+        node['vcard:hasURL'] = _id_ref(contact_point.contact_page)
     return node
 
 
-def _build_table(table: dict) -> dict:
-    """Build a ``csvw:Table`` node from a table dict."""
-    node: dict = {
-        '@type': 'csvw:Table',
-        'dct:title': table.get('title') or table['name'],
-    }
-    if table.get('url'):
-        node['csvw:url'] = {'@id': table['url']}
-    columns = table.get('columns', [])
-    if columns:
-        node['csvw:column'] = [_build_column(c) for c in columns]
+def _ensure_contact_point(
+    contact_point: ExportContactPoint | None,
+    graph: JsonLdGraph,
+    seen: set[str],
+) -> JsonLdContactPointValue | None:
+    if contact_point is None:
+        return None
+    node = _build_contact_point_node(contact_point)
+    contact_point_iri = node.get('@id')
+    if contact_point_iri is not None:
+        _append_node(graph, seen, node)
+        return _id_ref(contact_point_iri)
     return node
 
 
-def _build_table_group(tables: list[dict]) -> dict:
-    """Build a ``csvw:TableGroup`` node from a list of table dicts."""
-    return {
+def _build_agent_node(agent: ExportAgent, graph: JsonLdGraph, seen: set[str]) -> JsonLdAgentValue:
+    contact_point_value = _ensure_contact_point(agent.contact_point, graph, seen)
+    node: JsonLdAgentNode = {
+        '@type': 'foaf:Agent',
+        'foaf:name': agent.name,
+    }
+    agent_iri = _agent_iri(agent.app, agent.name)
+    if agent_iri is not None:
+        node['@id'] = agent_iri
+    if agent.description:
+        node['dct:description'] = agent.description
+    if contact_point_value is not None:
+        node['cv:contactPoint'] = contact_point_value
+    if agent_iri is not None:
+        _append_node(graph, seen, node)
+        return _id_ref(agent_iri)
+    return node
+
+
+def _uri_list(values: str | None) -> JsonLdIdRefList:
+    return [_id_ref(value) for value in _split_values(values) if _is_http_uri(value)]
+
+
+def _literal_or_uri_list(values: str | None) -> JsonLdLiteralOrUriList:
+    result: JsonLdLiteralOrUriList = []
+    for value in _split_values(values):
+        result.append(_id_ref(value) if _is_http_uri(value) else value)
+    return result
+
+
+def _build_table_group(distribution: ExportDistribution) -> JsonLdTableGroupNode | None:
+    if not distribution.tables:
+        return None
+    table_group: JsonLdTableGroupNode = {
         '@type': 'csvw:TableGroup',
-        'csvw:table': [_build_table(t) for t in tables],
+        'csvw:table': [],
     }
 
+    for table in distribution.tables:
+        table_node: JsonLdTableNode = {
+            '@type': 'csvw:Table',
+            'csvw:name': table.name,
+            'csvw:column': [],
+        }
+        if table.title:
+            table_node['dct:title'] = table.title
+        if table.description:
+            table_node['dct:description'] = table.description
+        if table.url:
+            table_node['csvw:url'] = _id_ref(table.url)
 
-def _build_distribution(d: dict, base: str) -> dict:
-    """Build a single ``dcat:Distribution`` node, optionally with CSVW tables."""
-    node: dict = {
-        '@type': ['dcat:Distribution', 'healthdcatap:HealthDistribution'],
-        '@id': f'{base}/distribution/{d["name"]}',
-        'dct:title': [{'@language': 'cs', '@value': d['title']}],
-        'dcat:accessURL': {'@id': d.get('access_url') or ''},
-        'dct:format': d.get('format') or '',
-        'dcatap:applicableLegislation': {'@id': d.get('applicable_legislation') or ''},
+        columns: list[JsonLdColumnNode] = []
+        for column in table.columns:
+            column_node: JsonLdColumnNode = {
+                '@type': 'csvw:Column',
+                'csvw:name': column.name,
+            }
+            if column.title:
+                column_node['dct:title'] = column.title
+            if column.description:
+                column_node['dct:description'] = column.description
+            if column.datatype:
+                column_node['csvw:datatype'] = column.datatype
+            if column.property_url:
+                column_node['csvw:propertyUrl'] = _id_ref(column.property_url)
+            columns.append(column_node)
+
+        table_node['csvw:column'] = columns
+        table_group['csvw:table'].append(table_node)
+
+    return table_group
+
+
+def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistributionNode:
+    node: JsonLdDistributionNode = {
+        '@type': 'dcat:Distribution',
     }
-    if d.get('db_layer'):
-        node['healthdcatap:dbLayer'] = d['db_layer']
-    tables = d.get('tables', [])
-    if tables:
-        node['adms:sample'] = _build_table_group(tables)
+    iri = _distribution_iri(distribution.access_url)
+    if iri is not None:
+        node['@id'] = iri
+    if distribution.title:
+        node['dct:title'] = distribution.title
+    if distribution.description:
+        node['dct:description'] = distribution.description
+    if distribution.access_url:
+        node['dcat:accessURL'] = _id_ref(distribution.access_url)
+    if distribution.applicable_legislation:
+        node['dcatap:applicableLegislation'] = _id_ref(distribution.applicable_legislation)
+    format_value = _maybe_uri_ref(distribution.format)
+    if format_value is not None:
+        node['dct:format'] = format_value
+    conforms_to = _literal_or_uri_list(distribution.conforms_to)
+    if conforms_to:
+        node['dct:conformsTo'] = conforms_to[0] if len(conforms_to) == 1 else conforms_to
+    if distribution.byte_size is not None:
+        node['dcat:byteSize'] = distribution.byte_size
+    rights_value = _maybe_uri_ref(distribution.rights)
+    if rights_value is not None:
+        node['dct:rights'] = rights_value
+    licence_value = _maybe_uri_ref(distribution.licence)
+    if licence_value is not None:
+        node['dct:license'] = licence_value
+    issued = _typed_datetime(distribution.release_date)
+    if issued is not None:
+        node['dct:issued'] = issued
+    modified = _typed_datetime(distribution.modification_date)
+    if modified is not None:
+        node['dct:modified'] = modified
+    sample = _build_table_group(distribution)
+    if sample is not None:
+        node['adms:sample'] = sample
     return node
 
 
-def build_jsonld(ds_dict: dict) -> dict:
-    """Build a Health DCAT-AP JSON-LD document from a serialised dataset dict.
-
-    Changes vs. the original warehouse helper:
-    * @context is loaded from the HealthDCAT-AP SHACL TTL via the schema
-      registry instead of being hardcoded (falls back to _EXTRA_PREFIXES).
-    * Contact-point email is emitted as a ``mailto:`` URI (vcard:hasEmail, Change 1).
-    * ``geodcatap:custodian`` is emitted when present (Change 5).
-    * Distributions with tables emit a ``csvw:TableGroup`` / ``csvw:Table`` /
-      ``csvw:Column`` hierarchy following the HealthDCAT-AP ``adms:sample`` pattern.
-    """
-    base = settings.SITE_URL.rstrip('/')
-
-    # Normalise contact-point email to mailto: URI for RDF export (Change 1).
-    raw_email = ds_dict.get('contact_point') or ''
-    contact_email_iri = (
-        (raw_email if raw_email.startswith('mailto:') else f'mailto:{raw_email}')
-        if raw_email
-        else ''
+def _build_dataset_node(
+    dataset: ExportDataset, graph: JsonLdGraph, seen: set[str]
+) -> JsonLdDatasetNode:
+    publisher_value = (
+        _build_agent_node(dataset.publisher, graph, seen) if dataset.publisher else None
     )
+    creator_value = _build_agent_node(dataset.creator, graph, seen) if dataset.creator else None
+    hdab_value = _build_agent_node(dataset.hdab, graph, seen) if dataset.hdab else None
+    custodian_value = (
+        _build_agent_node(dataset.custodian, graph, seen) if dataset.custodian else None
+    )
+    contact_point_value = _ensure_contact_point(dataset.contact_point, graph, seen)
 
-    custodian_name = ds_dict.get('custodian')
+    node: JsonLdDatasetNode = {
+        '@type': 'dcat:Dataset',
+    }
+    iri = _dataset_iri(dataset.identifier)
+    if iri is not None:
+        node['@id'] = iri
+    if dataset.title:
+        node['dct:title'] = dataset.title
+    if dataset.description:
+        node['dct:description'] = dataset.description
+    identifier = _typed_any_uri(dataset.identifier)
+    if identifier is not None:
+        node['dct:identifier'] = identifier
+    if dataset.version:
+        node['dcat:version'] = dataset.version
+    theme_values = _uri_list(dataset.theme)
+    if theme_values:
+        node['dcat:theme'] = theme_values[0] if len(theme_values) == 1 else theme_values
+    if publisher_value is not None:
+        node['dct:publisher'] = publisher_value
+    if creator_value is not None:
+        node['dct:creator'] = creator_value
+    conforms_to = _literal_or_uri_list(dataset.conforms_to)
+    if conforms_to:
+        node['dct:conformsTo'] = conforms_to[0] if len(conforms_to) == 1 else conforms_to
+    issued = _typed_datetime(dataset.issued)
+    if issued is not None:
+        node['dct:issued'] = issued
+    modified = _typed_datetime(dataset.modified)
+    if modified is not None:
+        node['dct:modified'] = modified
+    if dataset.keywords:
+        node['dcat:keyword'] = dataset.keywords
+    if dataset.source_name:
+        source_iri = _dataset_iri(dataset.source_identifier)
+        if source_iri is not None:
+            node['dct:source'] = _id_ref(source_iri)
+    if contact_point_value is not None:
+        node['dcat:contactPoint'] = contact_point_value
+    if dataset.provenance:
+        node['dct:provenance'] = dataset.provenance
+    if dataset.access_rights:
+        node['dct:accessRights'] = _id_ref(dataset.access_rights)
+    applicable_legislation = _uri_list(dataset.applicable_legislation)
+    if applicable_legislation:
+        node['dcatap:applicableLegislation'] = (
+            applicable_legislation[0]
+            if len(applicable_legislation) == 1
+            else applicable_legislation
+        )
+    if dataset.health_category:
+        node['healthdcatap:healthCategory'] = _id_ref(dataset.health_category)
+    if hdab_value is not None:
+        node['healthdcatap:hdab'] = hdab_value
+    if custodian_value is not None:
+        node['geodcatap:custodian'] = custodian_value
+    dataset_types = _uri_list(dataset.type)
+    if dataset_types:
+        node['dct:type'] = dataset_types[0] if len(dataset_types) == 1 else dataset_types
+    if dataset.distributions:
+        dist_refs = [
+            _id_ref(iri)
+            for distribution in dataset.distributions
+            if (iri := _distribution_iri(distribution.access_url)) is not None
+        ]
+        if dist_refs:
+            node['dcat:distribution'] = dist_refs
+    return node
 
-    body: dict = {
-        '@type': ['dcat:Dataset', 'healthdcatap:HealthDataset'],
-        '@id': f'{base}/dataset/{ds_dict["app"]}/{ds_dict["name"]}',
-        'dct:title': [{'@language': 'cs', '@value': ds_dict['title']}],
-        'dct:description': [{'@language': 'cs', '@value': ds_dict.get('description') or ''}],
-        'dcat:keyword': ds_dict.get('keywords', []),
-        'dct:rightsHolder': {
-            '@type': 'org:Organization',
-            'foaf:name': ds_dict.get('custodian') or '',
-        },
-        'dct:publisher': {'@type': 'org:Organization', 'foaf:name': ds_dict.get('publisher') or ''},
-        'dct:accessRights': {'@id': ds_dict.get('access_rights') or ''},
-        'healthdcatap:hasHealthCategory': {'@id': ds_dict.get('health_category') or ''},
-        'dcatap:applicableLegislation': {'@id': ds_dict.get('applicable_legislation') or ''},
-        'dcat:distribution': [
-            _build_distribution(d, base) for d in ds_dict.get('distributions', [])
+
+def _add_distributions(dataset: ExportDataset, graph: JsonLdGraph, seen: set[str]) -> None:
+    for distribution in dataset.distributions:
+        _append_node(graph, seen, _build_distribution_node(distribution))
+
+
+def _append_dataset_resource(
+    dataset: ExportDataset,
+    graph: JsonLdGraph,
+    seen: set[str],
+    *,
+    include_catalog: bool,
+) -> None:
+    if include_catalog and dataset.catalog is not None:
+        dataset_iri = _dataset_iri(dataset.identifier)
+        dataset_refs = [_id_ref(dataset_iri)] if dataset_iri is not None else []
+        catalog_node: JsonLdCatalogNode = {
+            '@type': 'dcat:Catalog',
+            'dcat:dataset': dataset_refs,
+        }
+        catalog_iri = _catalog_iri(dataset.catalog.app, dataset.catalog.name)
+        if catalog_iri is not None:
+            catalog_node['@id'] = catalog_iri
+        if dataset.catalog.title:
+            catalog_node['dct:title'] = dataset.catalog.title
+        if dataset.catalog.description:
+            catalog_node['dct:description'] = dataset.catalog.description
+        if dataset.catalog.applicable_legislation:
+            catalog_node['dcatap:applicableLegislation'] = _id_ref(
+                dataset.catalog.applicable_legislation
+            )
+        if dataset.catalog.publisher is not None:
+            catalog_node['dct:publisher'] = _build_agent_node(
+                dataset.catalog.publisher, graph, seen
+            )
+        _append_node(graph, seen, catalog_node)
+
+    dataset_node = _build_dataset_node(dataset, graph, seen)
+    _append_node(graph, seen, dataset_node)
+    _add_distributions(dataset, graph, seen)
+
+
+def _dataset_graph(dataset: ExportDataset) -> JsonLdGraph:
+    graph: JsonLdGraph = []
+    seen: set[str] = set()
+
+    _append_dataset_resource(dataset, graph, seen, include_catalog=True)
+    return graph
+
+
+def _append_catalog_resource(
+    catalog: ExportCatalog,
+    graph: JsonLdGraph,
+    seen: set[str],
+) -> None:
+    catalog_node: JsonLdCatalogNode = {
+        '@type': 'dcat:Catalog',
+        'dcat:dataset': [
+            _id_ref(iri)
+            for dataset in catalog.datasets
+            if (iri := _dataset_iri(dataset.identifier)) is not None
         ],
     }
+    catalog_iri = _catalog_iri(catalog.app, catalog.name)
+    if catalog_iri is not None:
+        catalog_node['@id'] = catalog_iri
+    if catalog.title:
+        catalog_node['dct:title'] = catalog.title
+    if catalog.description:
+        catalog_node['dct:description'] = catalog.description
+    if catalog.applicable_legislation:
+        catalog_node['dcatap:applicableLegislation'] = _id_ref(catalog.applicable_legislation)
+    if catalog.publisher is not None:
+        catalog_node['dct:publisher'] = _build_agent_node(catalog.publisher, graph, seen)
+    _append_node(graph, seen, catalog_node)
 
-    if contact_email_iri:
-        body['dcat:contactPoint'] = {
-            '@type': 'vcard:Kind',
-            'vcard:hasEmail': {'@id': contact_email_iri},
-        }
+    for dataset in catalog.datasets:
+        _append_dataset_resource(dataset, graph, seen, include_catalog=False)
 
-    if custodian_name:
-        body['geodcatap:custodian'] = {
-            '@type': 'foaf:Agent',
-            'foaf:name': custodian_name,
-        }
 
-    # Build @context with only the prefixes actually used in this document.
+def _catalog_graph(catalog: ExportCatalog) -> JsonLdGraph:
+    graph: JsonLdGraph = []
+    seen: set[str] = set()
+
+    _append_catalog_resource(catalog, graph, seen)
+
+    return graph
+
+
+def _complete_graph(
+    catalogs: list[ExportCatalog],
+    orphan_datasets: list[ExportDataset],
+) -> JsonLdGraph:
+    graph: JsonLdGraph = []
+    seen: set[str] = set()
+
+    for catalog in catalogs:
+        _append_catalog_resource(catalog, graph, seen)
+
+    for dataset in orphan_datasets:
+        _append_dataset_resource(dataset, graph, seen, include_catalog=False)
+
+    return graph
+
+
+def _build_document(graph: JsonLdGraph) -> JsonLdDocument:
     used: set[str] = set()
-    _collect_used_prefixes(body, used)
+    _collect_used_prefixes({'@graph': graph}, used)
+
     full_context = _build_context()
-    context = {k: v for k, v in full_context.items() if k in used}
-    # Set @base so relative URIs resolve against SITE_URL (not file://).
-    context['@base'] = f'{base}/'
-
-    return {'@context': context, **body}
+    context = {key: value for key, value in full_context.items() if key in used}
+    return {'@context': context, '@graph': graph}
 
 
-def has_distributions(ds_dict: dict) -> bool:
-    """Return True if the serialised dataset dict contains at least one distribution."""
-    return bool(ds_dict.get('distributions'))
+def build_jsonld(resource: ExportResource) -> JsonLdDocument:
+    """Build a HealthDCAT-AP Release 6 JSON-LD document for a dataset or catalog."""
+    if isinstance(resource, ExportDataset):
+        graph = _dataset_graph(resource)
+    elif isinstance(resource, ExportCatalog):
+        graph = _catalog_graph(resource)
+    else:
+        raise TypeError(f'Unsupported export resource: {type(resource)!r}')
+
+    return _build_document(graph)
 
 
-def build_turtle(ds_dict: dict) -> str:
-    """Build a HealthDCAT-AP Turtle serialisation from a serialised dataset dict.
+def build_complete_jsonld(
+    catalogs: list[ExportCatalog],
+    orphan_datasets: list[ExportDataset],
+) -> JsonLdDocument:
+    """Build one aggregate JSON-LD export document for all catalog resources."""
+    return _build_document(_complete_graph(catalogs, orphan_datasets))
 
-    Uses rdflib to convert the JSON-LD document produced by ``build_jsonld``
-    to Turtle format.  Returns a UTF-8 string.
-    """
+
+def has_distributions(dataset: ExportDataset) -> bool:
+    """Return True if the export dataset contains at least one distribution."""
+    return bool(dataset.distributions)
+
+
+def dump_jsonld(document: JsonLdDocument) -> str:
+    """Serialise a JSON-LD document to a stable pretty-printed string."""
+    return json.dumps(document, indent=2, ensure_ascii=False)
+
+
+def build_turtle(resource: ExportResource) -> str:
+    """Serialise the JSON-LD export document to Turtle."""
     from rdflib import Graph  # type: ignore[import-untyped]
 
-    jsonld = build_jsonld(ds_dict)
-    g = Graph()
-    g.parse(data=json.dumps(jsonld), format='json-ld')
-    return g.serialize(format='turtle')
+    jsonld = build_jsonld(resource)
+    graph = Graph()
+    graph.parse(data=dump_jsonld(jsonld), format='json-ld')
+    return graph.serialize(format='turtle')
+
+
+def build_complete_turtle(
+    catalogs: list[ExportCatalog],
+    orphan_datasets: list[ExportDataset],
+) -> str:
+    """Serialise the aggregate JSON-LD export document to Turtle."""
+    from rdflib import Graph  # type: ignore[import-untyped]
+
+    jsonld = build_complete_jsonld(catalogs, orphan_datasets)
+    graph = Graph()
+    graph.parse(data=dump_jsonld(jsonld), format='json-ld')
+    return graph.serialize(format='turtle')

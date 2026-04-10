@@ -143,7 +143,7 @@ jobs:
 
       - name: Run tests
         env:
-          DJANGO_SETTINGS_MODULE: catalogue.settings.test
+          DJANGO_SETTINGS_MODULE: catalogue.settings.ci
         run: |
           echo "Running tests..."
           ./scripts/check-tests.sh

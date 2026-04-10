@@ -1,0 +1,51 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'cs' }}" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% trans "Data Catalogue" %}{% endblock %} · MOU</title>
+
+  <!-- DaisyUI (must come before Tailwind so Tailwind can override) -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/dist/full.min.css" rel="stylesheet">
+
+  <!-- Google Fonts: Inter + Merriweather + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+  <!-- Custom fonts override -->
+  <link href="{% static 'css/custom-fonts.css' %}" rel="stylesheet">
+
+  <!-- Tailwind CDN (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  {% include "includes/_tailwind_config.html" %}
+
+  <!-- Base styles (animations, scrollbar, texture) -->
+  <link href="{% static 'css/base.css' %}" rel="stylesheet">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-page-bg text-txt font-sans min-h-screen">
+
+{% include 'catalogue/components/_header.html' %}
+
+<!-- ══════════════════════ MESSAGES ══════════════════════ -->
+{% include "includes/_toast_messages.html" %}
+
+<!-- ══════════════════════ CONTENT ══════════════════════ -->
+{% block sidebar %}
+<div class="site-outer bg-outer-bg" style="min-height:calc(100vh - 80px)">
+  <div class="site-content max-w-screen-2xl mx-auto px-6 py-8 bg-page-bg" style="min-height:calc(100vh - 80px)">
+    <div class="max-w-7xl mx-auto">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_modals %}{% endblock %}
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

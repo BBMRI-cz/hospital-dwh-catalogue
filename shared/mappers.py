@@ -11,9 +11,17 @@ Naming convention:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from shared.dtos import (
+    ExportAgent,
+    ExportCatalog,
+    ExportColumn,
+    ExportContactPoint,
+    ExportDataset,
+    ExportDistribution,
+    ExportTable,
     UnifiedDataset,
     UnifiedDistribution,
 )
@@ -22,6 +30,13 @@ if TYPE_CHECKING:
     # Import only for type hints — avoids import-time coupling.
     from fair_genomes import models as fgm
     from warehouse import models as wm
+
+
+_ModelT = TypeVar('_ModelT', covariant=True)
+
+
+class _RelatedManager(Protocol[_ModelT]):
+    def all(self) -> Iterable[_ModelT]: ...
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -37,6 +52,148 @@ def _dt_str(obj: object, attr: str) -> str | None:
     """Return isoformat of a DateTimeField or None."""
     value = getattr(obj, attr, None)
     return value.isoformat() if value else None
+
+
+def _keywords(value: str | None) -> list[str]:
+    """Split a comma-separated keyword string into a clean list."""
+    return [item.strip() for item in (value or '').split(',') if item.strip()]
+
+
+def map_export_contact_point(
+    obj: wm.ContactPoint | fgm.ContactPoint, app: str
+) -> ExportContactPoint:
+    return ExportContactPoint(
+        app=app,
+        identifier=str(obj.pk),
+        email=getattr(obj, 'email', None),
+        contact_page=getattr(obj, 'contact_page', None),
+    )
+
+
+def map_export_agent(obj: wm.Agent | fgm.Agent, app: str) -> ExportAgent:
+    contact_point = getattr(obj, 'contact_point', None)
+    return ExportAgent(
+        app=app,
+        name=obj.name,
+        description=getattr(obj, 'description', None),
+        contact_point=map_export_contact_point(contact_point, app) if contact_point else None,
+    )
+
+
+def map_export_catalog(
+    obj: wm.Catalog | fgm.Catalog,
+    app: str,
+    *,
+    datasets: list[ExportDataset] | None = None,
+) -> ExportCatalog:
+    publisher = getattr(obj, 'publisher', None)
+    return ExportCatalog(
+        app=app,
+        name=obj.name,
+        title=getattr(obj, 'title', None),
+        description=getattr(obj, 'description', None),
+        applicable_legislation=getattr(obj, 'applicable_legislation', None),
+        publisher=map_export_agent(publisher, app) if publisher else None,
+        datasets=datasets or [],
+    )
+
+
+def map_export_column(obj: wm.Column) -> ExportColumn:
+    return ExportColumn(
+        name=obj.name,
+        title=getattr(obj, 'title', None),
+        description=getattr(obj, 'description', None),
+        datatype=getattr(obj, 'datatype', None),
+        property_url=getattr(obj, 'property_url', None),
+    )
+
+
+def map_export_table(obj: wm.Table) -> ExportTable:
+    columns_manager = cast(_RelatedManager[Any] | None, getattr(obj, 'columns', None))
+    return ExportTable(
+        name=obj.name,
+        title=getattr(obj, 'title', None),
+        description=getattr(obj, 'description', None),
+        url=getattr(obj, 'url', None),
+        columns=[map_export_column(column) for column in columns_manager.all()]
+        if columns_manager
+        else [],
+    )
+
+
+def map_export_distribution(
+    obj: wm.Distribution | fgm.Distribution, app: str
+) -> ExportDistribution:
+    tables_manager = cast(_RelatedManager[Any] | None, getattr(obj, 'tables', None))
+    tables = [map_export_table(table) for table in tables_manager.all()] if tables_manager else []
+    return ExportDistribution(
+        app=app,
+        name=obj.name,
+        title=getattr(obj, 'title', None),
+        description=getattr(obj, 'description', None),
+        access_url=getattr(obj, 'access_url', None),
+        applicable_legislation=getattr(obj, 'applicable_legislation', None),
+        format=getattr(obj, 'format', None),
+        conforms_to=getattr(obj, 'conforms_to', None),
+        byte_size=getattr(obj, 'byte_size', None),
+        rights=getattr(obj, 'rights', None),
+        release_date=_dt_str(obj, 'release_date'),
+        modification_date=_dt_str(obj, 'modification_date'),
+        licence=getattr(obj, 'licence', None),
+        db_layer=getattr(obj, 'db_layer', None),
+        tables=tables,
+    )
+
+
+def map_export_dataset(
+    obj: wm.Dataset | fgm.Dataset,
+    app: str,
+    *,
+    include_catalog: bool = True,
+) -> ExportDataset:
+    publisher = getattr(obj, 'publisher', None)
+    creator = getattr(obj, 'creator', None)
+    contact_point = getattr(obj, 'contact_point', None)
+    catalog = getattr(obj, 'catalog', None)
+    hdab = getattr(obj, 'hdab', None)
+    custodian = getattr(obj, 'custodian', None)
+    source = getattr(obj, 'source', None)
+    distributions_manager = cast(
+        _RelatedManager[Any] | None,
+        getattr(obj, 'distributions', None),
+    )
+    return ExportDataset(
+        app=app,
+        name=obj.name,
+        title=getattr(obj, 'title', None),
+        version=getattr(obj, 'version', None),
+        description=getattr(obj, 'description', None),
+        identifier=getattr(obj, 'identifier', None),
+        type=getattr(obj, 'type', None),
+        theme=getattr(obj, 'theme', None),
+        publisher=map_export_agent(publisher, app) if publisher else None,
+        conforms_to=getattr(obj, 'conforms_to', None),
+        issued=_dt_str(obj, 'issued'),
+        modified=_dt_str(obj, 'modified'),
+        keywords=_keywords(getattr(obj, 'keyword', None)),
+        source_name=getattr(source, 'name', None) if source else None,
+        source_identifier=getattr(source, 'identifier', None) if source else None,
+        creator=map_export_agent(creator, app) if creator else None,
+        contact_point=map_export_contact_point(contact_point, app) if contact_point else None,
+        provenance=getattr(obj, 'provenance', None),
+        catalog=map_export_catalog(catalog, app) if include_catalog and catalog else None,
+        access_rights=getattr(obj, 'access_rights', None),
+        applicable_legislation=getattr(obj, 'applicable_legislation', None),
+        health_category=getattr(obj, 'health_category', None),
+        hdab=map_export_agent(hdab, app) if hdab else None,
+        custodian=map_export_agent(custodian, app) if custodian else None,
+        distributions=[
+            map_export_distribution(distribution, app)
+            for distribution in distributions_manager.all()
+        ]
+        if distributions_manager
+        else [],
+    )
 
 
 # ── Warehouse (Local Metadata) mappers ────────────────────────────────────────

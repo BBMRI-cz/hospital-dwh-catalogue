@@ -4,12 +4,12 @@
 
 The application has two authentication modes:
 
-- Development -- a mock backend that accepts any username and password. No Active Directory needed.
-- Production -- authenticates users against Active Directory via LDAP.
+- Mock LDAP -- accepts any username and password. No Active Directory needed.
+- Real LDAP -- authenticates users against Active Directory.
 
-## Development authentication
+## Mock authentication
 
-When `MOCK_LDAP=True` is set in your `.env`, the dev auth backend is active.
+When `MOCK_LDAP=True` is set in your `.env`, the mock auth backend is active. This is suitable for local development and for staging when you want to validate the rest of the deployment without depending on Active Directory.
 
 How it works:
 
@@ -18,11 +18,11 @@ How it works:
 - The first user created becomes a superuser
 - Every subsequent login creates a regular user if the username does not exist yet
 
-The backend checks only the `MOCK_LDAP` setting. It is meant for local development.
+The backend checks only the `MOCK_LDAP` setting.
 
-## Production LDAP setup
+## LDAP setup
 
-In production, users authenticate against your organization's Active Directory server.
+When `MOCK_LDAP=False`, users authenticate against your organization's Active Directory server. This is the only supported mode in production.
 
 ### What happens when a user logs in
 
@@ -74,6 +74,6 @@ Authentication data lives in the `auth_db` database, separate from application d
 
 1. User goes to `/accounts/login/`
 2. Enters their username (for example, `jnovak`) and password
-3. The system authenticates against LDAP (production) or the dev backend (development)
+3. The system authenticates against LDAP or the mock backend, depending on `MOCK_LDAP`
 4. On first login, Django creates the user account automatically
 5. User is redirected to the homepage

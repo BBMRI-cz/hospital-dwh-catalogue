@@ -41,7 +41,8 @@ A HealthDCAT-AP v6 compliant data catalogue for hospital data warehouse metadata
 
 ```
 catalogue/          Django project settings, middleware, URL config, DB routers
-warehouse/          Main catalogue app (models, views, templates, static files)
+frontend/           Catalogue frontend (views, routes, templates, static assets, page/API presentation layer)
+warehouse/          Warehouse metadata source app (models, source-specific services)
 fair_genomes/       FAIR Genomes integration (models, sync service, admin, stats)
 ticketing/          Ticket request system (cart, Alvao API client)
 shared/             Abstract models, DTOs, mappers, unified catalog service
@@ -52,6 +53,15 @@ locale/             Translation files (Czech and English)
 scripts/            Code quality and CI check scripts
 docs/               Project documentation
 ```
+
+## Metadata export API
+
+The catalogue exposes one aggregate HealthDCAT-AP export covering all source
+catalogs, datasets, and distributions from the warehouse and FAIR Genomes
+metadata databases.
+
+- JSON-LD: `/api/jsonld`
+- RDF Turtle: `/api/rdf`
 
 ## Databases
 

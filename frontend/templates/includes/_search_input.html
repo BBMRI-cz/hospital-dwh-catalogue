@@ -1,0 +1,30 @@
+{% comment %}
+  Reusable search/filter input with leading icon.
+
+  Optional variables:
+    search_id            – input id
+    search_name          – input name attribute
+    search_value         – input value (defaults to empty string)
+    search_placeholder   – placeholder text
+    search_wrapper_class – classes for the outer relative wrapper
+    search_input_class   – extra classes for width/layout
+    search_icon_size     – icon width/height (default: 13)
+    filter_list_id       – adds data-filter-list + data-list-id
+    table_filter         – adds data-table-filter when truthy
+    table_modal_id       – adds data-table-modal-filter + data-modal-id="tbl-modal-<id>"
+{% endcomment %}
+<div class="relative {{ search_wrapper_class }}">
+  <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="{{ search_icon_size|default:'13' }}" height="{{ search_icon_size|default:'13' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <input
+    {% if search_id %}id="{{ search_id }}"{% endif %}
+    type="text"
+    {% if search_name %}name="{{ search_name }}"{% endif %}
+    value="{{ search_value|default:'' }}"
+    placeholder="{{ search_placeholder }}"
+    {% if filter_list_id %}data-filter-list data-list-id="{{ filter_list_id }}"{% endif %}
+    {% if table_filter %}data-table-filter{% endif %}
+    {% if table_modal_id %}data-table-modal-filter data-modal-id="tbl-modal-{{ table_modal_id }}"{% endif %}
+    class="input input-sm input-bordered pl-8 text-sm bg-gray-50 focus:bg-white {{ search_input_class }}">
+</div>

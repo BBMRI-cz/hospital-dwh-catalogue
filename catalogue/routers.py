@@ -49,7 +49,7 @@ class WarehouseRouter:
 
     - 'fair_genomes' app models -> fair_genomes_db
     - 'warehouse' app models -> metadata_db
-    - 'ticketing' app models -> default (same as auth_db in most setups)
+    - 'ticketing' app models -> default
     - Everything else -> default
     """
 

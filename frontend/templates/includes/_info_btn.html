@@ -1,0 +1,15 @@
+{# Expects: semantics, optional stop #}
+{% if semantics in schema_json %}
+<button type="button"
+  data-schema-button
+  data-semantics="{{ semantics }}"
+  {% if stop %}data-schema-stop{% endif %}
+  class="inline-flex items-center justify-center w-4 h-4 rounded-full border border-mou-cyan-border bg-mou-cyan-light text-mou-blue hover:bg-mou-cyan hover:text-white hover:border-mou-cyan transition-colors shrink-0 cursor-pointer"
+  title="{{ semantics }}">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="16" x2="12" y2="12"/>
+    <line x1="12" y1="8" x2="12.01" y2="8" stroke-width="3.5"/>
+  </svg>
+</button>
+{% endif %}

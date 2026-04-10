@@ -116,7 +116,6 @@ class FairGenomesService:
             logger.info('RDF fetched and parsed', extra={'triples': len(graph)})
 
         # ── Phase 2: all DB writes in one atomic transaction ──────────────────
-        _empty_counts: dict = {'created': [], 'updated': []}
         with transaction.atomic(using='fair_genomes_db'):
             report = (
                 self._process_graph(graph)
@@ -132,11 +131,11 @@ class FairGenomesService:
                         'distributions': [],
                     },
                     'saved': {
-                        'contact_points': {**_empty_counts},
-                        'agents': {**_empty_counts},
-                        'catalogs': {**_empty_counts},
-                        'datasets': {**_empty_counts},
-                        'distributions': {**_empty_counts},
+                        'contact_points': {'created': [], 'updated': []},
+                        'agents': {'created': [], 'updated': []},
+                        'catalogs': {'created': [], 'updated': []},
+                        'datasets': {'created': [], 'updated': []},
+                        'distributions': {'created': [], 'updated': []},
                     },
                     'skipped': {},
                 }
@@ -226,15 +225,34 @@ class FairGenomesService:
             Distribution,
         )
 
+        # Extract vocabularies from the graph's own @prefix declarations.
+        ns_map = {prefix: str(uri) for prefix, uri in g.namespaces()}
+        FDP_O = Namespace(ns_map['fdp-o']) if 'fdp-o' in ns_map else None
+        VCARD = Namespace(ns_map['vcard']) if 'vcard' in ns_map else Namespace(
+            'http://www.w3.org/2006/vcard/ns#'
+        )
+
         fdp_base = self.rdf_url.rstrip('/')
-        FDP_O = Namespace('https://w3id.org/fdp/fdp-o#')
-        HEALTHDCAT = Namespace('http://healthdcat-ap.eu/ns#')
-        GEODCATAP = Namespace('http://data.europa.eu/930/')
-        VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
+        # The configured URL may use https but the RDF content may use http
+        # internally for its type and predicate URIs.  Detect the actual scheme
+        # from the parsed graph by looking for the FDP container subject.
+        for scheme in ('http://', 'https://'):
+            candidate = scheme + fdp_base.split('://', 1)[-1]
+            if (URIRef(candidate), None, None) in g:
+                fdp_base = candidate
+                break
+        FDP_NS = Namespace(f'{fdp_base}/')  # Instance-specific types derived from configured URL
 
         def col(entity: str, field: str) -> URIRef:
             """FDP column predicate URI for a given entity and field name."""
             return URIRef(f'{fdp_base}/{entity}/column/{field}')
+
+        def _subjects_of_type(*type_uris) -> set:
+            """Return the union of subjects for multiple RDF type URIs."""
+            result: set = set()
+            for t in type_uris:
+                result.update(g.subjects(RDF.type, t))
+            return result
 
         def get_literal(subject, *predicates) -> str | None:
             for pred in predicates:
@@ -266,7 +284,6 @@ class FairGenomesService:
             except (ValueError, TypeError):
                 return None
 
-        _ec: dict = {'created': [], 'updated': []}
         report: dict = {
             'status': 'partial',
             'rdf_url': self.rdf_url,
@@ -278,11 +295,11 @@ class FairGenomesService:
                 'distributions': [],
             },
             'saved': {
-                'contact_points': {**_ec},
-                'agents': {**_ec},
-                'catalogs': {**_ec},
-                'datasets': {**_ec},
-                'distributions': {**_ec},
+                'contact_points': {'created': [], 'updated': []},
+                'agents': {'created': [], 'updated': []},
+                'catalogs': {'created': [], 'updated': []},
+                'datasets': {'created': [], 'updated': []},
+                'distributions': {'created': [], 'updated': []},
             },
             'skipped': {},
         }
@@ -290,21 +307,29 @@ class FairGenomesService:
         # Lookup maps keyed by RDF subject URI → model instance.
         cp_by_uri: dict[str, ContactPoint] = {}
         agent_by_name: dict[str, Agent] = {}
+        agent_by_uri: dict[str, Agent] = {}
         catalog_by_name: dict[str, Catalog] = {}
+        catalog_by_uri: dict[str, Catalog] = {}
         dataset_by_name: dict[str, Dataset] = {}
-
-        def _resolve_agent(name_val: str | None) -> Agent | None:
-            if not name_val:
-                return None
-            return agent_by_name.get(name_val)
+        dataset_by_uri: dict[str, Dataset] = {}
 
         def _resolve_cp(uri_val: str | None) -> ContactPoint | None:
             if not uri_val:
                 return None
             return cp_by_uri.get(uri_val)
 
+        def _resolve_agent_ref(subject, *predicates) -> Agent | None:
+            """Resolve an agent FK that may be a literal name or a URI ref."""
+            name_val = get_literal(subject, *predicates)
+            if name_val and name_val in agent_by_name:
+                return agent_by_name[name_val]
+            uri_val = get_uri(subject, *predicates)
+            if uri_val and uri_val in agent_by_uri:
+                return agent_by_uri[uri_val]
+            return None
+
         # ── 1. CONTACT POINTS ─────────────────────────────────────────────────
-        for subj in g.subjects(RDF.type, VCARD.Kind):
+        for subj in _subjects_of_type(VCARD.Kind, FDP_NS.ContactPoint):
             email = get_literal(subj, VCARD.hasEmail, col('ContactPoint', 'email'))
             contact_page = get_literal(
                 subj, VCARD.hasURL, col('ContactPoint', 'contact_page')
@@ -326,7 +351,7 @@ class FairGenomesService:
             cp_by_uri[str(subj)] = cp
 
         # ── 2. AGENTS ─────────────────────────────────────────────────────────
-        for subj in g.subjects(RDF.type, FOAF.Agent):
+        for subj in _subjects_of_type(FOAF.Agent, FDP_NS.Agent):
             name = get_literal(subj, FOAF.name, RDFS.label, col('Agent', 'name'))
             if not name:
                 logger.warning('Skipping Agent with no name: %s', subj)
@@ -346,9 +371,10 @@ class FairGenomesService:
             )
             report['saved']['agents']['created' if created else 'updated'].append(name)
             agent_by_name[name] = _
+            agent_by_uri[str(subj)] = _
 
         # ── 3. CATALOGS ───────────────────────────────────────────────────────
-        for subj in g.subjects(RDF.type, DCAT.Catalog):
+        for subj in _subjects_of_type(DCAT.Catalog, FDP_NS.Catalog):
             name = get_literal(subj, RDFS.label, col('Catalog', 'name'))
             if not name:
                 logger.warning('Skipping Catalog with no name: %s', subj)
@@ -361,8 +387,9 @@ class FairGenomesService:
                 or get_uri(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
                 or ''
             )
-            publisher_name = get_literal(subj, DCTERMS.publisher, col('Catalog', 'publisher'))
-            publisher_agent = _resolve_agent(publisher_name)
+            publisher_agent = _resolve_agent_ref(
+                subj, DCTERMS.publisher, col('Catalog', 'publisher')
+            )
 
             report['fetched']['catalogs'].append(name)
             _, created = Catalog.objects.using('fair_genomes_db').update_or_create(
@@ -376,9 +403,10 @@ class FairGenomesService:
             )
             report['saved']['catalogs']['created' if created else 'updated'].append(name)
             catalog_by_name[name] = _
+            catalog_by_uri[str(subj)] = _
 
         # ── 4. DATASETS ───────────────────────────────────────────────────────
-        for subj in g.subjects(RDF.type, DCAT.Dataset):
+        for subj in _subjects_of_type(DCAT.Dataset, FDP_NS.Dataset):
             name = get_literal(subj, RDFS.label, col('Dataset', 'name'))
             if not name:
                 logger.warning('Skipping Dataset with no name: %s', subj)
@@ -387,15 +415,17 @@ class FairGenomesService:
             report['fetched']['datasets'].append(name)
 
             # Resolve mandatory non-nullable FKs.
-            hdab_name = get_literal(subj, HEALTHDCAT.hdab, col('Dataset', 'hdab'))
-            hdab = _resolve_agent(hdab_name)
+            hdab = _resolve_agent_ref(subj, col('Dataset', 'hdab'))
             cp_uri = get_uri(subj, DCAT.contactPoint, col('Dataset', 'contactPoint'))
             contact_point = _resolve_cp(cp_uri)
 
             if not hdab:
-                logger.warning('Skipping Dataset "%s": hdab agent "%s" not found', name, hdab_name)
+                hdab_val = get_literal(subj, col('Dataset', 'hdab')) or get_uri(
+                    subj, col('Dataset', 'hdab')
+                )
+                logger.warning('Skipping Dataset "%s": hdab agent "%s" not found', name, hdab_val)
                 report['skipped'].setdefault('datasets', []).append(
-                    {'name': name, 'reason': f'hdab agent "{hdab_name}" not resolved'}
+                    {'name': name, 'reason': 'hdab agent not resolved'}
                 )
                 continue
             if not contact_point:
@@ -405,12 +435,20 @@ class FairGenomesService:
                 )
                 continue
 
-            # Optional FK fields.
-            publisher_name = get_literal(subj, DCTERMS.publisher, col('Dataset', 'publisher'))
-            creator_name = get_literal(subj, DCTERMS.creator, col('Dataset', 'creator'))
-            custodian_name = get_literal(subj, GEODCATAP.custodian, col('Dataset', 'custodian'))
-            catalog_name = get_literal(subj, col('Dataset', 'catalog'))
-            source_name = get_literal(subj, DCTERMS.source, col('Dataset', 'source'))
+            # Optional FK fields — values may be literals or URI refs.
+            publisher = _resolve_agent_ref(subj, DCTERMS.publisher, col('Dataset', 'publisher'))
+            creator = _resolve_agent_ref(subj, DCTERMS.creator, col('Dataset', 'creator'))
+            custodian = _resolve_agent_ref(subj, col('Dataset', 'custodian'))
+            catalog_uri = get_uri(subj, DCAT.Catalog, col('Dataset', 'catalog'))
+            catalog = catalog_by_uri.get(catalog_uri) if catalog_uri else None
+            if not catalog:
+                catalog_name = get_literal(subj, col('Dataset', 'catalog'))
+                catalog = catalog_by_name.get(catalog_name) if catalog_name else None
+            source_uri = get_uri(subj, DCTERMS.source, col('Dataset', 'source'))
+            source = dataset_by_uri.get(source_uri) if source_uri else None
+            if not source:
+                source_name = get_literal(subj, DCTERMS.source, col('Dataset', 'source'))
+                source = dataset_by_name.get(source_name) if source_name else None
 
             defaults = {
                 'title': get_literal(subj, DCTERMS.title, col('Dataset', 'title')) or '',
@@ -436,22 +474,24 @@ class FairGenomesService:
                 )
                 or get_uri(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
                 or '',
-                'health_category': get_literal(
-                    subj, HEALTHDCAT.healthCategory, col('Dataset', 'health_category')
-                )
-                or get_uri(subj, HEALTHDCAT.healthCategory, col('Dataset', 'health_category'))
+                'health_category': get_literal(subj, col('Dataset', 'health_category'))
+                or get_uri(subj, col('Dataset', 'health_category'))
                 or '',
-                'issued': parse_datetime(get_literal(subj, DCTERMS.issued, FDP_O.metadataIssued)),
+                'issued': parse_datetime(
+                    get_literal(subj, DCTERMS.issued)
+                    or (get_literal(subj, FDP_O.metadataIssued) if FDP_O else None)
+                ),
                 'modified': parse_datetime(
-                    get_literal(subj, DCTERMS.modified, FDP_O.metadataModified)
+                    get_literal(subj, DCTERMS.modified)
+                    or (get_literal(subj, FDP_O.metadataModified) if FDP_O else None)
                 ),
                 'hdab': hdab,
                 'contact_point': contact_point,
-                'publisher': _resolve_agent(publisher_name),
-                'creator': _resolve_agent(creator_name),
-                'custodian': _resolve_agent(custodian_name),
-                'catalog': catalog_by_name.get(catalog_name) if catalog_name else None,
-                'source': dataset_by_name.get(source_name) if source_name else None,
+                'publisher': publisher,
+                'creator': creator,
+                'custodian': custodian,
+                'catalog': catalog,
+                'source': source,
             }
 
             _, created = Dataset.objects.using('fair_genomes_db').update_or_create(
@@ -460,9 +500,10 @@ class FairGenomesService:
             )
             report['saved']['datasets']['created' if created else 'updated'].append(name)
             dataset_by_name[name] = _
+            dataset_by_uri[str(subj)] = _
 
         # ── 5. DISTRIBUTIONS ──────────────────────────────────────────────────
-        for subj in g.subjects(RDF.type, DCAT.Distribution):
+        for subj in _subjects_of_type(DCAT.Distribution, FDP_NS.Distribution):
             name = get_literal(subj, RDFS.label, col('Distribution', 'name'))
             if not name:
                 logger.warning('Skipping Distribution with no name: %s', subj)
@@ -470,12 +511,16 @@ class FairGenomesService:
 
             report['fetched']['distributions'].append(name)
 
+            # dataset_name can be a literal name or a URI ref to a Dataset.
             ds_name = get_literal(subj, col('Distribution', 'dataset_name'))
             dataset = dataset_by_name.get(ds_name) if ds_name else None
             if not dataset:
-                # Try resolving via dcat:Distribution being a child of dcat:Dataset.
-                ds_uri = get_uri(subj, DCTERMS.isPartOf)
+                ds_uri = get_uri(
+                    subj, DCAT.Dataset, col('Distribution', 'dataset_name'), DCTERMS.isPartOf
+                )
                 if ds_uri:
+                    dataset = dataset_by_uri.get(ds_uri)
+                if not dataset and ds_uri:
                     ds_label = get_literal(g.resource(URIRef(ds_uri)).identifier, RDFS.label)
                     dataset = dataset_by_name.get(ds_label) if ds_label else None
 
@@ -590,27 +635,38 @@ class FairGenomesService:
         from fair_genomes.models import StatResult
 
         table_cap = table[0].upper() + table[1:]
-        query = f'{{ {table_cap}_groupBy(column: "{column}") ' f'{{ count {column} {{ name }} }} }}'
+        # MOLGENIS EMX2 _groupBy does not accept a 'column' argument;
+        # instead we request the column directly in the selection set.
+        # Ref/ontology columns return objects — request { value }.
+        # Scalar columns don't — if the first attempt errors, retry bare.
+        query_ref = f'{{ {table_cap}_groupBy {{ count {column} {{ value }} }} }}'
 
         headers: dict[str, str] = {'Content-Type': 'application/json'}
         if self.api_token:
             headers['x-molgenis-token'] = self.api_token
 
-        try:
-            response = requests.post(
-                self.graphql_url,
-                json={'query': query},
-                headers=headers,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            data = response.json()
-        except (requests.RequestException, ValueError) as exc:
-            msg = f'{table}.{column}: {exc}'
-            logger.warning('Stat sync failed: %s', msg)
-            return False, msg
+        data = None
+        for query in (query_ref, f'{{ {table_cap}_groupBy {{ count {column} }} }}'):
+            try:
+                response = requests.post(
+                    self.graphql_url,
+                    json={'query': query},
+                    headers=headers,
+                    timeout=self.timeout,
+                )
+                response.raise_for_status()
+                data = response.json()
+            except (requests.RequestException, ValueError) as exc:
+                msg = f'{table}.{column}: {exc}'
+                logger.warning('Stat sync failed: %s', msg)
+                return False, msg
 
-        if 'errors' in data:
+            if 'errors' not in data:
+                break  # success
+            # If this was the ref query and the error looks like a sub-selection
+            # issue, fall through to retry as scalar.
+
+        if data and 'errors' in data:
             msg = f'{table}.{column}: GraphQL errors {data["errors"]}'
             logger.warning('Stat sync GraphQL error: %s', msg)
             return False, msg
@@ -620,10 +676,11 @@ class FairGenomesService:
         distribution: dict[str, int] = {}
         for row in rows:
             count = row.get('count', 0)
-            # ref / ref_array columns nest the value under {column: {name: ...}}
+            # Ref / ontology columns nest the value under {column: {value: ...}}.
+            # Scalar columns return the value directly.
             col_val = row.get(column)
             if isinstance(col_val, dict):
-                value = col_val.get('name') or col_val.get('label') or str(col_val)
+                value = col_val.get('value') or col_val.get('name') or col_val.get('label') or ''
             elif col_val is not None:
                 value = str(col_val)
             else:

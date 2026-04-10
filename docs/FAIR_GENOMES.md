@@ -24,7 +24,7 @@ FAIR_GENOMES_SYNC_INTERVAL_HOURS=24
 
 `FAIR_GENOMES_RDF_URL` must point to a FAIR Data Point/DCAT metadata feed. A generic MOLGENIS schema RDF endpoint such as `/api/rdf` is not sufficient unless it exposes `Catalog`, `Dataset`, `Distribution`, `Agent`, and `ContactPoint` resources.
 
-In development, set `MOCK_FAIR_GENOMES=True` to use sample data instead of connecting to a real API.
+In development or staging, set `MOCK_FAIR_GENOMES=True` to use sample data instead of connecting to a real API.
 
 ## Syncing data
 
@@ -56,10 +56,13 @@ Once synced, FAIR Genomes datasets appear in the main catalogue alongside wareho
 
 - Dataset detail: `/dataset/fair_genomes/<name>/`
 - Distribution detail: `/distribution/fair_genomes/<name>/`
-- RDF (Turtle) export: `/dataset/fair_genomes/<name>/rdf/`
+- Dataset detail pages include authenticated UI buttons for dataset-specific JSON-LD and RDF exports.
+- Those per-dataset exports are separate from the public aggregate export API and include any nested distribution table/column metadata available for the dataset.
+- Aggregate JSON-LD export for all source metadata: `/api/jsonld`
+- Aggregate RDF (Turtle) export for all source metadata: `/api/rdf`
 
 Distribution detail pages for FAIR Genomes show statistics charts if stat definitions are configured. See [Stats Setup](STATS.md) for how to configure those.
 
-## Mock data for development
+## Mock data for development or staging
 
 When `MOCK_FAIR_GENOMES=True`, the startup script seeds sample datasets, distributions, contact points, agents, catalogs, stat definitions, and stat results. This lets you see the full UI without connecting to a real MOLGENIS instance.

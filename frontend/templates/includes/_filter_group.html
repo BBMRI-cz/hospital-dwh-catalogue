@@ -1,0 +1,21 @@
+{% load i18n %}
+{# Expects: title, items, list_id, field_name #}
+<div>
+  <div class="font-mono text-[11px] font-bold uppercase tracking-[1.5px] text-txt-muted mb-2">{{ title }}</div>
+  {% if items %}
+  {% trans "Filter…" as filter_placeholder %}
+  {% include "includes/_search_input.html" with search_placeholder=filter_placeholder search_wrapper_class="mb-1.5" search_input_class="w-full" filter_list_id=list_id only %}
+  {% endif %}
+  <div class="flex flex-col gap-0.5 max-h-[130px] overflow-y-auto" id="{{ list_id }}">
+    {% for item in items %}
+    <label class="chk-item flex items-center gap-2 px-2 py-1 rounded-md transition-colors cursor-pointer {% if item.checked %}bg-sky-50 hover:bg-sky-100{% else %}hover:bg-gray-50{% endif %}" title="{{ item.value }}">
+      <input type="checkbox" name="{{ field_name }}" value="{{ item.value }}" class="checkbox checkbox-xs shrink-0 accent-mou-cyan"
+        {% if item.checked %}checked{% endif %}>
+      <span class="text-xs {% if item.checked %}text-sky-700 font-medium{% else %}text-txt{% endif %} truncate min-w-0 flex-1">{{ item.label|default:item.value }}</span>
+      <span class="font-mono text-[10px] {% if item.checked %}text-sky-500{% else %}text-txt-muted{% endif %} shrink-0 pl-1">{{ item.count }}</span>
+    </label>
+    {% empty %}
+    <span class="px-2 py-1.5 text-xs italic text-txt-muted">{% trans "No options" %}</span>
+    {% endfor %}
+  </div>
+</div>

@@ -12,14 +12,38 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TypeGuard, cast
 
 from django.conf import settings
 from django.test import TestCase, override_settings
 
 from schema_registry.registry import _load, invalidate_cache
+from schema_registry.types import SchemaRegistryPayload
+from shared.dtos import (
+    ExportAgent,
+    ExportCatalog,
+    ExportColumn,
+    ExportContactPoint,
+    ExportDataset,
+    ExportDistribution,
+    ExportTable,
+)
+from shared.export_types import JsonLdDistributionNode, JsonLdDocument, JsonLdGraphNode
 
 # Absolute path to the release-6 directory inside the submodule.
 _RELEASE_6 = settings.BASE_DIR / 'health_dcat_ap' / 'public' / 'releases' / 'release-6'
+
+
+def _is_distribution_node(node: JsonLdGraphNode) -> TypeGuard[JsonLdDistributionNode]:
+    return node.get('@type') == 'dcat:Distribution'
+
+
+def _node_has_type(node: JsonLdGraphNode, rdf_type: str) -> bool:
+    value = node.get('@type')
+    if isinstance(value, list):
+        return rdf_type in value
+    return value == rdf_type
 
 
 class RegistryParserTest(TestCase):
@@ -130,6 +154,56 @@ class RegistryParserTest(TestCase):
         self.assertIn('healthdcatap:hdab', registry)
         entry = registry['healthdcatap:hdab']
         self.assertEqual(entry['requirement'], 'mandatory')
+
+    def test_synthesized_extension_uris_use_prefix_map(self) -> None:
+        from schema_registry.registry import _merge_healthdcat_terms
+
+        payload = {
+            'PUBLIC': {
+                'health category': {
+                    'card': '1..*',
+                    'requirement': 'Mandatory',
+                    'definition': 'Synthetic test term.',
+                    'usage_note': (
+                        'RDF example: '
+                        '<a href="#healthdcataphealthCategory">healthdcatap:healthCategory</a>'
+                    ),
+                },
+                'custodian': {
+                    'card': '0..1',
+                    'requirement': 'Recommended',
+                    'definition': 'Synthetic geodcatap test term.',
+                    'usage_note': (
+                        'RDF example: ' '<a href="#geodcatapcustodian">geodcatap:custodian</a>'
+                    ),
+                },
+            }
+        }
+
+        with TemporaryDirectory() as tmp_dir:
+            json_path = Path(tmp_dir) / 'healthdcat-cardinality-rules.json'
+            json_path.write_text(json.dumps(payload), encoding='utf-8')
+
+            result: SchemaRegistryPayload = {}
+            _merge_healthdcat_terms(
+                json_path,
+                result,
+                {
+                    'healthdcatap': 'https://example.org/health#',
+                    'geodcatap': 'https://example.org/geodcatap#',
+                },
+            )
+
+        self.assertIn('healthdcatap:healthCategory', result)
+        self.assertEqual(
+            result['healthdcatap:healthCategory']['uri'],
+            'https://example.org/health#healthCategory',
+        )
+        self.assertIn('geodcatap:custodian', result)
+        self.assertEqual(
+            result['geodcatap:custodian']['uri'],
+            'https://example.org/geodcatap#custodian',
+        )
 
     #  Namespace prefix map
 
@@ -266,34 +340,104 @@ class ServiceLayerTest(TestCase):
 class BuildJsonldContextTest(TestCase):
     """Tests for the prefix-filtering behaviour of build_jsonld() in shared.export."""
 
-    _FULL_DS: dict = {
-        'app': 'warehouse',
-        'name': 'test-ds',
-        'title': 'Test dataset',
-        'description': 'A test dataset',
-        'keywords': ['health'],
-        'custodian': 'Acme Hospital',
-        'publisher': 'Acme Hospital',
-        'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
-        'health_category': 'http://healthdataportal.eu/ns/health#clinical',
-        'applicable_legislation': 'http://data.europa.eu/eli/reg/2022/868/oj',
-        'contact_point': 'data@acme.example',
-        'distributions': [
-            {
-                'name': 'dist-1',
-                'title': 'CSV file',
-                'access_url': 'http://example.com/dist',
-                'format': 'CSV',
-                'applicable_legislation': '',
-                'db_layer': '',
-            }
-        ],
-    }
+    def _make_contact_point(
+        self,
+        *,
+        identifier: str = 'cp-1',
+        email: str | None = 'data@acme.example',
+        contact_page: str | None = 'https://example.com/contact',
+    ) -> ExportContactPoint:
+        return ExportContactPoint(
+            app='warehouse',
+            identifier=identifier,
+            email=email,
+            contact_page=contact_page,
+        )
 
-    def _build(self, ds: dict | None = None) -> dict:
+    def _make_agent(
+        self,
+        *,
+        name: str,
+        contact_point: ExportContactPoint | None,
+    ) -> ExportAgent:
+        return ExportAgent(app='warehouse', name=name, contact_point=contact_point)
+
+    def _make_dataset(self, *, with_tables: bool = False) -> ExportDataset:
+        dataset_cp = self._make_contact_point(identifier='dataset-cp')
+        agent_cp = self._make_contact_point(identifier='agent-cp')
+        publisher = self._make_agent(name='Acme Hospital', contact_point=agent_cp)
+        hdab = self._make_agent(name='Acme HDAB', contact_point=agent_cp)
+        custodian = self._make_agent(name='Acme Custodian', contact_point=agent_cp)
+
+        tables = []
+        if with_tables:
+            tables = [
+                ExportTable(
+                    name='patient_encounters',
+                    title='Patient Encounters',
+                    description='Encounter records',
+                    url='http://example.com/patient_encounters',
+                    columns=[
+                        ExportColumn(
+                            name='encounter_id',
+                            title='Encounter ID',
+                            description='Unique encounter identifier',
+                            datatype='integer',
+                        ),
+                        ExportColumn(
+                            name='diagnosis_code',
+                            title='Diagnosis Code',
+                            description='ICD-10 code',
+                            datatype='string',
+                            property_url='http://purl.bioontology.org/ontology/ICD10',
+                        ),
+                    ],
+                )
+            ]
+
+        catalog = ExportCatalog(
+            app='warehouse',
+            name='warehouse-cat',
+            title='Warehouse Catalogue',
+            description='Warehouse catalogue description',
+            applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
+            publisher=publisher,
+        )
+
+        return ExportDataset(
+            app='warehouse',
+            name='test-ds',
+            title='Test dataset',
+            description='A test dataset',
+            identifier='https://example.com/dataset/test-ds',
+            type='http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+            theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
+            keywords=['health'],
+            custodian=custodian,
+            publisher=publisher,
+            hdab=hdab,
+            access_rights='http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+            health_category='http://healthdataportal.eu/ns/health#clinical',
+            applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
+            contact_point=dataset_cp,
+            catalog=catalog,
+            distributions=[
+                ExportDistribution(
+                    app='warehouse',
+                    name='dist-1',
+                    title='CSV file',
+                    access_url='http://example.com/dist',
+                    format='http://publications.europa.eu/resource/authority/file-type/CSV',
+                    applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
+                    tables=tables,
+                )
+            ],
+        )
+
+    def _build(self, ds: ExportDataset | None = None) -> JsonLdDocument:
         from shared.export import build_jsonld
 
-        return build_jsonld(ds if ds is not None else self._FULL_DS)
+        return build_jsonld(ds if ds is not None else self._make_dataset())
 
     def test_context_is_first_key(self) -> None:
         result = self._build()
@@ -302,25 +446,38 @@ class BuildJsonldContextTest(TestCase):
     def test_full_dataset_contains_expected_prefixes(self) -> None:
         context = self._build()['@context']
         expected = {
-            '@base',
+            'cv',
             'dcat',
             'dct',
             'healthdcatap',
             'dcatap',
-            'org',
             'foaf',
             'vcard',
             'geodcatap',
+            'xsd',
         }
         self.assertEqual(set(context.keys()), expected)
 
     def test_no_contact_point_drops_vcard(self) -> None:
-        ds = {**self._FULL_DS, 'contact_point': ''}
+        ds = self._make_dataset()
+        ds.contact_point = None
+        ds.publisher = None
+        ds.hdab = None
+        ds.custodian = None
+        ds.catalog = ExportCatalog(
+            app='warehouse',
+            name='warehouse-cat',
+            title='Warehouse Catalogue',
+            description='Warehouse catalogue description',
+            applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
+            publisher=None,
+        )
         context = self._build(ds)['@context']
         self.assertNotIn('vcard', context)
 
     def test_no_custodian_drops_geodcatap(self) -> None:
-        ds = {**self._FULL_DS, 'custodian': ''}
+        ds = self._make_dataset()
+        ds.custodian = None
         context = self._build(ds)['@context']
         self.assertNotIn('geodcatap', context)
 
@@ -332,7 +489,6 @@ class BuildJsonldContextTest(TestCase):
             'rdfs',
             'shacl',
             'skos',
-            'xsd',
             'cc',
             'lcon',
             'owl',
@@ -355,77 +511,36 @@ class BuildJsonldContextTest(TestCase):
 
     # ── CSVW table/column export ─────────────────────────────────────────────
 
-    _DS_WITH_TABLES: dict = {
-        'app': 'warehouse',
-        'name': 'test-ds',
-        'title': 'Test dataset',
-        'description': 'A test dataset',
-        'keywords': ['health'],
-        'custodian': 'Acme Hospital',
-        'publisher': 'Acme Hospital',
-        'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
-        'health_category': 'http://healthdataportal.eu/ns/health#clinical',
-        'applicable_legislation': 'http://data.europa.eu/eli/reg/2022/868/oj',
-        'contact_point': 'data@acme.example',
-        'distributions': [
-            {
-                'name': 'dist-1',
-                'title': 'CSV file',
-                'access_url': 'http://example.com/dist',
-                'format': 'CSV',
-                'applicable_legislation': '',
-                'db_layer': '',
-                'tables': [
-                    {
-                        'name': 'patient_encounters',
-                        'title': 'Patient Encounters',
-                        'description': 'Encounter records',
-                        'url': 'http://example.com/patient_encounters',
-                        'columns': [
-                            {
-                                'name': 'encounter_id',
-                                'title': 'Encounter ID',
-                                'description': 'Unique encounter identifier',
-                                'datatype': 'integer',
-                                'property_url': '',
-                            },
-                            {
-                                'name': 'diagnosis_code',
-                                'title': 'Diagnosis Code',
-                                'description': 'ICD-10 code',
-                                'datatype': 'string',
-                                'property_url': 'http://purl.bioontology.org/ontology/ICD10',
-                            },
-                        ],
-                    }
-                ],
-            }
-        ],
-    }
+    def _distribution_node(self, result: JsonLdDocument) -> JsonLdDistributionNode:
+        return next(node for node in result['@graph'] if _is_distribution_node(node))
 
     def test_tables_emit_csvw_hierarchy(self) -> None:
-        result = self._build(self._DS_WITH_TABLES)
-        dist = result['dcat:distribution'][0]
+        result = self._build(self._make_dataset(with_tables=True))
+        dist = self._distribution_node(result)
         self.assertIn('adms:sample', dist)
-        tg = dist['adms:sample']
+        tg = dist.get('adms:sample')
+        self.assertIsNotNone(tg)
+        if tg is None:
+            self.fail('Expected adms:sample in distribution node')
         self.assertEqual(tg['@type'], 'csvw:TableGroup')
         tables = tg['csvw:table']
         self.assertEqual(len(tables), 1)
         table = tables[0]
         self.assertEqual(table['@type'], 'csvw:Table')
-        self.assertEqual(table['dct:title'], 'Patient Encounters')
-        self.assertEqual(table['csvw:url'], {'@id': 'http://example.com/patient_encounters'})
+        self.assertEqual(table.get('dct:title'), 'Patient Encounters')
+        self.assertEqual(table.get('csvw:url'), {'@id': 'http://example.com/patient_encounters'})
         cols = table['csvw:column']
         self.assertEqual(len(cols), 2)
         self.assertEqual(cols[0]['csvw:name'], 'encounter_id')
-        self.assertEqual(cols[0]['csvw:datatype'], 'integer')
+        self.assertEqual(cols[0].get('csvw:datatype'), 'integer')
         self.assertNotIn('csvw:propertyUrl', cols[0])
         self.assertEqual(
-            cols[1]['csvw:propertyUrl'], {'@id': 'http://purl.bioontology.org/ontology/ICD10'}
+            cols[1].get('csvw:propertyUrl'),
+            {'@id': 'http://purl.bioontology.org/ontology/ICD10'},
         )
 
     def test_tables_add_csvw_and_adms_prefixes(self) -> None:
-        context = self._build(self._DS_WITH_TABLES)['@context']
+        context = self._build(self._make_dataset(with_tables=True))['@context']
         self.assertIn('csvw', context)
         self.assertIn('adms', context)
 
@@ -435,22 +550,114 @@ class BuildJsonldContextTest(TestCase):
         self.assertNotIn('adms', context)
 
     def test_empty_tables_list_omits_sample(self) -> None:
-        ds = {**self._FULL_DS}
-        ds['distributions'] = [{**self._FULL_DS['distributions'][0], 'tables': []}]
-        dist = self._build(ds)['dcat:distribution'][0]
+        ds = self._make_dataset()
+        dist = self._distribution_node(self._build(ds))
         self.assertNotIn('adms:sample', dist)
+
+    def test_nodes_use_provided_identifiers_and_keep_related_nodes(self) -> None:
+        result = self._build()
+
+        dataset_node = next(
+            node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset')
+        )
+        distribution_node = self._distribution_node(result)
+        catalog_node = next(
+            node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')
+        )
+        agent_nodes = [node for node in result['@graph'] if _node_has_type(node, 'foaf:Agent')]
+        contact_point_nodes = [
+            node for node in result['@graph'] if _node_has_type(node, 'cv:ContactPoint')
+        ]
+        dataset_values = cast(dict[str, object], dataset_node)
+        catalog_values = cast(dict[str, object], catalog_node)
+
+        self.assertEqual(dataset_values.get('@id'), 'https://example.com/dataset/test-ds')
+        self.assertEqual(distribution_node['@id'], 'http://example.com/dist')
+        self.assertNotIn('@id', catalog_values)
+        self.assertEqual(len(agent_nodes), 0)
+        self.assertGreaterEqual(len(contact_point_nodes), 1)
+        self.assertIn(
+            'https://example.com/contact',
+            {cast(dict[str, object], node).get('@id') for node in contact_point_nodes},
+        )
+
+        dataset_publisher = cast(dict[str, object] | None, dataset_values.get('dct:publisher'))
+        self.assertIsNotNone(dataset_publisher)
+        if dataset_publisher is None:
+            self.fail('Expected dataset publisher in export')
+        self.assertEqual(dataset_publisher.get('foaf:name'), 'Acme Hospital')
+        self.assertNotIn('@id', dataset_publisher)
+
+        catalog_publisher = cast(dict[str, object] | None, catalog_values.get('dct:publisher'))
+        self.assertIsNotNone(catalog_publisher)
+        if catalog_publisher is None:
+            self.fail('Expected catalog publisher in export')
+        self.assertEqual(catalog_publisher.get('foaf:name'), 'Acme Hospital')
+
+        for node in result['@graph']:
+            node_id = node.get('@id')
+            if node_id is None:
+                continue
+            self.assertNotIn('urn:hospital-dwh-catalogue', node_id)
+            self.assertNotIn('/api/jsonld#', node_id)
+            self.assertNotIn('/api/metadata/', node_id)
+
+    def test_source_uses_provided_dataset_identifier(self) -> None:
+        ds = self._make_dataset()
+        ds.source_name = 'source-ds'
+        ds.source_identifier = 'https://example.com/dataset/source-ds'
+
+        result = self._build(ds)
+        dataset_node = next(
+            node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset')
+        )
+
+        self.assertEqual(
+            dataset_node.get('dct:source'), {'@id': 'https://example.com/dataset/source-ds'}
+        )
+
+    def test_build_complete_jsonld_includes_catalogs_and_orphan_datasets(self) -> None:
+        from shared.export import build_complete_jsonld
+
+        catalog_dataset = self._make_dataset()
+        catalog_dataset.catalog = None
+
+        orphan_dataset = self._make_dataset()
+        orphan_dataset.catalog = None
+        orphan_dataset.name = 'orphan-ds'
+        orphan_dataset.title = 'Orphan dataset'
+        orphan_dataset.identifier = 'https://example.com/dataset/orphan-ds'
+
+        catalog = ExportCatalog(
+            app='warehouse',
+            name='warehouse-cat',
+            title='Warehouse Catalogue',
+            description='Warehouse catalogue description',
+            applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
+            publisher=catalog_dataset.publisher,
+            datasets=[catalog_dataset],
+        )
+
+        result = build_complete_jsonld([catalog], [orphan_dataset])
+        ids = {node['@id'] for node in result['@graph'] if '@id' in node}
+        catalog_nodes = [node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')]
+
+        self.assertEqual(len(catalog_nodes), 1)
+        self.assertNotIn('@id', catalog_nodes[0])
+        self.assertIn('https://example.com/dataset/test-ds', ids)
+        self.assertIn('https://example.com/dataset/orphan-ds', ids)
 
     # ── RDF Turtle export ────────────────────────────────────────────────────
 
     def test_build_turtle_returns_valid_turtle(self) -> None:
         from shared.export import build_turtle
 
-        turtle = build_turtle(self._FULL_DS)
+        turtle = build_turtle(self._make_dataset())
         self.assertIsInstance(turtle, str)
         self.assertIn('dcat:Dataset', turtle)
 
     def test_build_turtle_contains_dataset_title(self) -> None:
         from shared.export import build_turtle
 
-        turtle = build_turtle(self._FULL_DS)
+        turtle = build_turtle(self._make_dataset())
         self.assertIn('Test dataset', turtle)

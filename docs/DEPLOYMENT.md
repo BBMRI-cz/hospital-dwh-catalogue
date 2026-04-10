@@ -3,8 +3,8 @@
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- A `.env` file created from the appropriate example (`.env.dev.example`, `.env.test.example`, or `.env.prod.example`)
-- The `DEPLOY_ENV` variable in `.env` set to `dev`, `test`, or `prod`
+- A `.env` file created from the appropriate example (`.env.dev.example`, `.env.staging.example`, or `.env.prod.example`)
+- The `DEPLOY_ENV` variable in `.env` set to `dev`, `staging`, or `prod`
 
 ## Using the deploy script
 
@@ -17,10 +17,11 @@ The simplest way to deploy:
 What the script does:
 
 1. Reads `DEPLOY_ENV` from `.env` to pick the right docker-compose file
-2. Pulls the latest code from git (skipped for `dev`)
-3. Updates the HealthDCAT-AP git submodule
-4. Stops existing containers
-5. Builds and starts new containers
+2. Validates required environment variables for the selected environment
+3. Pulls the latest code from git (skipped for `dev`)
+4. Updates the HealthDCAT-AP git submodule
+5. Stops existing containers
+6. Builds and starts new containers
 
 ## Manual deployment
 
@@ -31,7 +32,7 @@ docker compose -f docker-compose.<env>.yml build
 docker compose -f docker-compose.<env>.yml up -d
 ```
 
-Replace `<env>` with `dev`, `test`, or `prod`.
+Replace `<env>` with `dev`, `staging`, or `prod`.
 
 ## What happens on container startup
 
@@ -45,19 +46,22 @@ The web container entrypoint (`docker/entrypoint.sh` calling `docker/startup.py`
 6. Migrates the `metadata_db` database
 7. Seeds mock data if `MOCK_FAIR_GENOMES=True`
 8. Compiles translation messages if `.po` files are newer than `.mo` files
-9. Runs `collectstatic` (test and prod only)
+9. Runs `collectstatic` (staging and prod only)
 
 You do not need to run migrations or collectstatic manually.
 
 ## Environment differences
 
-| | Dev | Test | Prod |
+| | Dev | Staging | Prod |
 |---|---|---|---|
 | Web server | Django runserver | Gunicorn (2 workers) | Gunicorn (configurable) |
+| External DB defaults | PostgreSQL | PostgreSQL | PostgreSQL |
 | Redis | No | Yes | Yes |
 | SSL | No | No | Yes (Certbot) |
-| Mock services | All mocked | All mocked | All real |
+| Mock services | All mocked | Mockable per integration | All real |
 | Git pull on deploy | No | Yes | Yes |
+
+Development, staging, and production all use PostgreSQL for every Django database alias. Staging expects its database settings to be filled in explicitly and can independently mock LDAP, FAIR Genomes, and Alvao for pre-production validation. Production expects explicit database and live integration settings and does not support mocks. CI uses the separate `catalogue.settings.ci` module and is not a deployment environment.
 
 ## Production-specific setup
 
@@ -76,7 +80,7 @@ See `.env.prod.example` for the full list.
 
 ## Collecting static files
 
-In development, Django serves static files directly. In test and production, `collectstatic` runs automatically on container startup. If you need to run it manually:
+In development, Django serves static files directly. In staging and production, `collectstatic` runs automatically on container startup. If you need to run it manually:
 
 ```bash
 docker compose -f docker-compose.<env>.yml exec web python manage.py collectstatic --noinput

@@ -14,9 +14,9 @@ The cart is stored in the user's session and holds up to 50 items.
 
 ## Configuration
 
-### Development
+### Development or staging
 
-For local development, use the mock service:
+For local development or isolated staging validation, use the mock service:
 
 ```bash
 MOCK_ALVAO=True
@@ -24,7 +24,7 @@ MOCK_ALVAO=True
 
 The mock stores tickets locally, generates fake ticket IDs (`MOCK-XXXXXXXX`), and simulates API responses with realistic delays. No external service needed.
 
-### Test environment
+### Staging with real Alvao
 
 To test against a real Alvao instance:
 

@@ -51,7 +51,13 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
+
+from schema_registry.types import (
+    SchemaRegistryPayload,
+    SchemaRegistryPrefixMap,
+    SchemaRequirement,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,14 +72,15 @@ _NS_URI_TO_CANONICAL_PREFIX: dict[str, str] = {
     'http://purl.org/dc/terms/': 'dct',  # always exposed as dct: in the UI
 }
 
-# URI for the healthdcatap: namespace — used by _merge_healthdcat_terms to build
-# term URIs from the cardinality JSON (which only carries local names, not full URIs).
-_HEALTHDCAT_PREFIX = 'healthdcatap'
-_HEALTHDCAT_BASE_URI = 'http://healthdataportal.eu/ns/health#'
-
 # Module-level cache: keyed by resolved release_dir path so that different
 # release versions (or override_settings in tests) get independent caches.
-_registry_cache: dict[Path, tuple[dict[str, Any], dict[str, str]]] = {}
+_registry_cache: dict[Path, tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]] = {}
+
+
+class _PathTermInfo(TypedDict):
+    label: str
+    description: str
+    mandatory: bool
 
 
 # ---------------------------------------------------------------------------
@@ -81,7 +88,7 @@ _registry_cache: dict[Path, tuple[dict[str, Any], dict[str, str]]] = {}
 # ---------------------------------------------------------------------------
 
 
-def get_registry(release_dir: Path) -> dict[str, Any]:
+def get_registry(release_dir: Path) -> SchemaRegistryPayload:
     """
     Return the in-memory schema dict for *release_dir*, loading and caching it
     on the first call.
@@ -104,7 +111,7 @@ def get_registry(release_dir: Path) -> dict[str, Any]:
     return _registry_cache[resolved][0]
 
 
-def get_namespace_prefixes(release_dir: Path) -> dict[str, str]:
+def get_namespace_prefixes(release_dir: Path) -> SchemaRegistryPrefixMap:
     """
     Return the namespace prefix map parsed from the SHACL TTL for *release_dir*.
 
@@ -133,7 +140,7 @@ def invalidate_cache() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
+def _load(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]:
     shacl_ttl = release_dir / 'shacl' / 'dcat-ap-SHACL.ttl'
     cardinality_json = release_dir / 'context' / 'healthdcat-cardinality-rules.json'
 
@@ -169,7 +176,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
     # Build prefix map: normalise to canonical prefix names by namespace URI.
     # This handles TTL files that declare the same namespace under different
     # prefix spellings across releases (e.g. 'dc:' vs 'dc1:' for dc/terms/).
-    prefix_map: dict[str, str] = {}
+    prefix_map: SchemaRegistryPrefixMap = {}
     for pfx, ns in g.namespaces():
         pfx_str = str(pfx)
         ns_str = str(ns)
@@ -200,7 +207,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
 
     # Collect term data grouped by path URI
     # path_uri → {label, description, mandatory}
-    by_path: dict[str, dict[str, Any]] = {}
+    by_path: dict[str, _PathTermInfo] = {}
 
     for subj in g.subjects(SH.path, None):
         path_node = g.value(subj, SH.path)
@@ -239,7 +246,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
             existing['mandatory'] = True
 
     # Build output dict
-    result: dict[str, Any] = {}
+    result: SchemaRegistryPayload = {}
     for path_uri, info in by_path.items():
         prefixed = _uri_to_prefixed(path_uri, prefix_map)
         if prefixed is None:
@@ -247,7 +254,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
         colon_idx = prefixed.index(':')
         prefix = prefixed[:colon_idx]
         local_name = prefixed[colon_idx + 1 :]
-        requirement = 'mandatory' if info['mandatory'] else 'optional'
+        requirement: SchemaRequirement = 'mandatory' if info['mandatory'] else 'optional'
         result[prefixed] = {
             'prefix': prefix,
             'local_name': local_name,
@@ -260,7 +267,7 @@ def _load(release_dir: Path) -> tuple[dict[str, Any], dict[str, str]]:
 
     # Merge HealthDCAT-AP-specific extension terms from the cardinality JSON
     if cardinality_json.exists():
-        _merge_healthdcat_terms(cardinality_json, result)
+        _merge_healthdcat_terms(cardinality_json, result, prefix_map)
 
     logger.info(
         'Schema registry loaded: %d terms from %s',
@@ -280,7 +287,8 @@ def _uri_to_prefixed(uri: str, prefix_map: dict[str, str]) -> str | None:
 
 def _merge_healthdcat_terms(
     json_path: Path,
-    result: dict[str, Any],
+    result: SchemaRegistryPayload,
+    prefix_map: SchemaRegistryPrefixMap,
 ) -> None:
     """
     Parse HealthDCAT-AP cardinality rules from ``healthdcat-cardinality-rules.json``
@@ -298,8 +306,8 @@ def _merge_healthdcat_terms(
     provides the authoritative three-tier scheme: mandatory / recommended /
     optional) and ``cardinality`` is set from the JSON ``card`` field.
 
-    For new ``healthdcatap:`` terms not already in the SHACL result, a full
-    entry is created.
+    For terms not already present from the SHACL TTL, a full entry is created
+    when the term prefix is known in the parsed namespace map.
     """
     try:
         data = json.loads(json_path.read_text(encoding='utf-8'))
@@ -307,10 +315,17 @@ def _merge_healthdcat_terms(
         logger.exception('Failed to read HealthDCAT-AP cardinality JSON: %s', json_path)
         return
 
-    cardinality_data: dict[str, Any] = data.get('PUBLIC', {})
-    _req_map = {'mandatory': 'mandatory', 'recommended': 'recommended', 'optional': 'optional'}
+    cardinality_data: dict[str, object] = data.get('PUBLIC', {})
+    _req_map: dict[str, SchemaRequirement] = {
+        'mandatory': 'mandatory',
+        'recommended': 'recommended',
+        'optional': 'optional',
+        'deprecated': 'deprecated',
+    }
 
     for term_label, term_info in cardinality_data.items():
+        if not isinstance(term_info, dict):
+            continue
         usage_note: str = term_info.get('usage_note', '')
         # Extract prefix:propertyName from the <a> tag in the usage_note HTML.
         # Anchoring to '>' avoids false positives from mentions of prefixed
@@ -339,15 +354,23 @@ def _merge_healthdcat_terms(
             result[semantics]['cardinality'] = cardinality
             continue
 
-        # New term — only add healthdcatap: terms (others should already
-        # be present from the SHACL TTL).
-        if prefix == _HEALTHDCAT_PREFIX:
-            result[semantics] = {
-                'prefix': prefix,
-                'local_name': local_name,
-                'uri': f'{_HEALTHDCAT_BASE_URI}{local_name}',
-                'requirement': requirement,
-                'cardinality': cardinality,
-                'label': term_label.title(),
-                'description': term_info.get('definition', ''),
-            }
+        namespace_uri = prefix_map.get(prefix)
+        if not namespace_uri:
+            logger.warning(
+                'Prefix "%s" missing from namespace map while processing %s; '
+                'skipping synthesized term %s.',
+                prefix,
+                json_path,
+                semantics,
+            )
+            continue
+
+        result[semantics] = {
+            'prefix': prefix,
+            'local_name': local_name,
+            'uri': f'{namespace_uri}{local_name}',
+            'requirement': requirement,
+            'cardinality': cardinality,
+            'label': term_label.title(),
+            'description': term_info.get('definition', ''),
+        }

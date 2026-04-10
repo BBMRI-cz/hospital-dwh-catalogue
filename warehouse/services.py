@@ -2,8 +2,8 @@
 Warehouse Metadata Service — encapsulates all direct ORM access for the
 warehouse app so that views never touch the database directly.
 
-Every public method returns plain Python data structures (dicts, lists,
-frozensets) rather than Django QuerySets, keeping the view layer fully
+Every public method returns plain Python data structures (typed payload dicts,
+lists, frozensets) rather than Django QuerySets, keeping the view layer fully
 decoupled from the ORM.
 """
 
@@ -11,6 +11,14 @@ from __future__ import annotations
 
 import logging
 from collections import Counter, defaultdict
+from collections.abc import Mapping
+
+from warehouse.service_types import (
+    WarehouseStatChartPayload,
+    WarehouseTableColumnPayload,
+    WarehouseTablePayload,
+    WarehouseTableWithStatsPayload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -57,83 +65,107 @@ class WarehouseMetadataService:
 
     # ── Distribution tables + columns ───────────────────────────────────────
 
-    def get_tables_with_columns(self, distribution_name: str) -> list[dict]:
-        """Return table dicts (with nested column lists) for a distribution."""
+    def get_tables_with_columns(
+        self,
+        distribution_name: str,
+    ) -> list[WarehouseTableWithStatsPayload]:
+        """Return typed table payloads (with nested column payloads) for a distribution."""
         from warehouse.models import Column, Table
 
-        table_qs = (
+        table_rows = list(
             Table.objects.using('metadata_db')
             .filter(distribution_id=distribution_name)
+            .values_list('name', 'title', 'description', 'url')
             .order_by('name')
         )
-        table_names = [t.name for t in table_qs]
+        table_names = [table_name for table_name, _, _, _ in table_rows]
 
-        col_by_table: dict[str, list[dict]] = defaultdict(list)
-        for c in (
+        col_by_table: defaultdict[str, list[WarehouseTableColumnPayload]] = defaultdict(list)
+        for (
+            table_name,
+            column_name,
+            column_title,
+            column_description,
+            column_datatype,
+            property_url,
+        ) in (
             Column.objects.using('metadata_db')
             .filter(table_id__in=table_names)
+            .values_list('table_id', 'name', 'title', 'description', 'datatype', 'property_url')
             .order_by('table_id', 'var_order', 'name')
         ):
-            col_by_table[c.table_id].append(
+            col_by_table[table_name].append(
                 {
-                    'name': c.name,
-                    'title': c.title,
-                    'description': c.description,
-                    'datatype': c.datatype,
-                    'property_url': c.property_url,
+                    'name': column_name,
+                    'title': column_title,
+                    'description': column_description,
+                    'datatype': column_datatype,
+                    'property_url': property_url,
                 }
             )
 
         return [
             {
-                'name': t.name,
-                'title': t.title or t.name,
-                'description': t.description or '',
-                'url': t.url,
-                'columns': col_by_table.get(t.name, []),
+                'name': table_name,
+                'title': table_title or table_name,
+                'description': table_description or '',
+                'url': table_url,
+                'columns': col_by_table.get(table_name, []),
                 'stats': [],
             }
-            for t in table_qs
+            for table_name, table_title, table_description, table_url in table_rows
         ]
 
     # ── Tables + columns for multiple distributions (JSON-LD export) ────────
 
-    def get_tables_for_distributions(self, dist_names: list[str]) -> dict[str, list[dict]]:
-        """Return ``{distribution_name: [table_dict, …]}`` for multiple distributions."""
+    def get_tables_for_distributions(
+        self,
+        dist_names: list[str],
+    ) -> dict[str, list[WarehouseTablePayload]]:
+        """Return typed table payloads for multiple distributions keyed by distribution name."""
         from warehouse.models import Column, Table
 
-        table_qs = (
+        table_rows = list(
             Table.objects.using('metadata_db')
             .filter(distribution_id__in=dist_names)
+            .values_list('distribution_id', 'name', 'title', 'description', 'url')
             .order_by('distribution_id', 'name')
         )
 
-        all_table_names = [t.name for t in table_qs]
-        col_by_table: dict[str, list[dict]] = defaultdict(list)
-        for c in (
+        all_table_names = [table_name for _, table_name, _, _, _ in table_rows]
+        col_by_table: defaultdict[str, list[WarehouseTableColumnPayload]] = defaultdict(list)
+        for (
+            table_name,
+            column_name,
+            column_title,
+            column_description,
+            column_datatype,
+            property_url,
+        ) in (
             Column.objects.using('metadata_db')
             .filter(table_id__in=all_table_names)
+            .values_list('table_id', 'name', 'title', 'description', 'datatype', 'property_url')
             .order_by('table_id', 'var_order', 'name')
         ):
-            col_by_table[c.table_id].append(
+            col_by_table[table_name].append(
                 {
-                    'name': c.name,
-                    'title': c.title,
-                    'description': c.description,
-                    'datatype': c.datatype,
-                    'property_url': c.property_url,
+                    'name': column_name,
+                    'title': column_title,
+                    'description': column_description,
+                    'datatype': column_datatype,
+                    'property_url': property_url,
                 }
             )
 
-        tables_by_dist: dict[str, list[dict]] = defaultdict(list)
-        for t in table_qs:
-            tables_by_dist[t.distribution_id].append(
+        tables_by_dist: defaultdict[str, list[WarehouseTablePayload]] = defaultdict(list)
+        for distribution_id, table_name, table_title, table_description, table_url in table_rows:
+            tables_by_dist[distribution_id].append(
                 {
-                    'name': t.name,
-                    'title': t.title or t.name,
-                    'description': t.description or '',
-                    'url': t.url,
-                    'columns': col_by_table.get(t.name, []),
+                    'name': table_name,
+                    'title': table_title or table_name,
+                    'description': table_description or '',
+                    'url': table_url,
+                    'columns': col_by_table.get(table_name, []),
                 }
             )
 
@@ -141,8 +173,8 @@ class WarehouseMetadataService:
 
     # ── Fair Genomes stat charts ────────────────────────────────────────────
 
-    def get_stat_charts(self, distribution_name: str) -> list[dict]:
-        """Return stat chart dicts for a Fair Genomes distribution."""
+    def get_stat_charts(self, distribution_name: str) -> list[WarehouseStatChartPayload]:
+        """Return typed stat chart payloads for a Fair Genomes distribution."""
         from fair_genomes.models import StatDefinition as FGStatDefinition
         from fair_genomes.models import StatResult as FGStatResult
 
@@ -151,7 +183,7 @@ class WarehouseMetadataService:
             .filter(distribution__name=distribution_name, is_active=True)
             .order_by('sort_order', 'molgenis_table', 'molgenis_column')
         )
-        charts: list[dict] = []
+        charts: list[WarehouseStatChartPayload] = []
         for sd in stat_defs:
             sr = (
                 FGStatResult.objects.using('fair_genomes_db')
@@ -164,7 +196,7 @@ class WarehouseMetadataService:
                         'label': sd.chart_label,
                         'table_name': sr.table_name,
                         'column_name': sr.column_name,
-                        'data': sr.distribution,
+                        'data': {str(key): int(value) for key, value in sr.distribution.items()},
                     }
                 )
         return charts
@@ -193,7 +225,8 @@ class WarehouseMetadataService:
 
     def build_column_counter(
         self,
-        filtered_datasets: list[dict],
+        filtered_dist_names: list[str],
+        dist_to_dataset: Mapping[str, str],
     ) -> Counter:
         """Build a Counter of column titles across filtered warehouse distributions.
 
@@ -201,19 +234,10 @@ class WarehouseMetadataService:
         inflating counts when a dataset has multiple distributions sharing the
         same columns.
         """
-        filtered_dist_names = [
-            d['name']
-            for ds in filtered_datasets
-            if ds.get('app') == 'warehouse'
-            for d in ds.get('distributions', [])
-        ]
         col_counter: Counter = Counter()
         if not filtered_dist_names:
             return col_counter
 
-        dist_to_dataset: dict[str, str] = {
-            d['name']: ds['name'] for ds in filtered_datasets for d in ds.get('distributions', [])
-        }
         seen_col_ds: set[tuple[str, str]] = set()
         attr_rows = self.get_column_counts_for_distributions(filtered_dist_names)
         for title, dist_name in attr_rows:

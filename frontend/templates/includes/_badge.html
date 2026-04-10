@@ -1,0 +1,9 @@
+{% if b_variant == "cyan" %}
+<span class="badge badge-sm font-mono text-[10px] border px-2 bg-mou-cyan-light text-mou-blue border-mou-cyan-border">
+	{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}
+</span>
+{% else %}
+<span class="badge badge-sm font-mono text-[10px] border text-txt-muted bg-gray-50 border-gray-200 px-2">
+	{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}
+</span>
+{% endif %}

@@ -19,8 +19,8 @@ if [ ! -f ".env" ]; then
     echo -e "${RED}Error: .env file not found!${NC}"
     echo -e "${YELLOW}Please create a .env file based on one of the examples:${NC}"
     echo -e "${YELLOW}  - .env.dev.example${NC}"
+    echo -e "${YELLOW}  - .env.staging.example${NC}"
     echo -e "${YELLOW}  - .env.prod.example${NC}"
-    echo -e "${YELLOW}  - .env.test.example${NC}"
     exit 1
 fi
 
@@ -32,18 +32,18 @@ set +a
 # Check if DEPLOY_ENV is set
 if [ -z "$DEPLOY_ENV" ]; then
     echo -e "${RED}Error: DEPLOY_ENV is not set in .env file!${NC}"
-    echo -e "${YELLOW}Please add DEPLOY_ENV=<dev|prod|test> to your .env file${NC}"
+    echo -e "${YELLOW}Please add DEPLOY_ENV=<dev|staging|prod> to your .env file${NC}"
     exit 1
 fi
 
 # Validate DEPLOY_ENV value
 case "$DEPLOY_ENV" in
-    dev|prod|test)
+    dev|staging|prod)
         # Valid environment
         ;;
     *)
         echo -e "${RED}Error: Invalid DEPLOY_ENV value: $DEPLOY_ENV${NC}"
-        echo -e "${YELLOW}DEPLOY_ENV must be one of: dev, prod, test${NC}"
+        echo -e "${YELLOW}DEPLOY_ENV must be one of: dev, staging, prod${NC}"
         exit 1
         ;;
 esac

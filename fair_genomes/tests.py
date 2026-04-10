@@ -250,7 +250,7 @@ class SyncStatsTest(TestCase):
         resp = MagicMock()
         resp.raise_for_status.return_value = None
         table_cap = table[0].upper() + table[1:]
-        rows = [{'count': count, column: {'name': value}} for value, count in dist.items()]
+        rows = [{'count': count, column: {'value': value}} for value, count in dist.items()]
         resp.json.return_value = {'data': {f'{table_cap}_groupBy': rows}}
         return resp
 

@@ -10,10 +10,22 @@ originates from the Local Metadata (warehouse) or FAIR Genomes DB.
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
+from collections import Counter, defaultdict
+from collections.abc import Mapping
 
-from shared.dtos import UnifiedDataset, UnifiedDistribution
+from schema_registry.types import SchemaRegistryPayload
+from shared.dtos import (
+    ExportCatalog,
+    ExportDataset,
+    UnifiedDataset,
+    UnifiedDistribution,
+    UnifiedStatChart,
+    UnifiedTable,
+    UnifiedTableColumn,
+)
 from shared.mappers import (
+    map_export_catalog,
+    map_export_dataset,
     map_fair_dataset,
     map_fair_distribution,
     map_warehouse_dataset,
@@ -21,6 +33,28 @@ from shared.mappers import (
 )
 
 logger = logging.getLogger(__name__)
+
+_EXPORT_SOURCE_APPS = ('warehouse', 'fair_genomes')
+
+
+def parse_keywords(keyword_str: str | None) -> list[str]:
+    """Parse a comma-separated keyword string into a clean list."""
+    return [keyword.strip() for keyword in (keyword_str or '').split(',') if keyword.strip()]
+
+
+def derive_status(access_rights: str | None) -> str:
+    """Derive the catalogue status from an access-rights URI or label."""
+    if not access_rights:
+        return 'raw'
+
+    access_rights_upper = access_rights.upper()
+    if 'PUBLIC' in access_rights_upper and 'NON' not in access_rights_upper:
+        return 'ready'
+    if 'NON_PUBLIC' in access_rights_upper or 'NONPUBLIC' in access_rights_upper:
+        return 'unavailable'
+    if 'CLOSED' in access_rights_upper:
+        return 'unavailable'
+    return 'raw'
 
 
 class UnifiedCatalogService:
@@ -144,7 +178,7 @@ class UnifiedCatalogService:
         logger.warning('Dataset not found: app=%s name=%s', app, name)
         return None, []
 
-    def get_schema_json(self) -> dict:
+    def get_schema_json(self) -> SchemaRegistryPayload:
         """
         Return a dict keyed by semantics string (e.g. "dct:title") with term
         metadata loaded from the HealthDCAT-AP submodule.
@@ -160,3 +194,209 @@ class UnifiedCatalogService:
         except Exception:
             logger.exception('Failed to load schema registry')
             return {}
+
+    def get_dataset_names_by_columns(self, column_titles: set[str]) -> frozenset[str]:
+        """Return dataset names with warehouse columns matching the requested titles."""
+        if not column_titles:
+            return frozenset()
+
+        try:
+            from warehouse.services import WarehouseMetadataService
+
+            return WarehouseMetadataService().get_dataset_names_by_columns(column_titles)
+        except Exception:
+            logger.exception('Failed to resolve dataset names by columns')
+            return frozenset()
+
+    def build_column_counter(
+        self,
+        filtered_dist_names: list[str],
+        dist_to_dataset: Mapping[str, str],
+    ) -> Counter[str]:
+        """Build sidebar column counts for warehouse distributions."""
+        if not filtered_dist_names:
+            return Counter()
+
+        try:
+            from warehouse.services import WarehouseMetadataService
+
+            return WarehouseMetadataService().build_column_counter(
+                filtered_dist_names,
+                dist_to_dataset,
+            )
+        except Exception:
+            logger.exception('Failed to build warehouse column counter')
+            return Counter()
+
+    def get_tables_with_columns(self, app: str, distribution_name: str) -> list[UnifiedTable]:
+        """Return canonical table/column read models for a distribution."""
+        if app != 'warehouse':
+            if app != 'fair_genomes':
+                logger.warning('Unsupported table metadata app requested: %s', app)
+            return []
+
+        try:
+            from warehouse.services import WarehouseMetadataService
+
+            table_payloads = WarehouseMetadataService().get_tables_with_columns(distribution_name)
+        except Exception:
+            logger.exception(
+                'Failed to load warehouse tables for distribution=%s', distribution_name
+            )
+            return []
+
+        return [
+            UnifiedTable(
+                name=table['name'],
+                title=table['title'],
+                description=table['description'],
+                url=table['url'],
+                columns=[
+                    UnifiedTableColumn(
+                        name=column['name'],
+                        title=column['title'],
+                        description=column['description'],
+                        datatype=column['datatype'],
+                        property_url=column['property_url'],
+                    )
+                    for column in table['columns']
+                ],
+            )
+            for table in table_payloads
+        ]
+
+    def get_stat_charts(self, app: str, distribution_name: str) -> list[UnifiedStatChart]:
+        """Return canonical stat chart read models for a distribution."""
+        if app != 'fair_genomes':
+            if app != 'warehouse':
+                logger.warning('Unsupported stat chart app requested: %s', app)
+            return []
+
+        try:
+            from warehouse.services import WarehouseMetadataService
+
+            chart_payloads = WarehouseMetadataService().get_stat_charts(distribution_name)
+        except Exception:
+            logger.exception('Failed to load stat charts for distribution=%s', distribution_name)
+            return []
+
+        return [
+            UnifiedStatChart(
+                label=chart['label'],
+                table_name=chart['table_name'],
+                column_name=chart['column_name'],
+                data=chart['data'],
+            )
+            for chart in chart_payloads
+        ]
+
+    def _get_export_models(self, app: str):
+        """Return ``(db_alias, CatalogModel, DatasetModel)`` for an export source app."""
+        if app == 'warehouse':
+            from warehouse.models import Catalog as WarehouseCatalog
+            from warehouse.models import Dataset as WarehouseDataset
+
+            return 'metadata_db', WarehouseCatalog, WarehouseDataset
+
+        if app == 'fair_genomes':
+            from fair_genomes.models import Catalog as FairCatalog
+            from fair_genomes.models import Dataset as FairDataset
+
+            return 'fair_genomes_db', FairCatalog, FairDataset
+
+        logger.warning('Unsupported export app requested: %s', app)
+        return None, None, None
+
+    def _get_export_dataset_queryset(self, app: str, db_alias: str, dataset_model):
+        queryset = dataset_model.objects.using(db_alias).select_related(
+            'publisher__contact_point',
+            'creator__contact_point',
+            'contact_point',
+            'catalog__publisher__contact_point',
+            'hdab__contact_point',
+            'custodian__contact_point',
+            'source',
+        )
+
+        queryset = queryset.prefetch_related('distributions')
+        if app == 'warehouse':
+            queryset = queryset.prefetch_related('distributions__tables__columns')
+
+        return queryset
+
+    def _get_export_catalog_queryset(self, db_alias: str, catalog_model):
+        return catalog_model.objects.using(db_alias).select_related('publisher__contact_point')
+
+    def get_export_dataset(self, app: str, name: str):
+        """Return a structured export dataset graph object, or None if missing."""
+        db_alias, _, dataset_model = self._get_export_models(app)
+        if dataset_model is None or db_alias is None:
+            return None
+
+        queryset = self._get_export_dataset_queryset(app, db_alias, dataset_model).filter(name=name)
+
+        dataset = queryset.first()
+        if dataset is None:
+            logger.warning('Export dataset not found: app=%s name=%s', app, name)
+            return None
+
+        return map_export_dataset(dataset, app)
+
+    def get_export_catalog(self, app: str, name: str):
+        """Return a structured export catalog graph object, or None if missing."""
+        db_alias, catalog_model, dataset_model = self._get_export_models(app)
+        if catalog_model is None or dataset_model is None or db_alias is None:
+            return None
+
+        catalog = (
+            self._get_export_catalog_queryset(db_alias, catalog_model).filter(name=name).first()
+        )
+        if catalog is None:
+            logger.warning('Export catalog not found: app=%s name=%s', app, name)
+            return None
+
+        dataset_queryset = self._get_export_dataset_queryset(app, db_alias, dataset_model).filter(
+            catalog_id=name
+        )
+
+        export_datasets = [
+            map_export_dataset(dataset, app, include_catalog=False) for dataset in dataset_queryset
+        ]
+        return map_export_catalog(catalog, app, datasets=export_datasets)
+
+    def get_complete_export_catalogue(self) -> tuple[list[ExportCatalog], list[ExportDataset]]:
+        """Return all exportable catalogs plus datasets not assigned to any catalog."""
+        export_catalogs: list[ExportCatalog] = []
+        orphan_datasets: list[ExportDataset] = []
+
+        for app in _EXPORT_SOURCE_APPS:
+            db_alias, catalog_model, dataset_model = self._get_export_models(app)
+            if catalog_model is None or dataset_model is None or db_alias is None:
+                continue
+
+            try:
+                catalog_rows = list(self._get_export_catalog_queryset(db_alias, catalog_model))
+                dataset_rows = list(self._get_export_dataset_queryset(app, db_alias, dataset_model))
+            except Exception:
+                logger.exception('Failed to load aggregate export resources for app=%s', app)
+                continue
+
+            datasets_by_catalog: dict[str, list[ExportDataset]] = defaultdict(list)
+            for dataset in dataset_rows:
+                export_dataset = map_export_dataset(dataset, app, include_catalog=False)
+                catalog_name = getattr(dataset, 'catalog_id', None)
+                if catalog_name:
+                    datasets_by_catalog[catalog_name].append(export_dataset)
+                else:
+                    orphan_datasets.append(export_dataset)
+
+            export_catalogs.extend(
+                map_export_catalog(
+                    catalog,
+                    app,
+                    datasets=datasets_by_catalog.get(catalog.name, []),
+                )
+                for catalog in catalog_rows
+            )
+
+        return export_catalogs, orphan_datasets

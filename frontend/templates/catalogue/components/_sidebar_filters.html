@@ -1,0 +1,43 @@
+{% load i18n %}
+{# Expects: sidebar_keywords, sidebar_sources, sidebar_custodians, sidebar_health_categories, sidebar_themes, sidebar_columns, sidebar_counts, filter_params #}
+
+<form id="filter-form" method="GET" action="{% url 'frontend:catalogue' %}" class="flex flex-col h-full">
+  <input type="hidden" name="page" value="1">
+
+  <div class="flex-1 overflow-y-auto min-h-0 flex flex-col gap-5 py-4 pr-1">
+
+    {# ── Search ── #}
+    <div>
+      <label for="sidebar-search" class="font-mono text-[11px] font-bold uppercase tracking-[1.5px] text-txt-muted mb-1.5 block">{% trans "Search" %}</label>
+      {% trans "Datasets, distributions…" as sidebar_search_placeholder %}
+      {% include "includes/_search_input.html" with search_id="sidebar-search" search_name="q" search_value=filter_params.q search_placeholder=sidebar_search_placeholder search_input_class="w-full" only %}
+    </div>
+
+    {% trans "Keywords" as t_kw %}{% trans "Custodian" as t_custodian %}{% trans "Health Category" as t_hc %}{% trans "Source" as t_src %}{% trans "Theme" as t_theme %}{% trans "Distribution Columns" as t_cols %}
+    {% include "includes/_filter_group.html" with title=t_kw items=sidebar_keywords list_id='kw-list' field_name='keywords' only %}
+    {% include "includes/_filter_group.html" with title=t_custodian items=sidebar_custodians list_id='custodian-list' field_name='custodian' only %}
+    {% include "includes/_filter_group.html" with title=t_hc items=sidebar_health_categories list_id='hc-list' field_name='health_category' only %}
+    {% include "includes/_filter_group.html" with title=t_src items=sidebar_sources list_id='src-list' field_name='source' only %}
+    {% include "includes/_filter_group.html" with title=t_theme items=sidebar_themes list_id='theme-list' field_name='theme' only %}
+    {% include "includes/_filter_group.html" with title=t_cols items=sidebar_columns list_id='col-list' field_name='column' only %}
+
+  </div>{# /scrollable filters #}
+
+  {# ── Actions (pinned to bottom) ── #}
+  <div class="shrink-0 flex flex-row gap-2 py-3 border-t border-gray-100">
+    <button type="submit"
+      class="flex-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer bg-mou-cyan">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      {% trans "Search" %}
+    </button>
+    <a href="{% url 'frontend:catalogue' %}"
+      class="flex-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-white text-xs font-medium text-txt-muted border border-gray-200 transition-all duration-150 hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 active:scale-[0.97]">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+      {% trans "Clear" %}
+    </a>
+  </div>
+</form>

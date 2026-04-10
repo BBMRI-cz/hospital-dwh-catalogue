@@ -28,11 +28,11 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
 
 from django.conf import settings
 
 from schema_registry.registry import get_namespace_prefixes, get_registry
+from schema_registry.types import SchemaRegistryPayload, SchemaRegistryPrefixMap
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def _release_dir() -> Path:
     return base_dir / 'health_dcat_ap' / 'public' / 'releases' / version
 
 
-def get_schema_dict() -> dict[str, Any]:
+def get_schema_dict() -> SchemaRegistryPayload:
     """
     Return the in-memory schema dict for the configured release version.
 
@@ -61,7 +61,7 @@ def get_schema_dict() -> dict[str, Any]:
     return get_registry(_release_dir())
 
 
-def get_context_prefixes() -> dict[str, str]:
+def get_context_prefixes() -> SchemaRegistryPrefixMap:
     """
     Return the namespace prefix map parsed from the HealthDCAT-AP SHACL TTL.
 

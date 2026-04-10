@@ -41,6 +41,7 @@ def _ensure_env_superuser() -> None:
           user that happens to share the username; leave untouched and warn.
     """
     from django.contrib.auth import get_user_model
+    from django.contrib.auth.models import User
 
     username = os.environ.get('DJANGO_SUPERUSER_USERNAME', '').strip()
     password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '').strip()
@@ -52,11 +53,11 @@ def _ensure_env_superuser() -> None:
         )
         return
 
-    User = get_user_model()
+    UserModel = get_user_model()
 
     # ── Remove stale env-managed user (username changed in .env) ─────────────
     deleted_count, _ = (
-        User.objects.using('auth_db')
+        UserModel.objects.using('auth_db')
         .filter(email=_ENV_SUPERUSER_SENTINEL_EMAIL)
         .exclude(username=username)
         .delete()
@@ -65,7 +66,7 @@ def _ensure_env_superuser() -> None:
         print(f'Env superuser: deleted {deleted_count} stale env-managed user(s).', flush=True)
 
     # ── Create or update target user ──────────────────────────────────────────
-    user, created = User.objects.using('auth_db').get_or_create(
+    result = UserModel.objects.using('auth_db').get_or_create(
         username=username,
         defaults={
             'email': _ENV_SUPERUSER_SENTINEL_EMAIL,
@@ -73,6 +74,8 @@ def _ensure_env_superuser() -> None:
             'is_superuser': True,
         },
     )
+    user: User = result[0]  # type: ignore[assignment]
+    created: bool = result[1]
 
     if created:
         user.set_password(password)
@@ -151,8 +154,15 @@ def main() -> None:
         )
         call_command('migrate', 'fair_genomes', database='fair_genomes_db', interactive=False)
 
-    # metadata_db: warehouse app
-    call_command('migrate', database='metadata_db', interactive=False, verbosity=1)
+    # metadata_db: warehouse
+    try:
+        call_command('migrate', database='metadata_db', interactive=False, verbosity=1)
+    except Exception:
+        print(
+            'metadata_db migration skipped — database unavailable. '
+            'Warehouse data will not appear in the catalogue.',
+            flush=True,
+        )
 
     # ── Seed mock data ────────────────────────────────────────────────────────
     if os.environ.get('MOCK_FAIR_GENOMES', 'False') == 'True':

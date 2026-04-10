@@ -6,7 +6,7 @@
 {% block content %}
 <div class="py-8">
 
-  {% url 'warehouse:catalogue' as catalogue_url %}
+  {% url 'frontend:catalogue' as catalogue_url %}
   {% trans "Catalogue" as t_catalogue %}
   {% trans "Data Request Cart" as t_cart_title %}
   {% trans "Review selected datasets and submit an Alvao request" as t_cart_subtitle %}
@@ -29,7 +29,7 @@
         {% for item in cart %}
         <tr class="border-t border-gray-100 hover:bg-gray-50">
           <td class="px-5 py-3">
-            <a href="{% url 'warehouse:dataset_detail' item.app item.name %}" target="_blank" rel="noopener noreferrer"
+            <a href="{% url 'frontend:dataset_detail' item.app item.name %}" target="_blank" rel="noopener noreferrer"
                class="group block hover:text-mou-cyan transition-colors">
               <div class="font-medium text-gray-800 text-sm group-hover:text-mou-cyan">{{ item.title }}</div>
               <div class="font-mono text-[10px] text-txt-muted group-hover:text-mou-cyan/70">{{ item.name }}</div>

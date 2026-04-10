@@ -189,5 +189,5 @@ class TicketRequestItem(models.Model):
                     return None
             except LookupError:
                 return None
-            return reverse('warehouse:dataset_detail', kwargs={'app': app, 'name': name})
+            return reverse('frontend:dataset_detail', kwargs={'app': app, 'name': name})
         return None

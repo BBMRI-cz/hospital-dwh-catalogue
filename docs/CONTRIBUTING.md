@@ -46,7 +46,7 @@ This gives you `ruff` (linting and formatting), `mypy` (type checking), and `ban
 ./scripts/check-types.sh         # mypy type checking
 ./scripts/check-security.sh      # Bandit security scan
 ./scripts/check-translations.sh  # Translation completeness
-./scripts/check-tests.sh         # Django test suite
+./scripts/check-tests.sh         # Django test suite (uses catalogue.settings.ci by default)
 ./scripts/check-docker.sh        # Docker build check
 ```
 
@@ -90,3 +90,10 @@ This deletes all data in the development database.
 | Translations | Translation files are complete and compiled | Fix `.po` files and recompile |
 | Tests | Django test suite | Fix the failing tests |
 | CI Success | All above must pass | Fix whichever job failed |
+
+The repository now uses four runtime settings modules:
+
+- `catalogue.settings.dev` for local development
+- `catalogue.settings.ci` for automated checks and test execution
+- `catalogue.settings.staging` for the deployed pre-production environment
+- `catalogue.settings.prod` for production
