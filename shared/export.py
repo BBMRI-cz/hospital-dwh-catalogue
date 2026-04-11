@@ -299,7 +299,11 @@ def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistribu
 
 
 def _build_dataset_node(
-    dataset: ExportDataset, graph: JsonLdGraph, seen: set[str]
+    dataset: ExportDataset,
+    graph: JsonLdGraph,
+    seen: set[str],
+    *,
+    include_distributions: bool = True,
 ) -> JsonLdDatasetNode:
     publisher_value = (
         _build_agent_node(dataset.publisher, graph, seen) if dataset.publisher else None
@@ -370,7 +374,7 @@ def _build_dataset_node(
     dataset_types = _uri_list(dataset.type)
     if dataset_types:
         node['dct:type'] = dataset_types[0] if len(dataset_types) == 1 else dataset_types
-    if dataset.distributions:
+    if include_distributions and dataset.distributions:
         dist_refs = [
             _id_ref(iri)
             for distribution in dataset.distributions
@@ -392,6 +396,7 @@ def _append_dataset_resource(
     seen: set[str],
     *,
     include_catalog: bool,
+    include_distributions: bool = True,
 ) -> None:
     if include_catalog and dataset.catalog is not None:
         dataset_iri = _dataset_iri(dataset.identifier)
@@ -417,9 +422,10 @@ def _append_dataset_resource(
             )
         _append_node(graph, seen, catalog_node)
 
-    dataset_node = _build_dataset_node(dataset, graph, seen)
+    dataset_node = _build_dataset_node(dataset, graph, seen, include_distributions=include_distributions)
     _append_node(graph, seen, dataset_node)
-    _add_distributions(dataset, graph, seen)
+    if include_distributions:
+        _add_distributions(dataset, graph, seen)
 
 
 def _dataset_graph(dataset: ExportDataset) -> JsonLdGraph:
@@ -434,6 +440,8 @@ def _append_catalog_resource(
     catalog: ExportCatalog,
     graph: JsonLdGraph,
     seen: set[str],
+    *,
+    include_distributions: bool = True,
 ) -> None:
     catalog_node: JsonLdCatalogNode = {
         '@type': 'dcat:Catalog',
@@ -457,7 +465,9 @@ def _append_catalog_resource(
     _append_node(graph, seen, catalog_node)
 
     for dataset in catalog.datasets:
-        _append_dataset_resource(dataset, graph, seen, include_catalog=False)
+        _append_dataset_resource(
+            dataset, graph, seen, include_catalog=False, include_distributions=include_distributions
+        )
 
 
 def _catalog_graph(catalog: ExportCatalog) -> JsonLdGraph:
@@ -472,15 +482,19 @@ def _catalog_graph(catalog: ExportCatalog) -> JsonLdGraph:
 def _complete_graph(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
+    *,
+    include_distributions: bool = True,
 ) -> JsonLdGraph:
     graph: JsonLdGraph = []
     seen: set[str] = set()
 
     for catalog in catalogs:
-        _append_catalog_resource(catalog, graph, seen)
+        _append_catalog_resource(catalog, graph, seen, include_distributions=include_distributions)
 
     for dataset in orphan_datasets:
-        _append_dataset_resource(dataset, graph, seen, include_catalog=False)
+        _append_dataset_resource(
+            dataset, graph, seen, include_catalog=False, include_distributions=include_distributions
+        )
 
     return graph
 
@@ -509,9 +523,13 @@ def build_jsonld(resource: ExportResource) -> JsonLdDocument:
 def build_complete_jsonld(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
+    *,
+    include_distributions: bool = True,
 ) -> JsonLdDocument:
     """Build one aggregate JSON-LD export document for all catalog resources."""
-    return _build_document(_complete_graph(catalogs, orphan_datasets))
+    return _build_document(
+        _complete_graph(catalogs, orphan_datasets, include_distributions=include_distributions)
+    )
 
 
 def has_distributions(dataset: ExportDataset) -> bool:
@@ -537,11 +555,13 @@ def build_turtle(resource: ExportResource) -> str:
 def build_complete_turtle(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
+    *,
+    include_distributions: bool = True,
 ) -> str:
     """Serialise the aggregate JSON-LD export document to Turtle."""
     from rdflib import Graph  # type: ignore[import-untyped]
 
-    jsonld = build_complete_jsonld(catalogs, orphan_datasets)
+    jsonld = build_complete_jsonld(catalogs, orphan_datasets, include_distributions=include_distributions)
     graph = Graph()
     graph.parse(data=dump_jsonld(jsonld), format='json-ld')
     return graph.serialize(format='turtle')
