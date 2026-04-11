@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Sentinel email that marks env-managed superuser accounts.
 # This allows the startup script to track which user it owns across restarts,
 # even if LDAP (AUTH_LDAP_ALWAYS_UPDATE_USER) overwrites the email field.
-_ENV_SUPERUSER_SENTINEL_EMAIL = '__env_managed__@localhost'
+_ENV_SUPERUSER_SENTINEL_EMAIL = 'env-managed-superuser@localhost'
 
 
 def _ensure_env_superuser() -> None:

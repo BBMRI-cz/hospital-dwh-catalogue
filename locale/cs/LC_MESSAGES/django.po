@@ -442,6 +442,10 @@ msgstr "Klíčové slovo"
 msgid "Column"
 msgstr "Sloupec"
 
+#: frontend/templates/catalogue/components/_stat_charts.html
+msgid "No data available"
+msgstr "Data nejsou k dispozici"
+
 #: frontend/templates/catalogue/index.html:159
 #: frontend/templates/catalogue/index.html:174
 msgid "No datasets found"

@@ -441,6 +441,10 @@ msgstr "Keyword"
 msgid "Column"
 msgstr "Column"
 
+#: frontend/templates/catalogue/components/_stat_charts.html
+msgid "No data available"
+msgstr "No data available"
+
 #: frontend/templates/catalogue/index.html:159
 #: frontend/templates/catalogue/index.html:174
 msgid "No datasets found"

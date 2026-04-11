@@ -127,7 +127,7 @@
     var n      = idx + 1;
     var canvas = document.getElementById('stat-chart-' + n);
     var legEl  = document.getElementById('stat-chart-legend-' + n);
-    if (!canvas || !entry.data) return;
+    if (!canvas || !entry.data || Object.keys(entry.data).length === 0) return;
 
     var labels = Object.keys(entry.data);
     var values = labels.map(function (k) { return entry.data[k]; });

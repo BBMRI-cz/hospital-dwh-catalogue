@@ -646,7 +646,9 @@ class FairGenomesService:
             headers['x-molgenis-token'] = self.api_token
 
         data = None
-        for query in (query_ref, f'{{ {table_cap}_groupBy {{ count {column} }} }}'):
+        queries = (query_ref, f'{{ {table_cap}_groupBy {{ count {column} }} }}')
+        for attempt, query in enumerate(queries):
+            is_last = attempt == len(queries) - 1
             try:
                 response = requests.post(
                     self.graphql_url,
@@ -654,6 +656,10 @@ class FairGenomesService:
                     headers=headers,
                     timeout=self.timeout,
                 )
+                # A 400 on the first (ref) query means the column is a plain
+                # scalar — fall through to the scalar retry instead of giving up.
+                if response.status_code == 400 and not is_last:
+                    continue
                 response.raise_for_status()
                 data = response.json()
             except (requests.RequestException, ValueError) as exc:
@@ -733,13 +739,22 @@ class FairGenomesService:
 
         skip_suffixes = (
             '_groupBy',
+            'GroupBy',
             '_agg',
+            'Aggregate',
             '_aggregate',
             'Input',
             'OrderByInput',
             'FilterInput',
             'Connection',
             'Edge',
+        )
+        skip_prefixes = (
+            '__',
+            '_',
+            'Molgenis',
+            'Signin',
+            'Save',
         )
         skip_names = {
             'Query',
@@ -760,13 +775,24 @@ class FairGenomesService:
             kind = t.get('kind', '')
             if kind != 'OBJECT':
                 continue
-            if name.startswith('__') or name.startswith('_'):
+            if any(name.startswith(p) for p in skip_prefixes):
                 continue
             if name in skip_names:
                 continue
             if any(name.endswith(s) for s in skip_suffixes):
                 continue
-            fields = [f['name'] for f in (t.get('fields') or []) if not f['name'].startswith('_')]
+            # Exclude any type that contains Aggregate or GroupBy anywhere — these
+            # are sub-types like ClinicalAggregate_avg, SequencingGroupBy__sum.
+            if 'Aggregate' in name or 'GroupBy' in name:
+                continue
+            fields = [
+                f['name'] for f in (t.get('fields') or [])
+                if not f['name'].startswith('_')
+                and not f['name'].endswith('_agg')
+                and not f['name'].endswith('_groupBy')
+                and not f['name'].endswith('_aggregate')
+                and 'mg_' not in f['name']
+            ]
             if fields:
                 result[name] = sorted(fields)
 

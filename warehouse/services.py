@@ -190,15 +190,18 @@ class WarehouseMetadataService:
                 .filter(table_name=sd.molgenis_table, column_name=sd.molgenis_column)
                 .first()
             )
-            if sr and sr.distribution:
-                charts.append(
-                    {
-                        'label': sd.chart_label,
-                        'table_name': sr.table_name,
-                        'column_name': sr.column_name,
-                        'data': {str(key): int(value) for key, value in sr.distribution.items()},
-                    }
-                )
+            charts.append(
+                {
+                    'label': sd.chart_label,
+                    'table_name': sd.molgenis_table,
+                    'column_name': sd.molgenis_column,
+                    'data': (
+                        {str(key): int(value) for key, value in sr.distribution.items()}
+                        if sr and sr.distribution
+                        else {}
+                    ),
+                }
+            )
         return charts
 
     # ── Derive status (business logic) ──────────────────────────────────────
