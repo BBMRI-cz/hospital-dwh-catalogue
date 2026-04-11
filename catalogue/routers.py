@@ -33,7 +33,9 @@ class AuthRouter:
         if obj1._meta.app_label in self.AUTH_APPS and obj2._meta.app_label in self.AUTH_APPS:
             return True
         if obj1._meta.app_label in self.AUTH_APPS or obj2._meta.app_label in self.AUTH_APPS:
-            return False
+            # Defer to let cross-database FKs with db_constraint=False work
+            # (e.g. TicketRequest.requester referencing auth_db User).
+            return None
         return None
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
