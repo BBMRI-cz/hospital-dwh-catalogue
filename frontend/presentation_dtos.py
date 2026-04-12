@@ -11,7 +11,7 @@ class FrontendDistributionDTO(TypedDict):
     title: str
     description: str | None
     access_url: str | None
-    applicable_legislation: str | None
+    applicable_legislation: list[str]
     format: str | None
     conforms_to: str | None
     byte_size: int | None
@@ -27,10 +27,10 @@ class FrontendDatasetDTO(TypedDict):
     access_rights: str | None
     version: str | None
     conforms_to: str | None
-    theme: str | None
+    theme: list[str]
     publisher: str | None
-    applicable_legislation: str | None
-    health_category: str | None
+    applicable_legislation: list[str]
+    health_category: list[str]
     hdab: str | None
     source: str | None
     creator: str | None

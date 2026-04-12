@@ -4,11 +4,11 @@
   Works with is_paginated (ListView) and standalone page_obj.
 {% endcomment %}
 {% if page_obj.paginator.num_pages > 1 %}
-<div class="flex justify-center mt-8">
+<div class="flex justify-center mt-8" hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true">
   <div class="flex gap-1 items-center">
     {# Prev #}
     {% if page_obj.has_previous %}
-    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
+    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
       class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">«</a>
     {% else %}
     <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">«</span>
@@ -18,7 +18,7 @@
     {% if page_obj.number == 1 %}
     <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">1</span>
     {% else %}
-    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">1</a>
+    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">1</a>
     {% endif %}
 
     {# Leading ellipsis #}
@@ -32,7 +32,7 @@
         {% if p == page_obj.number %}
         <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">{{ p }}</span>
         {% elif p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
-        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ p }}</a>
+        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ p }}</a>
         {% endif %}
       {% endif %}
     {% endfor %}
@@ -47,13 +47,13 @@
       {% if page_obj.number == page_obj.paginator.num_pages %}
       <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">{{ page_obj.paginator.num_pages }}</span>
       {% else %}
-      <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ page_obj.paginator.num_pages }}</a>
+      <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ page_obj.paginator.num_pages }}</a>
       {% endif %}
     {% endif %}
 
     {# Next #}
     {% if page_obj.has_next %}
-    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
       class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">»</a>
     {% else %}
     <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">»</span>

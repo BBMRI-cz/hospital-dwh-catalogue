@@ -107,7 +107,7 @@ def _contact_point_iri(contact_point: ExportContactPoint) -> str | None:
 
 
 def _split_values(value: str | None) -> list[str]:
-    return [item.strip() for item in (value or '').split(',') if item.strip()]
+    return [item.strip() for item in (value or '').split(';') if item.strip()]
 
 
 def _is_http_uri(value: str | None) -> bool:
@@ -271,7 +271,11 @@ def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistribu
     if distribution.access_url:
         node['dcat:accessURL'] = _id_ref(distribution.access_url)
     if distribution.applicable_legislation:
-        node['dcatap:applicableLegislation'] = _id_ref(distribution.applicable_legislation)
+        legislation = _uri_list(distribution.applicable_legislation)
+        if legislation:
+            node['dcatap:applicableLegislation'] = (
+                legislation[0] if len(legislation) == 1 else legislation
+            )
     format_value = _maybe_uri_ref(distribution.format)
     if format_value is not None:
         node['dct:format'] = format_value
@@ -365,8 +369,13 @@ def _build_dataset_node(
             if len(applicable_legislation) == 1
             else applicable_legislation
         )
-    if dataset.health_category:
-        node['healthdcatap:healthCategory'] = _id_ref(dataset.health_category)
+    health_category_values = _uri_list(dataset.health_category)
+    if health_category_values:
+        node['healthdcatap:healthCategory'] = (
+            health_category_values[0]
+            if len(health_category_values) == 1
+            else health_category_values
+        )
     if hdab_value is not None:
         node['healthdcatap:hdab'] = hdab_value
     if custodian_value is not None:
@@ -422,7 +431,9 @@ def _append_dataset_resource(
             )
         _append_node(graph, seen, catalog_node)
 
-    dataset_node = _build_dataset_node(dataset, graph, seen, include_distributions=include_distributions)
+    dataset_node = _build_dataset_node(
+        dataset, graph, seen, include_distributions=include_distributions
+    )
     _append_node(graph, seen, dataset_node)
     if include_distributions:
         _add_distributions(dataset, graph, seen)
@@ -561,7 +572,9 @@ def build_complete_turtle(
     """Serialise the aggregate JSON-LD export document to Turtle."""
     from rdflib import Graph  # type: ignore[import-untyped]
 
-    jsonld = build_complete_jsonld(catalogs, orphan_datasets, include_distributions=include_distributions)
+    jsonld = build_complete_jsonld(
+        catalogs, orphan_datasets, include_distributions=include_distributions
+    )
     graph = Graph()
     graph.parse(data=dump_jsonld(jsonld), format='json-ld')
     return graph.serialize(format='turtle')

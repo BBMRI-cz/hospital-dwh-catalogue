@@ -1,9 +1,11 @@
 ﻿{% load i18n %}
 {# Ticket summary row + collapsible detail row. Expects: ticket #}
+<tbody x-data="{ open: false }">
 <tr class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
     role="button" tabindex="0"
-    onclick="toggleTicket('{{ ticket.pk }}')"
-    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTicket('{{ ticket.pk }}')}">
+    @click="open = !open"
+    @keydown.enter.prevent="open = !open"
+    @keydown.space.prevent="open = !open">
   <td class="px-5 py-3">
     <div class="font-medium text-sm max-w-xs truncate text-mou-orange">{{ ticket.subject }}</div>
     <div class="font-mono text-[10px] font-medium text-txt mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
@@ -12,12 +14,12 @@
     {% include "includes/_badge.html" with b_value=ticket.item_count only %}
   </td>
   <td class="pr-5">
-    <svg id="chev-{{ ticket.pk }}" class="chevron-icon text-gray-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <svg class="text-gray-300 transition-transform duration-200" :class="open && 'rotate-180'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
   </td>
 </tr>
-<tr id="items-{{ ticket.pk }}" class="hidden bg-gray-50">
+<tr x-show="open" x-cloak class="bg-gray-50">
   <td colspan="3" class="px-5 py-3">
     {% if ticket.description %}
     <div class="font-mono text-[9.5px] uppercase tracking-wider text-txt-muted mb-1">{% trans "Description" %}</div>
@@ -44,3 +46,4 @@
     </div>
   </td>
 </tr>
+</tbody>

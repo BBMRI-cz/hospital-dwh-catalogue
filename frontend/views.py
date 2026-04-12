@@ -54,19 +54,20 @@ class CatalogueIndexView(LoginRequiredMixin, View):
 
         sidebar_ctx = build_sidebar_context(filtered, filter_state=filter_state, service=service)
 
-        return render(
-            request,
-            'catalogue/index.html',
-            {
-                'page_obj': page_obj,
-                'filter_params': filter_state.as_dict(),
-                **sidebar_ctx,
-                'total_count': total_count,
-                'dist_count': dist_count,
-                'schema_json': schema_json,
-                'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
-            },
-        )
+        context = {
+            'page_obj': page_obj,
+            'filter_params': filter_state.as_dict(),
+            **sidebar_ctx,
+            'total_count': total_count,
+            'dist_count': dist_count,
+            'schema_json': schema_json,
+            'cart_dataset_ids': {item['name'] for item in CartService.get(request.session)},
+        }
+
+        if request.headers.get('HX-Request'):
+            return render(request, 'catalogue/components/_results.html', context)
+
+        return render(request, 'catalogue/index.html', context)
 
 
 class DatasetDetailView(LoginRequiredMixin, View):
@@ -121,6 +122,25 @@ class DatasetRdfExportView(LoginRequiredMixin, View):
             content_type='text/turtle; charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename="{name}.ttl"'
+        return response
+
+
+class DatasetJsonLdDownloadView(LoginRequiredMixin, View):
+    """Authenticated JSON-LD download for a single dataset."""
+
+    def get(self, request, app: str, name: str) -> HttpResponse:
+        export_dataset = UnifiedCatalogService().get_export_dataset(app, name)
+        if export_dataset is None:
+            raise Http404('Dataset not found')
+
+        if not has_distributions(export_dataset):
+            raise Http404('Dataset has no distributions')
+
+        response = HttpResponse(
+            build_jsonld(export_dataset),
+            content_type='application/ld+json; charset=utf-8',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{name}.jsonld"'
         return response
 
 

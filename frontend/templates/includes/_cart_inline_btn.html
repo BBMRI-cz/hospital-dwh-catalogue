@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}
+  Small inline HTMX cart toggle button for distribution cards.
+  Server returns this partial with updated state on each toggle.
+
+  Required variables:
+    cart_app         – app identifier
+    cart_name        – item name
+    cart_title       – human-readable title
+    cart_dataset_ids – set of names currently in the session cart
+{% endcomment %}
+<button type="button"
+  hx-post="{% url 'ticketing:cart_add' %}"
+  hx-target="this"
+  hx-swap="outerHTML"
+  hx-vals='{"app": "{{ cart_app }}", "name": "{{ cart_name }}", "title": "{{ cart_title|escapejs }}", "btn_style": "inline"}'
+  @click.stop
+  title="{% if cart_name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
+  class="inline-flex items-center justify-center px-1.5 py-2 rounded transition-colors cursor-pointer {% if cart_name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mou-cyan hover:text-orange-500 hover:bg-orange-50{% endif %}">
+  {% if cart_name in cart_dataset_ids %}
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+  {% else %}
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+  </svg>
+  {% endif %}
+</button>

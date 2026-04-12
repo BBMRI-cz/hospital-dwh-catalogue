@@ -298,9 +298,14 @@ class DatasetDetailViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'data-export-action="download-jsonld"')
-        self.assertContains(response, 'data-export-action="toggle-menu"')
-        self.assertContains(response, 'jsonld-data')
+        self.assertContains(
+            response,
+            reverse(
+                'frontend:dataset_jsonld_download',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
+            ),
+        )
+        self.assertContains(response, 'x-data')
         self.assertContains(
             response,
             reverse(
@@ -613,7 +618,6 @@ class SchemaPayloadHelperTest(SimpleTestCase):
             [
                 ('dct:title', 'Title', 'Test Dataset'),
                 ('dct:accessRights', 'Access Rights', 'PUBLIC'),
-                ('dct:description', 'Description', 'A test dataset'),
             ],
         )
 
@@ -678,3 +682,67 @@ class TablePayloadHelperTest(SimpleTestCase):
             tables[0]['columns'][0]['property_url'],
             'https://example.com/prop/patient-id',
         )
+
+
+class ParseMultiValuesTest(SimpleTestCase):
+    """Tests for the semicolon-separated multi-value parser."""
+
+    def test_splits_semicolons(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(
+            parse_multi_values('http://a;http://b;http://c'),
+            ['http://a', 'http://b', 'http://c'],
+        )
+
+    def test_strips_whitespace(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(
+            parse_multi_values(' http://a ; http://b '),
+            ['http://a', 'http://b'],
+        )
+
+    def test_empty_string_returns_empty_list(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(parse_multi_values(''), [])
+
+    def test_none_returns_empty_list(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(parse_multi_values(None), [])
+
+    def test_single_value(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(parse_multi_values('http://only'), ['http://only'])
+
+
+class MultiValueMapperTest(SimpleTestCase):
+    """Tests that dataset_to_dict pre-splits multi-value URI fields into lists."""
+
+    def test_theme_split_into_list(self):
+        ds = _make_test_dataset(theme='http://a;http://b')
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['theme'], ['http://a', 'http://b'])
+
+    def test_applicable_legislation_split_into_list(self):
+        ds = _make_test_dataset(applicable_legislation='http://x;http://y')
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['applicable_legislation'], ['http://x', 'http://y'])
+
+    def test_health_category_split_into_list(self):
+        ds = _make_test_dataset(health_category='cat_a;cat_b')
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['health_category'], ['cat_a', 'cat_b'])
+
+    def test_single_value_is_single_element_list(self):
+        ds = _make_test_dataset(health_category='patient_data')
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['health_category'], ['patient_data'])
+
+    def test_empty_value_is_empty_list(self):
+        ds = _make_test_dataset(theme=None)
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['theme'], [])

@@ -69,13 +69,8 @@ class StatDefinitionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # -- Dataset choices ------------------------------------------------
-        datasets = (
-            Dataset.objects.using('fair_genomes_db')
-            .order_by('title')
-        )
-        dataset_choices = [('', '---------')] + [
-            (ds.name, ds.title or ds.name) for ds in datasets
-        ]
+        datasets = Dataset.objects.using('fair_genomes_db').order_by('title')
+        dataset_choices = [('', '---------')] + [(ds.name, ds.title or ds.name) for ds in datasets]
         self.fields['dataset'].choices = dataset_choices
 
         # -- Distribution choices (with Dataset → Distribution label) --------
@@ -228,11 +223,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         return ds.title or ds.name
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related('distribution__dataset_name')
-        )
+        return super().get_queryset(request).select_related('distribution__dataset_name')
 
     # All staff can fully manage stat definitions without needing explicit
     # model-level permissions assigned by a superuser.
@@ -297,7 +288,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 summary_parts = [f'Status: {status}', f'Duration: {duration}s']
                 if stats:
                     summary_parts.append(
-                        f'Stats: {stats["updated"]} updated, ' f'{stats["failed"]} failed'
+                        f'Stats: {stats["updated"]} updated, {stats["failed"]} failed'
                     )
                 messages.success(
                     request,
@@ -332,7 +323,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         ok_count = 0
         fail_count = 0
         for defn in queryset.filter(is_active=True):
-            success, err = svc.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
+            success, _err = svc.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
             if success:
                 ok_count += 1
             else:
@@ -342,6 +333,3 @@ class StatDefinitionAdmin(admin.ModelAdmin):
             request,
             _('Synced %(ok)d stats, %(fail)d failed.') % {'ok': ok_count, 'fail': fail_count},
         )
-
-
-

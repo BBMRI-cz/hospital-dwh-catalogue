@@ -33,6 +33,22 @@ from django.db import transaction
 logger = logging.getLogger(__name__)
 
 
+def _uri_local_name(uri: str) -> str:
+    """Return the local fragment/path segment of an RDF URI string."""
+    stripped = uri.rstrip('/#')
+    if '#' in stripped:
+        return stripped.rsplit('#', 1)[-1]
+    return stripped.rsplit('/', 1)[-1]
+
+
+def _resolve_graph_predicate_uri(predicate_uris: set[str], local_name: str) -> str | None:
+    """Resolve a predicate URI from the graph by its local name when unambiguous."""
+    matches = {uri for uri in predicate_uris if _uri_local_name(uri) == local_name}
+    if len(matches) == 1:
+        return next(iter(matches))
+    return None
+
+
 class FairGenomesAPIException(Exception):
     """Raised when the FDP endpoint cannot be reached or its data cannot be parsed."""
 
@@ -228,8 +244,27 @@ class FairGenomesService:
         # Extract vocabularies from the graph's own @prefix declarations.
         ns_map = {prefix: str(uri) for prefix, uri in g.namespaces()}
         FDP_O = Namespace(ns_map['fdp-o']) if 'fdp-o' in ns_map else None
-        VCARD = Namespace(ns_map['vcard']) if 'vcard' in ns_map else Namespace(
-            'http://www.w3.org/2006/vcard/ns#'
+        VCARD = (
+            Namespace(ns_map['vcard'])
+            if 'vcard' in ns_map
+            else Namespace('http://www.w3.org/2006/vcard/ns#')
+        )
+        predicate_uris = {
+            str(predicate) for predicate in set(g.predicates()) if isinstance(predicate, URIRef)
+        }
+        applicable_legislation_predicate = _resolve_graph_predicate_uri(
+            predicate_uris,
+            'applicableLegislation',
+        )
+        health_category_predicate = _resolve_graph_predicate_uri(
+            predicate_uris,
+            'healthCategory',
+        )
+        applicable_legislation_uri = (
+            URIRef(applicable_legislation_predicate) if applicable_legislation_predicate else None
+        )
+        health_category_uri = (
+            URIRef(health_category_predicate) if health_category_predicate else None
         )
 
         fdp_base = self.rdf_url.rstrip('/')
@@ -256,6 +291,8 @@ class FairGenomesService:
 
         def get_literal(subject, *predicates) -> str | None:
             for pred in predicates:
+                if pred is None:
+                    continue
                 val = g.value(subject, pred)
                 if isinstance(val, Literal):
                     return str(val)
@@ -263,10 +300,42 @@ class FairGenomesService:
 
         def get_uri(subject, *predicates) -> str | None:
             for pred in predicates:
+                if pred is None:
+                    continue
                 val = g.value(subject, pred)
                 if isinstance(val, URIRef):
                     return str(val)
             return None
+
+        def get_all_literals(subject, *predicates) -> list[str]:
+            """Collect all Literal objects for the given predicates."""
+            result: list[str] = []
+            for pred in predicates:
+                if pred is None:
+                    continue
+                for obj in g.objects(subject, pred):
+                    if isinstance(obj, Literal):
+                        result.append(str(obj))
+            return result
+
+        def get_all_uris(subject, *predicates) -> list[str]:
+            """Collect all URIRef objects for the given predicates."""
+            result: list[str] = []
+            for pred in predicates:
+                if pred is None:
+                    continue
+                for obj in g.objects(subject, pred):
+                    if isinstance(obj, URIRef):
+                        result.append(str(obj))
+            return result
+
+        def join_uris(subject, *predicates) -> str:
+            """Collect all URI values for predicates and join with ';'."""
+            return ';'.join(get_all_uris(subject, *predicates))
+
+        def join_literals(subject, *predicates, sep: str = ',') -> str:
+            """Collect all literal values for predicates and join with *sep*."""
+            return sep.join(get_all_literals(subject, *predicates))
 
         def parse_datetime(val: str | None) -> datetime | None:
             if not val:
@@ -383,7 +452,12 @@ class FairGenomesService:
             title = get_literal(subj, DCTERMS.title, col('Catalog', 'title'))
             description = get_literal(subj, DCTERMS.description, col('Catalog', 'description'))
             applicable_legislation = (
-                get_literal(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
+                join_uris(
+                    subj,
+                    applicable_legislation_uri,
+                    col('Catalog', 'applicable_legislation'),
+                )
+                or get_literal(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
                 or get_uri(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
                 or ''
             )
@@ -457,9 +531,15 @@ class FairGenomesService:
                 or '',
                 'identifier': get_literal(subj, DCTERMS.identifier, col('Dataset', 'identifier'))
                 or str(subj),
-                'type': get_literal(subj, DCTERMS.type, col('Dataset', 'type')) or '',
-                'theme': get_literal(subj, DCAT.theme, col('Dataset', 'theme')) or '',
-                'keyword': get_literal(subj, DCAT.keyword, col('Dataset', 'keyword')) or '',
+                'type': join_uris(subj, DCTERMS.type, col('Dataset', 'type'))
+                or get_literal(subj, DCTERMS.type, col('Dataset', 'type'))
+                or '',
+                'theme': join_uris(subj, DCAT.theme, col('Dataset', 'theme'))
+                or get_literal(subj, DCAT.theme, col('Dataset', 'theme'))
+                or '',
+                'keyword': join_literals(subj, DCAT.keyword, col('Dataset', 'keyword'))
+                or get_literal(subj, DCAT.keyword, col('Dataset', 'keyword'))
+                or '',
                 'provenance': get_literal(subj, DCTERMS.provenance, col('Dataset', 'provenance'))
                 or '',
                 'conforms_to': get_literal(subj, DCTERMS.conformsTo, col('Dataset', 'conformsTo'))
@@ -469,12 +549,20 @@ class FairGenomesService:
                 )
                 or get_uri(subj, DCTERMS.accessRights, col('Dataset', 'access_rights'))
                 or '',
-                'applicable_legislation': get_literal(
-                    subj, DCTERMS.relation, col('Dataset', 'applicable_legislation')
+                'applicable_legislation': join_uris(
+                    subj,
+                    applicable_legislation_uri,
+                    col('Dataset', 'applicable_legislation'),
                 )
+                or get_literal(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
                 or get_uri(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
                 or '',
-                'health_category': get_literal(subj, col('Dataset', 'health_category'))
+                'health_category': join_uris(
+                    subj,
+                    health_category_uri,
+                    col('Dataset', 'health_category'),
+                )
+                or get_literal(subj, col('Dataset', 'health_category'))
                 or get_uri(subj, col('Dataset', 'health_category'))
                 or '',
                 'issued': parse_datetime(
@@ -556,7 +644,12 @@ class FairGenomesService:
                 'access_url': get_literal(subj, DCAT.accessURL, col('Distribution', 'access_url'))
                 or get_uri(subj, DCAT.accessURL, col('Distribution', 'access_url'))
                 or '',
-                'applicable_legislation': get_literal(
+                'applicable_legislation': join_uris(
+                    subj,
+                    applicable_legislation_uri,
+                    col('Distribution', 'applicable_legislation'),
+                )
+                or get_literal(
                     subj, DCTERMS.relation, col('Distribution', 'applicable_legislation')
                 )
                 or get_uri(subj, DCTERMS.relation, col('Distribution', 'applicable_legislation'))
@@ -786,7 +879,8 @@ class FairGenomesService:
             if 'Aggregate' in name or 'GroupBy' in name:
                 continue
             fields = [
-                f['name'] for f in (t.get('fields') or [])
+                f['name']
+                for f in (t.get('fields') or [])
                 if not f['name'].startswith('_')
                 and not f['name'].endswith('_agg')
                 and not f['name'].endswith('_groupBy')

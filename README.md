@@ -54,6 +54,14 @@ scripts/            Code quality and CI check scripts
 docs/               Project documentation
 ```
 
+## Frontend
+
+The UI is server-rendered Django templates styled with Tailwind CSS. Interactive behaviour is handled by two vendored libraries (no build step, no npm):
+
+- **HTMX 2** (`frontend/static/js/htmx.min.js`) — server-driven updates: catalogue filtering, pagination, cart toggles with out-of-band badge swaps.
+- **Alpine.js 3** (`frontend/static/js/alpine.min.js`) — client-side state: dropdowns, accordions, inline search, toasts, modals.
+- **Chart.js** (`frontend/static/js/chart.umd.min.js`) — FAIR Genomes stat doughnut charts.
+
 ## Metadata export API
 
 The catalogue exposes one aggregate HealthDCAT-AP export covering all source

@@ -131,12 +131,15 @@ def _build_tailwind_css(base_dir: Path) -> None:
         print('tailwindcss binary not found — skipping CSS build.', flush=True)
         return
 
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [
             'tailwindcss',
-            '-c', str(base_dir / 'tailwind.config.js'),
-            '-i', str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.input.css'),
-            '-o', str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.css'),
+            '-c',
+            str(base_dir / 'tailwind.config.js'),
+            '-i',
+            str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.input.css'),
+            '-o',
+            str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.css'),
             '--minify',
         ],
         capture_output=True,
@@ -146,6 +149,8 @@ def _build_tailwind_css(base_dir: Path) -> None:
         print(f'Tailwind CSS build failed:\n{result.stderr}', flush=True)
     else:
         print('Tailwind CSS built successfully.', flush=True)
+
+
 def main() -> None:
     django.setup()
 

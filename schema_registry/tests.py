@@ -29,7 +29,12 @@ from shared.dtos import (
     ExportDistribution,
     ExportTable,
 )
-from shared.export_types import JsonLdDistributionNode, JsonLdDocument, JsonLdGraphNode
+from shared.export_types import (
+    JsonLdDatasetNode,
+    JsonLdDistributionNode,
+    JsonLdDocument,
+    JsonLdGraphNode,
+)
 
 # Absolute path to the release-6 directory inside the submodule.
 _RELEASE_6 = settings.BASE_DIR / 'health_dcat_ap' / 'public' / 'releases' / 'release-6'
@@ -174,7 +179,7 @@ class RegistryParserTest(TestCase):
                     'requirement': 'Recommended',
                     'definition': 'Synthetic geodcatap test term.',
                     'usage_note': (
-                        'RDF example: ' '<a href="#geodcatapcustodian">geodcatap:custodian</a>'
+                        'RDF example: <a href="#geodcatapcustodian">geodcatap:custodian</a>'
                     ),
                 },
             }
@@ -661,3 +666,63 @@ class BuildJsonldContextTest(TestCase):
 
         turtle = build_turtle(self._make_dataset())
         self.assertIn('Test dataset', turtle)
+
+    # ── Multi-value URI field export ────────────────────────────────────────
+
+    def _dataset_node(self, result: JsonLdDocument) -> JsonLdDatasetNode:
+        return next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset'))
+
+    def test_multiple_themes_exported_as_array(self) -> None:
+        ds = self._make_dataset()
+        ds.theme = 'http://example.com/theme/A;http://example.com/theme/B'
+        node = self._dataset_node(self._build(ds))
+        self.assertEqual(
+            node.get('dcat:theme'),
+            [{'@id': 'http://example.com/theme/A'}, {'@id': 'http://example.com/theme/B'}],
+        )
+
+    def test_single_theme_exported_as_single_ref(self) -> None:
+        node = self._dataset_node(self._build())
+        self.assertEqual(
+            node.get('dcat:theme'),
+            {'@id': 'http://publications.europa.eu/resource/authority/data-theme/HEAL'},
+        )
+
+    def test_multiple_health_categories_exported_as_array(self) -> None:
+        ds = self._make_dataset()
+        ds.health_category = 'http://example.com/cat/A;http://example.com/cat/B'
+        node = self._dataset_node(self._build(ds))
+        self.assertEqual(
+            node.get('healthdcatap:healthCategory'),
+            [{'@id': 'http://example.com/cat/A'}, {'@id': 'http://example.com/cat/B'}],
+        )
+
+    def test_multiple_applicable_legislations_exported_as_array(self) -> None:
+        ds = self._make_dataset()
+        ds.applicable_legislation = (
+            'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj'
+        )
+        node = self._dataset_node(self._build(ds))
+        self.assertEqual(
+            node.get('dcatap:applicableLegislation'),
+            [
+                {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
+                {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},
+            ],
+        )
+
+    def test_distribution_multiple_applicable_legislations(self) -> None:
+        ds = self._make_dataset()
+        ds.distributions[
+            0
+        ].applicable_legislation = (
+            'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj'
+        )
+        dist = self._distribution_node(self._build(ds))
+        self.assertEqual(
+            dist.get('dcatap:applicableLegislation'),
+            [
+                {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
+                {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},
+            ],
+        )

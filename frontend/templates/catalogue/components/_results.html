@@ -1,0 +1,211 @@
+{% load i18n %}
+{% comment %}
+  Results partial for HTMX — rendered standalone on HX-Request, or included by index.html.
+  Contains: active filter chips, dataset card list, pagination.
+  Wrapped in #ds-list-wrapper in the parent.
+{% endcomment %}
+
+{# Active filter chips (server-rendered) #}
+{% with params=filter_params %}
+{% if params.q or params.keywords or params.custodian or params.health_category or params.source or params.theme or params.column %}
+<div class="flex flex-wrap gap-1.5 mb-4">
+  {% trans "Search" as chip_label_q %}
+  {% trans "Keyword" as chip_label_keywords %}
+  {% trans "Custodian" as chip_label_custodian %}
+  {% trans "Health Category" as chip_label_health_category %}
+  {% trans "Source" as chip_label_source %}
+  {% trans "Theme" as chip_label_theme %}
+  {% trans "Column" as chip_label_column %}
+
+  {% if params.q %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_q }}: {{ params.q }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% if k != 'q' and k != 'page' %}{% for v in vs %}{{ k }}={{ v }}&{% endfor %}{% endif %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endif %}
+
+  {% for val in params.keywords %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_keywords }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'keywords' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+
+  {% for val in params.custodian %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_custodian }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'custodian' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+
+  {% for val in params.health_category %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_health_category }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'health_category' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+
+  {% for val in params.source %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_source }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'source' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+
+  {% for val in params.theme %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_theme }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'theme' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+
+  {% for val in params.column %}
+  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
+    <span>{{ chip_label_column }}: {{ val }}</span>
+    <button type="button"
+      hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'column' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
+      hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
+      aria-label="{% trans 'Remove filter' %}"
+      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </span>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{# Dataset list #}
+{% if page_obj.object_list %}
+<div id="ds-list" class="flex flex-col gap-1.5">
+  {% for dataset in page_obj %}
+  {% with status=dataset.status %}
+
+  <div x-data="{ open: false }"
+    :class="open ? 'border-mou-cyan' : 'border-site-border'"
+    class="bg-white border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
+
+    {# Card header — click to expand #}
+    <div class="flex items-center gap-3 px-5 py-2 cursor-pointer select-none"
+      @click="open = !open">
+      <span class="font-serif text-[17px] flex-1 leading-snug text-mou-cyan">{{ dataset.title|default:dataset.name }}</span>
+
+      {# Dist count #}
+      {% include "includes/_badge.html" with b_value=dataset.distributions|length b_label="dist." only %}
+
+      {# Cart toggle (HTMX) #}
+      {% include "includes/_cart_inline_btn.html" with cart_app=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name %}
+
+      {# Eye / detail link #}
+      <a href="{% url 'frontend:dataset_detail' app=dataset.app name=dataset.name %}"
+        title="{% trans 'View full detail' %}"
+        class="inline-flex items-center justify-center px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
+        @click.stop>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </a>
+
+      {# Chevron #}
+      <svg :class="{ 'rotate-180': open }" class="text-gray-300 shrink-0 transition-transform"
+        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+
+    {# Expandable body #}
+    <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
+      <div class="border-t border-gray-100">
+        <div class="grid grid-cols-2">
+          {% if dataset.description %}
+          <div class="col-span-2 flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+            <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">
+              dct:description {% include "includes/_info_btn.html" with semantics="dct:description" stop=1 %}
+            </div>
+            <div class="text-[13px] text-gray-700 leading-relaxed">{{ dataset.description }}</div>
+          </div>
+          {% endif %}
+
+          {% if dataset.keywords %}
+          <div class="flex flex-col gap-1.5 px-4 py-3 border-r border-b border-gray-100">
+            <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">
+              dcat:keyword {% include "includes/_info_btn.html" with semantics="dcat:keyword" stop=1 %}
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              {% for kw in dataset.keywords %}
+              {% include "includes/_badge.html" with b_value=kw b_variant="cyan" only %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
+        </div>
+      </div>
+    </div>
+
+  </div>{# end card #}
+  {% endwith %}
+  {% empty %}
+  <div class="text-center py-20 text-txt-muted">
+    <svg class="mx-auto mb-4 opacity-20" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <p class="font-serif text-xl text-txt-muted mb-1">{% trans "No datasets found" %}</p>
+    <span class="text-sm italic">{% trans "Try a different query or adjust the sidebar filters." %}</span>
+  </div>
+  {% endfor %}
+</div>
+
+{# Pagination #}
+{% include "includes/_pagination.html" %}
+
+{% else %}
+{# No results at all #}
+<div class="text-center py-20 text-txt-muted">
+  <svg class="mx-auto mb-4 opacity-20" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <p class="font-serif text-xl text-txt-muted mb-1">{% trans "No datasets found" %}</p>
+  <a href="{% url 'frontend:catalogue' %}" class="text-sm underline text-mou-cyan">{% trans "Clear all filters" %}</a>
+</div>
+{% endif %}

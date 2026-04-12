@@ -81,12 +81,11 @@ def filter_datasets(
                 continue
         if filter_state.custodian and dataset.get('custodian') not in filter_state.custodian:
             continue
-        if (
-            filter_state.health_category
-            and dataset.get('health_category') not in filter_state.health_category
+        if filter_state.health_category and not (
+            set(dataset['health_category']) & filter_state.health_category
         ):
             continue
-        if filter_state.theme and dataset.get('theme') not in filter_state.theme:
+        if filter_state.theme and not (set(dataset['theme']) & filter_state.theme):
             continue
         if matching_dataset_names is not None and dataset.get('name') not in matching_dataset_names:
             continue
@@ -97,7 +96,7 @@ def filter_datasets(
                     dataset.get('description') or '',
                     dataset.get('custodian') or '',
                     dataset.get('source') or '',
-                    dataset.get('health_category') or '',
+                    ' '.join(dataset['health_category']),
                     ' '.join(dataset.get('keywords', [])),
                     ' '.join(
                         distribution.get('title', '')
@@ -188,10 +187,12 @@ def build_sidebar_context(
             source_counter[source] += 1
         if custodian := dataset.get('custodian'):
             custodian_counter[custodian] += 1
-        if health_category := dataset.get('health_category'):
-            health_category_counter[health_category] += 1
-        if theme := dataset.get('theme'):
-            theme_counter[theme] += 1
+        for hc in dataset['health_category']:
+            if hc:
+                health_category_counter[hc] += 1
+        for th in dataset['theme']:
+            if th:
+                theme_counter[th] += 1
         status_counter[dataset['status']] += 1
 
     catalog_service = service or UnifiedCatalogService()

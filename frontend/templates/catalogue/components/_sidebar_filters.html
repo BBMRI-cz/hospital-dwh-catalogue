@@ -1,7 +1,12 @@
 {% load i18n %}
 {# Expects: sidebar_keywords, sidebar_sources, sidebar_custodians, sidebar_health_categories, sidebar_themes, sidebar_columns, sidebar_counts, filter_params #}
 
-<form id="filter-form" method="GET" action="{% url 'frontend:catalogue' %}" class="flex flex-col h-full">
+<form id="filter-form" method="GET" action="{% url 'frontend:catalogue' %}"
+  hx-get="{% url 'frontend:catalogue' %}"
+  hx-target="#ds-list-wrapper"
+  hx-swap="innerHTML"
+  hx-push-url="true"
+  class="flex flex-col h-full">
   <input type="hidden" name="page" value="1">
 
   <div class="flex-1 overflow-y-auto min-h-0 flex flex-col gap-5 py-4 pr-1">

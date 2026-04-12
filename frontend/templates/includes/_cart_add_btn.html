@@ -1,25 +1,21 @@
 {% load i18n %}
 {% comment %}
-  Orange/red AJAX cart hero button — no page reload.
+  HTMX cart hero button — no page reload.
   Toggles between "Add to cart" (orange) and "Remove from cart" (red).
-  Requires ajaxCartToggle() from base_catalogue.html shared scripts.
+  Server returns this partial with updated state on each toggle.
 
   Required variables (via with):
-    cart_source      – dataset source string
-    cart_name        – dataset name (used as data-name)
+    cart_source      – dataset source string (app)
+    cart_name        – dataset name
     cart_title       – human-readable title for the item
   Context variables used:
     cart_dataset_ids – set of names currently in the session cart
 {% endcomment %}
 <button type="button"
-  data-cart-toggle
-  data-app="{{ cart_source }}"
-  data-name="{{ cart_name }}"
-  data-title="{{ cart_title }}"
-  data-in-cart="{% if cart_name in cart_dataset_ids %}true{% else %}false{% endif %}"
-  data-cart-hero="true"
-  data-label-add="{% trans 'Add to cart' %}"
-  data-label-remove="{% trans 'Remove from cart' %}"
+  hx-post="{% url 'ticketing:cart_add' %}"
+  hx-target="this"
+  hx-swap="outerHTML"
+  hx-vals='{"app": "{{ cart_source }}", "name": "{{ cart_name }}", "title": "{{ cart_title|escapejs }}"}'
   title="{% if cart_name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
   class="w-full inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md text-white text-xs font-semibold tracking-wide transition-all duration-150 shadow-sm hover:brightness-105 active:scale-[0.97] cursor-pointer {% if cart_name in cart_dataset_ids %}bg-red-600{% else %}bg-mou-orange{% endif %}"
 >

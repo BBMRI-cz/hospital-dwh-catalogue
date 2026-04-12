@@ -4,7 +4,8 @@
     name, title, description, url, columns
   Each table gets a DaisyUI <dialog> modal for its columns.
 {% endcomment %}
-<div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8">
+<div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8 card"
+  x-data="{ q: '' }">
   <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
     <div class="w-0.5 h-4 rounded shrink-0 bg-mou-blue"></div>
     <span class="font-mono text-[10px] uppercase tracking-wider shrink-0 text-mou-blue">
@@ -12,8 +13,13 @@
     </span>
     {% include "includes/_info_btn.html" with semantics="csvw:Table" %}
     <div class="flex-1"></div>
-    {% trans "Search tables…" as table_search_placeholder %}
-    {% include "includes/_search_input.html" with search_placeholder=table_search_placeholder search_wrapper_class="shrink-0" search_input_class="w-52 bg-white" search_icon_size="12" table_filter=True only %}
+    <div class="relative shrink-0">
+      <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" x-model="q" placeholder="{% trans 'Search tables…' %}"
+        class="block h-8 w-full rounded border border-gray-300 pl-8 pr-3 text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-mou-cyan focus:border-mou-cyan w-52 bg-white">
+    </div>
   </div>
 
   <table class="w-full">
@@ -35,9 +41,8 @@
       {% for tbl in tables %}
       <tr class="tbl-row border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
           role="button" tabindex="0"
-          data-tbl="{{ tbl.name|lower }} {{ tbl.title|lower }}"
-          data-modal-trigger
-          data-modal-id="tbl-modal-{{ forloop.counter }}">
+          x-show="!q || '{{ tbl.name|lower }} {{ tbl.title|lower }}'.includes(q.toLowerCase())"
+          @click="document.getElementById('tbl-modal-{{ forloop.counter }}').showModal()">
         <td class="px-5 py-3">
           <div class="font-medium text-sm text-mou-cyan">{{ tbl.title }}</div>
           {% if tbl.description %}
@@ -65,5 +70,3 @@
 {% for tbl in tables %}
 {% include 'catalogue/components/_table_modal.html' with tbl=tbl idx=forloop.counter %}
 {% endfor %}
-
-<script src="{% static 'js/table-list.js' %}"></script>

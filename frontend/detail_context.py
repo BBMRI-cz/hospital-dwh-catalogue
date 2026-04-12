@@ -18,12 +18,6 @@ from schema_registry.types import SchemaRegistryPayload
 from shared.dtos import UnifiedStatChart, UnifiedTable
 
 __all__ = [
-    'build_chart_groups',
-    'build_dataset_dcat_rows',
-    'build_distribution_dcat_rows',
-    'find_distribution_with_dataset',
-    'normalise_stat_charts',
-    'normalise_tables',
     'FrontendDcatRow',
     'FrontendStatChartDTO',
     'FrontendStatChartGroupDTO',
@@ -31,4 +25,10 @@ __all__ = [
     'SchemaRegistryPayload',
     'UnifiedStatChart',
     'UnifiedTable',
+    'build_chart_groups',
+    'build_dataset_dcat_rows',
+    'build_distribution_dcat_rows',
+    'find_distribution_with_dataset',
+    'normalise_stat_charts',
+    'normalise_tables',
 ]

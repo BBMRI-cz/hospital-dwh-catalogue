@@ -1,7 +1,28 @@
 {% load i18n static %}
-<!-- Schema Info Modal — populated by showSchemaModal(semantics) JS function -->
+<!-- Schema Info Modal — Alpine.js powered -->
 <dialog id="schema-modal" class="modal modal-middle"
-  data-schema-modal>
+  x-data="{
+    sd: {},
+    t: {},
+    reqMap: {
+      mandatory:  ['Mandatory',  'bg-green-50 text-green-800 border-green-200'],
+      recommended:['Recommended','bg-amber-50 text-amber-800 border-amber-200'],
+      optional:   ['Optional',   'bg-gray-100 text-gray-500 border-gray-200'],
+      deprecated: ['Deprecated', 'bg-red-50 text-red-700 border-red-200'],
+    },
+    init() {
+      try { this.sd = JSON.parse(document.getElementById('schema-data')?.textContent || '{}') } catch(e) {}
+    },
+    show(sem) {
+      this.t = this.sd[sem] || {};
+      if (!this.t.prefix) return;
+      $el.showModal();
+    },
+    reqLabel() { return (this.reqMap[this.t.requirement] || this.reqMap.optional)[0] },
+    reqCls()   { return (this.reqMap[this.t.requirement] || this.reqMap.optional)[1] },
+  }"
+  @show-schema.window="show($event.detail)"
+  @click="if($event.target === $el) $el.close()">
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden" style="width:32rem;max-width:calc(100vw - 2rem);border-radius:1rem;">
 
     <!-- ── Header ───────────────────────────────────────────────── -->
@@ -11,11 +32,11 @@
         <span class="font-mono text-[9.5px] uppercase tracking-widest text-mou-cyan">{% trans "DCAT-AP term" %}</span>
       </div>
       <div class="flex items-start gap-3">
-        <span id="sm-prefix"
-          class="font-mono text-[11px] px-2 py-0.5 shrink-0 mt-1 rounded bg-mou-blue-light text-mou-blue border border-mou-blue-border"></span>
+        <span class="font-mono text-[11px] px-2 py-0.5 shrink-0 mt-1 rounded bg-mou-blue-light text-mou-blue border border-mou-blue-border"
+          x-text="t.prefix + ':'"></span>
         <div class="min-w-0">
-          <h3 id="sm-label" class="font-serif text-xl leading-tight text-gray-900"></h3>
-          <p id="sm-name" class="font-mono text-[11px] text-txt-muted mt-0.5 truncate"></p>
+          <h3 class="font-serif text-xl leading-tight text-gray-900" x-text="t.label || t.local_name"></h3>
+          <p class="font-mono text-[11px] text-txt-muted mt-0.5 truncate" x-text="t.prefix + ':' + t.local_name"></p>
         </div>
       </div>
     </div>
@@ -23,27 +44,26 @@
     <!-- ── Body ─────────────────────────────────────────────────── -->
     <div class="px-6 pt-5 pb-5 bg-white space-y-4">
       <div class="flex items-center gap-3">
-        <div id="sm-req"></div>
-        <span id="sm-card" class="font-mono text-[10px] text-txt-muted" style="display:none"></span>
+        <span class="inline-flex items-center gap-1.5 font-mono text-[10px] px-2.5 py-1 rounded border"
+          :class="reqCls()" x-text="reqLabel()"></span>
+        <span class="font-mono text-[10px] text-txt-muted" x-show="t.cardinality" x-text="t.cardinality"></span>
       </div>
       <div>
         <p class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mb-1.5">{% trans "Description" %}</p>
-        <p id="sm-desc" class="text-sm text-gray-700 leading-relaxed"></p>
+        <p class="text-sm text-gray-700 leading-relaxed" x-text="t.description"></p>
       </div>
       <div>
         <p class="font-mono text-[9px] uppercase tracking-widest text-txt-muted mb-1.5">URI</p>
-        <a id="sm-uri" href="#" target="_blank" rel="noopener"
+        <a :href="t.uri" target="_blank" rel="noopener"
           class="flex items-center gap-2 font-mono text-[11px] rounded-lg px-3 py-2.5 border border-gray-200 bg-gray-50 hover:bg-mou-cyan-light hover:border-mou-cyan-border transition-colors break-all text-mou-blue">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
           </svg>
-          <span id="sm-uri-text" class="break-all"></span>
+          <span class="break-all" x-text="t.uri"></span>
         </a>
       </div>
     </div>
 
   </div>
 </dialog>
-
-<script src="{% static 'js/schema-modal.js' %}"></script>

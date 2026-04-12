@@ -17,9 +17,7 @@ def _require_auth(request: HttpRequest) -> HttpResponse | None:
 def _jsonld_response() -> HttpResponse:
     catalogs, orphan_datasets = UnifiedCatalogService().get_complete_export_catalogue()
     return HttpResponse(
-        dump_jsonld(
-            build_complete_jsonld(catalogs, orphan_datasets, include_distributions=False)
-        ),
+        dump_jsonld(build_complete_jsonld(catalogs, orphan_datasets, include_distributions=False)),
         content_type='application/ld+json; charset=utf-8',
     )
 

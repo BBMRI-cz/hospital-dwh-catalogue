@@ -85,11 +85,9 @@ class CatalogueUserAdmin(BaseUserAdmin):
 
         # Nobody can change their own staff status.
         if obj is not None and obj.pk == request.user.pk:
-            return base_readonly + ('is_staff',)
+            return (*base_readonly, 'is_staff')
 
-        if not request.user.is_superuser:
-            # Regular admin: cannot revoke, and cannot touch superusers.
-            if obj is not None and (obj.is_staff or obj.is_superuser):
-                return base_readonly + ('is_staff',)
+        if not request.user.is_superuser and obj is not None and (obj.is_staff or obj.is_superuser):
+            return (*base_readonly, 'is_staff')
 
         return base_readonly

@@ -6,9 +6,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-{% trans "Add to cart" as t_cart_add %}
-{% trans "Remove from cart" as t_cart_remove %}
-<script id="cart-config" type="application/json">{"cartAddUrl":"{% url 'ticketing:cart_add' %}","labelAdd":"{{ t_cart_add|escapejs }}","labelRemove":"{{ t_cart_remove|escapejs }}"}</script>
-<script src="{% static 'js/cart.js' %}"></script>
 {{ block.super }}
 {% endblock %}

@@ -15,6 +15,11 @@ urlpatterns = [
         name='dataset_rdf_export',
     ),
     path(
+        'dataset/<str:app>/<str:name>/jsonld/',
+        views.DatasetJsonLdDownloadView.as_view(),
+        name='dataset_jsonld_download',
+    ),
+    path(
         'distribution/<str:app>/<str:name>/',
         views.DistributionDetailView.as_view(),
         name='distribution_detail',

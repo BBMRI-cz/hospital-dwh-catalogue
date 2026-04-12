@@ -6,7 +6,8 @@
     idx  — outer loop counter (integer) — used for unique element IDs
 {% endcomment %}
 <dialog id="tbl-modal-{{ idx }}" class="modal modal-middle"
-  data-modal-dismiss>
+  x-data="{ q: '', openDesc: {} }"
+  @click="if($event.target === $el) $el.close()">
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden"
        style="width:min(92vw,56rem);max-width:92vw;max-height:88vh;border-radius:0.75rem;display:flex;flex-direction:column;">
 
@@ -56,8 +57,13 @@
           {% include "includes/_info_btn.html" with semantics="csvw:Column" %}
         </span>
         <div class="flex-1"></div>
-        {% trans "Search columns…" as column_search_placeholder %}
-        {% include "includes/_search_input.html" with search_placeholder=column_search_placeholder search_wrapper_class="shrink-0" search_input_class="w-48 bg-white" search_icon_size="12" table_modal_id=idx only %}
+        <div class="relative shrink-0">
+          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" x-model="q" placeholder="{% trans 'Search columns…' %}"
+            class="block h-8 w-full rounded border border-gray-300 pl-8 pr-3 text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-mou-cyan focus:border-mou-cyan w-48 bg-white">
+        </div>
       </div>
 
       <table class="w-full">
@@ -81,8 +87,8 @@
         <tbody>
           {% for col in tbl.columns %}
           <tr class="tbl-col-row border-t border-gray-100 hover:bg-gray-50 {% if col.description %}cursor-pointer{% endif %}"
-              data-col="{{ col.name|lower }} {{ col.title|lower }}"
-              {% if col.description %}data-col-toggle data-desc-id="tbl-col-desc-{{ idx }}-{{ forloop.counter }}"{% endif %}>
+              x-show="!q || '{{ col.name|lower }} {{ col.title|lower }}'.includes(q.toLowerCase())"
+              {% if col.description %}@click="openDesc[{{ forloop.counter }}] = !openDesc[{{ forloop.counter }}]"{% endif %}>
             <td class="px-6 py-3">
               <div class="font-medium text-sm text-mou-cyan">{{ col.title|default:"—" }}</div>
             </td>
@@ -91,7 +97,7 @@
             <td class="px-6 py-3 hidden lg:table-cell">
               {% if col.property_url %}
               <a href="{{ col.property_url }}" target="_blank" rel="noopener"
-                 data-col-ignore-toggle
+                 @click.stop
                  class="inline-flex items-center gap-1 font-mono text-[11px] no-underline transition-colors text-mou-cyan">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -105,8 +111,8 @@
             </td>
             <td class="pr-4 text-right">
               {% if col.description %}
-              <svg id="tbl-chev-{{ idx }}-{{ forloop.counter }}"
-                   class="text-txt-muted transition-transform duration-200 inline"
+              <svg class="text-txt-muted transition-transform duration-200 inline"
+                   :class="openDesc[{{ forloop.counter }}] && 'rotate-180'"
                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
@@ -114,7 +120,7 @@
             </td>
           </tr>
           {% if col.description %}
-          <tr id="tbl-col-desc-{{ idx }}-{{ forloop.counter }}" class="hidden bg-gray-50">
+          <tr x-show="openDesc[{{ forloop.counter }}]" x-cloak class="bg-gray-50">
             <td colspan="5" class="px-6 py-3">
               <div class="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-txt-muted mb-1">dct:description {% include "includes/_info_btn.html" with semantics="dct:description" %}</div>
               <p class="text-sm text-txt leading-relaxed">{{ col.description }}</p>

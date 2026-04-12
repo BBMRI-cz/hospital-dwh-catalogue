@@ -42,6 +42,11 @@ def parse_keywords(keyword_str: str | None) -> list[str]:
     return [keyword.strip() for keyword in (keyword_str or '').split(',') if keyword.strip()]
 
 
+def parse_multi_values(value_str: str | None) -> list[str]:
+    """Parse a semicolon-separated multi-value string into a clean list."""
+    return [v.strip() for v in (value_str or '').split(';') if v.strip()]
+
+
 def derive_status(access_rights: str | None) -> str:
     """Derive the catalogue status from an access-rights URI or label."""
     if not access_rights:

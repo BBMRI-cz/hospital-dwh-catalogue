@@ -9,8 +9,9 @@ from __future__ import annotations
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, View
@@ -55,6 +56,34 @@ class CartAddView(LoginRequiredMixin, View):
             else:
                 CartService.add(request.session, app, name, title)
                 in_cart = True
+        if request.headers.get('HX-Request'):
+            cart_count = CartService.count(request.session)
+            cart_dataset_ids = {item['name'] for item in CartService.get(request.session)}
+            btn_style = request.POST.get('btn_style', 'hero')
+            template = (
+                'includes/_cart_inline_btn.html'
+                if btn_style == 'inline'
+                else 'includes/_cart_add_btn.html'
+            )
+            ctx_key = 'cart_app' if btn_style == 'inline' else 'cart_source'
+            btn_html = render_to_string(
+                template,
+                {
+                    ctx_key: app,
+                    'cart_name': name,
+                    'cart_title': title,
+                    'cart_dataset_ids': cart_dataset_ids,
+                },
+                request=request,
+            )
+            badge_visibility = '' if cart_count else ' hidden'
+            oob_badge = (
+                f'<span id="cart-badge" hx-swap-oob="outerHTML"'
+                f' class="absolute -top-1 -right-1 flex items-center justify-center'
+                f' rounded-full text-white font-mono font-bold text-[9px] bg-mou-orange{badge_visibility}"'
+                f' style="min-width:15px;height:15px;padding:0 3px;">{cart_count}</span>'
+            )
+            return HttpResponse(btn_html + oob_badge)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse(
                 {

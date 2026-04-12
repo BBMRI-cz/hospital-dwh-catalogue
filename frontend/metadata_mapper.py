@@ -22,7 +22,7 @@ from shared.dtos import (
     UnifiedTable,
     UnifiedTableColumn,
 )
-from shared.services import derive_status, parse_keywords
+from shared.services import derive_status, parse_keywords, parse_multi_values
 
 
 def _to_snake(camel: str) -> str:
@@ -36,7 +36,7 @@ def distribution_to_dict(distribution: UnifiedDistribution) -> FrontendDistribut
         'title': distribution.title or distribution.name,
         'description': distribution.description,
         'access_url': distribution.access_url,
-        'applicable_legislation': distribution.applicable_legislation,
+        'applicable_legislation': parse_multi_values(distribution.applicable_legislation),
         'format': distribution.format,
         'conforms_to': distribution.conforms_to,
         'byte_size': distribution.byte_size,
@@ -54,10 +54,10 @@ def dataset_to_dict(dataset: UnifiedDataset) -> FrontendDatasetDTO:
         'access_rights': dataset.access_rights,
         'version': dataset.version,
         'conforms_to': dataset.conforms_to,
-        'theme': dataset.theme,
+        'theme': parse_multi_values(dataset.theme),
         'publisher': dataset.publisher,
-        'applicable_legislation': dataset.applicable_legislation,
-        'health_category': dataset.health_category,
+        'applicable_legislation': parse_multi_values(dataset.applicable_legislation),
+        'health_category': parse_multi_values(dataset.health_category),
         'hdab': dataset.hdab,
         'source': dataset.source,
         'creator': dataset.creator,
@@ -82,6 +82,8 @@ def _build_dcat_rows(
     dto_type: type[Any],
     schema_json: SchemaRegistryPayload,
     values: Mapping[str, Any],
+    *,
+    exclude: frozenset[str] = frozenset(),
 ) -> list[FrontendDcatRow]:
     field_to_term = {_to_snake(info['local_name']): term for term, info in schema_json.items()}
     return [
@@ -91,15 +93,20 @@ def _build_dcat_rows(
             values.get(field.name),
         )
         for field in dataclasses.fields(dto_type)
-        if field.name in field_to_term
+        if field.name in field_to_term and field.name not in exclude
     ]
+
+
+# 'name' is the internal slug and would incorrectly match foaf:name in the schema;
+# 'description' is rendered separately as a full-width row in the template.
+_DATASET_DCAT_ROW_EXCLUDE: frozenset[str] = frozenset({'name', 'description'})
 
 
 def build_dataset_dcat_rows(
     schema_json: SchemaRegistryPayload,
     dataset: FrontendDatasetDTO,
 ) -> list[FrontendDcatRow]:
-    return _build_dcat_rows(UnifiedDataset, schema_json, dataset)
+    return _build_dcat_rows(UnifiedDataset, schema_json, dataset, exclude=_DATASET_DCAT_ROW_EXCLUDE)
 
 
 def build_distribution_dcat_rows(

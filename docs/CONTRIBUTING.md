@@ -58,6 +58,24 @@ This gives you `ruff` (linting and formatting), `mypy` (type checking), and `ban
 | Formatting | Ruff | Yes |
 | Type checking | mypy | No |
 | Security | Bandit | No |
+
+## Frontend stack
+
+The frontend uses server-side Django templates with two lightweight JS libraries vendored under `frontend/static/js/`:
+
+| Library | Version | Purpose |
+|---|---|---|
+| **HTMX** | 2.0.4 | Server interactions — filtering, pagination, cart toggles, partial page swaps |
+| **Alpine.js** | 3.14.9 | Client-side UI state — accordions, dropdowns, inline search, toasts |
+| **Chart.js** | latest | Canvas charts for FAIR Genomes stat distributions (imperative, kept as JS) |
+
+**Rules:**
+- Use Alpine `x-data` / `x-show` / `@click` for anything that does not need a server round-trip.
+- Use HTMX `hx-get` / `hx-post` / `hx-target` for anything that does.
+- Do not add new vanilla JavaScript files. If Alpine logic is too complex for a single inline expression, define a named component with `Alpine.data()` in a new static JS file.
+- HTMX endpoints that respond to `HX-Request` headers must return rendered HTML partials (not JSON). Views detect the header with `request.headers.get('HX-Request')`.
+- Out-of-band swaps (`hx-swap-oob`) are used to update the cart badge alongside button swaps — see `ticketing/views.py` `CartAddView` for the pattern.
+- CSRF is passed globally via `hx-headers` on `<body>` in `base.html` — do not add per-request CSRF tokens to HTMX forms.
 | Translations | Custom script | No |
 | Tests | Django | No |
 

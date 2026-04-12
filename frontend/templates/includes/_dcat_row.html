@@ -1,7 +1,15 @@
-{% load i18n %}{% if value %}<div class="flex flex-col gap-1 px-5 py-3.5 border-r border-t border-gray-100">
+{% load i18n frontend_tags %}{% if value %}<div class="flex flex-col gap-1 px-5 py-3.5 border-r border-t border-gray-100">
   <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted leading-none">
     {{ semantics }}
     {% include "includes/_info_btn.html" with semantics=semantics %}
   </div>
+  {% if value|is_list %}
+  <div class="flex flex-wrap gap-1.5">
+    {% for item in value %}
+    {% include "includes/_badge.html" with b_value=item only %}
+    {% endfor %}
+  </div>
+  {% else %}
   <div class="text-[13px] text-gray-800 font-medium leading-snug break-words">{{ value }}</div>
+  {% endif %}
 </div>{% endif %}

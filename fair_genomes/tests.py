@@ -8,10 +8,15 @@ calls are made.
 
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition, StatResult
-from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
+from .services.fair_genomes_service import (
+    FairGenomesAPIException,
+    FairGenomesService,
+    _resolve_graph_predicate_uri,
+    _uri_local_name,
+)
 
 
 class ContactPointModelTest(TestCase):
@@ -149,6 +154,50 @@ class FairGenomesServiceTest(TestCase):
 
     def test_exception_class_exists(self):
         self.assertTrue(issubclass(FairGenomesAPIException, Exception))
+
+
+class GraphPredicateResolutionTest(SimpleTestCase):
+    """Tests for resolving RDF predicates from the parsed graph itself."""
+
+    def test_uri_local_name_handles_hash_namespaces(self):
+        self.assertEqual(
+            _uri_local_name('http://healthdataportal.eu/ns/health#healthCategory'),
+            'healthCategory',
+        )
+
+    def test_uri_local_name_handles_path_namespaces(self):
+        self.assertEqual(
+            _uri_local_name('http://data.europa.eu/r5r/applicableLegislation'),
+            'applicableLegislation',
+        )
+
+    def test_resolve_graph_predicate_uri_returns_unique_match(self):
+        predicate_uris = {
+            'https://example.org/ext/applicableLegislation',
+            'https://example.org/health#healthCategory',
+        }
+
+        self.assertEqual(
+            _resolve_graph_predicate_uri(predicate_uris, 'applicableLegislation'),
+            'https://example.org/ext/applicableLegislation',
+        )
+        self.assertEqual(
+            _resolve_graph_predicate_uri(predicate_uris, 'healthCategory'),
+            'https://example.org/health#healthCategory',
+        )
+
+    def test_resolve_graph_predicate_uri_returns_none_for_missing_name(self):
+        predicate_uris = {'https://example.org/ext/somethingElse'}
+
+        self.assertIsNone(_resolve_graph_predicate_uri(predicate_uris, 'healthCategory'))
+
+    def test_resolve_graph_predicate_uri_returns_none_for_ambiguous_name(self):
+        predicate_uris = {
+            'https://example.org/one/healthCategory',
+            'https://example.org/two#healthCategory',
+        }
+
+        self.assertIsNone(_resolve_graph_predicate_uri(predicate_uris, 'healthCategory'))
 
 
 class TableModelTest(TestCase):
