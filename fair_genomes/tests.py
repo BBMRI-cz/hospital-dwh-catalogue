@@ -6,6 +6,7 @@ Model tests do not require DB writes; service tests mock HTTP so no live API
 calls are made.
 """
 
+import os
 from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase, TestCase
@@ -390,3 +391,200 @@ class StatDefinitionModelTest(TestCase):
             distribution_id='DIST_X',
         )
         self.assertEqual(str(sd), 'seq.col → DIST_X')
+
+
+# ---------------------------------------------------------------------------
+# _process_graph() integration tests — use Turtle fixtures, no HTTP mocking
+# ---------------------------------------------------------------------------
+
+_FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
+
+
+def _load_turtle(filename: str) -> str:
+    with open(os.path.join(_FIXTURE_DIR, filename), encoding='utf-8') as fh:
+        return fh.read()
+
+
+class ProcessGraphFullTest(TestCase):
+    """_process_graph() with a complete valid fixture: all five entity types are saved."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def test_all_entities_saved(self):
+        from rdflib import Graph
+
+        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        self.assertIn('contact@example.org', report['fetched']['contact_points'])
+        self.assertIn('Test HDAB Agency', report['fetched']['agents'])
+        self.assertIn('test-catalog', report['fetched']['catalogs'])
+        self.assertIn('test-dataset', report['fetched']['datasets'])
+        self.assertIn('test-distribution', report['fetched']['distributions'])
+
+        self.assertTrue(
+            ContactPoint.objects.using('fair_genomes_db')
+            .filter(email='contact@example.org')
+            .exists()
+        )
+        self.assertTrue(
+            Agent.objects.using('fair_genomes_db').filter(name='Test HDAB Agency').exists()
+        )
+        self.assertTrue(
+            Catalog.objects.using('fair_genomes_db').filter(name='test-catalog').exists()
+        )
+        self.assertTrue(
+            Dataset.objects.using('fair_genomes_db').filter(name='test-dataset').exists()
+        )
+        self.assertTrue(
+            Distribution.objects.using('fair_genomes_db').filter(name='test-distribution').exists()
+        )
+
+    def test_distribution_linked_to_dataset(self):
+        from rdflib import Graph
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        from .models import Distribution
+
+        dist = Distribution.objects.using('fair_genomes_db').get(name='test-distribution')
+        self.assertEqual(dist.dataset_name_id, 'test-dataset')
+
+    def test_report_status_complete_when_no_skips(self):
+        from rdflib import Graph
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        self.assertEqual(report['status'], 'complete')
+        self.assertFalse(report['skipped'])
+
+
+class ProcessGraphPartialTest(TestCase):
+    """_process_graph() with a fixture where one Dataset has a missing FK."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def test_good_dataset_saved_bad_dataset_skipped(self):
+        from rdflib import Graph
+
+        from .models import Dataset
+
+        ttl = _load_turtle('test_partial_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        # Good dataset saved
+        self.assertIn('test-dataset-good', report['fetched']['datasets'])
+        self.assertTrue(
+            Dataset.objects.using('fair_genomes_db').filter(name='test-dataset-good').exists()
+        )
+
+        # Bad dataset skipped
+        self.assertIn('test-dataset-no-hdab', report['fetched']['datasets'])
+        self.assertFalse(
+            Dataset.objects.using('fair_genomes_db').filter(name='test-dataset-no-hdab').exists()
+        )
+        skipped_names = [s['name'] for s in report['skipped'].get('datasets', [])]
+        self.assertIn('test-dataset-no-hdab', skipped_names)
+
+    def test_report_status_partial_when_skips(self):
+        from rdflib import Graph
+
+        ttl = _load_turtle('test_partial_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        self.assertEqual(report['status'], 'partial')
+
+
+class ProcessGraphStaleCleanupTest(TestCase):
+    """After a sync, stale Datasets and Distributions absent from RDF are deleted."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution
+
+        cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
+            email='seed@example.org'
+        )
+        agent, _ = Agent.objects.using('fair_genomes_db').get_or_create(name='Seed Agent')
+        Catalog.objects.using('fair_genomes_db').get_or_create(
+            name='seed-catalog',
+            defaults={'title': 't', 'description': 'd', 'applicable_legislation': 'http://x'},
+        )
+        Dataset.objects.using('fair_genomes_db').get_or_create(
+            name='stale-dataset',
+            defaults={
+                'title': 'Stale',
+                'description': 'd',
+                'access_rights': 'public',
+                'applicable_legislation': 'http://x',
+                'health_category': 'genomics',
+                'contact_point': cp,
+                'hdab': agent,
+            },
+        )
+        Distribution.objects.using('fair_genomes_db').get_or_create(
+            name='stale-distribution',
+            defaults={
+                'title': 'Stale Dist',
+                'access_url': 'http://example.com',
+                'applicable_legislation': 'http://x',
+                'dataset_name_id': 'stale-dataset',
+            },
+        )
+
+    def test_stale_dataset_and_distribution_deleted(self):
+        from rdflib import Graph
+
+        from .models import Dataset, Distribution
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        self.assertFalse(
+            Dataset.objects.using('fair_genomes_db').filter(name='stale-dataset').exists()
+        )
+        self.assertFalse(
+            Distribution.objects.using('fair_genomes_db').filter(name='stale-distribution').exists()
+        )
+
+    def test_stale_deletion_reported(self):
+        from rdflib import Graph
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        self.assertIn('deleted', report)
+        self.assertGreaterEqual(report['deleted'].get('datasets', 0), 1)

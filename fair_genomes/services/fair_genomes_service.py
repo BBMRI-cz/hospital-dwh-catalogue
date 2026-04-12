@@ -26,6 +26,8 @@ import time
 from datetime import UTC
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from django.conf import settings
 from django.db import transaction
@@ -63,7 +65,7 @@ class FairGenomesService:
         rdf_url: str | None = None,
         api_url: str | None = None,
         api_token: str | None = None,
-        timeout: int = 30,
+        timeout: tuple[int, int] | int = (10, 60),
     ):
         # None → fall back to settings; explicit value (even '') → use as-is
         def _cfg(val: str | None, key: str) -> str:
@@ -133,29 +135,7 @@ class FairGenomesService:
 
         # ── Phase 2: all DB writes in one atomic transaction ──────────────────
         with transaction.atomic(using='fair_genomes_db'):
-            report = (
-                self._process_graph(graph)
-                if graph
-                else {
-                    'status': 'partial',
-                    'rdf_url': '',
-                    'fetched': {
-                        'contact_points': [],
-                        'agents': [],
-                        'catalogs': [],
-                        'datasets': [],
-                        'distributions': [],
-                    },
-                    'saved': {
-                        'contact_points': {'created': [], 'updated': []},
-                        'agents': {'created': [], 'updated': []},
-                        'catalogs': {'created': [], 'updated': []},
-                        'datasets': {'created': [], 'updated': []},
-                        'distributions': {'created': [], 'updated': []},
-                    },
-                    'skipped': {},
-                }
-            )
+            report = self._process_graph(graph) if graph else self._empty_rdf_report()
 
         report['graphql_url'] = self.graphql_url or ''
 
@@ -188,10 +168,43 @@ class FairGenomesService:
     # Internal helpers
     # ─────────────────────────────────────────────────────────────────────────
 
+    @staticmethod
+    def _empty_rdf_report() -> dict:
+        """Return a report skeleton used when RDF sync is skipped (stats-only path)."""
+        return {
+            'status': 'partial',
+            'rdf_url': '',
+            'fetched': {
+                'contact_points': [],
+                'agents': [],
+                'catalogs': [],
+                'datasets': [],
+                'distributions': [],
+            },
+            'saved': {
+                'contact_points': {'created': [], 'updated': []},
+                'agents': {'created': [], 'updated': []},
+                'catalogs': {'created': [], 'updated': []},
+                'datasets': {'created': [], 'updated': []},
+                'distributions': {'created': [], 'updated': []},
+            },
+            'skipped': {},
+        }
+
     def _fetch(self, url: str) -> requests.Response:
-        """HTTP GET with an RDF-friendly Accept header."""
+        """HTTP GET with an RDF-friendly Accept header and automatic retry on transient errors."""
+        retry = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=['GET'],
+            raise_on_status=False,
+        )
+        session = requests.Session()
+        session.mount('https://', HTTPAdapter(max_retries=retry))
+        session.mount('http://', HTTPAdapter(max_retries=retry))
         try:
-            response = requests.get(
+            response = session.get(
                 url,
                 timeout=self.timeout,
                 headers={'Accept': 'text/turtle, application/rdf+xml;q=0.9, */*;q=0.1'},
@@ -664,6 +677,31 @@ class FairGenomesService:
                 defaults=defaults,
             )
             report['saved']['distributions']['created' if created else 'updated'].append(name)
+
+        # ── STALE-ENTITY CLEANUP ──────────────────────────────────────────────
+        fetched_datasets = set(report['fetched']['datasets'])
+        if fetched_datasets:
+            deleted_ds, _ = (
+                Dataset.objects.using('fair_genomes_db').exclude(name__in=fetched_datasets).delete()
+            )
+            if deleted_ds:
+                logger.info('Removed %d stale Dataset(s) not present in current RDF', deleted_ds)
+                report['deleted'] = report.get('deleted', {})
+                report['deleted']['datasets'] = deleted_ds
+
+        fetched_distributions = set(report['fetched']['distributions'])
+        if fetched_distributions:
+            deleted_dist, _ = (
+                Distribution.objects.using('fair_genomes_db')
+                .exclude(name__in=fetched_distributions)
+                .delete()
+            )
+            if deleted_dist:
+                logger.info(
+                    'Removed %d stale Distribution(s) not present in current RDF', deleted_dist
+                )
+                report['deleted'] = report.get('deleted', {})
+                report['deleted']['distributions'] = deleted_dist
 
         # ── OVERALL STATUS ────────────────────────────────────────────────────
         all_entity_types = ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions')

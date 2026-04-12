@@ -105,6 +105,7 @@ Copy the appropriate file to `.env` and fill in the values. See the example file
 | `FAIR_GENOMES_API_URL` | MOLGENIS GraphQL endpoint for stats and data sync |
 | `FAIR_GENOMES_API_TOKEN` | Authentication token for the MOLGENIS API |
 | `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | How often the scheduler syncs data (default: 24) |
+| `MOCK_FAIR_GENOMES` | Set to `True` to use seeded mock data instead of a live MOLGENIS instance |
 | `SITE_URL` | Public base URL for JSON-LD export (e.g. `https://your-domain.com`) |
 | `HEALTH_DCAT_VERSION` | HealthDCAT-AP release to use (default: `release-6`) |
 

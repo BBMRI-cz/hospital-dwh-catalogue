@@ -294,6 +294,15 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                     request,
                     _('Full sync completed. %(summary)s') % {'summary': ' | '.join(summary_parts)},
                 )
+                if stats and stats['failed']:
+                    messages.warning(
+                        request,
+                        _('%(n)d stat aggregation(s) failed: %(errors)s')
+                        % {
+                            'n': stats['failed'],
+                            'errors': '; '.join(stats['errors'][:5]),
+                        },
+                    )
             except Exception as exc:
                 logger.exception('Full sync failed')
                 messages.error(
