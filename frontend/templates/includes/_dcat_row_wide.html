@@ -5,7 +5,7 @@
     {{ semantics }}{% include "includes/_info_btn.html" with semantics=semantics %}
   </div>
   {% if value|is_list %}
-  <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+  <div class="flex flex-col items-start gap-1.5">
     {% for item in value %}
     {% include "includes/_badge.html" with b_value=item only %}
     {% endfor %}

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n frontend_tags %}
 {% comment %}
   Results partial for HTMX — rendered standalone on HX-Request, or included by index.html.
   Contains: active filter chips, dataset card list, pagination.
@@ -153,13 +153,30 @@
     <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
       <div class="border-t border-gray-100">
         <div class="grid grid-cols-2">
-          {% if dataset.description %}
-          <div class="col-span-2 flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
-            <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">
-              dct:description {% include "includes/_info_btn.html" with semantics="dct:description" stop=1 %}
-            </div>
-            <div class="text-[13px] text-gray-700 leading-relaxed">{{ dataset.description }}</div>
-          </div>
+          {% if dataset.source and not dataset.source|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
+          {% endif %}
+          {% if dataset.custodian and not dataset.custodian|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
+          {% endif %}
+          {% if dataset.health_category and not dataset.health_category|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
+          {% endif %}
+          {% if dataset.theme and not dataset.theme|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
+          {% endif %}
+
+          {% if dataset.source|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
+          {% endif %}
+          {% if dataset.custodian|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
+          {% endif %}
+          {% if dataset.health_category|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
+          {% endif %}
+          {% if dataset.theme|is_list %}
+          {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
           {% endif %}
 
           {% if dataset.keywords %}
@@ -175,10 +192,14 @@
           </div>
           {% endif %}
 
-          {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
+          {% if dataset.description %}
+          <div class="col-span-2 flex flex-col gap-1 px-4 py-3 border-r border-b border-gray-100">
+            <div class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[1px] text-txt-muted">
+              dct:description {% include "includes/_info_btn.html" with semantics="dct:description" stop=1 %}
+            </div>
+            <div class="text-[13px] text-gray-700 leading-relaxed">{{ dataset.description }}</div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>

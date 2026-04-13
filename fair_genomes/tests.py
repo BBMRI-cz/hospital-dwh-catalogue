@@ -15,6 +15,7 @@ from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDef
 from .services.fair_genomes_service import (
     FairGenomesAPIException,
     FairGenomesService,
+    _dedupe_preserve_order,
     _resolve_graph_predicate_uri,
     _uri_local_name,
 )
@@ -199,6 +200,12 @@ class GraphPredicateResolutionTest(SimpleTestCase):
         }
 
         self.assertIsNone(_resolve_graph_predicate_uri(predicate_uris, 'healthCategory'))
+
+    def test_dedupe_preserve_order_keeps_first_occurrence(self):
+        self.assertEqual(
+            _dedupe_preserve_order(['a', 'b', 'a', 'c', 'b']),
+            ['a', 'b', 'c'],
+        )
 
 
 class TableModelTest(TestCase):
@@ -444,6 +451,29 @@ class ProcessGraphFullTest(TestCase):
         )
         self.assertTrue(
             Distribution.objects.using('fair_genomes_db').filter(name='test-distribution').exists()
+        )
+
+    def test_duplicate_theme_from_multiple_predicates_saved_once(self):
+        from rdflib import Graph, URIRef
+
+        ttl = _load_turtle('test_full_graph.ttl')
+        g = Graph()
+        g.parse(data=ttl, format='turtle')
+        g.add(
+            (
+                URIRef('http://fdp.example.org/Dataset/ds1'),
+                URIRef('http://fdp.example.org/Dataset/column/theme'),
+                URIRef('http://publications.europa.eu/resource/authority/data-theme/HEAL'),
+            )
+        )
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        dataset = Dataset.objects.using('fair_genomes_db').get(name='test-dataset')
+        self.assertEqual(
+            dataset.theme,
+            'http://publications.europa.eu/resource/authority/data-theme/HEAL',
         )
 
     def test_distribution_linked_to_dataset(self):

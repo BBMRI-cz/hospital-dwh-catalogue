@@ -37,14 +37,19 @@ logger = logging.getLogger(__name__)
 _EXPORT_SOURCE_APPS = ('warehouse', 'fair_genomes')
 
 
+def _split_unique_values(value_str: str | None, separator: str) -> list[str]:
+    values = [value.strip() for value in (value_str or '').split(separator) if value.strip()]
+    return list(dict.fromkeys(values))
+
+
 def parse_keywords(keyword_str: str | None) -> list[str]:
     """Parse a comma-separated keyword string into a clean list."""
-    return [keyword.strip() for keyword in (keyword_str or '').split(',') if keyword.strip()]
+    return _split_unique_values(keyword_str, ',')
 
 
 def parse_multi_values(value_str: str | None) -> list[str]:
     """Parse a semicolon-separated multi-value string into a clean list."""
-    return [v.strip() for v in (value_str or '').split(';') if v.strip()]
+    return _split_unique_values(value_str, ';')
 
 
 def derive_status(access_rights: str | None) -> str:

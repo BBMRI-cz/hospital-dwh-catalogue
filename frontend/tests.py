@@ -780,12 +780,25 @@ class ParseMultiValuesTest(SimpleTestCase):
 
         self.assertEqual(parse_multi_values('http://only'), ['http://only'])
 
+    def test_deduplicates_repeated_values(self):
+        from shared.services import parse_multi_values
+
+        self.assertEqual(
+            parse_multi_values('http://a; http://b; http://a; http://b'),
+            ['http://a', 'http://b'],
+        )
+
 
 class MultiValueMapperTest(SimpleTestCase):
     """Tests that dataset_to_dict pre-splits multi-value URI fields into lists."""
 
     def test_theme_split_into_list(self):
         ds = _make_test_dataset(theme='http://a;http://b')
+        result = dataset_to_dict(ds)
+        self.assertEqual(result['theme'], ['http://a', 'http://b'])
+
+    def test_theme_deduplicates_repeated_values(self):
+        ds = _make_test_dataset(theme='http://a;http://b;http://a')
         result = dataset_to_dict(ds)
         self.assertEqual(result['theme'], ['http://a', 'http://b'])
 

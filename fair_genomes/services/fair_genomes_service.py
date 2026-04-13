@@ -51,6 +51,11 @@ def _resolve_graph_predicate_uri(predicate_uris: set[str], local_name: str) -> s
     return None
 
 
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    """Return values with duplicates removed while preserving first-seen order."""
+    return list(dict.fromkeys(values))
+
+
 class FairGenomesAPIException(Exception):
     """Raised when the FDP endpoint cannot be reached or its data cannot be parsed."""
 
@@ -329,7 +334,7 @@ class FairGenomesService:
                 for obj in g.objects(subject, pred):
                     if isinstance(obj, Literal):
                         result.append(str(obj))
-            return result
+            return _dedupe_preserve_order(result)
 
         def get_all_uris(subject, *predicates) -> list[str]:
             """Collect all URIRef objects for the given predicates."""
@@ -340,7 +345,7 @@ class FairGenomesService:
                 for obj in g.objects(subject, pred):
                     if isinstance(obj, URIRef):
                         result.append(str(obj))
-            return result
+            return _dedupe_preserve_order(result)
 
         def join_uris(subject, *predicates) -> str:
             """Collect all URI values for predicates and join with ';'."""

@@ -1,5 +1,5 @@
 ﻿{% extends "catalogue/base_catalogue.html" %}
-{% load i18n static %}
+{% load i18n static frontend_tags %}
 
 {% block title %}{{ distribution.title|default:distribution.name }} · {% trans "Distribution" %}{% endblock %}
 
@@ -50,7 +50,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2">
         {% include "includes/_dcat_row.html" with semantics="dct:title" label="Title" value=distribution.title schema_json=schema_json only %}
         {% for semantics, label, value in dcat_rows %}
+        {% if value and not value|is_list %}
         {% include "includes/_dcat_row.html" with semantics=semantics label=label value=value schema_json=schema_json only %}
+        {% endif %}
+        {% endfor %}
+        {% for semantics, label, value in dcat_rows %}
+        {% if value|is_list %}
+        {% include "includes/_dcat_row.html" with semantics=semantics label=label value=value schema_json=schema_json only %}
+        {% endif %}
         {% endfor %}
         {% include "includes/_dcat_row_wide.html" with semantics="dct:description" label="Description" value=distribution.description schema_json=schema_json only %}
       </div>
