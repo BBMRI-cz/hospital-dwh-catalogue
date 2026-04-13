@@ -273,15 +273,13 @@ def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistribu
     if distribution.applicable_legislation:
         legislation = _uri_list(distribution.applicable_legislation)
         if legislation:
-            node['dcatap:applicableLegislation'] = (
-                legislation[0] if len(legislation) == 1 else legislation
-            )
+            node['dcatap:applicableLegislation'] = legislation
     format_value = _maybe_uri_ref(distribution.format)
     if format_value is not None:
         node['dct:format'] = format_value
     conforms_to = _literal_or_uri_list(distribution.conforms_to)
     if conforms_to:
-        node['dct:conformsTo'] = conforms_to[0] if len(conforms_to) == 1 else conforms_to
+        node['dct:conformsTo'] = conforms_to
     if distribution.byte_size is not None:
         node['dcat:byteSize'] = distribution.byte_size
     rights_value = _maybe_uri_ref(distribution.rights)
@@ -336,14 +334,14 @@ def _build_dataset_node(
         node['dcat:version'] = dataset.version
     theme_values = _uri_list(dataset.theme)
     if theme_values:
-        node['dcat:theme'] = theme_values[0] if len(theme_values) == 1 else theme_values
+        node['dcat:theme'] = theme_values
     if publisher_value is not None:
         node['dct:publisher'] = publisher_value
     if creator_value is not None:
         node['dct:creator'] = creator_value
     conforms_to = _literal_or_uri_list(dataset.conforms_to)
     if conforms_to:
-        node['dct:conformsTo'] = conforms_to[0] if len(conforms_to) == 1 else conforms_to
+        node['dct:conformsTo'] = conforms_to
     issued = _typed_datetime(dataset.issued)
     if issued is not None:
         node['dct:issued'] = issued
@@ -364,25 +362,17 @@ def _build_dataset_node(
         node['dct:accessRights'] = _id_ref(dataset.access_rights)
     applicable_legislation = _uri_list(dataset.applicable_legislation)
     if applicable_legislation:
-        node['dcatap:applicableLegislation'] = (
-            applicable_legislation[0]
-            if len(applicable_legislation) == 1
-            else applicable_legislation
-        )
+        node['dcatap:applicableLegislation'] = applicable_legislation
     health_category_values = _uri_list(dataset.health_category)
     if health_category_values:
-        node['healthdcatap:healthCategory'] = (
-            health_category_values[0]
-            if len(health_category_values) == 1
-            else health_category_values
-        )
+        node['healthdcatap:healthCategory'] = health_category_values
     if hdab_value is not None:
         node['healthdcatap:hdab'] = hdab_value
     if custodian_value is not None:
         node['geodcatap:custodian'] = custodian_value
     dataset_types = _uri_list(dataset.type)
     if dataset_types:
-        node['dct:type'] = dataset_types[0] if len(dataset_types) == 1 else dataset_types
+        node['dct:type'] = dataset_types
     if include_distributions and dataset.distributions:
         dist_refs = [
             _id_ref(iri)
@@ -422,9 +412,9 @@ def _append_dataset_resource(
         if dataset.catalog.description:
             catalog_node['dct:description'] = dataset.catalog.description
         if dataset.catalog.applicable_legislation:
-            catalog_node['dcatap:applicableLegislation'] = _id_ref(
-                dataset.catalog.applicable_legislation
-            )
+            legislation = _uri_list(dataset.catalog.applicable_legislation)
+            if legislation:
+                catalog_node['dcatap:applicableLegislation'] = legislation
         if dataset.catalog.publisher is not None:
             catalog_node['dct:publisher'] = _build_agent_node(
                 dataset.catalog.publisher, graph, seen
@@ -470,7 +460,9 @@ def _append_catalog_resource(
     if catalog.description:
         catalog_node['dct:description'] = catalog.description
     if catalog.applicable_legislation:
-        catalog_node['dcatap:applicableLegislation'] = _id_ref(catalog.applicable_legislation)
+        legislation = _uri_list(catalog.applicable_legislation)
+        if legislation:
+            catalog_node['dcatap:applicableLegislation'] = legislation
     if catalog.publisher is not None:
         catalog_node['dct:publisher'] = _build_agent_node(catalog.publisher, graph, seen)
     _append_node(graph, seen, catalog_node)

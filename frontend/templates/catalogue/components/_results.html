@@ -18,91 +18,91 @@
   {% trans "Column" as chip_label_column %}
 
   {% if params.q %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_q }}: {{ params.q }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_q }}: {{ params.q }}">{{ chip_label_q }}: {{ params.q }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% if k != 'q' and k != 'page' %}{% for v in vs %}{{ k }}={{ v }}&{% endfor %}{% endif %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endif %}
 
   {% for val in params.keywords %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_keywords }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-center gap-1 rounded-full border border-mou-cyan-border bg-mou-cyan-light px-2.5 py-0.5 text-xs font-medium text-mou-blue">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_keywords }}: {{ val }}">{{ chip_label_keywords }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'keywords' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endfor %}
 
   {% for val in params.custodian %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_custodian }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_custodian }}: {{ val }}">{{ chip_label_custodian }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'custodian' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endfor %}
 
   {% for val in params.health_category %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_health_category }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_health_category }}: {{ val }}">{{ chip_label_health_category }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'health_category' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endfor %}
 
   {% for val in params.source %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_source }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_source }}: {{ val }}">{{ chip_label_source }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'source' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endfor %}
 
   {% for val in params.theme %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_theme }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_theme }}: {{ val }}">{{ chip_label_theme }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'theme' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>
   {% endfor %}
 
   {% for val in params.column %}
-  <span class="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-medium bg-mou-cyan-light text-cyan-700 border-mou-cyan-border">
-    <span>{{ chip_label_column }}: {{ val }}</span>
+  <span class="inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm">
+    <span class="min-w-0 leading-tight break-all" title="{{ chip_label_column }}: {{ val }}">{{ chip_label_column }}: {{ val }}</span>
     <button type="button"
       hx-get="{% url 'frontend:catalogue' %}?{% for k,vs in request.GET.lists %}{% for v in vs %}{% if k == 'column' and v == val %}{% else %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endif %}{% endfor %}{% endfor %}page=1"
       hx-target="#ds-list-wrapper" hx-swap="innerHTML" hx-push-url="true"
       aria-label="{% trans 'Remove filter' %}"
-      class="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer">
+      class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </span>

@@ -681,11 +681,38 @@ class BuildJsonldContextTest(TestCase):
             [{'@id': 'http://example.com/theme/A'}, {'@id': 'http://example.com/theme/B'}],
         )
 
-    def test_single_theme_exported_as_single_ref(self) -> None:
+    def test_single_theme_exported_as_single_item_array(self) -> None:
         node = self._dataset_node(self._build())
         self.assertEqual(
             node.get('dcat:theme'),
-            {'@id': 'http://publications.europa.eu/resource/authority/data-theme/HEAL'},
+            [{'@id': 'http://publications.europa.eu/resource/authority/data-theme/HEAL'}],
+        )
+
+    def test_single_dataset_applicable_legislation_exported_as_single_item_array(self) -> None:
+        node = self._dataset_node(self._build())
+        self.assertEqual(
+            node.get('dcatap:applicableLegislation'),
+            [{'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'}],
+        )
+
+    def test_single_health_category_exported_as_single_item_array(self) -> None:
+        node = self._dataset_node(self._build())
+        self.assertEqual(
+            node.get('healthdcatap:healthCategory'),
+            [{'@id': 'http://healthdataportal.eu/ns/health#clinical'}],
+        )
+
+    def test_single_dataset_type_exported_as_single_item_array(self) -> None:
+        node = self._dataset_node(self._build())
+        self.assertEqual(
+            node.get('dct:type'),
+            [
+                {
+                    '@id': (
+                        'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL'
+                    )
+                }
+            ],
         )
 
     def test_multiple_health_categories_exported_as_array(self) -> None:
@@ -721,6 +748,84 @@ class BuildJsonldContextTest(TestCase):
         dist = self._distribution_node(self._build(ds))
         self.assertEqual(
             dist.get('dcatap:applicableLegislation'),
+            [
+                {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
+                {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},
+            ],
+        )
+
+    def test_distribution_single_applicable_legislation_exported_as_single_item_array(self) -> None:
+        dist = self._distribution_node(self._build())
+        self.assertEqual(
+            dist.get('dcatap:applicableLegislation'),
+            [{'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'}],
+        )
+
+    def test_distribution_single_conforms_to_exported_as_single_item_array(self) -> None:
+        ds = self._make_dataset()
+        ds.distributions[0].conforms_to = 'https://example.com/spec/distribution'
+        dist = self._distribution_node(self._build(ds))
+        self.assertEqual(
+            dist.get('dct:conformsTo'),
+            [{'@id': 'https://example.com/spec/distribution'}],
+        )
+
+    def test_dataset_single_conforms_to_exported_as_single_item_array(self) -> None:
+        ds = self._make_dataset()
+        ds.conforms_to = 'https://example.com/spec/dataset'
+        node = self._dataset_node(self._build(ds))
+        self.assertEqual(node.get('dct:conformsTo'), [{'@id': 'https://example.com/spec/dataset'}])
+
+    def test_nested_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:
+        ds = self._make_dataset()
+        assert ds.catalog is not None
+        ds.catalog.applicable_legislation = (
+            'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj'
+        )
+        result = self._build(ds)
+        catalog = next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog'))
+        self.assertEqual(
+            catalog.get('dcatap:applicableLegislation'),
+            [
+                {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
+                {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},
+            ],
+        )
+
+    def test_nested_catalog_single_applicable_legislation_exported_as_single_item_array(
+        self,
+    ) -> None:
+        result = self._build()
+        catalog = next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog'))
+        self.assertEqual(
+            catalog.get('dcatap:applicableLegislation'),
+            [{'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'}],
+        )
+
+    def test_top_level_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:
+        from shared.export import build_complete_jsonld
+
+        dataset = self._make_dataset()
+        dataset.catalog = None
+        catalog = ExportCatalog(
+            app='warehouse',
+            name='warehouse-cat',
+            title='Warehouse Catalogue',
+            description='Warehouse catalogue description',
+            applicable_legislation=(
+                'http://data.europa.eu/eli/reg/2016/679/oj;'
+                'http://data.europa.eu/eli/reg/2022/868/oj'
+            ),
+            publisher=dataset.publisher,
+            datasets=[dataset],
+        )
+
+        result = build_complete_jsonld([catalog], [])
+        catalog_node = next(
+            node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')
+        )
+        self.assertEqual(
+            catalog_node.get('dcatap:applicableLegislation'),
             [
                 {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
                 {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},

@@ -215,6 +215,68 @@ class CatalogueIndexViewTest(TestCase):
         self.assertContains(response, 'Alpha Dataset')
         self.assertNotContains(response, 'Beta Dataset')
 
+    @patch(_SERVICE_PATH)
+    def test_catalogue_preview_renders_list_metadata_without_python_list_repr(self, mock_cls):
+        dataset = _make_test_dataset(
+            theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
+            health_category='http://healthdataportal.eu/ns/health#clinical',
+        )
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [dataset]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'title="http://publications.europa.eu/resource/authority/data-theme/HEAL"',
+        )
+        self.assertNotContains(
+            response,
+            '[&#x27;http://publications.europa.eu/resource/authority/data-theme/HEAL&#x27;]',
+            html=True,
+        )
+        self.assertNotContains(
+            response,
+            '[&#x27;http://healthdataportal.eu/ns/health#clinical&#x27;]',
+            html=True,
+        )
+
+    @patch(_SERVICE_PATH)
+    def test_sidebar_filter_titles_include_display_and_raw_value(self, mock_cls):
+        dataset = _make_test_dataset(
+            theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
+        )
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [dataset]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'title="data-theme / HEAL | '
+            'http://publications.europa.eu/resource/authority/data-theme/HEAL"',
+        )
+
+    @patch(_SERVICE_PATH)
+    def test_active_filter_chip_titles_include_full_value(self, mock_cls):
+        theme_value = 'http://publications.europa.eu/resource/authority/data-theme/HEAL'
+        dataset = _make_test_dataset(theme=theme_value)
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [dataset]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'), {'theme': theme_value})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'title="Theme: {theme_value}"')
+
 
 class DatasetDetailViewTest(TestCase):
     """Tests for the dataset detail view."""

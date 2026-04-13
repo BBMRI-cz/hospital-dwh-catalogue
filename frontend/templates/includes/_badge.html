@@ -1,9 +1,13 @@
 {% if b_variant == "cyan" %}
-<span class="inline-flex items-center rounded-full font-mono text-[10px] border px-2 bg-mou-cyan-light text-mou-blue border-mou-cyan-border">
+<span
+	class="inline-flex max-w-full items-center rounded-full border border-mou-cyan-border bg-mou-cyan-light px-2 py-0.5 font-mono text-[10px] leading-tight break-all text-left text-mou-blue"
+	title="{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}">
 	{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}
 </span>
 {% else %}
-<span class="inline-flex items-center rounded-full font-mono text-[10px] border text-txt-muted bg-gray-50 border-gray-200 px-2">
+<span
+	class="inline-flex max-w-full items-start rounded-md border border-site-border bg-page-bg px-2 py-1 font-mono text-[10px] leading-tight break-all text-left text-mou-dark"
+	title="{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}">
 	{{ b_value }}{% if b_label %} {{ b_label }}{% endif %}
 </span>
 {% endif %}
