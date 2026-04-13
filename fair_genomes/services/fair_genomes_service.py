@@ -1,29 +1,8 @@
-"""
-Service layer for Fair Genomes catalogue.
-
-Two sync sources contribute to one atomic transaction per run:
-
-  1. RDF (FAIR Data Point) — configured via FAIR_GENOMES_RDF_URL.
-       - Agent    : saved fully.
-       - Catalog  : saved with partial data (applicable_legislation mandatory
-                    in HealthDCAT-AP v6 but absent from FDP — stored as '').
-       - Dataset  : collected but NOT saved (mandatory fields missing).
-
-  2. GraphQL (MOLGENIS EMX2) — configured via FAIR_GENOMES_API_URL +
-     FAIR_GENOMES_API_TOKEN.
-       - Aggregation stats: full value distributions for columns defined in
-         stat_config.py.
-
-RDF DB writes are wrapped in a transaction.atomic so the catalogue never has
-partial data.  Stat aggregation runs outside the transaction so a failed count
-query never rolls back the RDF sync.
-
-sync() returns a structured report dict for downstream reporting.
-"""
+"""Service layer for the FAIR Genomes catalogue sync."""
 
 import logging
 import time
-from datetime import UTC
+from datetime import UTC, datetime
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -32,28 +11,109 @@ from urllib3.util.retry import Retry
 from django.conf import settings
 from django.db import transaction
 
+from fair_genomes.services.rdf_schema import (
+    ENTITY_SPECS,
+    FieldSpec,
+    RawRecord,
+    discover_graph_schema,
+)
+
 logger = logging.getLogger(__name__)
-
-
-def _uri_local_name(uri: str) -> str:
-    """Return the local fragment/path segment of an RDF URI string."""
-    stripped = uri.rstrip('/#')
-    if '#' in stripped:
-        return stripped.rsplit('#', 1)[-1]
-    return stripped.rsplit('/', 1)[-1]
-
-
-def _resolve_graph_predicate_uri(predicate_uris: set[str], local_name: str) -> str | None:
-    """Resolve a predicate URI from the graph by its local name when unambiguous."""
-    matches = {uri for uri in predicate_uris if _uri_local_name(uri) == local_name}
-    if len(matches) == 1:
-        return next(iter(matches))
-    return None
 
 
 def _dedupe_preserve_order(values: list[str]) -> list[str]:
     """Return values with duplicates removed while preserving first-seen order."""
     return list(dict.fromkeys(values))
+
+
+def _parse_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+        return dt
+    except (ValueError, TypeError):
+        return None
+
+
+def _parse_int(value: str | None) -> int | None:
+    if not value:
+        return None
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def _extract_scalar_values(graph, subject, predicates) -> tuple[list[str], list[str]]:
+    from rdflib import Literal as RdfLiteral
+    from rdflib import URIRef
+
+    literal_values: list[str] = []
+    uri_values: list[str] = []
+
+    for predicate in predicates:
+        for obj in graph.objects(subject, predicate):
+            if isinstance(obj, URIRef):
+                uri_values.append(str(obj))
+            elif isinstance(obj, RdfLiteral):
+                literal_values.append(str(obj))
+
+    return _dedupe_preserve_order(literal_values), _dedupe_preserve_order(uri_values)
+
+
+def _normalise_field_value(literal_values: list[str], uri_values: list[str], field: FieldSpec):
+    raw_value: str | None
+
+    if field.extractor == 'literal':
+        raw_value = (literal_values or uri_values or [None])[0]
+    elif field.extractor == 'uri':
+        raw_value = (uri_values or literal_values or [None])[0]
+    elif field.extractor == 'multi_uri':
+        values = uri_values or literal_values
+        raw_value = field.separator.join(values) if values else None
+    else:
+        values = literal_values or uri_values
+        raw_value = field.separator.join(values) if values else None
+
+    if field.value_type == 'datetime':
+        return _parse_datetime(raw_value)
+    if field.value_type == 'int':
+        return _parse_int(raw_value)
+    return raw_value
+
+
+def _parse_raw_records(graph) -> dict[str, list[RawRecord]]:
+    schema = discover_graph_schema(graph)
+    parsed: dict[str, list[RawRecord]] = {spec.name: [] for spec in ENTITY_SPECS}
+
+    for spec in ENTITY_SPECS:
+        for subject in schema.subjects_for_entity(graph, spec.name):
+            values: dict[str, object] = {}
+            for field in spec.fields:
+                predicates = schema.predicate_candidates(spec.name, field)
+                literal_values, uri_values = _extract_scalar_values(graph, subject, predicates)
+                values[field.name] = _normalise_field_value(literal_values, uri_values, field)
+
+            parsed[spec.name].append(
+                RawRecord(
+                    entity_name=spec.name,
+                    subject_uri=str(subject),
+                    values=values,
+                )
+            )
+
+    return parsed
+
+
+def _resolve_related(value: str | None, by_uri: dict[str, object], by_name: dict[str, object]):
+    if not value:
+        return None
+    if value in by_uri:
+        return by_uri[value]
+    return by_name.get(value)
 
 
 class FairGenomesAPIException(Exception):
@@ -240,17 +300,7 @@ class FairGenomesService:
         return 'turtle'  # MOLGENIS FDP default
 
     def _process_graph(self, g) -> dict:
-        """
-        Walk the parsed RDF graph and persist all HealthDCAT-AP v6 entities.
-
-        Processing order respects FK dependencies:
-        ContactPoint → Agent → Catalog → Dataset → Distribution.
-        """
-        from datetime import datetime
-
-        from rdflib import Literal, Namespace, URIRef
-        from rdflib.namespace import DCAT, DCTERMS, FOAF, RDF, RDFS
-
+        """Parse the RDF graph into raw records and persist them in FK order."""
         from fair_genomes.models import (
             Agent,
             Catalog,
@@ -259,117 +309,7 @@ class FairGenomesService:
             Distribution,
         )
 
-        # Extract vocabularies from the graph's own @prefix declarations.
-        ns_map = {prefix: str(uri) for prefix, uri in g.namespaces()}
-        FDP_O = Namespace(ns_map['fdp-o']) if 'fdp-o' in ns_map else None
-        VCARD = (
-            Namespace(ns_map['vcard'])
-            if 'vcard' in ns_map
-            else Namespace('http://www.w3.org/2006/vcard/ns#')
-        )
-        predicate_uris = {
-            str(predicate) for predicate in set(g.predicates()) if isinstance(predicate, URIRef)
-        }
-        applicable_legislation_predicate = _resolve_graph_predicate_uri(
-            predicate_uris,
-            'applicableLegislation',
-        )
-        health_category_predicate = _resolve_graph_predicate_uri(
-            predicate_uris,
-            'healthCategory',
-        )
-        applicable_legislation_uri = (
-            URIRef(applicable_legislation_predicate) if applicable_legislation_predicate else None
-        )
-        health_category_uri = (
-            URIRef(health_category_predicate) if health_category_predicate else None
-        )
-
-        fdp_base = self.rdf_url.rstrip('/')
-        # The configured URL may use https but the RDF content may use http
-        # internally for its type and predicate URIs.  Detect the actual scheme
-        # from the parsed graph by looking for the FDP container subject.
-        for scheme in ('http://', 'https://'):
-            candidate = scheme + fdp_base.split('://', 1)[-1]
-            if (URIRef(candidate), None, None) in g:
-                fdp_base = candidate
-                break
-        FDP_NS = Namespace(f'{fdp_base}/')  # Instance-specific types derived from configured URL
-
-        def col(entity: str, field: str) -> URIRef:
-            """FDP column predicate URI for a given entity and field name."""
-            return URIRef(f'{fdp_base}/{entity}/column/{field}')
-
-        def _subjects_of_type(*type_uris) -> set:
-            """Return the union of subjects for multiple RDF type URIs."""
-            result: set = set()
-            for t in type_uris:
-                result.update(g.subjects(RDF.type, t))
-            return result
-
-        def get_literal(subject, *predicates) -> str | None:
-            for pred in predicates:
-                if pred is None:
-                    continue
-                val = g.value(subject, pred)
-                if isinstance(val, Literal):
-                    return str(val)
-            return None
-
-        def get_uri(subject, *predicates) -> str | None:
-            for pred in predicates:
-                if pred is None:
-                    continue
-                val = g.value(subject, pred)
-                if isinstance(val, URIRef):
-                    return str(val)
-            return None
-
-        def get_all_literals(subject, *predicates) -> list[str]:
-            """Collect all Literal objects for the given predicates."""
-            result: list[str] = []
-            for pred in predicates:
-                if pred is None:
-                    continue
-                for obj in g.objects(subject, pred):
-                    if isinstance(obj, Literal):
-                        result.append(str(obj))
-            return _dedupe_preserve_order(result)
-
-        def get_all_uris(subject, *predicates) -> list[str]:
-            """Collect all URIRef objects for the given predicates."""
-            result: list[str] = []
-            for pred in predicates:
-                if pred is None:
-                    continue
-                for obj in g.objects(subject, pred):
-                    if isinstance(obj, URIRef):
-                        result.append(str(obj))
-            return _dedupe_preserve_order(result)
-
-        def join_uris(subject, *predicates) -> str:
-            """Collect all URI values for predicates and join with ';'."""
-            return ';'.join(get_all_uris(subject, *predicates))
-
-        def join_literals(subject, *predicates, sep: str = ',') -> str:
-            """Collect all literal values for predicates and join with *sep*."""
-            return sep.join(get_all_literals(subject, *predicates))
-
-        def parse_datetime(val: str | None) -> datetime | None:
-            if not val:
-                return None
-            try:
-                return datetime.fromisoformat(val)
-            except (ValueError, TypeError):
-                return None
-
-        def parse_int(val: str | None) -> int | None:
-            if not val:
-                return None
-            try:
-                return int(val)
-            except (ValueError, TypeError):
-                return None
+        raw_records = _parse_raw_records(g)
 
         report: dict = {
             'status': 'partial',
@@ -400,197 +340,147 @@ class FairGenomesService:
         dataset_by_name: dict[str, Dataset] = {}
         dataset_by_uri: dict[str, Dataset] = {}
 
-        def _resolve_cp(uri_val: str | None) -> ContactPoint | None:
-            if not uri_val:
-                return None
-            return cp_by_uri.get(uri_val)
+        def str_value(record: RawRecord, field_name: str) -> str | None:
+            value = record.values.get(field_name)
+            return value if isinstance(value, str) and value else None
 
-        def _resolve_agent_ref(subject, *predicates) -> Agent | None:
-            """Resolve an agent FK that may be a literal name or a URI ref."""
-            name_val = get_literal(subject, *predicates)
-            if name_val and name_val in agent_by_name:
-                return agent_by_name[name_val]
-            uri_val = get_uri(subject, *predicates)
-            if uri_val and uri_val in agent_by_uri:
-                return agent_by_uri[uri_val]
-            return None
+        def datetime_value(record: RawRecord, field_name: str) -> datetime | None:
+            value = record.values.get(field_name)
+            return value if isinstance(value, datetime) else None
+
+        def int_value(record: RawRecord, field_name: str) -> int | None:
+            value = record.values.get(field_name)
+            return value if isinstance(value, int) else None
 
         # ── 1. CONTACT POINTS ─────────────────────────────────────────────────
-        for subj in _subjects_of_type(VCARD.Kind, FDP_NS.ContactPoint):
-            email = get_literal(subj, VCARD.hasEmail, col('ContactPoint', 'email'))
-            contact_page = get_literal(
-                subj, VCARD.hasURL, col('ContactPoint', 'contact_page')
-            ) or get_uri(subj, VCARD.hasURL, col('ContactPoint', 'contact_page'))
+        for record in raw_records['ContactPoint']:
+            email = str_value(record, 'email')
+            contact_page = str_value(record, 'contact_page')
 
             if not email and not contact_page:
-                logger.warning('Skipping ContactPoint with no email or page: %s', subj)
+                logger.warning(
+                    'Skipping ContactPoint with no email or page: %s',
+                    record.subject_uri,
+                )
                 continue
 
-            label = email or contact_page or str(subj)
+            label = email or contact_page or record.subject_uri
             report['fetched']['contact_points'].append(label)
 
-            # Look up by the combination of fields — that's the natural identity.
             cp, created = ContactPoint.objects.using('fair_genomes_db').get_or_create(
                 email=email,
                 contact_page=contact_page,
             )
             report['saved']['contact_points']['created' if created else 'updated'].append(label)
-            cp_by_uri[str(subj)] = cp
+            cp_by_uri[record.subject_uri] = cp
 
         # ── 2. AGENTS ─────────────────────────────────────────────────────────
-        for subj in _subjects_of_type(FOAF.Agent, FDP_NS.Agent):
-            name = get_literal(subj, FOAF.name, RDFS.label, col('Agent', 'name'))
+        for record in raw_records['Agent']:
+            name = str_value(record, 'name')
             if not name:
-                logger.warning('Skipping Agent with no name: %s', subj)
+                logger.warning('Skipping Agent with no name: %s', record.subject_uri)
                 continue
 
-            description = get_literal(subj, DCTERMS.description, col('Agent', 'description'))
-            cp_uri = get_uri(subj, DCAT.contactPoint, col('Agent', 'contactPoint'))
-            contact_point = _resolve_cp(cp_uri)
+            contact_point = cp_by_uri.get(str_value(record, 'contact_point') or '')
 
             report['fetched']['agents'].append(name)
-            _, created = Agent.objects.using('fair_genomes_db').update_or_create(
+            agent, created = Agent.objects.using('fair_genomes_db').update_or_create(
                 name=name,
                 defaults={
-                    'description': description or '',
+                    'description': str_value(record, 'description') or '',
                     'contact_point': contact_point,
                 },
             )
             report['saved']['agents']['created' if created else 'updated'].append(name)
-            agent_by_name[name] = _
-            agent_by_uri[str(subj)] = _
+            agent_by_name[name] = agent
+            agent_by_uri[record.subject_uri] = agent
 
         # ── 3. CATALOGS ───────────────────────────────────────────────────────
-        for subj in _subjects_of_type(DCAT.Catalog, FDP_NS.Catalog):
-            name = get_literal(subj, RDFS.label, col('Catalog', 'name'))
+        for record in raw_records['Catalog']:
+            name = str_value(record, 'name')
             if not name:
-                logger.warning('Skipping Catalog with no name: %s', subj)
+                logger.warning('Skipping Catalog with no name: %s', record.subject_uri)
                 continue
 
-            title = get_literal(subj, DCTERMS.title, col('Catalog', 'title'))
-            description = get_literal(subj, DCTERMS.description, col('Catalog', 'description'))
-            applicable_legislation = (
-                join_uris(
-                    subj,
-                    applicable_legislation_uri,
-                    col('Catalog', 'applicable_legislation'),
-                )
-                or get_literal(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
-                or get_uri(subj, DCTERMS.relation, col('Catalog', 'applicable_legislation'))
-                or ''
-            )
-            publisher_agent = _resolve_agent_ref(
-                subj, DCTERMS.publisher, col('Catalog', 'publisher')
+            publisher_agent = _resolve_related(
+                str_value(record, 'publisher'),
+                agent_by_uri,
+                agent_by_name,
             )
 
             report['fetched']['catalogs'].append(name)
-            _, created = Catalog.objects.using('fair_genomes_db').update_or_create(
+            catalog, created = Catalog.objects.using('fair_genomes_db').update_or_create(
                 name=name,
                 defaults={
-                    'title': title or '',
-                    'description': description or '',
+                    'title': str_value(record, 'title') or '',
+                    'description': str_value(record, 'description') or '',
                     'publisher': publisher_agent,
-                    'applicable_legislation': applicable_legislation,
+                    'applicable_legislation': str_value(record, 'applicable_legislation') or '',
                 },
             )
             report['saved']['catalogs']['created' if created else 'updated'].append(name)
-            catalog_by_name[name] = _
-            catalog_by_uri[str(subj)] = _
+            catalog_by_name[name] = catalog
+            catalog_by_uri[record.subject_uri] = catalog
 
         # ── 4. DATASETS ───────────────────────────────────────────────────────
-        for subj in _subjects_of_type(DCAT.Dataset, FDP_NS.Dataset):
-            name = get_literal(subj, RDFS.label, col('Dataset', 'name'))
+        pending_source_refs: list[tuple[Dataset, str]] = []
+
+        for record in raw_records['Dataset']:
+            name = str_value(record, 'name')
             if not name:
-                logger.warning('Skipping Dataset with no name: %s', subj)
+                logger.warning('Skipping Dataset with no name: %s', record.subject_uri)
                 continue
 
             report['fetched']['datasets'].append(name)
 
-            # Resolve mandatory non-nullable FKs.
-            hdab = _resolve_agent_ref(subj, col('Dataset', 'hdab'))
-            cp_uri = get_uri(subj, DCAT.contactPoint, col('Dataset', 'contactPoint'))
-            contact_point = _resolve_cp(cp_uri)
+            hdab_ref = str_value(record, 'hdab')
+            hdab = _resolve_related(hdab_ref, agent_by_uri, agent_by_name)
+            cp_ref = str_value(record, 'contact_point')
+            contact_point = cp_by_uri.get(cp_ref or '')
 
             if not hdab:
-                hdab_val = get_literal(subj, col('Dataset', 'hdab')) or get_uri(
-                    subj, col('Dataset', 'hdab')
-                )
-                logger.warning('Skipping Dataset "%s": hdab agent "%s" not found', name, hdab_val)
+                logger.warning('Skipping Dataset "%s": hdab agent "%s" not found', name, hdab_ref)
                 report['skipped'].setdefault('datasets', []).append(
                     {'name': name, 'reason': 'hdab agent not resolved'}
                 )
                 continue
             if not contact_point:
-                logger.warning('Skipping Dataset "%s": contact_point "%s" not found', name, cp_uri)
+                logger.warning('Skipping Dataset "%s": contact_point "%s" not found', name, cp_ref)
                 report['skipped'].setdefault('datasets', []).append(
-                    {'name': name, 'reason': f'contact_point "{cp_uri}" not resolved'}
+                    {'name': name, 'reason': f'contact_point "{cp_ref}" not resolved'}
                 )
                 continue
 
-            # Optional FK fields — values may be literals or URI refs.
-            publisher = _resolve_agent_ref(subj, DCTERMS.publisher, col('Dataset', 'publisher'))
-            creator = _resolve_agent_ref(subj, DCTERMS.creator, col('Dataset', 'creator'))
-            custodian = _resolve_agent_ref(subj, col('Dataset', 'custodian'))
-            catalog_uri = get_uri(subj, DCAT.Catalog, col('Dataset', 'catalog'))
-            catalog = catalog_by_uri.get(catalog_uri) if catalog_uri else None
-            if not catalog:
-                catalog_name = get_literal(subj, col('Dataset', 'catalog'))
-                catalog = catalog_by_name.get(catalog_name) if catalog_name else None
-            source_uri = get_uri(subj, DCTERMS.source, col('Dataset', 'source'))
-            source = dataset_by_uri.get(source_uri) if source_uri else None
-            if not source:
-                source_name = get_literal(subj, DCTERMS.source, col('Dataset', 'source'))
-                source = dataset_by_name.get(source_name) if source_name else None
+            publisher = _resolve_related(
+                str_value(record, 'publisher'), agent_by_uri, agent_by_name
+            )
+            creator = _resolve_related(str_value(record, 'creator'), agent_by_uri, agent_by_name)
+            custodian = _resolve_related(
+                str_value(record, 'custodian'),
+                agent_by_uri,
+                agent_by_name,
+            )
+            catalog = _resolve_related(
+                str_value(record, 'catalog'), catalog_by_uri, catalog_by_name
+            )
+            source_ref = str_value(record, 'source')
+            source = _resolve_related(source_ref, dataset_by_uri, dataset_by_name)
 
             defaults = {
-                'title': get_literal(subj, DCTERMS.title, col('Dataset', 'title')) or '',
-                'version': get_literal(subj, DCTERMS.hasVersion, col('Dataset', 'version')) or '',
-                'description': get_literal(subj, DCTERMS.description, col('Dataset', 'description'))
-                or '',
-                'identifier': get_literal(subj, DCTERMS.identifier, col('Dataset', 'identifier'))
-                or str(subj),
-                'type': join_uris(subj, DCTERMS.type, col('Dataset', 'type'))
-                or get_literal(subj, DCTERMS.type, col('Dataset', 'type'))
-                or '',
-                'theme': join_uris(subj, DCAT.theme, col('Dataset', 'theme'))
-                or get_literal(subj, DCAT.theme, col('Dataset', 'theme'))
-                or '',
-                'keyword': join_literals(subj, DCAT.keyword, col('Dataset', 'keyword'))
-                or get_literal(subj, DCAT.keyword, col('Dataset', 'keyword'))
-                or '',
-                'provenance': get_literal(subj, DCTERMS.provenance, col('Dataset', 'provenance'))
-                or '',
-                'conforms_to': get_literal(subj, DCTERMS.conformsTo, col('Dataset', 'conformsTo'))
-                or '',
-                'access_rights': get_literal(
-                    subj, DCTERMS.accessRights, col('Dataset', 'access_rights')
-                )
-                or get_uri(subj, DCTERMS.accessRights, col('Dataset', 'access_rights'))
-                or '',
-                'applicable_legislation': join_uris(
-                    subj,
-                    applicable_legislation_uri,
-                    col('Dataset', 'applicable_legislation'),
-                )
-                or get_literal(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
-                or get_uri(subj, DCTERMS.relation, col('Dataset', 'applicable_legislation'))
-                or '',
-                'health_category': join_uris(
-                    subj,
-                    health_category_uri,
-                    col('Dataset', 'health_category'),
-                )
-                or get_literal(subj, col('Dataset', 'health_category'))
-                or get_uri(subj, col('Dataset', 'health_category'))
-                or '',
-                'issued': parse_datetime(
-                    get_literal(subj, DCTERMS.issued)
-                    or (get_literal(subj, FDP_O.metadataIssued) if FDP_O else None)
-                ),
-                'modified': parse_datetime(
-                    get_literal(subj, DCTERMS.modified)
-                    or (get_literal(subj, FDP_O.metadataModified) if FDP_O else None)
-                ),
+                'title': str_value(record, 'title') or '',
+                'version': str_value(record, 'version') or '',
+                'description': str_value(record, 'description') or '',
+                'identifier': str_value(record, 'identifier') or record.subject_uri,
+                'type': str_value(record, 'type') or '',
+                'theme': str_value(record, 'theme') or '',
+                'keyword': str_value(record, 'keyword') or '',
+                'provenance': str_value(record, 'provenance') or '',
+                'conforms_to': str_value(record, 'conforms_to') or '',
+                'access_rights': str_value(record, 'access_rights') or '',
+                'applicable_legislation': str_value(record, 'applicable_legislation') or '',
+                'health_category': str_value(record, 'health_category') or '',
+                'issued': datetime_value(record, 'issued'),
+                'modified': datetime_value(record, 'modified'),
                 'hdab': hdab,
                 'contact_point': contact_point,
                 'publisher': publisher,
@@ -600,81 +490,58 @@ class FairGenomesService:
                 'source': source,
             }
 
-            _, created = Dataset.objects.using('fair_genomes_db').update_or_create(
+            dataset, created = Dataset.objects.using('fair_genomes_db').update_or_create(
                 name=name,
                 defaults=defaults,
             )
             report['saved']['datasets']['created' if created else 'updated'].append(name)
-            dataset_by_name[name] = _
-            dataset_by_uri[str(subj)] = _
+            dataset_by_name[name] = dataset
+            dataset_by_uri[record.subject_uri] = dataset
+
+            if source_ref:
+                pending_source_refs.append((dataset, source_ref))
+
+        for dataset, source_ref in pending_source_refs:
+            source = _resolve_related(source_ref, dataset_by_uri, dataset_by_name)
+            if source is None or dataset.source_id == source.pk:
+                continue
+            dataset.source = source
+            dataset.save(update_fields=['source'], using='fair_genomes_db')
 
         # ── 5. DISTRIBUTIONS ──────────────────────────────────────────────────
-        for subj in _subjects_of_type(DCAT.Distribution, FDP_NS.Distribution):
-            name = get_literal(subj, RDFS.label, col('Distribution', 'name'))
+        for record in raw_records['Distribution']:
+            name = str_value(record, 'name')
             if not name:
-                logger.warning('Skipping Distribution with no name: %s', subj)
+                logger.warning('Skipping Distribution with no name: %s', record.subject_uri)
                 continue
 
             report['fetched']['distributions'].append(name)
 
-            # dataset_name can be a literal name or a URI ref to a Dataset.
-            ds_name = get_literal(subj, col('Distribution', 'dataset_name'))
-            dataset = dataset_by_name.get(ds_name) if ds_name else None
-            if not dataset:
-                ds_uri = get_uri(
-                    subj, DCAT.Dataset, col('Distribution', 'dataset_name'), DCTERMS.isPartOf
-                )
-                if ds_uri:
-                    dataset = dataset_by_uri.get(ds_uri)
-                if not dataset and ds_uri:
-                    ds_label = get_literal(g.resource(URIRef(ds_uri)).identifier, RDFS.label)
-                    dataset = dataset_by_name.get(ds_label) if ds_label else None
+            dataset_ref = str_value(record, 'dataset_name')
+            dataset = _resolve_related(dataset_ref, dataset_by_uri, dataset_by_name)
 
             if not dataset:
-                logger.warning('Skipping Distribution "%s": dataset "%s" not found', name, ds_name)
+                logger.warning(
+                    'Skipping Distribution "%s": dataset "%s" not found', name, dataset_ref
+                )
                 report['skipped'].setdefault('distributions', []).append(
-                    {'name': name, 'reason': f'dataset "{ds_name}" not resolved'}
+                    {'name': name, 'reason': f'dataset "{dataset_ref}" not resolved'}
                 )
                 continue
 
             defaults = {
                 'dataset_name': dataset,
-                'title': get_literal(subj, DCTERMS.title, col('Distribution', 'title')) or '',
-                'description': get_literal(
-                    subj, DCTERMS.description, col('Distribution', 'description')
-                )
-                or '',
-                'format': get_literal(subj, DCTERMS.format, col('Distribution', 'format')) or '',
-                'conforms_to': get_literal(
-                    subj, DCTERMS.conformsTo, col('Distribution', 'conforms_to')
-                )
-                or '',
-                'byte_size': parse_int(
-                    get_literal(subj, DCAT.byteSize, col('Distribution', 'byte_size'))
-                ),
-                'rights': get_literal(subj, DCTERMS.rights, col('Distribution', 'rights')) or '',
-                'release_date': parse_datetime(
-                    get_literal(subj, DCTERMS.issued, col('Distribution', 'release_date'))
-                ),
-                'modification_date': parse_datetime(
-                    get_literal(subj, DCTERMS.modified, col('Distribution', 'modification_date'))
-                ),
-                'access_url': get_literal(subj, DCAT.accessURL, col('Distribution', 'access_url'))
-                or get_uri(subj, DCAT.accessURL, col('Distribution', 'access_url'))
-                or '',
-                'applicable_legislation': join_uris(
-                    subj,
-                    applicable_legislation_uri,
-                    col('Distribution', 'applicable_legislation'),
-                )
-                or get_literal(
-                    subj, DCTERMS.relation, col('Distribution', 'applicable_legislation')
-                )
-                or get_uri(subj, DCTERMS.relation, col('Distribution', 'applicable_legislation'))
-                or '',
-                'licence': get_literal(subj, DCTERMS.license, col('Distribution', 'licence'))
-                or get_uri(subj, DCTERMS.license, col('Distribution', 'licence'))
-                or '',
+                'title': str_value(record, 'title') or '',
+                'description': str_value(record, 'description') or '',
+                'format': str_value(record, 'format') or '',
+                'conforms_to': str_value(record, 'conforms_to') or '',
+                'byte_size': int_value(record, 'byte_size'),
+                'rights': str_value(record, 'rights') or '',
+                'release_date': datetime_value(record, 'release_date'),
+                'modification_date': datetime_value(record, 'modification_date'),
+                'access_url': str_value(record, 'access_url') or '',
+                'applicable_legislation': str_value(record, 'applicable_legislation') or '',
+                'licence': str_value(record, 'licence') or '',
             }
 
             _, created = Distribution.objects.using('fair_genomes_db').update_or_create(

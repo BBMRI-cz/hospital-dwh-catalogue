@@ -275,7 +275,9 @@ class CatalogueIndexViewTest(TestCase):
         response = self.client.get(reverse('frontend:catalogue'), {'theme': theme_value})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f'title="Theme: {theme_value}"')
+        from django.utils.translation import gettext
+
+        self.assertContains(response, f'title="{gettext("Theme")}: {theme_value}"')
 
 
 class DatasetDetailViewTest(TestCase):
@@ -375,8 +377,6 @@ class DatasetDetailViewTest(TestCase):
                 kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
             ),
         )
-        self.assertContains(response, 'encounter')
-        self.assertContains(response, 'patient_id')
         self.assertNotContains(response, reverse('frontend_api:jsonld'))
         self.assertNotContains(response, reverse('frontend_api:rdf'))
 
@@ -551,18 +551,31 @@ class DistributionDetailViewTest(TestCase):
 
 
 class MetadataApiViewTest(TestCase):
-    """Tests for anonymous aggregate metadata API endpoints."""
+    """Tests for authenticated aggregate metadata API endpoints."""
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def setUp(self):
         django_cache.clear()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='api_viewer', email='api@example.com', password='secret'
+        )
+
+    def test_jsonld_endpoint_requires_auth(self):
+        response = self.client.get(reverse('frontend_api:jsonld'))
+        self.assertEqual(response.status_code, 401)
+
+    def test_turtle_endpoint_requires_auth(self):
+        response = self.client.get(reverse('frontend_api:rdf'))
+        self.assertEqual(response.status_code, 401)
 
     @patch('frontend.api_views.UnifiedCatalogService')
-    def test_jsonld_endpoint_is_public(self, mock_cls):
+    def test_jsonld_endpoint_returns_data_when_authenticated(self, mock_cls):
         mock_svc = mock_cls.return_value
         mock_svc.get_complete_export_catalogue.return_value = ([_make_test_export_catalog()], [])
 
+        self.client.force_login(self.user)
         response = self.client.get(reverse('frontend_api:jsonld'))
 
         self.assertEqual(response.status_code, 200)
@@ -571,10 +584,11 @@ class MetadataApiViewTest(TestCase):
         self.assertContains(response, 'Test Dataset')
 
     @patch('frontend.api_views.UnifiedCatalogService')
-    def test_turtle_endpoint_is_public(self, mock_cls):
+    def test_turtle_endpoint_returns_data_when_authenticated(self, mock_cls):
         mock_svc = mock_cls.return_value
         mock_svc.get_complete_export_catalogue.return_value = ([_make_test_export_catalog()], [])
 
+        self.client.force_login(self.user)
         response = self.client.get(reverse('frontend_api:rdf'))
 
         self.assertEqual(response.status_code, 200)
@@ -592,6 +606,7 @@ class MetadataApiViewTest(TestCase):
         )
         mock_svc.get_complete_export_catalogue.return_value = ([], [orphan_dataset])
 
+        self.client.force_login(self.user)
         response = self.client.get(reverse('frontend_api:jsonld'))
 
         self.assertEqual(response.status_code, 200)

@@ -1,58 +1,362 @@
-@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix dct: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
-@prefix r5r:  <http://data.europa.eu/r5r/> .
-@prefix hdcat: <https://healthdataportal.eu/ns/health#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix r5r: <http://data.europa.eu/r5r/> .
+@prefix edam: <http://edamontology.org/> .
+@prefix fdp-o: <https://w3id.org/fdp/fdp-o#> .
+@prefix FDP: <http://fdp.example.org/api/rdf/> .
 
-# ContactPoint
-<http://fdp.example.org/ContactPoint/cp1>
-    a vcard:Kind ;
+FDP:Agent a owl:Class ;
+    rdfs:label "Agent" .
+
+FDP:ContactPoint a owl:Class ;
+    rdfs:label "ContactPoint" .
+
+FDP:Catalog a owl:Class ;
+    rdfs:label "Catalog" .
+
+FDP:Dataset a owl:Class ;
+    rdfs:label "Dataset" .
+
+FDP:Distribution a owl:Class ;
+    rdfs:label "Distribution" .
+
+<http://fdp.example.org/api/rdf/ContactPoint/column/email> a owl:DatatypeProperty ;
+    rdfs:label "email" ;
+    rdfs:domain FDP:ContactPoint ;
+    rdfs:isDefinedBy vcard:hasEmail .
+
+<http://fdp.example.org/api/rdf/ContactPoint/column/contact_page> a owl:DatatypeProperty ;
+    rdfs:label "contact_page" ;
+    rdfs:domain FDP:ContactPoint ;
+    rdfs:isDefinedBy vcard:hasURL .
+
+<http://fdp.example.org/api/rdf/Agent/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Agent ;
+    rdfs:isDefinedBy foaf:name .
+
+<http://fdp.example.org/api/rdf/Agent/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Agent ;
+    rdfs:isDefinedBy dcat:description .
+
+<http://fdp.example.org/api/rdf/Agent/column/contact_point> a owl:ObjectProperty ;
+    rdfs:label "contact_point" ;
+    rdfs:domain FDP:Agent ;
+    rdfs:isDefinedBy dcat:contactPoint .
+
+<http://fdp.example.org/api/rdf/Catalog/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Catalog ;
+    rdfs:isDefinedBy dcat:Catalog .
+
+<http://fdp.example.org/api/rdf/Catalog/column/title> a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain FDP:Catalog ;
+    rdfs:isDefinedBy dcat:title .
+
+<http://fdp.example.org/api/rdf/Catalog/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Catalog ;
+    rdfs:isDefinedBy dcat:description .
+
+<http://fdp.example.org/api/rdf/Catalog/column/publisher> a owl:ObjectProperty ;
+    rdfs:label "publisher" ;
+    rdfs:domain FDP:Catalog ;
+    rdfs:isDefinedBy dcat:publisher .
+
+<http://fdp.example.org/api/rdf/Catalog/column/applicable_legislation> a owl:ObjectProperty ;
+    rdfs:label "applicable_legislation" ;
+    rdfs:domain FDP:Catalog ;
+    rdfs:isDefinedBy r5r:applicableLegislation .
+
+<http://fdp.example.org/api/rdf/Dataset/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/title> a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:title .
+
+<http://fdp.example.org/api/rdf/Dataset/column/version> a owl:DatatypeProperty ;
+    rdfs:label "version" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:version .
+
+<http://fdp.example.org/api/rdf/Dataset/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:description .
+
+<http://fdp.example.org/api/rdf/Dataset/column/identifier> a owl:DatatypeProperty ;
+    rdfs:label "identifier" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:identifier .
+
+<http://fdp.example.org/api/rdf/Dataset/column/type> a owl:ObjectProperty ;
+    rdfs:label "type" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:type .
+
+<http://fdp.example.org/api/rdf/Dataset/column/theme> a owl:ObjectProperty ;
+    rdfs:label "theme" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:theme .
+
+<http://fdp.example.org/api/rdf/Dataset/column/keyword> a owl:DatatypeProperty ;
+    rdfs:label "keyword" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:keyword .
+
+<http://fdp.example.org/api/rdf/Dataset/column/provenance> a owl:DatatypeProperty ;
+    rdfs:label "provenance" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:provenance .
+
+<http://fdp.example.org/api/rdf/Dataset/column/access_rights> a owl:DatatypeProperty ;
+    rdfs:label "access_rights" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:accessRights .
+
+<http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> a owl:ObjectProperty ;
+    rdfs:label "applicable_legislation" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy r5r:applicableLegislation .
+
+<http://fdp.example.org/api/rdf/Dataset/column/health_category> a owl:ObjectProperty ;
+    rdfs:label "health_category" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/hdab> a owl:ObjectProperty ;
+    rdfs:label "hdab" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/contact_point> a owl:ObjectProperty ;
+    rdfs:label "contact_point" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:contactPoint .
+
+<http://fdp.example.org/api/rdf/Dataset/column/publisher> a owl:ObjectProperty ;
+    rdfs:label "publisher" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:publisher .
+
+<http://fdp.example.org/api/rdf/Dataset/column/creator> a owl:ObjectProperty ;
+    rdfs:label "creator" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:creator .
+
+<http://fdp.example.org/api/rdf/Dataset/column/custodian> a owl:ObjectProperty ;
+    rdfs:label "custodian" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/catalog> a owl:ObjectProperty ;
+    rdfs:label "catalog" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:Catalog .
+
+<http://fdp.example.org/api/rdf/Dataset/column/conforms_to> a owl:ObjectProperty ;
+    rdfs:label "conforms_to" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:conformsTo .
+
+<http://fdp.example.org/api/rdf/Dataset/column/issued> a owl:DatatypeProperty ;
+    rdfs:label "issued" ;
+    rdfs:domain FDP:Dataset ;
+    rdfs:isDefinedBy dcat:issued .
+
+<http://fdp.example.org/api/rdf/Distribution/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:Distribution .
+
+<http://fdp.example.org/api/rdf/Distribution/column/dataset_name> a owl:ObjectProperty ;
+    rdfs:label "dataset_name" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:Dataset .
+
+<http://fdp.example.org/api/rdf/Distribution/column/access_url> a owl:DatatypeProperty ;
+    rdfs:label "access_url" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:accessURL .
+
+<http://fdp.example.org/api/rdf/Distribution/column/applicable_legislation> a owl:ObjectProperty ;
+    rdfs:label "applicable_legislation" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy r5r:applicableLegislation .
+
+<http://fdp.example.org/api/rdf/Distribution/column/title> a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:title .
+
+<http://fdp.example.org/api/rdf/Distribution/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:description .
+
+<http://fdp.example.org/api/rdf/Distribution/column/format> a owl:ObjectProperty ;
+    rdfs:label "format" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:format .
+
+<http://fdp.example.org/api/rdf/Distribution/column/conforms_to> a owl:ObjectProperty ;
+    rdfs:label "conforms_to" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:conformsTo .
+
+<http://fdp.example.org/api/rdf/Distribution/column/rights> a owl:DatatypeProperty ;
+    rdfs:label "rights" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:rights .
+
+<http://fdp.example.org/api/rdf/Distribution/column/licence> a owl:DatatypeProperty ;
+    rdfs:label "licence" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:license .
+
+<http://fdp.example.org/api/rdf/Distribution/column/releaseDate> a owl:DatatypeProperty ;
+    rdfs:label "releaseDate" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:issued .
+
+<http://fdp.example.org/api/rdf/Distribution/column/modificationDate> a owl:DatatypeProperty ;
+    rdfs:label "modificationDate" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:modified .
+
+<http://fdp.example.org/api/rdf/Distribution/column/byte_size> a owl:DatatypeProperty ;
+    rdfs:label "byte_size" ;
+    rdfs:domain FDP:Distribution ;
+    rdfs:isDefinedBy dcat:byteSize .
+
+<http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> a FDP:ContactPoint, qb:Observation, vcard:Kind ;
     vcard:hasEmail "contact@example.org" ;
-    vcard:hasURL "https://example.org/contact" .
+    <http://fdp.example.org/api/rdf/ContactPoint/column/email> "contact@example.org" ;
+    vcard:hasURL <https://example.org/contact> ;
+    <http://fdp.example.org/api/rdf/ContactPoint/column/contact_page> "https://example.org/contact" .
 
-# Agent (HDAB + publisher)
-<http://fdp.example.org/Agent/ag1>
-    a foaf:Agent ;
+<http://fdp.example.org/api/rdf/Agent/name=Test%20HDAB%20Agency> a FDP:Agent, qb:Observation, foaf:Agent ;
     foaf:name "Test HDAB Agency" ;
-    dcat:contactPoint <http://fdp.example.org/ContactPoint/cp1> .
+    <http://fdp.example.org/api/rdf/Agent/column/name> "Test HDAB Agency" ;
+    dcat:description "HDAB agent used by tests." ;
+    <http://fdp.example.org/api/rdf/Agent/column/description> "HDAB agent used by tests." ;
+    dcat:contactPoint <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    <http://fdp.example.org/api/rdf/Agent/column/contact_point> <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> .
 
-# Catalog
-<http://fdp.example.org/Catalog/cat1>
-    a dcat:Catalog ;
+<http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> a FDP:Agent, qb:Observation, foaf:Agent ;
+    foaf:name "Test Publisher" ;
+    <http://fdp.example.org/api/rdf/Agent/column/name> "Test Publisher" ;
+    dcat:description "Publisher agent used by tests." ;
+    <http://fdp.example.org/api/rdf/Agent/column/description> "Publisher agent used by tests." ;
+    dcat:contactPoint <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    <http://fdp.example.org/api/rdf/Agent/column/contact_point> <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> .
+
+<http://fdp.example.org/api/rdf/Catalog/name=test-catalog> a FDP:Catalog, qb:Observation, dcat:Catalog ;
     rdfs:label "test-catalog" ;
-    dct:title "Test Catalog" ;
-    dct:description "A catalog for unit tests." ;
-    dct:publisher <http://fdp.example.org/Agent/ag1> ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> .
+    dcat:Catalog "test-catalog" ;
+    <http://fdp.example.org/api/rdf/Catalog/column/name> "test-catalog" ;
+    dcat:title "Test Catalog" ;
+    <http://fdp.example.org/api/rdf/Catalog/column/title> "Test Catalog" ;
+    dcat:description "A catalog for unit tests." ;
+    <http://fdp.example.org/api/rdf/Catalog/column/description> "A catalog for unit tests." ;
+    dcat:publisher <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    <http://fdp.example.org/api/rdf/Catalog/column/publisher> <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Catalog/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2016/679/oj> ;
+    <http://fdp.example.org/api/rdf/Catalog/column/applicable_legislation> <http://data.europa.eu/eli/reg/2016/679/oj> .
 
-# Dataset
-<http://fdp.example.org/Dataset/ds1>
-    a dcat:Dataset ;
+<http://fdp.example.org/api/rdf/Dataset/name=test-dataset> a FDP:Dataset, qb:Observation, dcat:Dataset ;
     rdfs:label "test-dataset" ;
-    dct:title "Test Dataset" ;
-    dct:description "A dataset for unit tests." ;
-    dct:identifier "http://fdp.example.org/Dataset/ds1" ;
-    dct:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    dcat:Dataset "test-dataset" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/name> "test-dataset" ;
+    dcat:title "Test Dataset" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/title> "Test Dataset" ;
+    dcat:description "A dataset for unit tests." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/description> "A dataset for unit tests." ;
+    dcat:identifier "http://fdp.example.org/api/rdf/Dataset/name=test-dataset" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/identifier> "http://fdp.example.org/api/rdf/Dataset/name=test-dataset" ;
+    dcat:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/type> <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    dcat:type <http://publications.europa.eu/resource/authority/dataset-type/IMAGE> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/type> <http://publications.europa.eu/resource/authority/dataset-type/IMAGE> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/theme> <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
     dcat:keyword "genomics" ;
-    dct:provenance "Collected for testing." ;
-    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
-    hdcat:healthCategory <https://healthdataportal.eu/categorisation/Health-care-delivery> ;
-    dcat:contactPoint <http://fdp.example.org/ContactPoint/cp1> ;
-    <http://fdp.example.org/Dataset/column/hdab> "Test HDAB Agency" ;
-    dcat:Catalog <http://fdp.example.org/Catalog/cat1> .
+    <http://fdp.example.org/api/rdf/Dataset/column/keyword> "genomics" ;
+    dcat:provenance "Collected for testing." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/provenance> "Collected for testing." ;
+    dcat:accessRights "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/access_rights> "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2016/679/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> <http://data.europa.eu/eli/reg/2016/679/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/hdab> <http://fdp.example.org/api/rdf/Agent/name=Test%20HDAB%20Agency> ;
+    dcat:contactPoint <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/contact_point> <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    dcat:version "v1" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/version> "v1" ;
+    dcat:publisher <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/publisher> <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    dcat:creator <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/creator> <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    <http://data.europa.eu/930/custodian> <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/custodian> <http://fdp.example.org/api/rdf/Agent/name=Test%20Publisher> ;
+    dcat:Catalog <http://fdp.example.org/api/rdf/Catalog/name=test-catalog> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/catalog> <http://fdp.example.org/api/rdf/Catalog/name=test-catalog> ;
+    dcat:conformsTo <http://dicom.nema.org/medical/dicom/> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/conforms_to> <http://dicom.nema.org/medical/dicom/> ;
+    dcat:conformsTo edam:format_1930 ;
+    <http://fdp.example.org/api/rdf/Dataset/column/conforms_to> edam:format_1930 ;
+    dcat:conformsTo <https://openslide.org/formats/mirax/> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/conforms_to> <https://openslide.org/formats/mirax/> ;
+    dcat:issued "2026-04-01T00:00:00"^^xsd:dateTime ;
+    <http://fdp.example.org/api/rdf/Dataset/column/issued> "2026-04-01T00:00:00"^^xsd:dateTime ;
+    fdp-o:metadataIdentifier <http://fdp.example.org/api/rdf/Dataset/name=test-dataset> .
 
-# Distribution
-<http://fdp.example.org/Distribution/dist1>
-    a dcat:Distribution ;
+<http://fdp.example.org/api/rdf/Distribution/name=test-distribution> a FDP:Distribution, qb:Observation, dcat:Distribution ;
     rdfs:label "test-distribution" ;
-    dct:title "Test Distribution" ;
-    dct:description "A distribution for unit tests." ;
-    dcat:accessURL <https://example.org/access> ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
-    dct:isPartOf <http://fdp.example.org/Dataset/ds1> .
+    dcat:Distribution "test-distribution" ;
+    <http://fdp.example.org/api/rdf/Distribution/column/name> "test-distribution" ;
+    dcat:Dataset <http://fdp.example.org/api/rdf/Dataset/name=test-dataset> ;
+    dct:isPartOf <http://fdp.example.org/api/rdf/Dataset/name=test-dataset> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/dataset_name> <http://fdp.example.org/api/rdf/Dataset/name=test-dataset> ;
+    dcat:accessURL "https://example.org/access" ;
+    <http://fdp.example.org/api/rdf/Distribution/column/access_url> "https://example.org/access" ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2016/679/oj> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/applicable_legislation> <http://data.europa.eu/eli/reg/2016/679/oj> ;
+    dcat:title "Test Distribution" ;
+    <http://fdp.example.org/api/rdf/Distribution/column/title> "Test Distribution" ;
+    dcat:description "A distribution for unit tests." ;
+    <http://fdp.example.org/api/rdf/Distribution/column/description> "A distribution for unit tests." ;
+    dcat:format <http://publications.europa.eu/resource/authority/file-type/CSV> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/format> <http://publications.europa.eu/resource/authority/file-type/CSV> ;
+    dcat:conformsTo <https://w3id.org/fair-genomes/ontology/Analysis> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/conforms_to> <https://w3id.org/fair-genomes/ontology/Analysis> ;
+    dcat:conformsTo <https://w3id.org/fair-genomes/ontology/Sequencing> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/conforms_to> <https://w3id.org/fair-genomes/ontology/Sequencing> ;
+    dcat:conformsTo <https://w3id.org/fair-genomes/ontology/SamplePreparation> ;
+    <http://fdp.example.org/api/rdf/Distribution/column/conforms_to> <https://w3id.org/fair-genomes/ontology/SamplePreparation> ;
+    dcat:rights "http://publications.europa.eu/resource/authority/access-right/RESTRICTED" ;
+    <http://fdp.example.org/api/rdf/Distribution/column/rights> "http://publications.europa.eu/resource/authority/access-right/RESTRICTED" ;
+    dcat:license "Data Transfer Agreement" ;
+    <http://fdp.example.org/api/rdf/Distribution/column/licence> "Data Transfer Agreement" ;
+    dcat:issued "2027-01-01T00:00:00"^^xsd:dateTime ;
+    <http://fdp.example.org/api/rdf/Distribution/column/releaseDate> "2027-01-01T00:00:00"^^xsd:dateTime ;
+    dcat:modified "2027-02-01T00:00:00"^^xsd:dateTime ;
+    <http://fdp.example.org/api/rdf/Distribution/column/modificationDate> "2027-02-01T00:00:00"^^xsd:dateTime ;
+    dcat:byteSize "1024"^^xsd:int ;
+    <http://fdp.example.org/api/rdf/Distribution/column/byte_size> "1024"^^xsd:int .

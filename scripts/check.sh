@@ -9,6 +9,7 @@
 # 4. Security scanning (Bandit) - Manual fixes required
 # 5. Translation completeness - Manual fixes required
 # 6. Test suite
+# 7. Docker build check
 # 
 # Usage:
 #   ./scripts/check.sh          # Run all checks with auto-fix

@@ -12,13 +12,8 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase, TestCase
 
 from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition, StatResult
-from .services.fair_genomes_service import (
-    FairGenomesAPIException,
-    FairGenomesService,
-    _dedupe_preserve_order,
-    _resolve_graph_predicate_uri,
-    _uri_local_name,
-)
+from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
+from .services.rdf_schema import discover_graph_schema
 
 
 class ContactPointModelTest(TestCase):
@@ -158,54 +153,43 @@ class FairGenomesServiceTest(TestCase):
         self.assertTrue(issubclass(FairGenomesAPIException, Exception))
 
 
-class GraphPredicateResolutionTest(SimpleTestCase):
-    """Tests for resolving RDF predicates from the parsed graph itself."""
+class SchemaDiscoveryTest(SimpleTestCase):
+    """Tests for discovering live-style FDP classes and column predicates."""
 
-    def test_uri_local_name_handles_hash_namespaces(self):
-        self.assertEqual(
-            _uri_local_name('http://healthdataportal.eu/ns/health#healthCategory'),
-            'healthCategory',
-        )
+    def test_discovers_entity_types_from_schema_labels_and_domains(self):
+        from rdflib import Graph
 
-    def test_uri_local_name_handles_path_namespaces(self):
-        self.assertEqual(
-            _uri_local_name('http://data.europa.eu/r5r/applicableLegislation'),
-            'applicableLegislation',
-        )
+        graph = Graph()
+        graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
 
-    def test_resolve_graph_predicate_uri_returns_unique_match(self):
-        predicate_uris = {
-            'https://example.org/ext/applicableLegislation',
-            'https://example.org/health#healthCategory',
-        }
+        schema = discover_graph_schema(graph)
+        dataset_type_uris = {str(uri) for uri in schema.entity_types['Dataset']}
 
-        self.assertEqual(
-            _resolve_graph_predicate_uri(predicate_uris, 'applicableLegislation'),
-            'https://example.org/ext/applicableLegislation',
-        )
-        self.assertEqual(
-            _resolve_graph_predicate_uri(predicate_uris, 'healthCategory'),
-            'https://example.org/health#healthCategory',
-        )
+        self.assertIn('http://fdp.example.org/api/rdf/Dataset', dataset_type_uris)
 
-    def test_resolve_graph_predicate_uri_returns_none_for_missing_name(self):
-        predicate_uris = {'https://example.org/ext/somethingElse'}
+    def test_discovers_mixed_column_labels_from_live_style_schema(self):
+        from rdflib import Graph
 
-        self.assertIsNone(_resolve_graph_predicate_uri(predicate_uris, 'healthCategory'))
+        graph = Graph()
+        graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
 
-    def test_resolve_graph_predicate_uri_returns_none_for_ambiguous_name(self):
-        predicate_uris = {
-            'https://example.org/one/healthCategory',
-            'https://example.org/two#healthCategory',
-        }
+        schema = discover_graph_schema(graph)
 
-        self.assertIsNone(_resolve_graph_predicate_uri(predicate_uris, 'healthCategory'))
+        self.assertIn('contact_point', schema.column_predicates['Dataset'])
+        self.assertIn('access_rights', schema.column_predicates['Dataset'])
+        self.assertIn('releaseDate', schema.column_predicates['Distribution'])
+        self.assertIn('modificationDate', schema.column_predicates['Distribution'])
 
-    def test_dedupe_preserve_order_keeps_first_occurrence(self):
-        self.assertEqual(
-            _dedupe_preserve_order(['a', 'b', 'a', 'c', 'b']),
-            ['a', 'b', 'c'],
-        )
+    def test_discovers_record_subjects_from_column_usage(self):
+        from rdflib import Graph
+
+        graph = Graph()
+        graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
+
+        schema = discover_graph_schema(graph)
+        dataset_subjects = {str(uri) for uri in schema.subjects_for_entity(graph, 'Dataset')}
+
+        self.assertIn('http://fdp.example.org/api/rdf/Dataset/name=test-dataset', dataset_subjects)
 
 
 class TableModelTest(TestCase):
@@ -412,19 +396,23 @@ def _load_turtle(filename: str) -> str:
         return fh.read()
 
 
+def _load_graph(filename: str):
+    from rdflib import Graph
+
+    graph = Graph()
+    graph.parse(data=_load_turtle(filename), format='turtle')
+    return graph
+
+
 class ProcessGraphFullTest(TestCase):
     """_process_graph() with a complete valid fixture: all five entity types are saved."""
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def test_all_entities_saved(self):
-        from rdflib import Graph
-
         from .models import Agent, Catalog, ContactPoint, Dataset, Distribution
 
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         report = svc._process_graph(g)
@@ -454,15 +442,13 @@ class ProcessGraphFullTest(TestCase):
         )
 
     def test_duplicate_theme_from_multiple_predicates_saved_once(self):
-        from rdflib import Graph, URIRef
+        from rdflib import URIRef
 
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_full_graph.ttl')
         g.add(
             (
-                URIRef('http://fdp.example.org/Dataset/ds1'),
-                URIRef('http://fdp.example.org/Dataset/column/theme'),
+                URIRef('http://fdp.example.org/api/rdf/Dataset/name=test-dataset'),
+                URIRef('http://fdp.example.org/api/rdf/Dataset/column/theme'),
                 URIRef('http://publications.europa.eu/resource/authority/data-theme/HEAL'),
             )
         )
@@ -477,11 +463,7 @@ class ProcessGraphFullTest(TestCase):
         )
 
     def test_distribution_linked_to_dataset(self):
-        from rdflib import Graph
-
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         svc._process_graph(g)
@@ -491,12 +473,72 @@ class ProcessGraphFullTest(TestCase):
         dist = Distribution.objects.using('fair_genomes_db').get(name='test-distribution')
         self.assertEqual(dist.dataset_name_id, 'test-dataset')
 
-    def test_report_status_complete_when_no_skips(self):
-        from rdflib import Graph
+    def test_dataset_uri_fields_are_normalized_from_live_style_rdf(self):
+        g = _load_graph('test_full_graph.ttl')
 
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        dataset = Dataset.objects.using('fair_genomes_db').get(name='test-dataset')
+
+        self.assertEqual(
+            dataset.access_rights,
+            'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+        )
+        self.assertEqual(
+            dataset.conforms_to,
+            ';'.join(
+                [
+                    'http://dicom.nema.org/medical/dicom/',
+                    'http://edamontology.org/format_1930',
+                    'https://openslide.org/formats/mirax/',
+                ]
+            ),
+        )
+        self.assertEqual(dataset.hdab_id, 'Test HDAB Agency')
+        self.assertEqual(dataset.catalog_id, 'test-catalog')
+
+    def test_distribution_uri_fields_are_normalized_from_live_style_rdf(self):
+        g = _load_graph('test_full_graph.ttl')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        dist = Distribution.objects.using('fair_genomes_db').get(name='test-distribution')
+
+        self.assertEqual(
+            dist.format,
+            'http://publications.europa.eu/resource/authority/file-type/CSV',
+        )
+        self.assertEqual(
+            dist.conforms_to,
+            ';'.join(
+                [
+                    'https://w3id.org/fair-genomes/ontology/Analysis',
+                    'https://w3id.org/fair-genomes/ontology/Sequencing',
+                    'https://w3id.org/fair-genomes/ontology/SamplePreparation',
+                ]
+            ),
+        )
+        self.assertEqual(dist.release_date.isoformat(), '2027-01-01T00:00:00+00:00')
+        self.assertEqual(dist.modification_date.isoformat(), '2027-02-01T00:00:00+00:00')
+
+    def test_missing_health_category_is_normalized_to_empty_string(self):
+        g = _load_graph('test_full_graph.ttl')
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc._process_graph(g)
+
+        dataset = Dataset.objects.using('fair_genomes_db').get(name='test-dataset')
+
+        self.assertEqual(dataset.health_category, '')
+        self.assertNotIn(
+            'test-dataset',
+            [item['name'] for item in report['skipped'].get('datasets', [])],
+        )
+
+    def test_report_status_complete_when_no_skips(self):
+        g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         report = svc._process_graph(g)
@@ -511,13 +553,9 @@ class ProcessGraphPartialTest(TestCase):
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def test_good_dataset_saved_bad_dataset_skipped(self):
-        from rdflib import Graph
-
         from .models import Dataset
 
-        ttl = _load_turtle('test_partial_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_partial_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         report = svc._process_graph(g)
@@ -537,11 +575,7 @@ class ProcessGraphPartialTest(TestCase):
         self.assertIn('test-dataset-no-hdab', skipped_names)
 
     def test_report_status_partial_when_skips(self):
-        from rdflib import Graph
-
-        ttl = _load_turtle('test_partial_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_partial_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         report = svc._process_graph(g)
@@ -588,13 +622,9 @@ class ProcessGraphStaleCleanupTest(TestCase):
         )
 
     def test_stale_dataset_and_distribution_deleted(self):
-        from rdflib import Graph
-
         from .models import Dataset, Distribution
 
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         svc._process_graph(g)
@@ -607,11 +637,7 @@ class ProcessGraphStaleCleanupTest(TestCase):
         )
 
     def test_stale_deletion_reported(self):
-        from rdflib import Graph
-
-        ttl = _load_turtle('test_full_graph.ttl')
-        g = Graph()
-        g.parse(data=ttl, format='turtle')
+        g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         report = svc._process_graph(g)

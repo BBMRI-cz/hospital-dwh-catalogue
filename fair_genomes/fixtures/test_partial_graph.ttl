@@ -1,60 +1,164 @@
-@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix dct:  <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-@prefix r5r:  <http://data.europa.eu/r5r/> .
-@prefix hdcat: <https://healthdataportal.eu/ns/health#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix r5r: <http://data.europa.eu/r5r/> .
+@prefix FDP: <http://fdp.example.org/api/rdf/> .
 
-# ContactPoint
-<http://fdp.example.org/ContactPoint/cp1>
-    a vcard:Kind ;
-    vcard:hasEmail "contact@example.org" .
+FDP:Agent a owl:Class ;
+    rdfs:label "Agent" .
 
-# Agent
-<http://fdp.example.org/Agent/ag1>
-    a foaf:Agent ;
-    foaf:name "Test HDAB Agency" .
+FDP:ContactPoint a owl:Class ;
+    rdfs:label "ContactPoint" .
 
-# Catalog
-<http://fdp.example.org/Catalog/cat1>
-    a dcat:Catalog ;
+FDP:Catalog a owl:Class ;
+    rdfs:label "Catalog" .
+
+FDP:Dataset a owl:Class ;
+    rdfs:label "Dataset" .
+
+<http://fdp.example.org/api/rdf/ContactPoint/column/email> a owl:DatatypeProperty ;
+    rdfs:label "email" ;
+    rdfs:domain FDP:ContactPoint .
+
+<http://fdp.example.org/api/rdf/Agent/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Agent .
+
+<http://fdp.example.org/api/rdf/Catalog/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Catalog .
+
+<http://fdp.example.org/api/rdf/Catalog/column/title> a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain FDP:Catalog .
+
+<http://fdp.example.org/api/rdf/Catalog/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Catalog .
+
+<http://fdp.example.org/api/rdf/Catalog/column/applicable_legislation> a owl:ObjectProperty ;
+    rdfs:label "applicable_legislation" ;
+    rdfs:domain FDP:Catalog .
+
+<http://fdp.example.org/api/rdf/Dataset/column/name> a owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/title> a owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/description> a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/identifier> a owl:DatatypeProperty ;
+    rdfs:label "identifier" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/type> a owl:ObjectProperty ;
+    rdfs:label "type" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/theme> a owl:ObjectProperty ;
+    rdfs:label "theme" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/keyword> a owl:DatatypeProperty ;
+    rdfs:label "keyword" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/provenance> a owl:DatatypeProperty ;
+    rdfs:label "provenance" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/access_rights> a owl:DatatypeProperty ;
+    rdfs:label "access_rights" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> a owl:ObjectProperty ;
+    rdfs:label "applicable_legislation" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/hdab> a owl:ObjectProperty ;
+    rdfs:label "hdab" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/Dataset/column/contact_point> a owl:ObjectProperty ;
+    rdfs:label "contact_point" ;
+    rdfs:domain FDP:Dataset .
+
+<http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> a FDP:ContactPoint, qb:Observation, vcard:Kind ;
+    vcard:hasEmail "contact@example.org" ;
+    <http://fdp.example.org/api/rdf/ContactPoint/column/email> "contact@example.org" .
+
+<http://fdp.example.org/api/rdf/Agent/name=Test%20HDAB%20Agency> a FDP:Agent, qb:Observation, foaf:Agent ;
+    foaf:name "Test HDAB Agency" ;
+    <http://fdp.example.org/api/rdf/Agent/column/name> "Test HDAB Agency" .
+
+<http://fdp.example.org/api/rdf/Catalog/name=test-catalog> a FDP:Catalog, qb:Observation, dcat:Catalog ;
     rdfs:label "test-catalog" ;
-    dct:title "Test Catalog" ;
-    dct:description "A catalog for unit tests." ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> .
+    dcat:Catalog "test-catalog" ;
+    <http://fdp.example.org/api/rdf/Catalog/column/name> "test-catalog" ;
+    dcat:title "Test Catalog" ;
+    <http://fdp.example.org/api/rdf/Catalog/column/title> "Test Catalog" ;
+    dcat:description "A catalog for unit tests." ;
+    <http://fdp.example.org/api/rdf/Catalog/column/description> "A catalog for unit tests." ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Catalog/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> .
 
-# Dataset with valid FKs — should be saved
-<http://fdp.example.org/Dataset/ds-good>
-    a dcat:Dataset ;
+<http://fdp.example.org/api/rdf/Dataset/name=test-dataset-good> a FDP:Dataset, qb:Observation, dcat:Dataset ;
     rdfs:label "test-dataset-good" ;
-    dct:title "Good Dataset" ;
-    dct:description "Has all mandatory FKs." ;
-    dct:identifier "http://fdp.example.org/Dataset/ds-good" ;
-    dct:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    dcat:Dataset "test-dataset-good" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/name> "test-dataset-good" ;
+    dcat:title "Good Dataset" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/title> "Good Dataset" ;
+    dcat:description "Has all mandatory FKs." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/description> "Has all mandatory FKs." ;
+    dcat:identifier "http://fdp.example.org/api/rdf/Dataset/name=test-dataset-good" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/identifier> "http://fdp.example.org/api/rdf/Dataset/name=test-dataset-good" ;
+    dcat:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/type> <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/theme> <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
     dcat:keyword "genomics" ;
-    dct:provenance "Collected for testing." ;
-    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
-    hdcat:healthCategory <https://healthdataportal.eu/categorisation/Health-care-delivery> ;
-    dcat:contactPoint <http://fdp.example.org/ContactPoint/cp1> ;
-    <http://fdp.example.org/Dataset/column/hdab> "Test HDAB Agency" .
+    <http://fdp.example.org/api/rdf/Dataset/column/keyword> "genomics" ;
+    dcat:provenance "Collected for testing." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/provenance> "Collected for testing." ;
+    dcat:accessRights "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/access_rights> "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/hdab> <http://fdp.example.org/api/rdf/Agent/name=Test%20HDAB%20Agency> ;
+    dcat:contactPoint <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/contact_point> <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> .
 
-# Dataset with MISSING hdab — should be skipped
-<http://fdp.example.org/Dataset/ds-no-hdab>
-    a dcat:Dataset ;
+<http://fdp.example.org/api/rdf/Dataset/name=test-dataset-no-hdab> a FDP:Dataset, qb:Observation, dcat:Dataset ;
     rdfs:label "test-dataset-no-hdab" ;
-    dct:title "Dataset Missing HDAB" ;
-    dct:description "Missing mandatory hdab FK." ;
-    dct:identifier "http://fdp.example.org/Dataset/ds-no-hdab" ;
-    dct:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    dcat:Dataset "test-dataset-no-hdab" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/name> "test-dataset-no-hdab" ;
+    dcat:title "Dataset Missing HDAB" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/title> "Dataset Missing HDAB" ;
+    dcat:description "Missing mandatory hdab FK." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/description> "Missing mandatory hdab FK." ;
+    dcat:identifier "http://fdp.example.org/api/rdf/Dataset/name=test-dataset-no-hdab" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/identifier> "http://fdp.example.org/api/rdf/Dataset/name=test-dataset-no-hdab" ;
+    dcat:type <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/type> <http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/theme> <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
     dcat:keyword "genomics" ;
-    dct:provenance "Collected for testing." ;
-    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
-    r5r:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
-    hdcat:healthCategory <https://healthdataportal.eu/categorisation/Health-care-delivery> ;
-    dcat:contactPoint <http://fdp.example.org/ContactPoint/cp1> .
-    # intentionally no hdab predicate
+    <http://fdp.example.org/api/rdf/Dataset/column/keyword> "genomics" ;
+    dcat:provenance "Collected for testing." ;
+    <http://fdp.example.org/api/rdf/Dataset/column/provenance> "Collected for testing." ;
+    dcat:accessRights "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    <http://fdp.example.org/api/rdf/Dataset/column/access_rights> "http://publications.europa.eu/resource/authority/access-right/PUBLIC" ;
+    dcat:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/applicable_legislation> <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    dcat:contactPoint <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> ;
+    <http://fdp.example.org/api/rdf/Dataset/column/contact_point> <http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org> .
