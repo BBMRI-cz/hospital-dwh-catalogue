@@ -8,6 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.13"
+  CHECK_RUNNER: "local"
 
 jobs:
   lint:
