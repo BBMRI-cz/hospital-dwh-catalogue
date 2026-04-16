@@ -16,6 +16,9 @@ Start the stack:
 ./deploy.sh
 ```
 
+These helper scripts require Bash. Use `./deploy.sh` or `bash ./deploy.sh`, not `sh ./deploy.sh`.
+During deployment, `deploy.sh` attempts to update `health_dcat_ap` from Git automatically when Git metadata is available.
+
 Open `http://localhost` and sign in with any non-empty username and password. That works in development because `MOCK_LDAP=True`.
 
 ## What the app does

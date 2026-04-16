@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Test Suite
 # Usage: ./scripts/check-tests.sh
 

@@ -279,14 +279,20 @@ def security_cookie_settings(*, secure: bool) -> dict[str, Any]:
     }
 
 
-def production_security_settings(*, allowed_hosts: list[str]) -> dict[str, Any]:
+def reverse_proxy_https_settings(*, allowed_hosts: list[str]) -> dict[str, Any]:
     return {
         **security_cookie_settings(secure=True),
         'CSRF_TRUSTED_ORIGINS': [f'https://{host}' for host in allowed_hosts],
+        'SECURE_PROXY_SSL_HEADER': ('HTTP_X_FORWARDED_PROTO', 'https'),
+    }
+
+
+def production_security_settings(*, allowed_hosts: list[str]) -> dict[str, Any]:
+    return {
+        **reverse_proxy_https_settings(allowed_hosts=allowed_hosts),
         'SECURE_SSL_REDIRECT': config('SECURE_SSL_REDIRECT', default=True, cast=bool),
         'SECURE_HSTS_SECONDS': config('SECURE_HSTS_SECONDS', default=31536000, cast=int),
         'SECURE_CONTENT_TYPE_NOSNIFF': True,
-        'SECURE_PROXY_SSL_HEADER': ('HTTP_X_FORWARDED_PROTO', 'https'),
         'SESSION_COOKIE_HTTPONLY': True,
         'SESSION_COOKIE_SAMESITE': 'Strict',
         'CSRF_COOKIE_HTTPONLY': True,

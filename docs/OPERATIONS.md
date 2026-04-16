@@ -33,8 +33,8 @@ Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Pro
 | Environment | Main purpose | Auth mode | FAIR Genomes / Alvao | Runtime shape |
 |---|---|---|---|---|
 | `dev` | local development | mocked LDAP | mocked by default | `runserver`, bind mounts, no Redis |
-| `staging` | pre-production validation | LDAP mocked by default | live-like by default | Gunicorn, Redis, named volumes |
-| `prod` | live deployment | real LDAP only | real integrations only | Gunicorn, TLS, Certbot, observability always on |
+| `staging` | pre-production validation | LDAP mocked by default | live-like by default | Gunicorn, Redis, named volumes, internal HTTPS |
+| `prod` | live deployment | real LDAP only | real integrations only | Gunicorn, internal HTTPS, observability always on |
 
 ## Environment bootstrap
 
@@ -125,13 +125,32 @@ Relevant variables:
 
 When `MOCK_ALVAO=True`, the app stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
 
-### Production-only settings
+### HTTPS certificates for staging and production
+
+By default, both deployed environments expect these repository-root relative paths in `.env`:
+
+- `certs/server.crt`
+- `certs/server.key`
+
+If the files live elsewhere, set these optional repo-root relative overrides in `.env`:
+
+- `NGINX_SSL_CERT_PATH`
+- `NGINX_SSL_KEY_PATH`
+
+The nginx container mounts those repo-root relative files directly for TLS termination. The
+internal `MOURootCA` stays a client trust concern on managed PCs; the application does not
+need a separate runtime CA file for this setup.
+
+### Deployed HTTPS settings
+
+Staging and production both need:
+
+- `SERVER_NAME`
+- `GUNICORN_WORKERS`
 
 Production also needs:
 
-- `SERVER_NAME`
 - `ADMIN_EMAIL`
-- `GUNICORN_WORKERS`
 - `EMAIL_HOST`
 - `EMAIL_PORT`
 - `EMAIL_HOST_USER`
@@ -158,9 +177,15 @@ For dev or staging with observability:
 
 1. loads `.env`
 2. validates the contract for the selected `DEPLOY_ENV`
-3. checks the configured `HEALTH_DCAT_VERSION`
-4. renders the compose stack
-5. starts or updates the services
+3. attempts to update `health_dcat_ap` from Git when Git metadata is available
+4. checks the configured `HEALTH_DCAT_VERSION`
+5. renders the compose stack
+6. starts or updates the services
+
+Before deploying `staging` or `prod`, place the provided certificate and private key into the
+repo-root `certs/` directory as `server.crt` and `server.key`. The generated `.env` already
+uses the repo-root relative values `certs/server.crt` and `certs/server.key`; change those
+only when the files live somewhere else inside or relative to the repository checkout.
 
 ## Validation contract
 
@@ -176,8 +201,8 @@ Shared requirements for all environments:
 Environment-specific requirements:
 
 - `dev` also requires the three `MOCK_*` flags
-- `staging` also requires `DEBUG`, `GUNICORN_WORKERS`, and real credentials only for integrations whose `MOCK_*` flag is `False`
-- `prod` requires `GUNICORN_WORKERS`, `SERVER_NAME`, `ADMIN_EMAIL`, live LDAP / FAIR Genomes / Alvao credentials, email settings, and TLS-related settings
+- `staging` also requires `DEBUG`, `GUNICORN_WORKERS`, `SERVER_NAME`, valid TLS certificate files, and real credentials only for integrations whose `MOCK_*` flag is `False`
+- `prod` requires `GUNICORN_WORKERS`, `SERVER_NAME`, `ADMIN_EMAIL`, valid TLS certificate files, live LDAP / FAIR Genomes / Alvao credentials, and email settings
 
 This keeps the docs and the real runtime contract aligned.
 
@@ -376,6 +401,7 @@ Check:
 - the missing variable reported by the validation step
 - `DEPLOY_ENV` matches the template you used
 - `HEALTH_DCAT_VERSION` points to an existing release directory
+- the TLS certificate and key exist either in `certs/` at the repo root or at the override paths from `.env`
 
 ### Users cannot log in with real LDAP
 
@@ -426,7 +452,7 @@ The schema and export semantics depend on `HEALTH_DCAT_VERSION`, which points to
 
 If you change the release:
 
-1. make sure the release files exist
+1. make sure `health_dcat_ap` contains that release, either in the checked-out copy or via Git update during deploy
 2. update `.env`
 3. rerun deploy
 4. verify schema labels and exports

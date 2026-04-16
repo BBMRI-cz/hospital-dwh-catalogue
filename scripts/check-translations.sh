@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Translation Completeness Check
 # Usage: ./scripts/check-translations.sh
 

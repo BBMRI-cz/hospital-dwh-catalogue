@@ -9,6 +9,8 @@ media
 staticfiles/
 logs/*.log
 logs/*.log.*
+certs/*
+!certs/.gitkeep
 
 # Tailwind compiled output — generated at container startup by startup.py
 frontend/static/css/tailwind.css

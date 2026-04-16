@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Security Check (bandit)
 # Usage: ./scripts/check-security.sh
 

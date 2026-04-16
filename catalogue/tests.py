@@ -4,6 +4,8 @@ Tests for the catalogue project configuration.
 Covers URL routing, views, and database routers.
 """
 
+import importlib
+import os
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -11,6 +13,66 @@ from django.contrib.auth.models import User
 from django.test import SimpleTestCase, TestCase
 
 from .routers import AuthRouter, WarehouseRouter
+
+
+class ReverseProxyHttpsSettingsTest(SimpleTestCase):
+    def test_reverse_proxy_https_settings_sets_secure_proxy_defaults(self):
+        from .settings.helpers import reverse_proxy_https_settings
+
+        settings = reverse_proxy_https_settings(
+            allowed_hosts=['katalog-dwh-test.int.mou.cz', 'localhost']
+        )
+
+        self.assertEqual(
+            settings['CSRF_TRUSTED_ORIGINS'],
+            ['https://katalog-dwh-test.int.mou.cz', 'https://localhost'],
+        )
+        self.assertEqual(settings['SECURE_PROXY_SSL_HEADER'], ('HTTP_X_FORWARDED_PROTO', 'https'))
+        self.assertTrue(settings['CSRF_COOKIE_SECURE'])
+        self.assertTrue(settings['SESSION_COOKIE_SECURE'])
+
+    def test_staging_settings_enable_secure_proxy_defaults(self):
+        env = {
+            'SECRET_KEY': 'test-secret',
+            'DEBUG': 'True',
+            'ALLOWED_HOSTS': 'katalog-dwh-test.int.mou.cz',
+            'SITE_URL': 'https://katalog-dwh-test.int.mou.cz',
+            'POSTGRES_DB': 'catalogue',
+            'POSTGRES_USER': 'catalogue',
+            'POSTGRES_PASSWORD': 'catalogue',
+            'POSTGRES_HOST': 'db',
+            'POSTGRES_PORT': '5432',
+            'AUTH_DB_NAME': 'auth_db',
+            'AUTH_DB_USER': 'catalogue',
+            'AUTH_DB_PASSWORD': 'catalogue',
+            'AUTH_DB_HOST': 'db',
+            'AUTH_DB_PORT': '5432',
+            'METADATA_DB_NAME': 'metadata_db',
+            'METADATA_DB_USER': 'catalogue',
+            'METADATA_DB_PASSWORD': 'catalogue',
+            'METADATA_DB_HOST': 'db',
+            'METADATA_DB_PORT': '5432',
+            'FAIR_GENOMES_DB_NAME': 'fair_genomes_db',
+            'FAIR_GENOMES_DB_USER': 'catalogue',
+            'FAIR_GENOMES_DB_PASSWORD': 'catalogue',
+            'FAIR_GENOMES_DB_HOST': 'db',
+            'FAIR_GENOMES_DB_PORT': '5432',
+            'MOCK_LDAP': 'True',
+            'MOCK_FAIR_GENOMES': 'True',
+            'MOCK_ALVAO': 'True',
+        }
+
+        with patch.dict(os.environ, env, clear=False):
+            module = importlib.import_module('catalogue.settings.staging')
+            module = importlib.reload(module)
+
+        self.assertEqual(
+            module.CSRF_TRUSTED_ORIGINS,
+            ['https://katalog-dwh-test.int.mou.cz'],
+        )
+        self.assertEqual(module.SECURE_PROXY_SSL_HEADER, ('HTTP_X_FORWARDED_PROTO', 'https'))
+        self.assertTrue(module.CSRF_COOKIE_SECURE)
+        self.assertTrue(module.SESSION_COOKIE_SECURE)
 
 
 class GrafanaAuthCheckTest(TestCase):

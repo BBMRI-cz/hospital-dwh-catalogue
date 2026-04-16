@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Type Checking (mypy)
 # Usage: ./scripts/check-types.sh
 

@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Ruff Linting Check
 # Usage:
 #   ./scripts/check-lint.sh          # Auto-fix issues

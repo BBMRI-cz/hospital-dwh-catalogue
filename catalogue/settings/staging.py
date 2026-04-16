@@ -12,7 +12,7 @@ from .helpers import (
     fair_genomes_settings,
     ldap_settings,
     manifest_staticfiles_storage,
-    security_cookie_settings,
+    reverse_proxy_https_settings,
 )
 
 BASE_DIR = base_settings.BASE_DIR
@@ -79,7 +79,9 @@ if 'SESSION_CACHE_ALIAS' in _CACHE_SETTINGS:
 _EMAIL_SETTINGS = console_email_settings()
 EMAIL_BACKEND = _EMAIL_SETTINGS['EMAIL_BACKEND']
 
-_SECURITY_SETTINGS = security_cookie_settings(secure=False)
+_SECURITY_SETTINGS = reverse_proxy_https_settings(allowed_hosts=ALLOWED_HOSTS)
+CSRF_TRUSTED_ORIGINS = _SECURITY_SETTINGS['CSRF_TRUSTED_ORIGINS']
+SECURE_PROXY_SSL_HEADER = _SECURITY_SETTINGS['SECURE_PROXY_SSL_HEADER']
 CSRF_COOKIE_SECURE = _SECURITY_SETTINGS['CSRF_COOKIE_SECURE']
 SESSION_COOKIE_SECURE = _SECURITY_SETTINGS['SESSION_COOKIE_SECURE']
 

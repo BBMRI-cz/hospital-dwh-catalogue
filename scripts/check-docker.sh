@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Docker Build Check
 # Usage: ./scripts/check-docker.sh
 # Verifies that both runtime and check images build from the compose layout.

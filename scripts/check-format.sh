@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 # Ruff Formatting Check
 # Usage:
 #   ./scripts/check-format.sh          # Auto-format code

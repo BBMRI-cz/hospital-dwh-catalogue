@@ -63,10 +63,24 @@ load_dotenv() {
         return 1
     fi
 
+    local dotenv_source="$DOTENV_FILE"
+    local temp_file=""
+
+    # Accept Windows-edited .env files copied onto Linux hosts.
+    if LC_ALL=C grep -q $'\r' "$DOTENV_FILE"; then
+        temp_file="$(mktemp)"
+        tr -d '\r' < "$DOTENV_FILE" > "$temp_file"
+        dotenv_source="$temp_file"
+    fi
+
     set -a
     # shellcheck disable=SC1090
-    . "$DOTENV_FILE"
+    . "$dotenv_source"
     set +a
+
+    if [ -n "$temp_file" ]; then
+        rm -f "$temp_file"
+    fi
 }
 
 require_valid_deploy_env() {
