@@ -45,7 +45,7 @@ RUN ARCH="${TARGETARCH:-amd64}"; \
     && chmod +x /usr/local/bin/tailwindcss
 
 RUN tailwindcss \
-    -c /app/tailwind.config.js \
+    -c /app/tailwind.config.cjs \
     -i /app/frontend/static/css/tailwind.input.css \
     -o /app/frontend/static/css/tailwind.css \
     --minify

@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 
 if should_use_docker_check_runner; then
-    CHECK_COMMAND=(run_dev_check_compose run --rm check python -m mypy .)
+    CHECK_COMMAND=(run_dev_check_compose run --build --rm check python -m mypy .)
 else
     ensure_project_dependencies
     PYTHON="$(resolve_python)"

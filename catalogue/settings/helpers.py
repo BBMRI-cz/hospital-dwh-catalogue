@@ -284,6 +284,7 @@ def production_security_settings(*, allowed_hosts: list[str]) -> dict[str, Any]:
         **security_cookie_settings(secure=True),
         'CSRF_TRUSTED_ORIGINS': [f'https://{host}' for host in allowed_hosts],
         'SECURE_SSL_REDIRECT': config('SECURE_SSL_REDIRECT', default=True, cast=bool),
+        'SECURE_HSTS_SECONDS': config('SECURE_HSTS_SECONDS', default=31536000, cast=int),
         'SECURE_CONTENT_TYPE_NOSNIFF': True,
         'SECURE_PROXY_SSL_HEADER': ('HTTP_X_FORWARDED_PROTO', 'https'),
         'SESSION_COOKIE_HTTPONLY': True,

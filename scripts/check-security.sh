@@ -8,12 +8,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
+SCAN_TARGETS=(
+    manage.py
+    catalogue
+    schema_registry
+    fair_genomes
+    frontend
+    ticketing
+    shared
+    warehouse
+    scripts
+    docker/startup.py
+    docker/startup_tasks.py
+)
+
 if should_use_docker_check_runner; then
-    BANDIT_COMMAND=(run_dev_check_compose run --rm check python -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
+    BANDIT_COMMAND=(run_dev_check_compose run --build --rm check python -m bandit -r "${SCAN_TARGETS[@]}" -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 else
     ensure_project_dependencies
     PYTHON="$(resolve_python)"
-    BANDIT_COMMAND=("$PYTHON" -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
+    BANDIT_COMMAND=("$PYTHON" -m bandit -r "${SCAN_TARGETS[@]}" -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 fi
 
 BANDIT_OUTPUT=$("${BANDIT_COMMAND[@]}" 2>&1) || true

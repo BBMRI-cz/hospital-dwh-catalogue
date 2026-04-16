@@ -13,6 +13,35 @@ from django.test import SimpleTestCase, TestCase
 from .routers import AuthRouter, WarehouseRouter
 
 
+class GrafanaAuthCheckTest(TestCase):
+    """Tests for the internal Grafana staff-auth gate."""
+
+    databases = {'default', 'auth_db'}
+
+    def setUp(self):
+        self.url = '/internal/auth/grafana/'
+
+    def test_returns_401_for_anonymous_user(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_returns_403_for_authenticated_non_staff_user(self):
+        user = User.objects.create_user(username='viewer', password='secret')
+        self.client.force_login(user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_returns_200_for_staff_user(self):
+        user = User.objects.create_user(username='admin-user', password='secret', is_staff=True)
+        self.client.force_login(user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+
+
 class AuthRouterTest(TestCase):
     """Tests for the AuthRouter database router."""
 

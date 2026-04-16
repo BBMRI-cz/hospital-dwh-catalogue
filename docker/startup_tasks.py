@@ -29,7 +29,7 @@ def tailwind_build_command(base_dir: Path) -> list[str]:
     return [
         'tailwindcss',
         '-c',
-        str(base_dir / 'tailwind.config.js'),
+        str(base_dir / 'tailwind.config.cjs'),
         '-i',
         str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.input.css'),
         '-o',

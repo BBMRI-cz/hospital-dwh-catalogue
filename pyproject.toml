@@ -21,7 +21,7 @@ exclude = [
 line-length = 100
 
 # Target Python version
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 # Enable rules

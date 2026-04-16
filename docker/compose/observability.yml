@@ -29,7 +29,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ../../docker/grafana/provisioning:/etc/grafana/provisioning:ro
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Grafana is only exposed through Nginx after a Django staff check,
+      # so there is no separate user-managed Grafana password in .env.
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin

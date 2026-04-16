@@ -4,25 +4,49 @@
 #   ./scripts/check-format.sh          # Auto-format code
 #   ./scripts/check-format.sh --check  # Check only (CI mode)
 
-set -e
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: ./scripts/check-format.sh [--check]
+
+Options:
+  --check   Check formatting without applying changes
+  --help    Show this message
+EOF
+}
+
+CHECK_ONLY=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --check)
+            CHECK_ONLY=true
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
 if should_use_docker_check_runner; then
-    CHECK_COMMAND=(run_dev_check_compose run --rm check python -m ruff format --check .)
-    FORMAT_COMMAND=(run_dev_check_compose run --rm check python -m ruff format .)
+    CHECK_COMMAND=(run_dev_check_compose run --build --rm check python -m ruff format --check .)
+    FORMAT_COMMAND=(run_dev_check_compose run --build --rm check python -m ruff format .)
 else
     ensure_project_dependencies
     PYTHON="$(resolve_python)"
     CHECK_COMMAND=("$PYTHON" -m ruff format --check .)
     FORMAT_COMMAND=("$PYTHON" -m ruff format .)
-fi
-
-CHECK_ONLY=false
-if [ "$1" = "--check" ]; then
-    CHECK_ONLY=true
 fi
 
 if [ "$CHECK_ONLY" = true ]; then

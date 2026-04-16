@@ -28,7 +28,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/accounts/login/')\""]
+      test: ["CMD", "python", "/app/scripts/check_login_health.py"]
       interval: 10s
       timeout: 5s
       retries: 25

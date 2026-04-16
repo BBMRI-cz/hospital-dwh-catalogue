@@ -24,13 +24,38 @@
 #   ./scripts/check-tests.sh
 # =============================================================================
 
-set -e
+set -euo pipefail
 
-# Parse arguments
+usage() {
+    cat <<'EOF'
+Usage: ./scripts/check.sh [--check]
+
+Runs the full quality suite.
+
+Options:
+  --check   Run in check-only mode (used in CI)
+  --help    Show this message
+EOF
+}
+
 CHECK_ONLY=false
-if [ "$1" = "--check" ]; then
-    CHECK_ONLY=true
-fi
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --check)
+            CHECK_ONLY=true
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,9 +80,9 @@ echo "========================================"
 echo ""
 
 # Pass --check flag to scripts that support it
-CHECK_FLAG=""
+CHECK_ARGS=()
 if [ "$CHECK_ONLY" = true ]; then
-    CHECK_FLAG="--check"
+    CHECK_ARGS+=(--check)
 fi
 
 # -----------------------------------------------------------------------------
@@ -65,7 +90,7 @@ fi
 # -----------------------------------------------------------------------------
 echo "[1/7] Ruff Linting"
 echo "----------------------------------------"
-if ! "$SCRIPT_DIR/check-lint.sh" $CHECK_FLAG; then
+if ! "$SCRIPT_DIR/check-lint.sh" "${CHECK_ARGS[@]}"; then
     FAILED=true
 fi
 echo ""
@@ -75,7 +100,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo "[2/7] Code Formatting"
 echo "----------------------------------------"
-if ! "$SCRIPT_DIR/check-format.sh" $CHECK_FLAG; then
+if ! "$SCRIPT_DIR/check-format.sh" "${CHECK_ARGS[@]}"; then
     FAILED=true
 fi
 echo ""
