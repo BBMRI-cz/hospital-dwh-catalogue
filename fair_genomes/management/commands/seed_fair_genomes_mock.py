@@ -56,7 +56,6 @@ class Command(BaseCommand):
         self.stdout.write('Seeding fair_genomes_db with mock data …')
         created_counts: dict[str, int] = {}
 
-        # ── ContactPoints ──────────────────────────────────────────────────
         contact_points = [
             # email + page
             {
@@ -81,7 +80,6 @@ class Command(BaseCommand):
 
         cp_both, cp_email_only, cp_page_only, _cp_none = cp_objects
 
-        # ── Agents ─────────────────────────────────────────────────────────
         agent_data: list[dict[str, Any]] = [
             # with email+page contact + description
             {
@@ -124,7 +122,6 @@ class Command(BaseCommand):
         agent_dwh = agent_objects['FG_AGENT_DWH']
         agent_molgenis = agent_objects['FG_AGENT_MOLGENIS']
 
-        # ── Catalogs ───────────────────────────────────────────────────────
         cat_full, cat_created_full = Catalog.objects.using(DB).get_or_create(
             name='CAT_FAIR_GENOMES',
             defaults={
@@ -144,7 +141,6 @@ class Command(BaseCommand):
         )
         created_counts['Catalog'] = int(cat_created_full) + int(cat_created_min)
 
-        # ── Datasets ──────────────────────────────────────────────────────
         now = timezone.now()
 
         dataset_specs: list[dict[str, Any]] = [
@@ -563,9 +559,8 @@ class Command(BaseCommand):
                 ds_created += 1
         created_counts['Dataset'] = ds_created
 
-        # ── Distributions ─────────────────────────────────────────────────
         # Fair Genomes distributions have no db_layer (warehouse-only field).
-        # Cover: format x rights x byte_size x timestamps
+        # Cover format, rights, byte_size, and timestamp combinations.
 
         distribution_specs: list[dict[str, Any]] = [
             # All optional filled; VCF format; internal; large byte_size
@@ -855,7 +850,6 @@ class Command(BaseCommand):
                 dist_created += 1
         created_counts['Distribution'] = dist_created
 
-        # ── StatResults ───────────────────────────────────────────────────
         # Seed a mock value distribution that _sync_stats() would write after
         # a real sync.  Uses plausible mock values so the application can be
         # evaluated without a live MOLGENIS connection.
@@ -951,7 +945,6 @@ class Command(BaseCommand):
                 stat_created += 1
         created_counts['StatResult'] = stat_created
 
-        # ── StatDefinitions ───────────────────────────────────────────────
         # Each StatResult must have a corresponding StatDefinition that links
         # the MOLGENIS table/column pair to the distribution whose detail page
         # shows the chart.
@@ -972,7 +965,6 @@ class Command(BaseCommand):
                     sd_created += 1
         created_counts['StatDefinition'] = sd_created
 
-        # ── Summary ────────────────────────────────────────────────────────
         total = sum(created_counts.values())
         summary = ', '.join(f'{k}: {v}' for k, v in created_counts.items())
         if total:

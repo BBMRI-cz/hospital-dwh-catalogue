@@ -351,6 +351,36 @@ class CartAddViewTest(TestCase):
         self.assertEqual(payload['cart_count'], 0)
         self.assertEqual(self.client.session.get('cart', []), [])
 
+    def test_htmx_add_returns_partial_with_oob_badge(self):
+        """HTMX add returns the updated button fragment plus an OOB cart badge swap."""
+        response = self.client.post(
+            self.url,
+            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+            HTTP_HX_REQUEST='true',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="cart-badge"')
+        self.assertContains(response, 'hx-swap-oob="outerHTML"')
+        self.assertContains(response, 'bg-red-600')
+
+    def test_htmx_inline_add_preserves_inline_button_contract(self):
+        """HTMX inline toggle keeps the inline button payload and cart badge fragment."""
+        response = self.client.post(
+            self.url,
+            data={
+                'app': 'warehouse',
+                'name': 'dataset-1',
+                'title': 'Dataset 1',
+                'btn_style': 'inline',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"btn_style": "inline"')
+        self.assertContains(response, 'id="cart-badge"')
+
     def test_ajax_missing_required_param_is_noop_with_json_shape(self):
         """Missing app/name keeps cart unchanged and still returns expected JSON keys."""
         response = self.client.post(
@@ -366,6 +396,28 @@ class CartAddViewTest(TestCase):
         self.assertFalse(payload['in_cart'])
         self.assertEqual(payload['cart_count'], 0)
         self.assertEqual(self.client.session.get('cart', []), [])
+
+    def test_ajax_add_when_cart_is_full_keeps_item_out_of_cart(self):
+        """Overflow adds report the unchanged state instead of a false in-cart toggle."""
+        session = self.client.session
+        session['cart'] = [
+            {'app': 'warehouse', 'name': f'ds-{i}', 'title': f'Dataset {i}'}
+            for i in range(CART_MAX_ITEMS)
+        ]
+        session.save()
+
+        response = self.client.post(
+            self.url,
+            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload['success'])
+        self.assertFalse(payload['in_cart'])
+        self.assertEqual(payload['cart_count'], CART_MAX_ITEMS)
+        self.assertEqual(len(self.client.session.get('cart', [])), CART_MAX_ITEMS)
 
     def test_open_redirect_prevented(self):
         """POST with external next URL redirects to / instead."""
@@ -434,3 +486,17 @@ class CartOverflowTest(TestCase):
 
         result = CartService.add(self.client.session, 'warehouse', 'ds-last', 'Last One')
         self.assertTrue(result)
+
+    def test_toggle_returns_false_when_cart_is_full(self):
+        """Toggle reports failure when it cannot add a new item."""
+        session = self.client.session
+        session['cart'] = [
+            {'app': 'warehouse', 'name': f'ds-{i}', 'title': f'Dataset {i}'}
+            for i in range(CART_MAX_ITEMS)
+        ]
+        session.save()
+
+        result = CartService.toggle(self.client.session, 'warehouse', 'ds-overflow', 'Overflow')
+
+        self.assertFalse(result)
+        self.assertEqual(len(self.client.session.get('cart', [])), CART_MAX_ITEMS)

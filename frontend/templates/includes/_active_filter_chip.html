@@ -1,0 +1,16 @@
+{% load i18n %}
+<span class="{{ chip.container_class }}">
+  <span class="min-w-0 leading-tight break-all" title="{{ chip.title }}">{{ chip.display }}</span>
+  <button type="button"
+    hx-get="{{ chip.remove_url }}"
+    hx-target="#ds-list-wrapper"
+    hx-swap="innerHTML"
+    hx-push-url="true"
+    aria-label="{% trans 'Remove filter' %}"
+    class="ml-0.5 self-start shrink-0 hover:opacity-70 transition-opacity cursor-pointer">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</span>

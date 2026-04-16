@@ -1,6 +1,4 @@
-"""
-Service factory for getting the appropriate ticket service based on environment.
-"""
+"""Ticket service selection."""
 
 import logging
 
@@ -11,18 +9,11 @@ from .mock_service import MockAlvaoService
 
 logger = logging.getLogger(__name__)
 
-# Type alias for ticket services
 TicketService = AlvaoService | MockAlvaoService
 
 
 def get_ticket_service() -> TicketService:
-    """
-    Get the appropriate ticket service based on configuration.
-
-    Returns:
-        - MockAlvaoService if MOCK_ALVAO is True (dev environment)
-        - AlvaoService for production/test environments
-    """
+    """Return the configured ticket service implementation."""
     use_mock = getattr(settings, 'MOCK_ALVAO', False)
 
     if use_mock:

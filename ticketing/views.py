@@ -1,25 +1,23 @@
-"""
-Views for the ticketing application.
-
-Provides cart management, ticket submission, and ticket viewing functionality.
-"""
+"""Views for ticketing cart and submission flows."""
 
 from __future__ import annotations
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, View
 
 from ticketing.cart import CartService
 from ticketing.services.ticketing_service import TicketingService
-
-# ── Forms ─────────────────────────────────────────────────────────────────────
+from ticketing.view_helpers import (
+    build_cart_page_context,
+    get_cart_toggle_request,
+    get_safe_redirect_target,
+    render_cart_toggle_response,
+)
 
 
 class TicketSubmitForm(forms.Form):
@@ -36,54 +34,21 @@ class TicketSubmitForm(forms.Form):
     )
 
 
-# ── Cart views ────────────────────────────────────────────────────────────────
-
-
 class CartAddView(LoginRequiredMixin, View):
     """POST: add a dataset to the session cart."""
 
     def post(self, request):
-        app = request.POST.get('app', '')
-        name = request.POST.get('name', '')
-        title = request.POST.get('title', '')
+        toggle_request = get_cart_toggle_request(request)
         in_cart = False
-        if app and name:
-            cart = CartService.get(request.session)
-            already_in = any(i['app'] == app and i['name'] == name for i in cart)
-            if already_in:
-                CartService.remove(request.session, app, name)
-                in_cart = False
-            else:
-                CartService.add(request.session, app, name, title)
-                in_cart = True
+        if toggle_request.app and toggle_request.name:
+            in_cart = CartService.toggle(
+                request.session,
+                toggle_request.app,
+                toggle_request.name,
+                toggle_request.title,
+            )
         if request.headers.get('HX-Request'):
-            cart_count = CartService.count(request.session)
-            cart_dataset_ids = {item['name'] for item in CartService.get(request.session)}
-            btn_style = request.POST.get('btn_style', 'hero')
-            template = (
-                'includes/_cart_inline_btn.html'
-                if btn_style == 'inline'
-                else 'includes/_cart_add_btn.html'
-            )
-            ctx_key = 'cart_app' if btn_style == 'inline' else 'cart_source'
-            btn_html = render_to_string(
-                template,
-                {
-                    ctx_key: app,
-                    'cart_name': name,
-                    'cart_title': title,
-                    'cart_dataset_ids': cart_dataset_ids,
-                },
-                request=request,
-            )
-            badge_visibility = '' if cart_count else ' hidden'
-            oob_badge = (
-                f'<span id="cart-badge" hx-swap-oob="outerHTML"'
-                f' class="absolute -top-1 -right-1 flex items-center justify-center'
-                f' rounded-full text-white font-mono font-bold text-[9px] bg-mou-orange{badge_visibility}"'
-                f' style="min-width:15px;height:15px;padding:0 3px;">{cart_count}</span>'
-            )
-            return HttpResponse(btn_html + oob_badge)
+            return render_cart_toggle_response(request, toggle_request)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse(
                 {
@@ -92,10 +57,7 @@ class CartAddView(LoginRequiredMixin, View):
                     'cart_count': CartService.count(request.session),
                 }
             )
-        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
-        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
-            next_url = '/'
-        return redirect(next_url)
+        return redirect(get_safe_redirect_target(request))
 
 
 class CartRemoveView(LoginRequiredMixin, View):
@@ -115,16 +77,22 @@ class CartView(LoginRequiredMixin, View):
     template_name = 'ticketing/cart.html'
 
     def get(self, request):
-        cart = CartService.get(request.session)
-        form = TicketSubmitForm()
-        return render(request, self.template_name, {'cart': cart, 'form': form})
+        return render(
+            request,
+            self.template_name,
+            build_cart_page_context(request.session, TicketSubmitForm()),
+        )
 
     def post(self, request):
         cart = CartService.get(request.session)
         form = TicketSubmitForm(request.POST)
 
         if not form.is_valid():
-            return render(request, self.template_name, {'cart': cart, 'form': form})
+            return render(
+                request,
+                self.template_name,
+                build_cart_page_context(request.session, form),
+            )
 
         svc = TicketingService()
         ticket = svc.create_ticket_from_cart(
@@ -154,9 +122,6 @@ class CartView(LoginRequiredMixin, View):
             )
 
         return redirect('ticketing:ticket_history')
-
-
-# ── History view ──────────────────────────────────────────────────────────────
 
 
 class TicketHistoryView(LoginRequiredMixin, ListView):

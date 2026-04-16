@@ -6,35 +6,30 @@
   <title>{% block title %}{% trans "Data Catalogue" %}{% endblock %} · MOU</title>
   <link rel="icon" href="{% static 'img/mmci_logo.svg' %}" type="image/svg+xml">
 
-  <!-- Google Fonts: Inter + Merriweather + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
 
-  <!-- Custom fonts override -->
   <link href="{% static 'css/custom-fonts.css' %}" rel="stylesheet">
-
-  <!-- Tailwind CSS (compiled — built by docker/startup.py via tailwind.config.js) -->
   <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
-
-  <!-- Base styles (animations, scrollbar, texture) -->
   <link href="{% static 'css/base.css' %}" rel="stylesheet">
 
   {% block extra_head %}{% endblock %}
 
-  <!-- HTMX + Alpine.js (vendored) -->
   <script src="{% static 'js/htmx.min.js' %}"></script>
   <script defer src="{% static 'js/alpine.min.js' %}"></script>
+  <script defer src="{% static 'js/site-ui.js' %}"></script>
+  {% trans "Error" as t_error_title %}{{ t_error_title|json_script:"site-ui-error-title" }}
 </head>
 <body class="bg-page-bg text-txt font-sans min-h-screen"
+      x-data="siteUi()"
+      x-init="init()"
       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
 {% include 'catalogue/components/_header.html' %}
 
-<!-- ══════════════════════ MESSAGES ══════════════════════ -->
 {% include "includes/_toast_messages.html" %}
 
-<!-- ══════════════════════ CONTENT ══════════════════════ -->
 {% block sidebar %}
 <div class="site-outer bg-outer-bg" style="min-height:calc(100vh - 80px)">
   <div class="site-content max-w-screen-2xl mx-auto px-6 py-8 bg-page-bg" style="min-height:calc(100vh - 80px)">
@@ -47,24 +42,6 @@
 
 {% block page_modals %}{% endblock %}
 {% block extra_scripts %}{% endblock %}
-
-<script>
-document.body.addEventListener('htmx:responseError', function (e) {
-  var c = document.getElementById('toast-container');
-  if (!c) {
-    c = document.createElement('div');
-    c.id = 'toast-container';
-    c.className = 'fixed top-20 right-4 z-50 flex flex-col gap-3 pointer-events-none';
-    document.body.appendChild(c);
-  }
-  var t = document.createElement('div');
-  t.setAttribute('role', 'alert');
-  t.className = 'pointer-events-auto slide-in flex items-start gap-3 rounded-2xl bg-red-50 border border-red-200 shadow-xl px-4 py-3.5 min-w-80 max-w-sm';
-  t.innerHTML = '<div class="flex-1 min-w-0"><p class="text-sm font-semibold text-red-800">Error</p><p class="text-xs text-red-600">Request failed (' + e.detail.xhr.status + ')</p></div>';
-  c.appendChild(t);
-  setTimeout(function () { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 400); }, 5000);
-});
-</script>
 
 </body>
 </html>

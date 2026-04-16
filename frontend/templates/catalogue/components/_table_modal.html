@@ -1,41 +1,23 @@
 {% load i18n %}
-{% comment %}
-  Per-table column modal.
-  Variables expected (pass via {% include … with tbl=tbl idx=forloop.counter %}):
-    tbl  — typed frontend table payload (name, title, description, url, columns[])
-    idx  — outer loop counter (integer) — used for unique element IDs
-{% endcomment %}
 <dialog id="tbl-modal-{{ idx }}" class="modal modal-middle"
   x-data="{ q: '', openDesc: {} }"
   @click="if($event.target === $el) $el.close()">
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden"
        style="width:min(92vw,56rem);max-width:92vw;max-height:88vh;border-radius:0.75rem;display:flex;flex-direction:column;">
-
-    <!-- ── Header (gradient, matching schema modal) ──────────────────── -->
     <div class="px-6 pt-5 pb-5 shrink-0 modal-gradient-header">
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0 flex-1">
-
-          <!-- label row: accent bar · term · name badge -->
           <div class="flex items-center gap-2 mb-2 flex-wrap">
             <div class="w-0.5 h-4 rounded shrink-0 bg-mou-cyan"></div>
             <span class="font-mono text-[9.5px] uppercase tracking-widest text-mou-cyan">csvw:Table</span>
             {% include "includes/_info_btn.html" with semantics="csvw:Table" %}
             <span class="font-mono text-[11px] px-2 py-0.5 rounded shrink-0 bg-mou-blue-light text-mou-blue border border-mou-blue-border">{{ tbl.name }}</span>
           </div>
-
-          <!-- title -->
           <h3 class="font-serif text-xl leading-tight text-gray-900">{{ tbl.title }}</h3>
-
-          <!-- description -->
           {% if tbl.description %}
           <p class="text-sm text-gray-600 mt-1.5 leading-relaxed">{{ tbl.description }}</p>
           {% endif %}
-
-
-
         </div>
-        <!-- close button -->
         <form method="dialog" class="shrink-0 -mt-1">
           <button class="inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -46,11 +28,8 @@
       </div>
     </div>
 
-    <!-- ── Body: scrollable column table ────────────────────────────── -->
     <div class="overflow-y-auto flex-1 bg-white">
       {% if tbl.columns %}
-
-      <!-- sticky subheader with search -->
       <div class="flex items-center gap-3 px-6 py-2.5 border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
         <span class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted">
           csvw:Column · {{ tbl.columns|length }}

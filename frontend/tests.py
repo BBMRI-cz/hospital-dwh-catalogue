@@ -4,18 +4,22 @@ from collections import Counter
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache as django_cache
+from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from frontend.catalogue_helpers import dataset_to_dict
-from frontend.detail_context import (
+from frontend.presentation.filters import FilterState, build_sidebar_context
+from frontend.presentation.mapping import (
     build_chart_groups,
     build_dataset_dcat_rows,
+    dataset_to_view_model,
     normalise_stat_charts,
     normalise_tables,
 )
-from frontend.filtering import FilterState, build_sidebar_context
+from frontend.presentation.types import CatalogueDistributionLookup
+from frontend.templatetags.frontend_tags import active_filter_chips
 from schema_registry.types import SchemaRegistryPayload
 from shared.dtos import (
     ExportAgent,
@@ -55,6 +59,12 @@ def _make_test_dataset(**overrides):
         ),
     ]
     return dataset
+
+
+def _make_distribution_lookup(dataset: UnifiedDataset) -> CatalogueDistributionLookup:
+    dataset_view = dataset_to_view_model(dataset)
+    distribution = dataset_view.distributions[0]
+    return CatalogueDistributionLookup(distribution=distribution, dataset=dataset_view)
 
 
 def _mock_schema() -> SchemaRegistryPayload:
@@ -160,8 +170,11 @@ def _make_test_export_catalog(**overrides):
     return ExportCatalog(**defaults)
 
 
-_SERVICE_PATH = 'frontend.views.UnifiedCatalogService'
-_DATASET_LOOKUP_PATH = 'frontend.views.get_cached_dataset_dict'
+_VIEW_CONTEXT_SERVICE_PATH = 'frontend.presentation.context.UnifiedCatalogService'
+_EXPORT_SERVICE_PATH = 'frontend.views.UnifiedCatalogService'
+_DATASET_LOOKUP_PATH = 'frontend.presentation.context.get_cached_dataset'
+_SCHEMA_LOOKUP_PATH = 'frontend.presentation.context.get_cached_schema_json'
+_DISTRIBUTION_LOOKUP_PATH = 'frontend.presentation.context.get_cached_distribution_lookup'
 
 
 class CatalogueIndexViewTest(TestCase):
@@ -180,7 +193,7 @@ class CatalogueIndexViewTest(TestCase):
         response = self.client.get(reverse('frontend:catalogue'))
         self.assertNotEqual(response.status_code, 200)
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_returns_200_with_datasets(self, mock_cls):
         mock_svc = mock_cls.return_value
         mock_svc.get_datasets_with_distributions.return_value = [_make_test_dataset()]
@@ -191,7 +204,7 @@ class CatalogueIndexViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Test Dataset')
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_empty_catalogue(self, mock_cls):
         mock_svc = mock_cls.return_value
         mock_svc.get_datasets_with_distributions.return_value = []
@@ -201,7 +214,7 @@ class CatalogueIndexViewTest(TestCase):
         response = self.client.get(reverse('frontend:catalogue'))
         self.assertEqual(response.status_code, 200)
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_text_search_filters(self, mock_cls):
         ds1 = _make_test_dataset(name='ds1', title='Alpha Dataset')
         ds2 = _make_test_dataset(name='ds2', title='Beta Dataset')
@@ -215,7 +228,7 @@ class CatalogueIndexViewTest(TestCase):
         self.assertContains(response, 'Alpha Dataset')
         self.assertNotContains(response, 'Beta Dataset')
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_catalogue_preview_renders_list_metadata_without_python_list_repr(self, mock_cls):
         dataset = _make_test_dataset(
             theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
@@ -244,7 +257,7 @@ class CatalogueIndexViewTest(TestCase):
             html=True,
         )
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_sidebar_filter_titles_include_display_and_raw_value(self, mock_cls):
         dataset = _make_test_dataset(
             theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
@@ -263,7 +276,7 @@ class CatalogueIndexViewTest(TestCase):
             'http://publications.europa.eu/resource/authority/data-theme/HEAL"',
         )
 
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_active_filter_chip_titles_include_full_value(self, mock_cls):
         theme_value = 'http://publications.europa.eu/resource/authority/data-theme/HEAL'
         dataset = _make_test_dataset(theme=theme_value)
@@ -293,17 +306,14 @@ class DatasetDetailViewTest(TestCase):
         )
 
     @patch(_DATASET_LOOKUP_PATH)
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_returns_200_for_existing_dataset(self, mock_cls, mock_dataset_lookup):
         dataset = _make_test_dataset()
         export_dataset = _make_test_export_dataset()
         mock_svc = mock_cls.return_value
         mock_svc.get_schema_json.return_value = _mock_schema()
         mock_svc.get_export_dataset.return_value = export_dataset
-
-        from frontend.catalogue_helpers import dataset_to_dict
-
-        mock_dataset_lookup.return_value = dataset_to_dict(dataset)
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
 
         self.client.force_login(self.user)
         response = self.client.get(
@@ -314,7 +324,7 @@ class DatasetDetailViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch(_DATASET_LOOKUP_PATH)
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_dataset_detail_includes_dataset_export_controls(self, mock_cls, mock_dataset_lookup):
         dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
         dataset.distributions[0].name = 'warehouse-dist'
@@ -349,10 +359,7 @@ class DatasetDetailViewTest(TestCase):
         mock_svc = mock_cls.return_value
         mock_svc.get_schema_json.return_value = _mock_schema()
         mock_svc.get_export_dataset.return_value = export_dataset
-
-        from frontend.catalogue_helpers import dataset_to_dict
-
-        mock_dataset_lookup.return_value = dataset_to_dict(dataset)
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
 
         self.client.force_login(self.user)
         response = self.client.get(
@@ -381,7 +388,7 @@ class DatasetDetailViewTest(TestCase):
         self.assertNotContains(response, reverse('frontend_api:rdf'))
 
     @patch(_DATASET_LOOKUP_PATH)
-    @patch(_SERVICE_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_missing_dataset_raises_404(self, mock_cls, mock_dataset_lookup):
         """A non-existent dataset triggers Http404 in the view."""
         from django.http import Http404
@@ -398,7 +405,7 @@ class DatasetDetailViewTest(TestCase):
             request = factory.get('/dataset/fair_genomes/nonexistent/')
             request.user = self.user
             request.session = self.client.session
-            with patch(_SERVICE_PATH) as inner_service_mock:
+            with patch(_VIEW_CONTEXT_SERVICE_PATH) as inner_service_mock:
                 inner_service_mock.return_value.get_export_dataset.return_value = None
                 with patch(_DATASET_LOOKUP_PATH, return_value=None):
                     DatasetDetailView.as_view()(request, app='fair_genomes', name='nonexistent')
@@ -407,7 +414,7 @@ class DatasetDetailViewTest(TestCase):
         response = self.client.get('/dataset/fair_genomes/test-dataset/rdf/')
         self.assertNotEqual(response.status_code, 200)
 
-    @patch(_SERVICE_PATH)
+    @patch(_EXPORT_SERVICE_PATH)
     def test_dataset_specific_rdf_route_returns_tables_and_columns(self, mock_cls):
         export_dataset = _make_test_export_dataset(
             app='warehouse',
@@ -446,6 +453,29 @@ class DatasetDetailViewTest(TestCase):
         self.assertIn('encounter', response.content.decode())
         self.assertIn('patient_id', response.content.decode())
 
+    @patch(_DATASET_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_dataset_without_distributions_raises_404(self, mock_cls, mock_dataset_lookup):
+        from django.http import Http404
+        from django.test import RequestFactory
+
+        from frontend.views import DatasetDetailView
+
+        dataset = _make_test_dataset()
+        dataset.distributions = []
+        export_dataset = _make_test_export_dataset(distributions=[])
+
+        mock_cls.return_value.get_export_dataset.return_value = export_dataset
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
+
+        factory = RequestFactory()
+        request = factory.get('/dataset/fair_genomes/test-dataset/')
+        request.user = self.user
+        request.session = self.client.session
+
+        with self.assertRaises(Http404):
+            DatasetDetailView.as_view()(request, app='fair_genomes', name='test-dataset')
+
 
 class DistributionDetailViewTest(TestCase):
     """Tests for the distribution detail view."""
@@ -459,20 +489,20 @@ class DistributionDetailViewTest(TestCase):
             username='viewer-dist', email='vd@example.com', password='secret'
         )
 
-    @patch('frontend.views.get_cached_schema_json')
-    @patch('frontend.views.get_cached_all_datasets')
-    @patch(_SERVICE_PATH)
+    @patch(_SCHEMA_LOOKUP_PATH)
+    @patch(_DISTRIBUTION_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_distribution_detail_requests_tables_and_charts(
         self,
         mock_cls,
-        mock_get_all_datasets,
+        mock_get_distribution_lookup,
         mock_get_schema,
     ):
         dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
         dataset.distributions[0].name = 'warehouse-dist'
         dataset.distributions[0].title = 'Warehouse Distribution'
 
-        mock_get_all_datasets.return_value = [dataset_to_dict(dataset)]
+        mock_get_distribution_lookup.return_value = _make_distribution_lookup(dataset)
         mock_get_schema.return_value = _mock_schema()
 
         mock_svc = mock_cls.return_value
@@ -516,20 +546,20 @@ class DistributionDetailViewTest(TestCase):
         mock_svc.get_tables_with_columns.assert_called_once_with('warehouse', 'warehouse-dist')
         mock_svc.get_stat_charts.assert_called_once_with('warehouse', 'warehouse-dist')
 
-    @patch('frontend.views.get_cached_schema_json')
-    @patch('frontend.views.get_cached_all_datasets')
-    @patch(_SERVICE_PATH)
+    @patch(_SCHEMA_LOOKUP_PATH)
+    @patch(_DISTRIBUTION_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_distribution_detail_handles_third_app_without_special_branches(
         self,
         mock_cls,
-        mock_get_all_datasets,
+        mock_get_distribution_lookup,
         mock_get_schema,
     ):
         dataset = _make_test_dataset(app='third_source', name='third-dataset', title='Third Source')
         dataset.distributions[0].name = 'third-dist'
         dataset.distributions[0].title = 'Third Distribution'
 
-        mock_get_all_datasets.return_value = [dataset_to_dict(dataset)]
+        mock_get_distribution_lookup.return_value = _make_distribution_lookup(dataset)
         mock_get_schema.return_value = _mock_schema()
 
         mock_svc = mock_cls.return_value
@@ -548,6 +578,18 @@ class DistributionDetailViewTest(TestCase):
         self.assertContains(response, 'Third Distribution')
         mock_svc.get_tables_with_columns.assert_called_once_with('third_source', 'third-dist')
         mock_svc.get_stat_charts.assert_called_once_with('third_source', 'third-dist')
+
+    @patch(_DISTRIBUTION_LOOKUP_PATH, return_value=None)
+    def test_missing_distribution_returns_404(self, _mock_get_distribution_lookup):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'fair_genomes', 'name': 'missing-dist'},
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
 
 
 class MetadataApiViewTest(TestCase):
@@ -614,7 +656,7 @@ class MetadataApiViewTest(TestCase):
 
 
 class SidebarContextHelperTest(SimpleTestCase):
-    @patch('frontend.filtering.UnifiedCatalogService.build_column_counter')
+    @patch('frontend.presentation.filters.UnifiedCatalogService.build_column_counter')
     def test_build_sidebar_context_returns_typed_sidebar_payloads(self, mock_build_column_counter):
         warehouse_dataset = _make_test_dataset(
             app='warehouse',
@@ -636,7 +678,10 @@ class SidebarContextHelperTest(SimpleTestCase):
         mock_build_column_counter.return_value = Counter({'patient_id': 2})
 
         context = build_sidebar_context(
-            [dataset_to_dict(warehouse_dataset), dataset_to_dict(fair_genomes_dataset)],
+            [
+                dataset_to_view_model(warehouse_dataset),
+                dataset_to_view_model(fair_genomes_dataset),
+            ],
             filter_state=FilterState(
                 q='',
                 status=set(),
@@ -654,39 +699,95 @@ class SidebarContextHelperTest(SimpleTestCase):
             {'wh-dist': 'warehouse-dataset'},
         )
 
-        patient_keyword = next(
-            item for item in context['sidebar_keywords'] if item['value'] == 'patient'
-        )
+        patient_keyword = next(item for item in context.sidebar_keywords if item.value == 'patient')
         custodian = next(
-            item for item in context['sidebar_custodians'] if item['value'] == 'AGENT_DATA_STEWARD'
+            item for item in context.sidebar_custodians if item.value == 'AGENT_DATA_STEWARD'
         )
         health_category = next(
-            item for item in context['sidebar_health_categories'] if item['value'] == 'patient_data'
+            item for item in context.sidebar_health_categories if item.value == 'patient_data'
         )
         theme = next(
             item
-            for item in context['sidebar_themes']
-            if item['value'] == 'http://publications.europa.eu/resource/authority/data-theme/HEAL'
+            for item in context.sidebar_themes
+            if item.value == 'http://publications.europa.eu/resource/authority/data-theme/HEAL'
         )
-        column = next(item for item in context['sidebar_columns'] if item['value'] == 'patient_id')
+        column = next(item for item in context.sidebar_columns if item.value == 'patient_id')
 
-        self.assertEqual(patient_keyword['label'], 'patient')
-        self.assertEqual(patient_keyword['count'], 1)
-        self.assertTrue(patient_keyword['checked'])
-        self.assertEqual(custodian['label'], 'DATA STEWARD')
-        self.assertTrue(custodian['checked'])
-        self.assertEqual(health_category['label'], 'Patient data')
-        self.assertEqual(theme['label'], 'data-theme / HEAL')
-        self.assertEqual(column['count'], 2)
-        self.assertTrue(column['checked'])
-        self.assertEqual(context['sidebar_counts']['ready'], 2)
-        self.assertEqual(context['sidebar_counts']['raw'], 0)
-        self.assertEqual(context['sidebar_counts']['unavailable'], 0)
+        self.assertEqual(patient_keyword.label, 'patient')
+        self.assertEqual(patient_keyword.count, 1)
+        self.assertTrue(patient_keyword.checked)
+        self.assertEqual(custodian.label, 'DATA STEWARD')
+        self.assertTrue(custodian.checked)
+        self.assertEqual(health_category.label, 'Patient data')
+        self.assertEqual(theme.label, 'data-theme / HEAL')
+        self.assertEqual(column.count, 2)
+        self.assertTrue(column.checked)
+        self.assertEqual(context.sidebar_counts.ready, 2)
+        self.assertEqual(context.sidebar_counts.raw, 0)
+        self.assertEqual(context.sidebar_counts.unavailable, 0)
+
+
+class FilterStateParsingTest(SimpleTestCase):
+    def test_from_query_params_parses_multiselect_filters(self):
+        query_params = QueryDict(
+            'q=Alpha&status=ready&status=raw&source=warehouse&theme=http://example.com/theme'
+            '&column=patient_id'
+        )
+
+        state = FilterState.from_query_params(query_params)
+
+        self.assertEqual(state.q, 'Alpha')
+        self.assertEqual(state.status, {'ready', 'raw'})
+        self.assertEqual(state.source, {'warehouse'})
+        self.assertEqual(state.theme, {'http://example.com/theme'})
+        self.assertEqual(state.column, {'patient_id'})
+
+
+class ActiveFilterChipHelperTest(SimpleTestCase):
+    def test_builds_remove_urls_without_losing_other_filters(self):
+        query_params = QueryDict(
+            'q=Alpha&theme=http://example.com/theme&theme=http://example.com/other&page=3'
+        )
+        filter_params = FilterState.from_query_params(query_params)
+
+        chips = active_filter_chips(filter_params, query_params, '/catalogue/')
+
+        self.assertEqual(len(chips), 3)
+        theme_chip = next(chip for chip in chips if chip.title.endswith('http://example.com/theme'))
+        self.assertIn('page=1', theme_chip.remove_url)
+        self.assertIn('q=Alpha', theme_chip.remove_url)
+        self.assertIn('theme=http%3A%2F%2Fexample.com%2Fother', theme_chip.remove_url)
+        self.assertNotIn('theme=http%3A%2F%2Fexample.com%2Ftheme', theme_chip.remove_url)
+
+
+class AuthGuardHelperTest(SimpleTestCase):
+    def test_require_auth_rejects_anonymous_requests(self):
+        from django.test import RequestFactory
+
+        from frontend.api_views import _require_auth
+
+        request = RequestFactory().get('/api/jsonld')
+        request.user = AnonymousUser()
+
+        response = _require_auth(request)
+
+        self.assertIsNotNone(response)
+        self.assertEqual(response.status_code, 401)
+
+    def test_require_auth_allows_authenticated_requests(self):
+        from django.test import RequestFactory
+
+        from frontend.api_views import _require_auth
+
+        request = RequestFactory().get('/api/jsonld')
+        request.user = type('UserStub', (), {'is_authenticated': True})()
+
+        self.assertIsNone(_require_auth(request))
 
 
 class SchemaPayloadHelperTest(SimpleTestCase):
     def test_build_dataset_dcat_rows_uses_typed_schema_payload(self):
-        dataset = dataset_to_dict(_make_test_dataset())
+        dataset = dataset_to_view_model(_make_test_dataset())
 
         rows = build_dataset_dcat_rows(_mock_schema(), dataset)
 
@@ -696,6 +797,49 @@ class SchemaPayloadHelperTest(SimpleTestCase):
                 ('dct:title', 'Title', 'Test Dataset'),
                 ('dct:accessRights', 'Access Rights', 'PUBLIC'),
             ],
+        )
+
+    def test_build_dataset_dcat_rows_preserves_identifier_and_type_fields(self):
+        dataset = dataset_to_view_model(
+            _make_test_dataset(
+                identifier='https://example.com/datasets/test-dataset',
+                type='http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+            )
+        )
+        schema = {
+            'dct:identifier': {
+                'prefix': 'dct',
+                'label': 'Identifier',
+                'local_name': 'identifier',
+                'uri': 'http://purl.org/dc/terms/identifier',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'A unique identifier for the Dataset.',
+            },
+            'dct:type': {
+                'prefix': 'dct',
+                'label': 'Type',
+                'local_name': 'type',
+                'uri': 'http://purl.org/dc/terms/type',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'The dataset type.',
+            },
+        }
+
+        rows = build_dataset_dcat_rows(schema, dataset)
+
+        self.assertIn(
+            ('dct:identifier', 'Identifier', 'https://example.com/datasets/test-dataset'),
+            rows,
+        )
+        self.assertIn(
+            (
+                'dct:type',
+                'Type',
+                'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+            ),
+            rows,
         )
 
 
@@ -719,12 +863,12 @@ class ChartPayloadHelperTest(SimpleTestCase):
         charts = normalise_stat_charts(raw_charts)
         chart_groups = build_chart_groups(charts)
 
-        self.assertEqual(charts[0]['data']['MiSeq'], 2)
-        self.assertNotIn('canvas_idx', charts[0])
+        self.assertEqual(charts[0].data['MiSeq'], 2)
+        self.assertIsNone(charts[0].canvas_idx)
         self.assertEqual(len(chart_groups), 1)
-        self.assertEqual(chart_groups[0]['table_name'], 'sequencing')
-        self.assertEqual(chart_groups[0]['charts'][0]['canvas_idx'], 1)
-        self.assertEqual(chart_groups[0]['charts'][1]['canvas_idx'], 2)
+        self.assertEqual(chart_groups[0].table_name, 'sequencing')
+        self.assertEqual(chart_groups[0].charts[0].canvas_idx, 1)
+        self.assertEqual(chart_groups[0].charts[1].canvas_idx, 2)
 
 
 class TablePayloadHelperTest(SimpleTestCase):
@@ -749,14 +893,14 @@ class TablePayloadHelperTest(SimpleTestCase):
 
         tables = normalise_tables(raw_tables)
 
-        self.assertEqual(tables[0]['name'], 'encounter')
-        self.assertEqual(tables[0]['title'], 'Encounter')
-        self.assertEqual(tables[0]['description'], 'Encounter data')
-        self.assertEqual(tables[0]['url'], 'https://example.com/tables/encounter')
-        self.assertEqual(tables[0]['columns'][0]['name'], 'patient_id')
-        self.assertEqual(tables[0]['columns'][0]['datatype'], 'string')
+        self.assertEqual(tables[0].name, 'encounter')
+        self.assertEqual(tables[0].title, 'Encounter')
+        self.assertEqual(tables[0].description, 'Encounter data')
+        self.assertEqual(tables[0].url, 'https://example.com/tables/encounter')
+        self.assertEqual(tables[0].columns[0].name, 'patient_id')
+        self.assertEqual(tables[0].columns[0].datatype, 'string')
         self.assertEqual(
-            tables[0]['columns'][0]['property_url'],
+            tables[0].columns[0].property_url,
             'https://example.com/prop/patient-id',
         )
 
@@ -809,30 +953,30 @@ class MultiValueMapperTest(SimpleTestCase):
 
     def test_theme_split_into_list(self):
         ds = _make_test_dataset(theme='http://a;http://b')
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['theme'], ['http://a', 'http://b'])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.theme, ['http://a', 'http://b'])
 
     def test_theme_deduplicates_repeated_values(self):
         ds = _make_test_dataset(theme='http://a;http://b;http://a')
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['theme'], ['http://a', 'http://b'])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.theme, ['http://a', 'http://b'])
 
     def test_applicable_legislation_split_into_list(self):
         ds = _make_test_dataset(applicable_legislation='http://x;http://y')
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['applicable_legislation'], ['http://x', 'http://y'])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.applicable_legislation, ['http://x', 'http://y'])
 
     def test_health_category_split_into_list(self):
         ds = _make_test_dataset(health_category='cat_a;cat_b')
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['health_category'], ['cat_a', 'cat_b'])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.health_category, ['cat_a', 'cat_b'])
 
     def test_single_value_is_single_element_list(self):
         ds = _make_test_dataset(health_category='patient_data')
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['health_category'], ['patient_data'])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.health_category, ['patient_data'])
 
     def test_empty_value_is_empty_list(self):
         ds = _make_test_dataset(theme=None)
-        result = dataset_to_dict(ds)
-        self.assertEqual(result['theme'], [])
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.theme, [])

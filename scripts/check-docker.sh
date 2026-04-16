@@ -1,19 +1,17 @@
 #!/bin/bash
 # Docker Build Check
 # Usage: ./scripts/check-docker.sh
-# Verifies that the Dockerfile builds successfully without producing a tagged image.
+# Verifies that both runtime and check images build from the compose layout.
 
 set -e
 
-# Build the image with a temporary tag so we can clean it up
-TEMP_TAG="hospital-dwh-catalogue-check:$$"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
-if docker build -f docker/Dockerfile -t "$TEMP_TAG" . > /dev/null 2>&1; then
-    # Remove the temporary image
-    docker rmi "$TEMP_TAG" > /dev/null 2>&1 || true
-    echo "PASSED: Docker image builds successfully"
+if run_dev_check_compose build web check > /dev/null 2>&1; then
+    echo "PASSED: Runtime and check images build successfully"
 else
-    docker rmi "$TEMP_TAG" > /dev/null 2>&1 || true
-    echo "FAILED: Docker image build failed"
+    echo "FAILED: Docker compose build failed"
     exit 1
 fi

@@ -43,10 +43,8 @@ This account is intended as a bootstrap/emergency account. Real staff should aut
 If you need to create an additional superuser by hand (e.g. the env vars are not set), run this inside the web container:
 
 ```bash
-docker compose -f docker-compose.<env>.yml exec web python manage.py createsuperuser
+./scripts/compose.sh exec web python manage.py createsuperuser
 ```
-
-Replace `<env>` with `dev`, `test`, or `prod`.
 
 > **Note:** If the manually created username matches `DJANGO_SUPERUSER_USERNAME` and the user has no usable local password (i.e. it is a pure LDAP account), the startup script will leave it untouched. If it does have a local password, the startup script will re-claim it as the env-managed account on next restart.
 

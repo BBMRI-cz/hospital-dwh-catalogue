@@ -1,12 +1,4 @@
-"""
-Cart helper for the ticketing app.
-
-Cart items are stored in the session as a list of dicts:
-    session['cart'] = [
-        {'app': 'warehouse', 'name': 'my_dataset', 'title': 'My Dataset'},
-        ...
-    ]
-"""
+"""Session-backed cart helpers for ticketing."""
 
 from __future__ import annotations
 
@@ -35,13 +27,12 @@ class CartService:
         """
         Add a dataset to the cart.
 
-        Idempotent — adding the same (app, name) twice is a no-op.
+        Adding the same ``(app, name)`` twice is a no-op.
         Returns True if the item was added, False if it was already present
         or the cart is full.
         """
         cart: list[dict] = list(session.get(CART_SESSION_KEY, []))
 
-        # Already present — idempotent
         for item in cart:
             if item['app'] == app and item['name'] == name:
                 logger.debug('Cart add no-op: app=%s name=%s already present', app, name)
@@ -64,6 +55,27 @@ class CartService:
             len(cart),
         )
         return True
+
+    @staticmethod
+    def contains(session: SessionBase, app: str, name: str) -> bool:
+        """Return whether the cart already contains the dataset."""
+        return any(
+            item['app'] == app and item['name'] == name
+            for item in session.get(CART_SESSION_KEY, [])
+        )
+
+    @staticmethod
+    def toggle(session: SessionBase, app: str, name: str, title: str) -> bool:
+        """Add the dataset when missing, otherwise remove it."""
+        if CartService.contains(session, app, name):
+            CartService.remove(session, app, name)
+            return False
+        return CartService.add(session, app, name, title)
+
+    @staticmethod
+    def dataset_ids(session: SessionBase) -> set[str]:
+        """Return the dataset identifiers currently present in the cart."""
+        return {item['name'] for item in session.get(CART_SESSION_KEY, [])}
 
     @staticmethod
     def remove(session: SessionBase, app: str, name: str) -> bool:

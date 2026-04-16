@@ -6,22 +6,27 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+
+if should_use_docker_check_runner; then
+    CHECK_COMMAND=(run_dev_check_compose run --rm check python -m ruff format --check .)
+    FORMAT_COMMAND=(run_dev_check_compose run --rm check python -m ruff format .)
+else
+    ensure_project_dependencies
+    PYTHON="$(resolve_python)"
+    CHECK_COMMAND=("$PYTHON" -m ruff format --check .)
+    FORMAT_COMMAND=("$PYTHON" -m ruff format .)
+fi
+
 CHECK_ONLY=false
 if [ "$1" = "--check" ]; then
     CHECK_ONLY=true
 fi
 
-# Detect Python executable
-if [ -f ".venv/bin/python" ]; then
-    PYTHON=".venv/bin/python"
-elif [ -f "venv/bin/python" ]; then
-    PYTHON="venv/bin/python"
-else
-    PYTHON="python"
-fi
-
 if [ "$CHECK_ONLY" = true ]; then
-    if $PYTHON -m ruff format --check . 2>&1; then
+    if "${CHECK_COMMAND[@]}" 2>&1; then
         echo "PASSED: All files formatted correctly"
     else
         echo "FAILED: Some files need formatting"
@@ -30,7 +35,7 @@ if [ "$CHECK_ONLY" = true ]; then
     fi
 else
     echo "Auto-formatting code..."
-    FORMAT_OUTPUT=$($PYTHON -m ruff format . 2>&1)
+    FORMAT_OUTPUT=$("${FORMAT_COMMAND[@]}" 2>&1)
     if echo "$FORMAT_OUTPUT" | grep -q "file.*reformatted"; then
         echo "Formatted: $FORMAT_OUTPUT"
     else

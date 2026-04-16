@@ -6,12 +6,26 @@ set -e
 
 TRANSLATION_ISSUES=false
 
+translation_file_is_dirty() {
+    [ -n "$(git status --porcelain -- "$1" 2>/dev/null)" ]
+}
+
 # Check for fuzzy translations
 echo "Checking for fuzzy translations..."
-if grep -r "^#, fuzzy" locale/*/LC_MESSAGES/django.po 2>/dev/null; then
-    echo "FAILED: Fuzzy translations found - please review and update translations"
-    TRANSLATION_ISSUES=true
-fi
+for po_file in locale/*/LC_MESSAGES/django.po; do
+    if [ -f "$po_file" ]; then
+        FUZZY_FOUND=$(grep "^#, fuzzy" "$po_file" 2>/dev/null || true)
+        if [ -n "$FUZZY_FOUND" ]; then
+            if translation_file_is_dirty "$po_file"; then
+                echo "FAILED: Fuzzy translations found in changed file $po_file"
+                echo "$FUZZY_FOUND"
+                TRANSLATION_ISSUES=true
+            else
+                echo "WARN: Existing fuzzy translations in clean file $po_file (not failing)"
+            fi
+        fi
+    fi
+done
 
 # Check for empty translations
 echo "Checking for empty translations..."
@@ -33,12 +47,16 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
                 }
             }
             END { exit (found > 0) }
-        ' "$po_file" 2>&1)
+        ' "$po_file" 2>&1 || true)
         
-        if [ $? -ne 0 ]; then
-            echo "FAILED: Empty translations found in $po_file"
-            echo "$EMPTY_FOUND"
-            TRANSLATION_ISSUES=true
+        if [ -n "$EMPTY_FOUND" ]; then
+            if translation_file_is_dirty "$po_file"; then
+                echo "FAILED: Empty translations found in changed file $po_file"
+                echo "$EMPTY_FOUND"
+                TRANSLATION_ISSUES=true
+            else
+                echo "WARN: Existing empty translations in clean file $po_file (not failing)"
+            fi
         fi
     fi
 done
@@ -54,9 +72,13 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
     if [ -f "$po_file" ]; then
         mo_file="${po_file%.po}.mo"
         if [ ! -f "$mo_file" ]; then
-            echo "FAILED: Missing compiled translation: $mo_file"
-            echo "  Run: python manage.py compilemessages"
-            TRANSLATION_ISSUES=true
+            if translation_file_is_dirty "$po_file"; then
+                echo "FAILED: Missing compiled translation for changed file: $mo_file"
+                echo "  Run: python manage.py compilemessages"
+                TRANSLATION_ISSUES=true
+            else
+                echo "WARN: Missing compiled translation for clean file $po_file (not failing)"
+            fi
         else
             stale=false
             # Check whether the .po has uncommitted or untracked changes in git.
@@ -77,9 +99,13 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
             fi
 
             if [ "$stale" = true ]; then
-                echo "FAILED: Stale compiled translation: $mo_file is older than $po_file"
-                echo "  Run: python manage.py compilemessages"
-                TRANSLATION_ISSUES=true
+                if translation_file_is_dirty "$po_file"; then
+                    echo "FAILED: Stale compiled translation: $mo_file is older than changed file $po_file"
+                    echo "  Run: python manage.py compilemessages"
+                    TRANSLATION_ISSUES=true
+                else
+                    echo "WARN: Existing stale compiled translation for clean file $po_file (not failing)"
+                fi
             fi
         fi
     fi

@@ -35,33 +35,14 @@ fi
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Setup virtual environment if it doesn't exist
-if [ ! -d ".venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv .venv
-fi
+# shellcheck source=scripts/lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
-# Detect Python executable
-if [ -f ".venv/bin/python" ]; then
-    PYTHON=".venv/bin/python"
-    PIP=".venv/bin/pip"
-elif [ -f "venv/bin/python" ]; then
-    PYTHON="venv/bin/python"
-    PIP="venv/bin/pip"
-else
-    PYTHON="python"
-    PIP="pip"
-fi
-
-# Install/upgrade dependencies if needed
-if [ ! -f ".venv/.deps_installed" ] || [ "requirements.txt" -nt ".venv/.deps_installed" ] || [ "requirements-dev.txt" -nt ".venv/.deps_installed" ]; then
-    echo "Installing/updating dependencies..."
-    $PIP install --upgrade pip > /dev/null 2>&1
-    $PIP install -r requirements.txt > /dev/null 2>&1
-    $PIP install -r requirements-dev.txt > /dev/null 2>&1
-    touch .venv/.deps_installed
-    echo "Dependencies installed successfully"
+if should_use_docker_check_runner; then
+    echo "Using Docker check runner because local dev tools are unavailable."
     echo ""
+else
+    ensure_project_dependencies
 fi
 
 # Track if any check fails
@@ -166,4 +147,3 @@ else
     echo "========================================"
     exit 0
 fi
-

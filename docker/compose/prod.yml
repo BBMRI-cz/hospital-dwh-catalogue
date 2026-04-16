@@ -1,0 +1,77 @@
+services:
+  db:
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save 300 1 --loglevel warning
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    command: gunicorn catalogue.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-4}
+    restart: unless-stopped
+    volumes:
+      - staticfiles:/app/staticfiles
+      - logs:/app/logs
+    environment:
+      DJANGO_SETTINGS_MODULE: catalogue.settings.prod
+      REDIS_URL: redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    restart: unless-stopped
+    volumes:
+      - logs:/app/logs
+    environment:
+      DJANGO_SETTINGS_MODULE: catalogue.settings.prod
+      REDIS_URL: redis://redis:6379/1
+
+  nginx:
+    ports:
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - ../../docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../docker/nginx/conf.d/prod.conf:/etc/nginx/conf.d/default.conf.template:ro
+      - ../../docker/nginx/conf.d/bootstrap.conf:/etc/nginx/conf.d/bootstrap.conf.template:ro
+      - ../../docker/nginx/conf.d/includes:/etc/nginx/conf.d/includes:ro
+      - ../../docker/nginx/error_pages:/etc/nginx/error_pages:ro
+      - staticfiles:/app/staticfiles:ro
+      - letsencrypt_data:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
+    environment:
+      SERVER_NAME: ${SERVER_NAME}
+    command: >
+      /bin/sh -c
+      "if [ -f /etc/letsencrypt/live/$$SERVER_NAME/fullchain.pem ];
+      then envsubst '$$SERVER_NAME' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf;
+      else envsubst '$$SERVER_NAME' < /etc/nginx/conf.d/bootstrap.conf.template > /etc/nginx/conf.d/default.conf;
+      fi && while :; do sleep 6h; nginx -s reload 2>/dev/null || true; done &
+      nginx -g 'daemon off;'"
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+    entrypoint: ["/bin/sh", "-c", "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"]
+
+volumes:
+  redis_data:
+  letsencrypt_data:
+  certbot_webroot:
+
+networks:
+  default:
+    name: hospital_dwh_network
+    driver: bridge

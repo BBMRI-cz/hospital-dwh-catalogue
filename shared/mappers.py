@@ -1,13 +1,4 @@
-"""
-Mappers: Django model instances → shared DTOs.
-
-Each mapper function accepts a concrete model instance from one of the
-source apps and returns a normalised DTO.  FKs are resolved via
-getattr(..., None) guards so that None FKs never raise AttributeError.
-
-Naming convention:
-  map_<source>_<entity>  e.g. map_warehouse_dataset, map_fair_dataset
-"""
+"""Map source models into shared DTOs."""
 
 from __future__ import annotations
 
@@ -27,7 +18,6 @@ from shared.dtos import (
 )
 
 if TYPE_CHECKING:
-    # Import only for type hints — avoids import-time coupling.
     from fair_genomes import models as fgm
     from warehouse import models as wm
 
@@ -39,17 +29,14 @@ class _RelatedManager(Protocol[_ModelT]):
     def all(self) -> Iterable[_ModelT]: ...
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
-
 def _fk_name(obj: object, fk_attr: str) -> str | None:
-    """Return the .name of a FK object, or None if the FK is not set."""
+    """Return the ``name`` of a related object if it exists."""
     related = getattr(obj, fk_attr, None)
     return getattr(related, 'name', None) if related else None
 
 
 def _dt_str(obj: object, attr: str) -> str | None:
-    """Return isoformat of a DateTimeField or None."""
+    """Return an ISO timestamp string for an attribute if present."""
     value = getattr(obj, attr, None)
     return value.isoformat() if value else None
 
@@ -57,6 +44,11 @@ def _dt_str(obj: object, attr: str) -> str | None:
 def _keywords(value: str | None) -> list[str]:
     """Split a comma-separated keyword string into a clean list."""
     return [item.strip() for item in (value or '').split(',') if item.strip()]
+
+
+def _related_items(obj: object, attr: str) -> Iterable[Any]:
+    manager = cast(_RelatedManager[Any] | None, getattr(obj, attr, None))
+    return manager.all() if manager else ()
 
 
 def map_export_contact_point(
@@ -109,23 +101,19 @@ def map_export_column(obj: wm.Column) -> ExportColumn:
 
 
 def map_export_table(obj: wm.Table) -> ExportTable:
-    columns_manager = cast(_RelatedManager[Any] | None, getattr(obj, 'columns', None))
     return ExportTable(
         name=obj.name,
         title=getattr(obj, 'title', None),
         description=getattr(obj, 'description', None),
         url=getattr(obj, 'url', None),
-        columns=[map_export_column(column) for column in columns_manager.all()]
-        if columns_manager
-        else [],
+        columns=[map_export_column(column) for column in _related_items(obj, 'columns')],
     )
 
 
 def map_export_distribution(
     obj: wm.Distribution | fgm.Distribution, app: str
 ) -> ExportDistribution:
-    tables_manager = cast(_RelatedManager[Any] | None, getattr(obj, 'tables', None))
-    tables = [map_export_table(table) for table in tables_manager.all()] if tables_manager else []
+    tables = [map_export_table(table) for table in _related_items(obj, 'tables')]
     return ExportDistribution(
         app=app,
         name=obj.name,
@@ -158,10 +146,6 @@ def map_export_dataset(
     hdab = getattr(obj, 'hdab', None)
     custodian = getattr(obj, 'custodian', None)
     source = getattr(obj, 'source', None)
-    distributions_manager = cast(
-        _RelatedManager[Any] | None,
-        getattr(obj, 'distributions', None),
-    )
     return ExportDataset(
         app=app,
         name=obj.name,
@@ -189,72 +173,15 @@ def map_export_dataset(
         custodian=map_export_agent(custodian, app) if custodian else None,
         distributions=[
             map_export_distribution(distribution, app)
-            for distribution in distributions_manager.all()
-        ]
-        if distributions_manager
-        else [],
+            for distribution in _related_items(obj, 'distributions')
+        ],
     )
 
 
-# ── Warehouse (Local Metadata) mappers ────────────────────────────────────────
-
-
-def map_warehouse_dataset(obj: wm.Dataset) -> UnifiedDataset:
+def map_unified_dataset(obj: wm.Dataset | fgm.Dataset, app: str) -> UnifiedDataset:
     cp = getattr(obj, 'contact_point', None)
     return UnifiedDataset(
-        app='warehouse',
-        name=obj.name,
-        title=obj.title,
-        version=obj.version,
-        description=obj.description,
-        theme=obj.theme,
-        publisher=_fk_name(obj, 'publisher'),
-        conforms_to=obj.conforms_to,
-        issued=_dt_str(obj, 'issued'),
-        modified=_dt_str(obj, 'modified'),
-        keyword=obj.keyword,
-        source=_fk_name(obj, 'source'),
-        creator=_fk_name(obj, 'creator'),
-        contact_point=getattr(cp, 'email', None),
-        provenance=obj.provenance,
-        catalog_name=_fk_name(obj, 'catalog'),
-        access_rights=obj.access_rights,
-        applicable_legislation=obj.applicable_legislation,
-        health_category=obj.health_category,
-        hdab=_fk_name(obj, 'hdab'),
-        custodian=_fk_name(obj, 'custodian'),
-        identifier=getattr(obj, 'identifier', None),
-        type=getattr(obj, 'type', None),
-    )
-
-
-def map_warehouse_distribution(obj: wm.Distribution) -> UnifiedDistribution:
-    return UnifiedDistribution(
-        app='warehouse',
-        name=obj.name,
-        dataset_name=_fk_name(obj, 'dataset_name'),
-        title=obj.title,
-        description=obj.description,
-        access_url=obj.access_url,
-        applicable_legislation=obj.applicable_legislation,
-        format=obj.format,
-        conforms_to=obj.conforms_to,
-        byte_size=obj.byte_size,
-        rights=obj.rights,
-        release_date=_dt_str(obj, 'release_date'),
-        modification_date=_dt_str(obj, 'modification_date'),
-        licence=obj.licence,
-        db_layer=getattr(obj, 'db_layer', None),
-    )
-
-
-# ── FAIR Genomes mappers ───────────────────────────────────────────────────────
-
-
-def map_fair_dataset(obj: fgm.Dataset) -> UnifiedDataset:
-    cp = getattr(obj, 'contact_point', None)
-    return UnifiedDataset(
-        app='fair_genomes',
+        app=app,
         name=obj.name,
         title=obj.title,
         version=obj.version,
@@ -280,9 +207,12 @@ def map_fair_dataset(obj: fgm.Dataset) -> UnifiedDataset:
     )
 
 
-def map_fair_distribution(obj: fgm.Distribution) -> UnifiedDistribution:
+def map_unified_distribution(
+    obj: wm.Distribution | fgm.Distribution,
+    app: str,
+) -> UnifiedDistribution:
     return UnifiedDistribution(
-        app='fair_genomes',
+        app=app,
         name=obj.name,
         dataset_name=_fk_name(obj, 'dataset_name'),
         title=obj.title,
@@ -296,4 +226,5 @@ def map_fair_distribution(obj: fgm.Distribution) -> UnifiedDistribution:
         release_date=_dt_str(obj, 'release_date'),
         modification_date=_dt_str(obj, 'modification_date'),
         licence=obj.licence,
+        db_layer=getattr(obj, 'db_layer', None),
     )

@@ -2,29 +2,22 @@
 {% get_current_language as LANGUAGE_CODE %}
 <header class="cat-header sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
   <div class="max-w-screen-2xl mx-auto px-4 h-20 flex items-center gap-4">
-
-  <!-- Logo -->
   <a href="{% url 'frontend:catalogue' %}" class="shrink-0 flex items-center py-2" title="{% trans 'Data Catalogue' %}">
     <img src="{% static 'img/mmci_logo.svg' %}" alt="MMCI logo" class="max-h-full w-auto">
   </a>
 
   <div class="flex-1"></div>
 
-  <!-- Right side -->
   <div class="flex items-center gap-3">
     {% if user.is_authenticated %}
-
-    <!-- Cart -->
     <a href="{% url 'ticketing:cart' %}" class="relative flex items-center justify-center w-10 h-10 rounded-md text-txt-muted hover:bg-gray-100 transition-colors" title="{% trans 'View cart' %}">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
       </svg>
-      <span id="cart-badge" class="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-white font-mono font-bold text-[9px] bg-mou-orange{% if cart_count == 0 %} hidden{% endif %}"
-        style="min-width:15px;height:15px;padding:0 3px;">{{ cart_count }}</span>
+      {% include "includes/_cart_badge.html" with cart_count=cart_count only %}
     </a>
 
-    <!-- Language switcher -->
     <div class="flex items-center rounded-md border border-gray-200 overflow-hidden text-[13px] font-mono">
       <button type="button"
         @click="document.getElementById('lang-input').value='cs';document.getElementById('lang-form').submit()"
@@ -37,7 +30,6 @@
         >EN</button>
     </div>
 
-    <!-- User dropdown -->
     <div class="relative" x-data="{ open: false }">
       <button type="button"
         @click="open = !open"
@@ -86,10 +78,9 @@
     {% endif %}
   </div>
 
-  </div>{# /inner #}
+  </div>
 </header>
 
-<!-- Hidden language form -->
 <form id="lang-form" action="{% url 'set_language' %}" method="post" class="hidden">
   {% csrf_token %}
   <input name="next" type="hidden" value="{{ request.get_full_path }}">

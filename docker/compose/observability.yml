@@ -1,0 +1,46 @@
+services:
+  loki:
+    image: grafana/loki:3.0.0
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ../../docker/loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    command:
+      - -config.file=/etc/promtail/config.yml
+      - -config.expand-env=true
+    environment:
+      PROMTAIL_JOB_NAME: django_${DEPLOY_ENV}
+      PROMTAIL_ENV: ${DEPLOY_ENV}
+    volumes:
+      - ../../docker/promtail/config.yml:/etc/promtail/config.yml:ro
+      - logs:/app/logs:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../../docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_SERVER_DOMAIN: ${SERVER_NAME:-localhost}
+      GF_SERVER_ROOT_URL: ${SITE_URL}/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+volumes:
+  loki_data:
+  grafana_data:

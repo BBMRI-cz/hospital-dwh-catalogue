@@ -1,10 +1,4 @@
-"""
-Ticketing Service — orchestrates ticket creation, item persistence,
-and external ticketing system submission.
-
-All direct ORM access for the ticketing domain lives here so that views
-remain free of database calls.
-"""
+"""Ticket persistence and submission workflows."""
 
 from __future__ import annotations
 
@@ -15,6 +9,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from ticketing.models import TicketRequest, TicketRequestItem
+from ticketing.presenters import (
+    build_ticket_description,
+    build_ticket_history_entries,
+    build_ticket_subject,
+)
+from ticketing.read_models import TicketHistoryEntry
 from ticketing.services.base import TicketData
 from ticketing.services.factory import get_ticket_service
 
@@ -23,8 +23,6 @@ logger = logging.getLogger(__name__)
 
 class TicketingService:
     """High-level service for creating and submitting ticket requests."""
-
-    # ── Ticket creation ─────────────────────────────────────────────────────
 
     @staticmethod
     def create_ticket_from_cart(
@@ -37,12 +35,7 @@ class TicketingService:
 
         Returns the persisted ``TicketRequest`` in ``DRAFT`` status.
         """
-        dataset_names = ', '.join(item['title'] for item in cart)
-        auto_subject = (
-            (str(_('Data access request')) + f' \u2014 {dataset_names}')
-            if dataset_names
-            else str(_('Data access request'))
-        )[:500]
+        auto_subject = build_ticket_subject(cart, str(_('Data access request')))
 
         with transaction.atomic():
             ticket = TicketRequest.objects.create(
@@ -71,8 +64,6 @@ class TicketingService:
         )
         return ticket
 
-    # ── Alvao submission ────────────────────────────────────────────────────
-
     @staticmethod
     def submit_ticket(ticket: TicketRequest, cart: list[dict]) -> str | None:
         """Submit *ticket* to the external ticketing system (Alvao).
@@ -84,7 +75,7 @@ class TicketingService:
         service = get_ticket_service()
         ticket_data = TicketData(
             subject=ticket.subject,
-            description=_build_ticket_description(ticket, cart),
+            description=build_ticket_description(ticket.description, cart),
             requester_email=ticket.requester_email,
             requester_name=ticket.requester_name,
         )
@@ -111,12 +102,10 @@ class TicketingService:
             ticket.save()
             raise
 
-    # ── Queries ─────────────────────────────────────────────────────────────
-
     @staticmethod
-    def get_user_tickets(user):
-        """Return a QuerySet of tickets belonging to *user* (including pre-auth sessions)."""
-        return (
+    def get_user_tickets(user) -> list[TicketHistoryEntry]:
+        """Return read models for tickets belonging to *user*."""
+        tickets = list(
             TicketRequest.objects.filter(
                 models.Q(requester=user)
                 | models.Q(requester__isnull=True, requester_email=user.email)
@@ -124,12 +113,4 @@ class TicketingService:
             .prefetch_related('items')
             .order_by('-created_at')
         )
-
-
-def _build_ticket_description(ticket: TicketRequest, cart: list[dict]) -> str:
-    lines = [ticket.description]
-    if cart:
-        lines += ['', '--- Requested datasets ---']
-        for item in cart:
-            lines.append(f'  [{item["app"]}] {item["title"]} ({item["name"]})')
-    return '\n'.join(lines)
+        return build_ticket_history_entries(tickets)

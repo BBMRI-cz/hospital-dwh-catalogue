@@ -1,9 +1,4 @@
 {% load i18n static %}
-{% comment %}
-  Expects: tables — list of typed frontend table payloads:
-    name, title, description, url, columns
-  Each table gets a DaisyUI <dialog> modal for its columns.
-{% endcomment %}
 <div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8 card"
   x-data="{ q: '' }">
   <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
@@ -66,7 +61,6 @@
   </table>
 </div>
 
-{# ── Per-table column modals ──────────────────────────────────────────────── #}
 {% for tbl in tables %}
 {% include 'catalogue/components/_table_modal.html' with tbl=tbl idx=forloop.counter %}
 {% endfor %}

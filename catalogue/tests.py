@@ -4,8 +4,11 @@ Tests for the catalogue project configuration.
 Covers URL routing, views, and database routers.
 """
 
+from types import SimpleNamespace
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from .routers import AuthRouter, WarehouseRouter
 
@@ -141,3 +144,109 @@ class WarehouseRouterTest(TestCase):
         fg_dataset = Dataset(name='fg-ds1')
         ticket = TicketRequest(requester_email='t@e.com')
         self.assertFalse(self.router.allow_relation(fg_dataset, ticket))
+
+
+class AttachDistributionsTest(SimpleTestCase):
+    def test_attach_distributions_returns_new_dataset_objects(self):
+        from shared.catalogue_assemblers import attach_distributions
+        from shared.dtos import UnifiedDataset, UnifiedDistribution
+
+        dataset = UnifiedDataset(app='warehouse', name='ds-1', title='Dataset One')
+        distributions = [
+            UnifiedDistribution(
+                app='warehouse',
+                name='dist-1',
+                dataset_name='ds-1',
+                title='Distribution One',
+            )
+        ]
+
+        attached = attach_distributions([dataset], distributions)
+
+        self.assertEqual(dataset.distributions, [])
+        self.assertEqual(len(attached), 1)
+        self.assertIsNot(attached[0], dataset)
+        self.assertEqual(
+            [distribution.name for distribution in attached[0].distributions],
+            ['dist-1'],
+        )
+
+
+class SourceLoaderRegistryTest(SimpleTestCase):
+    def test_get_export_source_apps_uses_registered_sources(self):
+        from shared.source_loaders import get_export_source_apps
+
+        self.assertEqual(get_export_source_apps(), ('warehouse', 'fair_genomes'))
+
+    def test_get_apps_with_table_columns_uses_registered_sources(self):
+        from shared.source_loaders import get_apps_with_table_columns
+
+        self.assertEqual(get_apps_with_table_columns(), frozenset({'warehouse'}))
+
+    def test_get_export_models_returns_none_for_unknown_source(self):
+        from shared.source_loaders import get_export_models
+
+        self.assertEqual(get_export_models('unknown_source'), (None, None, None))
+
+    def test_get_export_models_resolves_registered_source_models(self):
+        from fair_genomes.models import Dataset as FairDataset
+        from shared.source_loaders import get_export_models
+        from warehouse.models import Dataset as WarehouseDataset
+
+        wh_db_alias, _, wh_dataset_model = get_export_models('warehouse')
+        fg_db_alias, _, fg_dataset_model = get_export_models('fair_genomes')
+
+        self.assertEqual(wh_db_alias, 'metadata_db')
+        self.assertIs(wh_dataset_model, WarehouseDataset)
+        self.assertEqual(fg_db_alias, 'fair_genomes_db')
+        self.assertIs(fg_dataset_model, FairDataset)
+
+    def test_export_loaders_return_none_for_unknown_source(self):
+        from shared.source_loaders import load_export_catalog, load_export_dataset
+
+        self.assertIsNone(load_export_dataset('unknown_source', 'dataset-1'))
+        self.assertIsNone(load_export_catalog('unknown_source', 'catalog-1'))
+
+
+class CompleteExportCatalogueAssemblerTest(SimpleTestCase):
+    @patch(
+        'shared.catalogue_assemblers.map_export_catalog',
+        return_value=SimpleNamespace(name='catalog-1'),
+    )
+    @patch(
+        'shared.catalogue_assemblers.map_export_dataset',
+        return_value=SimpleNamespace(name='dataset-1'),
+    )
+    def test_build_complete_export_catalogue_skips_failing_source(
+        self,
+        mock_map_dataset,
+        mock_map_catalog,
+    ):
+        from shared.catalogue_assemblers import build_complete_export_catalogue
+
+        def get_models(app):
+            if app == 'warehouse':
+                return 'metadata_db', object, object
+            return 'fair_genomes_db', object, object
+
+        def get_catalog_queryset(db_alias, _catalog_model):
+            if db_alias == 'fair_genomes_db':
+                raise RuntimeError('boom')
+            return [SimpleNamespace(name='catalog-1')]
+
+        def get_dataset_queryset(app, db_alias, _dataset_model):
+            if db_alias == 'fair_genomes_db':
+                raise RuntimeError('boom')
+            return [SimpleNamespace(name='dataset-1', catalog_id='catalog-1')]
+
+        catalogs, orphan_datasets = build_complete_export_catalogue(
+            apps=('warehouse', 'fair_genomes'),
+            get_models=get_models,
+            get_catalog_queryset=get_catalog_queryset,
+            get_dataset_queryset=get_dataset_queryset,
+        )
+
+        self.assertEqual([catalog.name for catalog in catalogs], ['catalog-1'])
+        self.assertEqual(orphan_datasets, [])
+        mock_map_catalog.assert_called_once()
+        mock_map_dataset.assert_called_once()

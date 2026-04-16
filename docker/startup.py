@@ -11,16 +11,21 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from startup_tasks import (
+    ENV_SUPERUSER_SENTINEL_EMAIL,
+    env_superuser_credentials,
+    should_collectstatic,
+    should_seed_mock_fair_genomes,
+    table_is_missing,
+    tailwind_build_command,
+    translations_need_compile,
+)
+
 import django
 from django.core.management import call_command
 from django.db import connections
 
 logger = logging.getLogger(__name__)
-
-# Sentinel email that marks env-managed superuser accounts.
-# This allows the startup script to track which user it owns across restarts,
-# even if LDAP (AUTH_LDAP_ALWAYS_UPDATE_USER) overwrites the email field.
-_ENV_SUPERUSER_SENTINEL_EMAIL = 'env-managed-superuser@localhost'
 
 
 def _ensure_env_superuser() -> None:
@@ -45,22 +50,21 @@ def _ensure_env_superuser() -> None:
     from django.contrib.auth import get_user_model
     from django.contrib.auth.models import User
 
-    username = os.environ.get('DJANGO_SUPERUSER_USERNAME', '').strip()
-    password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '').strip()
-
-    if not username or not password:
+    credentials = env_superuser_credentials(os.environ)
+    if credentials is None:
         print(
             'DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser bootstrap.',
             flush=True,
         )
         return
+    username, password = credentials
 
     UserModel = get_user_model()
 
     # ── Remove stale env-managed user (username changed in .env) ─────────────
     deleted_count, _ = (
         UserModel.objects.using('auth_db')
-        .filter(email=_ENV_SUPERUSER_SENTINEL_EMAIL)
+        .filter(email=ENV_SUPERUSER_SENTINEL_EMAIL)
         .exclude(username=username)
         .delete()
     )
@@ -71,7 +75,7 @@ def _ensure_env_superuser() -> None:
     result = UserModel.objects.using('auth_db').get_or_create(
         username=username,
         defaults={
-            'email': _ENV_SUPERUSER_SENTINEL_EMAIL,
+            'email': ENV_SUPERUSER_SENTINEL_EMAIL,
             'is_staff': True,
             'is_superuser': True,
         },
@@ -86,7 +90,7 @@ def _ensure_env_superuser() -> None:
         return
 
     # User already existed — decide whether to claim/re-claim it.
-    has_sentinel = user.email == _ENV_SUPERUSER_SENTINEL_EMAIL
+    has_sentinel = user.email == ENV_SUPERUSER_SENTINEL_EMAIL
     is_local_superuser = user.is_superuser and user.has_usable_password()
 
     if not has_sentinel and not is_local_superuser:
@@ -100,7 +104,7 @@ def _ensure_env_superuser() -> None:
 
     # Either sentinel is present (normal case or re-stamp after LDAP overwrite)
     # or it's a local-password superuser we previously owned: re-claim.
-    user.email = _ENV_SUPERUSER_SENTINEL_EMAIL
+    user.email = ENV_SUPERUSER_SENTINEL_EMAIL
     user.is_staff = True
     user.is_superuser = True
     user.set_password(password)
@@ -108,15 +112,6 @@ def _ensure_env_superuser() -> None:
 
     action = 'updated (re-stamped sentinel)' if not has_sentinel else 'updated'
     print(f"Env superuser: '{username}' {action}.", flush=True)
-
-
-def _translations_need_compile(locale_dir: Path) -> bool:
-    """Return True if any .po file is missing its .mo or is newer than it."""
-    for po in locale_dir.rglob('*.po'):
-        mo = po.with_suffix('.mo')
-        if not mo.exists() or po.stat().st_mtime > mo.stat().st_mtime:
-            return True
-    return False
 
 
 def _build_tailwind_css(base_dir: Path) -> None:
@@ -132,16 +127,7 @@ def _build_tailwind_css(base_dir: Path) -> None:
         return
 
     result = subprocess.run(
-        [
-            'tailwindcss',
-            '-c',
-            str(base_dir / 'tailwind.config.js'),
-            '-i',
-            str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.input.css'),
-            '-o',
-            str(base_dir / 'frontend' / 'static' / 'css' / 'tailwind.css'),
-            '--minify',
-        ],
+        tailwind_build_command(base_dir),
         capture_output=True,
         text=True,
     )
@@ -169,7 +155,7 @@ def main() -> None:
     # Repair drifted default migration state where ticketing 0001 is marked applied
     # but the table is missing (DB was reset/replaced without clearing django_migrations).
     default_tables = connections['default'].introspection.table_names()
-    if 'ticketing_ticket_request' not in default_tables:
+    if table_is_missing(default_tables, 'ticketing_ticket_request'):
         print(
             'default migration drift detected (missing ticketing_ticket_request). '
             'Repairing migration state...',
@@ -184,7 +170,7 @@ def main() -> None:
     # Repair drifted fair_genomes_db migration state where 0001 is marked applied
     # but core tables are missing (legacy schema leftovers, manual DB changes).
     fg_tables = connections['fair_genomes_db'].introspection.table_names()
-    if 'fair_genomes_contact_point' not in fg_tables:
+    if table_is_missing(fg_tables, 'fair_genomes_contact_point'):
         print(
             'fair_genomes_db migration drift detected (missing fair_genomes_contact_point). '
             'Repairing migration state...',
@@ -211,7 +197,7 @@ def main() -> None:
         )
 
     # ── Seed mock data ────────────────────────────────────────────────────────
-    if os.environ.get('MOCK_FAIR_GENOMES', 'False') == 'True':
+    if should_seed_mock_fair_genomes(os.environ):
         print('MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data...', flush=True)
         call_command('seed_fair_genomes_mock')
 
@@ -221,14 +207,14 @@ def main() -> None:
 
     # ── Translations ──────────────────────────────────────────────────────────
     locale_dir = Path(__file__).resolve().parent.parent / 'locale'
-    if _translations_need_compile(locale_dir):
+    if translations_need_compile(locale_dir):
         print('Compiling translations...', flush=True)
         call_command('compilemessages', locale=['cs', 'en'], verbosity=0)
     else:
         print('Translations up to date, skipping compilemessages.', flush=True)
 
     # ── Static files (skip in dev — runserver serves them directly) ───────────
-    if settings_module != 'catalogue.settings.dev':
+    if should_collectstatic(settings_module):
         call_command('collectstatic', interactive=False, verbosity=0)
 
 

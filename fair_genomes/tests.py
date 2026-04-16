@@ -295,7 +295,7 @@ class SyncStatsTest(TestCase):
         resp.json.return_value = {'data': {f'{table_cap}_groupBy': rows}}
         return resp
 
-    @patch('fair_genomes.services.fair_genomes_service.requests.post')
+    @patch('fair_genomes.services.stats.requests.post')
     def test_sync_stats_success(self, mock_post):
         # Each stat def gets its own mock response; only the first needs real data.
         n = len(self.STAT_DEFS)
@@ -321,7 +321,7 @@ class SyncStatsTest(TestCase):
         )
         self.assertEqual(sr.distribution, {'MiSeq': 17, 'NovaSeq': 5})
 
-    @patch('fair_genomes.services.fair_genomes_service.requests.post')
+    @patch('fair_genomes.services.stats.requests.post')
     def test_sync_stats_http_error(self, mock_post):
         import requests as req_lib
 
@@ -335,7 +335,7 @@ class SyncStatsTest(TestCase):
         self.assertEqual(report['failed'], n)
         self.assertEqual(len(report['errors']), n)
 
-    @patch('fair_genomes.services.fair_genomes_service.requests.post')
+    @patch('fair_genomes.services.stats.requests.post')
     def test_sync_stats_graphql_error_response(self, mock_post):
         resp = MagicMock()
         resp.raise_for_status.return_value = None

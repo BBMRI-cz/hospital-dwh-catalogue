@@ -4,16 +4,19 @@
 
 set -e
 
-# Detect Python executable
-if [ -f ".venv/bin/python" ]; then
-    PYTHON=".venv/bin/python"
-elif [ -f "venv/bin/python" ]; then
-    PYTHON="venv/bin/python"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+
+if should_use_docker_check_runner; then
+    BANDIT_COMMAND=(run_dev_check_compose run --rm check python -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 else
-    PYTHON="python"
+    ensure_project_dependencies
+    PYTHON="$(resolve_python)"
+    BANDIT_COMMAND=("$PYTHON" -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 fi
 
-BANDIT_OUTPUT=$($PYTHON -m bandit -r . -x ./warehouse/static,./venv,./.venv,./node_modules -ll 2>&1) || true
+BANDIT_OUTPUT=$("${BANDIT_COMMAND[@]}" 2>&1) || true
 if echo "$BANDIT_OUTPUT" | grep -q "No issues identified"; then
     echo "PASSED: No security issues"
 elif echo "$BANDIT_OUTPUT" | grep -q "Severity: Medium\|Severity: High"; then

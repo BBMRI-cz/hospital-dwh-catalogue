@@ -33,7 +33,7 @@ In development or staging, set `MOCK_FAIR_GENOMES=True` to use sample data inste
 Run the sync command inside the web container:
 
 ```bash
-docker compose -f docker-compose.<env>.yml exec web python manage.py sync_fair_genomes
+./scripts/compose.sh exec web python manage.py sync_fair_genomes
 ```
 
 This does two things:
@@ -47,7 +47,7 @@ A dedicated `scheduler` Docker container runs the sync on a cron schedule. The i
 The scheduler logs go to the container's stdout, so you can view them with:
 
 ```bash
-docker compose -f docker-compose.<env>.yml logs scheduler
+./scripts/compose.sh logs scheduler
 ```
 
 ## Viewing the data

@@ -1,9 +1,4 @@
-"""
-Mock Alvao Service for development environment.
-
-This service simulates Alvao Service Desk API behavior without making real API calls.
-Stores tickets in a local SQLite database or in-memory for testing.
-"""
+"""Mock Alvao service used in non-production environments."""
 
 import logging
 import uuid
@@ -17,25 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class MockAlvaoService:
-    """
-    Mock implementation of Alvao Service Desk API.
+    """Simulate Alvao ticket creation without a live API."""
 
-    Used in development environment to simulate ticket creation and retrieval
-    without connecting to a real Alvao server.
-
-    Tickets are stored in the local database using the MockTicket model.
-    """
-
-    # In-memory storage for tickets (used when database is not available)
     _memory_storage: dict[str, dict] = {}
 
     def __init__(self, use_database: bool = True):
-        """
-        Initialize the mock service.
-
-        Args:
-            use_database: Whether to persist to database (vs memory only)
-        """
         self.use_database = use_database
 
     def _simulate_delay(self) -> None:
@@ -52,17 +33,13 @@ class MockAlvaoService:
 
     def _generate_ticket_number(self) -> str:
         """Generate a mock ticket number."""
-        # Simple incrementing number based on timestamp
         return f'T{int(datetime.now().timestamp()) % 100000:05d}'
 
     def _store_ticket(self, ticket_id: str, data: dict) -> None:
         """Store ticket data (database or memory)."""
         if self.use_database:
-            # We store mock tickets in the same model but with mock IDs
-            # The actual storage happens through the views
             pass
 
-        # Always store in memory as backup
         MockAlvaoService._memory_storage[ticket_id] = data
 
     def _get_stored_ticket(self, ticket_id: str) -> dict | None:
@@ -70,15 +47,7 @@ class MockAlvaoService:
         return MockAlvaoService._memory_storage.get(ticket_id)
 
     def create_ticket(self, ticket_data: TicketData) -> TicketResponse:
-        """
-        Create a mock ticket.
-
-        Args:
-            ticket_data: Data for the new ticket
-
-        Returns:
-            TicketResponse with mock ticket information
-        """
+        """Create and return a mock ticket response."""
         self._simulate_delay()
 
         ticket_id = self._generate_ticket_id()

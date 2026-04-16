@@ -70,7 +70,7 @@ To sync only specific stats:
 Run the full sync:
 
 ```bash
-docker compose -f docker-compose.<env>.yml exec web python manage.py sync_fair_genomes
+./scripts/compose.sh exec web python manage.py sync_fair_genomes
 ```
 
 ### Automatically via the scheduler

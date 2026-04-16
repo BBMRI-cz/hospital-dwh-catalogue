@@ -39,7 +39,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f'Sync skipped: {report.get("reason")}'))
             return
 
-        # ── Summary header ────────────────────────────────────────────────────
         style_fn = self.style.SUCCESS if status == 'complete' else self.style.WARNING
         self.stdout.write(style_fn(f'Sync status: {status.upper()}'))
         self.stdout.write(f'RDF source: {report.get("rdf_url", "")}')
@@ -48,7 +47,6 @@ class Command(BaseCommand):
             self.stdout.write(f'Duration: {duration}s')
         self.stdout.write('')
 
-        # ── Fetched ───────────────────────────────────────────────────────────
         fetched = report.get('fetched', {})
         self.stdout.write('FETCHED FROM RDF:')
         for entity in ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions'):
@@ -57,7 +55,6 @@ class Command(BaseCommand):
             self.stdout.write(f'  {label:<18} ({len(names)}): {names}')
         self.stdout.write('')
 
-        # ── Saved ─────────────────────────────────────────────────────────────
         saved = report.get('saved', {})
         self.stdout.write('SAVED:')
         for entity in ('contact_points', 'agents', 'catalogs', 'datasets', 'distributions'):
@@ -72,7 +69,6 @@ class Command(BaseCommand):
                 self.stdout.write(f'  {label}: nothing saved')
         self.stdout.write('')
 
-        # ── Skipped (unresolved FKs) ──────────────────────────────────────────
         skipped = report.get('skipped', {})
         if skipped:
             self.stdout.write(self.style.WARNING('SKIPPED (unresolved FK references):'))
@@ -85,12 +81,10 @@ class Command(BaseCommand):
                     )
             self.stdout.write('')
 
-        # ── GraphQL stats ───────────────────────────────────────────────────────
         graphql_url = report.get('graphql_url')
         if graphql_url:
             self.stdout.write(f'GRAPHQL SOURCE: {graphql_url}')
 
-        # ── Stat counts ────────────────────────────────────────────────────────
         stats = report.get('stats')
         if stats is not None:
             self.stdout.write('')
@@ -105,5 +99,4 @@ class Command(BaseCommand):
                 for err in stats['errors']:
                     self.stdout.write(self.style.WARNING(f'    {err}'))
 
-        # Invalidate catalogue cache so fresh data is served immediately.
         cache.delete('catalogue_all_datasets')

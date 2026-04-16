@@ -1,0 +1,26 @@
+services:
+  db:
+    ports:
+      - "5433:5432"
+
+  web:
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ../../:/app
+      - logs:/app/logs
+    environment:
+      DJANGO_SETTINGS_MODULE: catalogue.settings.dev
+
+  scheduler:
+    volumes:
+      - ../../:/app
+      - logs:/app/logs
+    environment:
+      DJANGO_SETTINGS_MODULE: catalogue.settings.dev
+
+  nginx:
+    volumes:
+      - ../../docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../docker/nginx/conf.d/dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../docker/nginx/conf.d/includes:/etc/nginx/conf.d/includes:ro
+      - ../../docker/nginx/error_pages:/etc/nginx/error_pages:ro

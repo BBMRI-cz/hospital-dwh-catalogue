@@ -1,0 +1,12 @@
+services:
+  check:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile
+      target: check
+    env_file:
+      - ../../.env
+    environment:
+      DJANGO_SETTINGS_MODULE: catalogue.settings.ci
+    volumes:
+      - ../../:/app

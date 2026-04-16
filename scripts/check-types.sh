@@ -4,16 +4,19 @@
 
 set -e
 
-# Detect Python executable
-if [ -f ".venv/bin/python" ]; then
-    PYTHON=".venv/bin/python"
-elif [ -f "venv/bin/python" ]; then
-    PYTHON="venv/bin/python"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+
+if should_use_docker_check_runner; then
+    CHECK_COMMAND=(run_dev_check_compose run --rm check python -m mypy .)
 else
-    PYTHON="python"
+    ensure_project_dependencies
+    PYTHON="$(resolve_python)"
+    CHECK_COMMAND=("$PYTHON" -m mypy .)
 fi
 
-if $PYTHON -m mypy . 2>&1; then
+if "${CHECK_COMMAND[@]}" 2>&1; then
     echo "PASSED: No type errors"
 else
     echo "FAILED: Type errors found (manual fix required)"

@@ -9,17 +9,17 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: django_production
+  - job_name: ${PROMTAIL_JOB_NAME}
     static_configs:
       - targets:
           - localhost
         labels:
           job: django
           app: hospital-dwh-catalogue
+          environment: ${PROMTAIL_ENV}
           log_type: application
           __path__: /app/logs/app.log
     pipeline_stages:
-      # Parse JSON fields emitted by pythonjsonlogger
       - json:
           expressions:
             levelname:
@@ -30,11 +30,9 @@ scrape_configs:
             http_path:
             http_status:
             duration_ms:
-      # Promote parsed fields to Loki labels (kept low-cardinality)
       - labels:
           levelname:
           name:
-      # Store request_id as a structured metadata field (not a label — high cardinality)
       - structured_metadata:
           request_id:
 
@@ -45,6 +43,7 @@ scrape_configs:
         labels:
           job: django
           app: hospital-dwh-catalogue
+          environment: ${PROMTAIL_ENV}
           log_type: error
           __path__: /app/logs/error.log
     pipeline_stages:

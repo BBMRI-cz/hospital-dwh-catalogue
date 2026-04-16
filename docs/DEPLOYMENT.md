@@ -3,89 +3,123 @@
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- A `.env` file created from the appropriate example (`.env.dev.example`, `.env.staging.example`, or `.env.prod.example`)
-- The `DEPLOY_ENV` variable in `.env` set to `dev`, `staging`, or `prod`
+- A `.env` file created from one of:
+  - `.env.dev.example`
+  - `.env.staging.example`
+  - `.env.prod.example`
+- `DEPLOY_ENV` in `.env` set to `dev`, `staging`, or `prod`
 
-## Using the deploy script
+## Canonical commands
 
-The simplest way to deploy:
-
-```bash
-./deploy.sh
-```
-
-What the script does:
-
-1. Reads `DEPLOY_ENV` from `.env` to pick the right docker-compose file
-2. Validates required environment variables for the selected environment
-3. Pulls the latest code from git (skipped for `dev`)
-4. Updates the HealthDCAT-AP git submodule
-5. Stops existing containers
-6. Builds and starts new containers
-
-## Manual deployment
-
-If you prefer to run the steps yourself:
+Use the provided scripts instead of calling compose files directly:
 
 ```bash
-docker compose -f docker-compose.<env>.yml build
-docker compose -f docker-compose.<env>.yml up -d
+./scripts/deploy.sh
+./scripts/compose.sh ps
 ```
 
-Replace `<env>` with `dev`, `staging`, or `prod`.
+`./scripts/deploy.sh` is the canonical deployment entrypoint. It:
+
+1. Loads `.env`
+2. Validates the environment contract for the selected `DEPLOY_ENV`
+3. Verifies the configured `HEALTH_DCAT_VERSION` release directory exists
+4. Renders the matching compose stack
+5. Starts or updates the containers with `up -d --build --remove-orphans`
+
+For dev or staging, include observability explicitly:
+
+```bash
+./scripts/deploy.sh --with-observability
+```
+
+Production always includes Loki, Promtail, and Grafana.
+
+## Compose layout
+
+The Docker Compose config is split into focused layers under `docker/compose/`:
+
+- `base.yml` -- shared app services (`db`, `web`, `scheduler`, `nginx`)
+- `dev.yml` -- bind mounts, `runserver`, no Redis
+- `staging.yml` -- Gunicorn, Redis, named volumes, HTTP-only proxy
+- `prod.yml` -- production runtime, TLS, Certbot, stricter restart/network settings
+- `check.yml` -- optional `check` service used by quality scripts
+- `observability.yml` -- Loki, Promtail, Grafana
+
+Use `./scripts/compose.sh` for manual operations because it assembles the right file set for the current `.env` automatically.
+
+Examples:
+
+```bash
+./scripts/compose.sh up -d --build
+./scripts/compose.sh exec web python manage.py createsuperuser
+./scripts/compose.sh logs scheduler
+./scripts/compose.sh --with-observability ps
+```
+
+## Validation rules
+
+The deploy script validates more than just `DEPLOY_ENV`:
+
+- All environments must define the core Django settings, all four PostgreSQL database aliases, bootstrap superuser credentials, mock flags, and `HEALTH_DCAT_VERSION`.
+- Staging requires `GUNICORN_WORKERS` and conditionally requires LDAP, FAIR Genomes, or Alvao credentials when the matching `MOCK_*` flag is `False`.
+- Production requires live LDAP, FAIR Genomes, Alvao, email, proxy, and TLS settings; `DEBUG` must be `False`, and all `MOCK_*` flags must be `False`.
+
+This validation mirrors the actual runtime expectations more closely than the old docs-only guidance.
 
 ## What happens on container startup
 
 The web container entrypoint (`docker/entrypoint.sh` calling `docker/startup.py`) runs these steps automatically:
 
 1. Creates the logs directory
-2. Migrates the `auth_db` database
-3. Creates or updates the env-managed superuser from `DJANGO_SUPERUSER_USERNAME` and `DJANGO_SUPERUSER_PASSWORD` (see [Admin Guide](ADMIN.md)). Skipped if either variable is not set.
-4. Migrates the `default` database
-5. Migrates the `fair_genomes_db` database (includes automatic drift repair if core tables are missing)
-6. Migrates the `metadata_db` database
-7. Seeds mock data if `MOCK_FAIR_GENOMES=True`
-8. Compiles translation messages if `.po` files are newer than `.mo` files
-9. Runs `collectstatic` (staging and prod only)
+2. Migrates `auth_db`
+3. Creates or updates the env-managed superuser from `DJANGO_SUPERUSER_USERNAME` and `DJANGO_SUPERUSER_PASSWORD`
+4. Migrates the default database
+5. Repairs ticketing migration drift if the migration state says a table exists but the table is missing
+6. Migrates `fair_genomes_db`
+7. Repairs FAIR Genomes migration drift if core tables are missing
+8. Migrates `metadata_db` when it is reachable
+9. Seeds mock FAIR Genomes data when `MOCK_FAIR_GENOMES=True`
+10. Builds Tailwind CSS
+11. Compiles translations when `.po` files are newer than `.mo`
+12. Runs `collectstatic` outside development
 
-You do not need to run migrations or collectstatic manually.
+You do not need to run migrations or collectstatic manually during normal deployment.
 
 ## Environment differences
 
 | | Dev | Staging | Prod |
 |---|---|---|---|
-| Web server | Django runserver | Gunicorn (2 workers) | Gunicorn (configurable) |
-| External DB defaults | PostgreSQL | PostgreSQL | PostgreSQL |
+| App server | Django `runserver` | Gunicorn | Gunicorn |
+| Bind mounts | Yes | No | No |
 | Redis | No | Yes | Yes |
-| SSL | No | No | Yes (Certbot) |
-| Mock services | All mocked | Mockable per integration | All real |
-| Git pull on deploy | No | Yes | Yes |
+| TLS / Certbot | No | No | Yes |
+| Observability | Opt-in | Opt-in | Always on |
+| Mock integrations | Default on | Individually configurable | Forbidden |
 
-Development, staging, and production all use PostgreSQL for every Django database alias. Staging expects its database settings to be filled in explicitly and can independently mock LDAP, FAIR Genomes, and Alvao for pre-production validation. Production expects explicit database and live integration settings and does not support mocks. CI uses the separate `catalogue.settings.ci` module and is not a deployment environment.
+Staging is intentionally much closer to production than development is.
 
-## Production-specific setup
+## Manual maintenance
 
-For production, make sure you have set:
-
-- `SECRET_KEY` -- a strong random string
-- `ALLOWED_HOSTS` -- your production domain
-- `SECURE_SSL_REDIRECT=True` -- forces HTTPS
-- `SERVER_NAME` -- your domain (used by Nginx and Certbot)
-- `AUTH_LDAP_*` -- LDAP connection details (see [Authentication](AUTHENTICATION.md))
-- `FAIR_GENOMES_*` -- MOLGENIS API details (see [FAIR Genomes](FAIR_GENOMES.md))
-- `ALVAO_*` -- Alvao API details (see [Ticketing](TICKETING.md))
-- `EMAIL_*` -- SMTP settings for error notifications
-
-See `.env.prod.example` for the full list.
-
-## Collecting static files
-
-In development, Django serves static files directly. In staging and production, `collectstatic` runs automatically on container startup. If you need to run it manually:
+Create an extra superuser:
 
 ```bash
-docker compose -f docker-compose.<env>.yml exec web python manage.py collectstatic --noinput
+./scripts/compose.sh exec web python manage.py createsuperuser
 ```
 
-## Monitoring
+Collect static files manually:
 
-Grafana is available at `/grafana/` (requires staff status). Loki collects logs from all containers via Promtail.
+```bash
+./scripts/compose.sh exec web python manage.py collectstatic --noinput
+```
+
+Render the effective stack without starting it:
+
+```bash
+./scripts/compose.sh config
+```
+
+Render the effective stack with observability:
+
+```bash
+./scripts/compose.sh --with-observability config
+```

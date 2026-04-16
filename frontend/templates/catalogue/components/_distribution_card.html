@@ -1,50 +1,26 @@
 {% load i18n %}
-{% comment %}
-  Distribution accordion card — mirrors the index page dataset card pattern.
-  Used inside a for loop on dataset_detail.html.
-
-  Required variables:
-    dist         – distribution dict (title, name, source, format, db_layer, description)
-    dataset      – parent dataset dict (name, source)
-    loop_id      – unique id string for this card within the page (e.g. forloop.counter)
-    cart_dataset_ids – set of item names currently in the session cart
-{% endcomment %}
 <div class="bg-white rounded-lg overflow-hidden transition-shadow hover:shadow-md"
   id="dist-card-{{ loop_id }}"
   x-data="{ open: false }"
   :class="open ? 'border border-mou-orange' : 'border border-site-border'">
-
-  {# ── Card header — click to expand ── #}
   <div class="flex items-center gap-3 px-5 py-2 cursor-pointer select-none"
     @click="open = !open">
-
-    {# Title #}
     <span class="font-serif text-[16px] flex-1 leading-snug text-mou-orange">
       {{ dist.title|default:dist.name }}
     </span>
 
-    {# HTMX cart toggle #}
     {% include "includes/_cart_inline_btn.html" with cart_app=dist.app cart_name=dist.name cart_title=dist.title|default:dist.name %}
 
-    {# Eye / detail link #}
-    <a href="{% url 'frontend:distribution_detail' app=dist.app name=dist.name %}"
-      title="{% trans 'View full detail' %}"
-      class="inline-flex items-center justify-center px-1.5 py-2 rounded text-mou-cyan hover:text-cyan-600 hover:bg-cyan-50 transition-colors"
-      @click.stop>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-    </a>
+    {% trans 'View full detail' as t_view_full_detail %}
+    {% url 'frontend:distribution_detail' app=dist.app name=dist.name as dist_detail_url %}
+    {% include "includes/_icon_action_link.html" with href=dist_detail_url title=t_view_full_detail click_stop=1 only %}
 
-    {# Chevron #}
     <svg class="text-txt-muted shrink-0 transition-transform" :class="open && 'rotate-180'"
       width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
   </div>
 
-  {# ── Expandable body ── #}
   <div x-show="open" x-transition x-cloak>
     <div class="border-t border-gray-100">
       <div class="grid grid-cols-1">

@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-slim AS base
 
 # Prevent Python from writing .pyc files and buffer output
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -22,6 +22,13 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
+FROM base AS check
+
+COPY requirements-dev.txt /app/
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+FROM base AS runtime
 
 # Copy project files
 COPY . /app/

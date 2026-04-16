@@ -7,7 +7,7 @@ The application supports Czech and English. All user-facing strings in templates
 1. After adding or changing translatable strings in templates or Python code, extract them:
 
    ```bash
-   docker exec hospital_dwh_web_dev python manage.py makemessages --all
+   ./scripts/compose.sh exec web python manage.py makemessages --all
    ```
 
 2. Edit the `.po` files to add the translations:
@@ -18,7 +18,7 @@ The application supports Czech and English. All user-facing strings in templates
 3. Compile the `.po` files into `.mo` files:
 
    ```bash
-   docker exec hospital_dwh_web_dev python manage.py compilemessages
+   ./scripts/compose.sh exec web python manage.py compilemessages
    ```
 
 4. Commit both the `.po` and `.mo` files together.
@@ -50,7 +50,7 @@ Then read it from JavaScript in a separate `.js` file.
 Start it first:
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d db web
+./scripts/compose.sh up -d db web
 ```
 
 Wait for it to be healthy, then run the `makemessages` or `compilemessages` commands above.

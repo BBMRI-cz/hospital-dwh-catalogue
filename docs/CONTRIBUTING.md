@@ -58,6 +58,8 @@ This gives you `ruff` (linting and formatting), `mypy` (type checking), and `ban
 | Formatting | Ruff | Yes |
 | Type checking | mypy | No |
 | Security | Bandit | No |
+| Translations | Custom script | No |
+| Tests | Django | No |
 
 ## Frontend stack
 
@@ -76,8 +78,6 @@ The frontend uses server-side Django templates with two lightweight JS libraries
 - HTMX endpoints that respond to `HX-Request` headers must return rendered HTML partials (not JSON). Views detect the header with `request.headers.get('HX-Request')`.
 - Out-of-band swaps (`hx-swap-oob`) are used to update the cart badge alongside button swaps — see `ticketing/views.py` `CartAddView` for the pattern.
 - CSRF is passed globally via `hx-headers` on `<body>` in `base.html` — do not add per-request CSRF tokens to HTMX forms.
-| Translations | Custom script | No |
-| Tests | Django | No |
 
 ## Pre-commit hooks (optional)
 
@@ -95,7 +95,7 @@ Configuration is in `.pre-commit-config.yaml`. With this set up, you do not need
 To wipe your local database and start fresh:
 
 ```bash
-docker compose -f docker-compose.dev.yml down -v
+./scripts/compose.sh down -v
 ```
 
 This deletes all data in the development database.

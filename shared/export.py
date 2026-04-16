@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import logging
 import re
 
 from shared.dtos import (
@@ -13,6 +11,8 @@ from shared.dtos import (
     ExportDataset,
     ExportDistribution,
 )
+from shared.export_context import clear_export_context_cache, get_export_context_prefixes
+from shared.export_serialization import dump_jsonld, serialise_jsonld_to_turtle
 from shared.export_types import (
     ExportResource,
     JsonLdAgentNode,
@@ -36,9 +36,17 @@ from shared.export_types import (
     JsonLdTypedValue,
 )
 
-logger = logging.getLogger(__name__)
-
 _CURIE_RE = re.compile(r'^([A-Za-z][A-Za-z0-9_-]*):[^/]')
+
+__all__ = [
+    'build_complete_jsonld',
+    'build_complete_turtle',
+    'build_jsonld',
+    'build_turtle',
+    'clear_export_context_cache',
+    'dump_jsonld',
+    'has_distributions',
+]
 
 
 def _collect_used_prefixes(obj: object, prefixes: set[str]) -> None:
@@ -64,16 +72,8 @@ def _collect_used_prefixes(obj: object, prefixes: set[str]) -> None:
 
 
 def _build_context() -> JsonLdContext:
-    """Load namespace prefixes from the schema registry."""
-    try:
-        from schema_registry.services import get_context_prefixes
-
-        return get_context_prefixes()
-    except Exception:
-        logger.warning(
-            'Could not load JSON-LD context prefixes from schema registry', exc_info=True
-        )
-        return {}
+    """Load namespace prefixes from the schema registry cache."""
+    return get_export_context_prefixes()
 
 
 def _catalog_iri(app: str, name: str) -> str | None:
@@ -540,19 +540,9 @@ def has_distributions(dataset: ExportDataset) -> bool:
     return bool(dataset.distributions)
 
 
-def dump_jsonld(document: JsonLdDocument) -> str:
-    """Serialise a JSON-LD document to a stable pretty-printed string."""
-    return json.dumps(document, indent=2, ensure_ascii=False)
-
-
 def build_turtle(resource: ExportResource) -> str:
     """Serialise the JSON-LD export document to Turtle."""
-    from rdflib import Graph  # type: ignore[import-untyped]
-
-    jsonld = build_jsonld(resource)
-    graph = Graph()
-    graph.parse(data=dump_jsonld(jsonld), format='json-ld')
-    return graph.serialize(format='turtle')
+    return serialise_jsonld_to_turtle(build_jsonld(resource))
 
 
 def build_complete_turtle(
@@ -562,11 +552,10 @@ def build_complete_turtle(
     include_distributions: bool = True,
 ) -> str:
     """Serialise the aggregate JSON-LD export document to Turtle."""
-    from rdflib import Graph  # type: ignore[import-untyped]
-
-    jsonld = build_complete_jsonld(
-        catalogs, orphan_datasets, include_distributions=include_distributions
+    return serialise_jsonld_to_turtle(
+        build_complete_jsonld(
+            catalogs,
+            orphan_datasets,
+            include_distributions=include_distributions,
+        )
     )
-    graph = Graph()
-    graph.parse(data=dump_jsonld(jsonld), format='json-ld')
-    return graph.serialize(format='turtle')

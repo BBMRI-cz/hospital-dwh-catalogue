@@ -1,5 +1,4 @@
 {% load i18n static %}
-<!-- Schema Info Modal — Alpine.js powered -->
 <dialog id="schema-modal" class="modal modal-middle"
   x-data="{
     sd: {},
@@ -24,8 +23,6 @@
   @show-schema.window="show($event.detail)"
   @click="if($event.target === $el) $el.close()">
   <div class="modal-box p-0 shadow-2xl border border-gray-200 overflow-hidden" style="width:32rem;max-width:calc(100vw - 2rem);border-radius:1rem;">
-
-    <!-- ── Header ───────────────────────────────────────────────── -->
     <div class="px-6 pt-5 pb-5 modal-gradient-header">
       <div class="flex items-center gap-2 mb-3">
         <div class="w-0.5 h-4 rounded shrink-0 bg-mou-cyan"></div>
@@ -41,7 +38,6 @@
       </div>
     </div>
 
-    <!-- ── Body ─────────────────────────────────────────────────── -->
     <div class="px-6 pt-5 pb-5 bg-white space-y-4">
       <div class="flex items-center gap-3">
         <span class="inline-flex items-center gap-1.5 font-mono text-[10px] px-2.5 py-1 rounded border"
