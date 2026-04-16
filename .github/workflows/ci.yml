@@ -38,12 +38,12 @@ jobs:
       - name: Run linting
         run: |
           echo "Running linter..."
-          ./scripts/check-lint.sh --check
+          bash ./scripts/check-lint.sh --check
 
       - name: Run formatting check
         run: |
           echo "Checking code formatting..."
-          ./scripts/check-format.sh --check
+          bash ./scripts/check-format.sh --check
 
   type-check:
     name: Type Checking
@@ -71,12 +71,12 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Set up environment
-        run: ./init-env.sh dev
+        run: bash ./init-env.sh dev
 
       - name: Run mypy
         run: |
           echo "Running type checker..."
-          ./scripts/check-types.sh
+          bash ./scripts/check-types.sh
 
   translations:
     name: Translations
@@ -101,7 +101,7 @@ jobs:
       - name: Check translations
         run: |
           echo "Checking translations..."
-          ./scripts/check-translations.sh
+          bash ./scripts/check-translations.sh
 
   security:
     name: Security
@@ -131,7 +131,7 @@ jobs:
       - name: Run Bandit security linter
         run: |
           echo "Running security scan..."
-          ./scripts/check-security.sh
+          bash ./scripts/check-security.sh
 
   test:
     name: Tests
@@ -161,14 +161,14 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Set up environment
-        run: ./init-env.sh dev
+        run: bash ./init-env.sh dev
 
       - name: Run tests
         env:
           DJANGO_SETTINGS_MODULE: catalogue.settings.ci
         run: |
           echo "Running tests..."
-          ./scripts/check-tests.sh
+          bash ./scripts/check-tests.sh
 
   docker-build:
     name: Docker Build
