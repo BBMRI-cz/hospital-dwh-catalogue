@@ -76,7 +76,7 @@ DATABASES = build_postgres_databases(
 
 MOCK_LDAP = config('MOCK_LDAP', default=True, cast=bool)
 _LDAP_SETTINGS = ldap_settings(mock_ldap=MOCK_LDAP)
-AUTHENTICATION_BACKENDS = _LDAP_SETTINGS['AUTHENTICATION_BACKENDS']
+globals().update(_LDAP_SETTINGS)
 
 MOCK_FAIR_GENOMES = config('MOCK_FAIR_GENOMES', default=True, cast=bool)
 _FAIR_GENOMES_SETTINGS = fair_genomes_settings(mock_fair_genomes=MOCK_FAIR_GENOMES)

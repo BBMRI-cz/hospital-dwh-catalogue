@@ -6,6 +6,7 @@ Covers URL routing, views, and database routers.
 
 import importlib
 import os
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -13,6 +14,59 @@ from django.contrib.auth.models import User
 from django.test import SimpleTestCase, TestCase
 
 from .routers import AuthRouter, WarehouseRouter
+
+
+class LdapSettingsTest(SimpleTestCase):
+    def test_ldap_settings_default_login_attr_is_samaccountname(self):
+        from .settings.helpers import ldap_settings
+
+        env = {
+            'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636',
+            'AUTH_LDAP_BIND_DN': 'cn=svc,dc=example,dc=com',
+            'AUTH_LDAP_BIND_PASSWORD': 'secret',
+            'AUTH_LDAP_USER_SEARCH_BASE': 'ou=Users,dc=example,dc=com',
+        }
+
+        with patch.dict(os.environ, env, clear=False):
+            settings = ldap_settings(mock_ldap=False)
+
+        self.assertEqual(settings['AUTH_LDAP_LOGIN_ATTR'], 'sAMAccountName')
+        self.assertEqual(
+            settings['AUTH_LDAP_USER_SEARCH_FILTER'],
+            '(&(objectClass=user)(!(objectClass=computer))(sAMAccountName=%(user)s))',
+        )
+
+    def test_ldap_settings_uses_configured_login_attr_in_ad_filter(self):
+        from .settings.helpers import ldap_settings
+
+        env = {
+            'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636',
+            'AUTH_LDAP_BIND_DN': 'cn=svc,dc=example,dc=com',
+            'AUTH_LDAP_BIND_PASSWORD': 'secret',
+            'AUTH_LDAP_USER_SEARCH_BASE': 'ou=Users,dc=example,dc=com',
+            'AUTH_LDAP_LOGIN_ATTR': 'userPrincipalName',
+        }
+
+        with patch.dict(os.environ, env, clear=False):
+            settings = ldap_settings(mock_ldap=False)
+
+        self.assertEqual(settings['AUTH_LDAP_LOGIN_ATTR'], 'userPrincipalName')
+        self.assertEqual(
+            settings['AUTH_LDAP_USER_SEARCH_FILTER'],
+            '(&(objectClass=user)(!(objectClass=computer))(userPrincipalName=%(user)s))',
+        )
+
+    def test_prod_env_example_uses_repo_relative_ldap_ca_path(self):
+        prod_example = (
+            Path(__file__).resolve().parent.parent / 'env-examples' / 'prod.env.example'
+        ).read_text(encoding='utf-8')
+
+        line = next(
+            current_line
+            for current_line in prod_example.splitlines()
+            if current_line.startswith('AUTH_LDAP_CA_CERT_PATH=')
+        )
+        self.assertEqual(line, 'AUTH_LDAP_CA_CERT_PATH=certs/ldap-ca.crt')
 
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):

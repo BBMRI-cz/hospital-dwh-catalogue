@@ -20,6 +20,7 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - logs:/app/logs
+      - ../../${AUTH_LDAP_CA_CERT_PATH}:/usr/local/share/ca-certificates/auth-ldap-ca.crt:ro
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.prod
       REDIS_URL: redis://redis:6379/1

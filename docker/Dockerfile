@@ -9,11 +9,13 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
     postgresql-client \
     gettext \
     cron \
     gcc \
     libldap2-dev \
+    ldap-utils \
     libsasl2-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*

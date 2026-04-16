@@ -91,7 +91,9 @@ Relevant variables:
 - `AUTH_LDAP_BIND_DN`
 - `AUTH_LDAP_BIND_PASSWORD`
 - `AUTH_LDAP_USER_SEARCH_BASE`
+- `AUTH_LDAP_LOGIN_ATTR` defaults to `sAMAccountName` and can be changed to `userPrincipalName` if your directory uses that login format
 - `AUTH_LDAP_START_TLS` when your directory uses StartTLS instead of `ldaps://`
+- `AUTH_LDAP_CA_CERT_PATH` in production when the LDAP server certificate chains to an internal CA
 
 When `MOCK_LDAP=True`:
 
@@ -99,7 +101,7 @@ When `MOCK_LDAP=True`:
 - the username matching `DJANGO_SUPERUSER_USERNAME` becomes staff and superuser
 - other users are created as regular Django users on first login
 
-When `MOCK_LDAP=False`, the app authenticates against Active Directory through a service account search + bind flow.
+When `MOCK_LDAP=False`, the app authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django.
 
 ### FAIR Genomes
 
@@ -203,6 +205,7 @@ Environment-specific requirements:
 - `dev` also requires the three `MOCK_*` flags
 - `staging` also requires `DEBUG`, `GUNICORN_WORKERS`, `SERVER_NAME`, valid TLS certificate files, and real credentials only for integrations whose `MOCK_*` flag is `False`
 - `prod` requires `GUNICORN_WORKERS`, `SERVER_NAME`, `ADMIN_EMAIL`, valid TLS certificate files, live LDAP / FAIR Genomes / Alvao credentials, and email settings
+- production LDAP also requires `AUTH_LDAP_LOGIN_ATTR`, `AUTH_LDAP_START_TLS`, and `AUTH_LDAP_CA_CERT_PATH`
 
 This keeps the docs and the real runtime contract aligned.
 
@@ -408,7 +411,8 @@ Check:
 Check:
 
 - `MOCK_LDAP=False`
-- `AUTH_LDAP_SERVER_URI`, `AUTH_LDAP_BIND_DN`, `AUTH_LDAP_BIND_PASSWORD`, and `AUTH_LDAP_USER_SEARCH_BASE` are set
+- `AUTH_LDAP_SERVER_URI`, `AUTH_LDAP_BIND_DN`, `AUTH_LDAP_BIND_PASSWORD`, `AUTH_LDAP_USER_SEARCH_BASE`, and `AUTH_LDAP_LOGIN_ATTR` are set
+- `AUTH_LDAP_CA_CERT_PATH` points to the internal LDAP CA certificate when your directory uses internal PKI
 - the LDAP server is reachable from the containers
 - the user can actually bind through LDAP with the supplied credentials
 

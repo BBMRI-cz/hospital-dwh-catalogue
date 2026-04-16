@@ -245,6 +245,9 @@ validate_prod_contract() {
         AUTH_LDAP_BIND_DN \
         AUTH_LDAP_BIND_PASSWORD \
         AUTH_LDAP_USER_SEARCH_BASE \
+        AUTH_LDAP_LOGIN_ATTR \
+        AUTH_LDAP_START_TLS \
+        AUTH_LDAP_CA_CERT_PATH \
         FAIR_GENOMES_RDF_URL \
         FAIR_GENOMES_API_URL \
         FAIR_GENOMES_API_TOKEN \
@@ -261,7 +264,10 @@ validate_prod_contract() {
         SECURE_HSTS_SECONDS
 
     validate_boolean_literal EMAIL_USE_TLS
+    validate_boolean_literal AUTH_LDAP_START_TLS
     validate_boolean_literal SECURE_SSL_REDIRECT
+    require_relative_path AUTH_LDAP_CA_CERT_PATH
+    require_existing_file AUTH_LDAP_CA_CERT_PATH
     validate_tls_contract
 }
 

@@ -70,6 +70,10 @@ def ldap_settings(*, mock_ldap: bool) -> dict[str, Any]:
     ldap_opt_network_timeout = ldap_attributes['OPT_NETWORK_TIMEOUT']
 
     auth_ldap_user_search_base = config('AUTH_LDAP_USER_SEARCH_BASE')
+    auth_ldap_login_attr = config('AUTH_LDAP_LOGIN_ATTR', default='sAMAccountName')
+    auth_ldap_user_search_filter = (
+        f'(&(objectClass=user)(!(objectClass=computer))({auth_ldap_login_attr}=%(user)s))'
+    )
     return {
         'AUTHENTICATION_BACKENDS': [
             'django_auth_ldap.backend.LDAPBackend',
@@ -79,10 +83,12 @@ def ldap_settings(*, mock_ldap: bool) -> dict[str, Any]:
         'AUTH_LDAP_BIND_DN': config('AUTH_LDAP_BIND_DN'),
         'AUTH_LDAP_BIND_PASSWORD': config('AUTH_LDAP_BIND_PASSWORD'),
         'AUTH_LDAP_USER_SEARCH_BASE': auth_ldap_user_search_base,
+        'AUTH_LDAP_LOGIN_ATTR': auth_ldap_login_attr,
+        'AUTH_LDAP_USER_SEARCH_FILTER': auth_ldap_user_search_filter,
         'AUTH_LDAP_USER_SEARCH': LDAPSearch(
             auth_ldap_user_search_base,
             ldap_scope_subtree,
-            '(sAMAccountName=%(user)s)',
+            auth_ldap_user_search_filter,
         ),
         'AUTH_LDAP_USER_ATTR_MAP': {
             'first_name': 'givenName',
