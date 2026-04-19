@@ -12,7 +12,7 @@ from frontend.presentation import (
     build_dataset_detail_context,
     build_distribution_detail_context,
 )
-from shared.export import build_jsonld, build_turtle, has_distributions
+from shared.export import build_jsonld, build_turtle, dump_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
 
 
@@ -78,7 +78,7 @@ class DatasetJsonLdDownloadView(LoginRequiredMixin, View):
             raise Http404('Dataset has no distributions')
 
         response = HttpResponse(
-            build_jsonld(export_dataset),
+            dump_jsonld(build_jsonld(export_dataset)),
             content_type='application/ld+json; charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename="{name}.jsonld"'

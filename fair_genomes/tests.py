@@ -495,6 +495,15 @@ class ProcessGraphFullTest(TestCase):
                 ]
             ),
         )
+        self.assertEqual(
+            dataset.type,
+            ';'.join(
+                [
+                    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                    'http://publications.europa.eu/resource/authority/dataset-type/IMAGE',
+                ]
+            ),
+        )
         self.assertEqual(dataset.hdab_id, 'Test HDAB Agency')
         self.assertEqual(dataset.catalog_id, 'test-catalog')
 

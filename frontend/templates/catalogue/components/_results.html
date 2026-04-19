@@ -38,29 +38,16 @@
     <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
       <div class="border-t border-gray-100">
         <div class="grid grid-cols-2">
-          {% if dataset.source and not dataset.source|is_list %}
+          {% if dataset.source %}
           {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
           {% endif %}
-          {% if dataset.custodian and not dataset.custodian|is_list %}
+          {% if dataset.custodian %}
           {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
           {% endif %}
-          {% if dataset.health_category and not dataset.health_category|is_list %}
+          {% if dataset.health_category %}
           {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
           {% endif %}
-          {% if dataset.theme and not dataset.theme|is_list %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
-          {% endif %}
-
-          {% if dataset.source|is_list %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="dct:source" dc_value=dataset.source %}
-          {% endif %}
-          {% if dataset.custodian|is_list %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="geodcatap:custodian" dc_value=dataset.custodian %}
-          {% endif %}
-          {% if dataset.health_category|is_list %}
-          {% include "includes/_dcat_cell.html" with dc_semantics="healthdcatap:healthCategory" dc_value=dataset.health_category %}
-          {% endif %}
-          {% if dataset.theme|is_list %}
+          {% if dataset.theme %}
           {% include "includes/_dcat_cell.html" with dc_semantics="dcat:theme" dc_value=dataset.theme %}
           {% endif %}
 

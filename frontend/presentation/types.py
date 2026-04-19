@@ -15,7 +15,7 @@ class FrontendDistribution:
     access_url: str | None
     applicable_legislation: list[str]
     format: str | None
-    conforms_to: str | None
+    conforms_to: list[str]
     byte_size: int | None
     rights: str | None
     release_date: str | None
@@ -30,10 +30,10 @@ class FrontendDataset:
     name: str
     title: str
     identifier: str | None
-    type: str | None
+    type: list[str]
     access_rights: str | None
     version: str | None
-    conforms_to: str | None
+    conforms_to: list[str]
     theme: list[str]
     publisher: str | None
     applicable_legislation: list[str]

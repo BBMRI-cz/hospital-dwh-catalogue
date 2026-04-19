@@ -27,17 +27,29 @@ def _to_snake(camel: str) -> str:
 
 
 def _build_search_text(dataset: FrontendDataset) -> str:
+    distribution_titles = [distribution.title for distribution in dataset.distributions]
+    distribution_conforms_to = [
+        item for distribution in dataset.distributions for item in distribution.conforms_to
+    ]
+    distribution_legislation = [
+        item for distribution in dataset.distributions for item in distribution.applicable_legislation
+    ]
     return ' '.join(
         [
             dataset.title or '',
             dataset.identifier or '',
-            dataset.type or '',
+            ' '.join(dataset.type),
+            ' '.join(dataset.conforms_to),
+            ' '.join(dataset.theme),
             dataset.description or '',
             dataset.custodian or '',
             dataset.source or '',
+            ' '.join(dataset.applicable_legislation),
             ' '.join(dataset.health_category),
             ' '.join(dataset.keywords),
-            ' '.join(distribution.title for distribution in dataset.distributions),
+            ' '.join(distribution_titles),
+            ' '.join(distribution_conforms_to),
+            ' '.join(distribution_legislation),
         ]
     ).lower()
 
@@ -51,7 +63,7 @@ def distribution_to_view_model(distribution: UnifiedDistribution) -> FrontendDis
         access_url=distribution.access_url,
         applicable_legislation=parse_multi_values(distribution.applicable_legislation),
         format=distribution.format,
-        conforms_to=distribution.conforms_to,
+        conforms_to=parse_multi_values(distribution.conforms_to),
         byte_size=distribution.byte_size,
         rights=distribution.rights,
         release_date=distribution.release_date,
@@ -67,10 +79,10 @@ def dataset_to_view_model(dataset: UnifiedDataset) -> FrontendDataset:
         name=dataset.name,
         title=dataset.title or dataset.name,
         identifier=dataset.identifier,
-        type=dataset.type,
+        type=parse_multi_values(dataset.type),
         access_rights=dataset.access_rights,
         version=dataset.version,
-        conforms_to=dataset.conforms_to,
+        conforms_to=parse_multi_values(dataset.conforms_to),
         theme=parse_multi_values(dataset.theme),
         publisher=dataset.publisher,
         applicable_legislation=parse_multi_values(dataset.applicable_legislation),

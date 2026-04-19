@@ -1,5 +1,6 @@
 """Tests for the frontend presentation layer."""
 
+import json
 from collections import Counter
 from unittest.mock import patch
 
@@ -229,6 +230,28 @@ class CatalogueIndexViewTest(TestCase):
         self.assertNotContains(response, 'Beta Dataset')
 
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_text_search_matches_multi_value_metadata(self, mock_cls):
+        ds1 = _make_test_dataset(
+            name='ds1',
+            title='Alpha Dataset',
+            type='http://example.com/type/a;http://example.com/type/b',
+            conforms_to='http://example.com/spec/a;http://example.com/spec/b',
+            theme='http://example.com/theme/alpha',
+            applicable_legislation='http://example.com/law/a;http://example.com/law/b',
+        )
+        ds2 = _make_test_dataset(name='ds2', title='Beta Dataset')
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [ds1, ds2]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'), {'q': 'http://example.com/spec/b'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Alpha Dataset')
+        self.assertNotContains(response, 'Beta Dataset')
+
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_catalogue_preview_renders_list_metadata_without_python_list_repr(self, mock_cls):
         dataset = _make_test_dataset(
             theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
@@ -389,6 +412,93 @@ class DatasetDetailViewTest(TestCase):
 
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_dataset_detail_renders_multi_value_metadata_as_separate_badges(
+        self,
+        mock_cls,
+        mock_dataset_lookup,
+    ):
+        dataset = _make_test_dataset(
+            type='http://example.com/type/a;http://example.com/type/b',
+            conforms_to='http://example.com/spec/a;http://example.com/spec/b',
+            applicable_legislation='http://example.com/law/a;http://example.com/law/b',
+            theme='http://example.com/theme/a;http://example.com/theme/b',
+            health_category='clinical;genomics',
+        )
+        export_dataset = _make_test_export_dataset()
+        mock_svc = mock_cls.return_value
+        mock_svc.get_export_dataset.return_value = export_dataset
+        mock_svc.get_schema_json.return_value = {
+            'dct:type': {
+                'prefix': 'dct',
+                'label': 'Type',
+                'local_name': 'type',
+                'uri': 'http://purl.org/dc/terms/type',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'The dataset type.',
+            },
+            'dct:conformsTo': {
+                'prefix': 'dct',
+                'label': 'Conforms To',
+                'local_name': 'conformsTo',
+                'uri': 'http://purl.org/dc/terms/conformsTo',
+                'requirement': 'optional',
+                'cardinality': '0..*',
+                'description': 'A standard or profile the dataset conforms to.',
+            },
+            'dcatap:applicableLegislation': {
+                'prefix': 'dcatap',
+                'label': 'Applicable Legislation',
+                'local_name': 'applicableLegislation',
+                'uri': 'http://data.europa.eu/r5r/applicableLegislation',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'Applicable legislation.',
+            },
+            'dcat:theme': {
+                'prefix': 'dcat',
+                'label': 'Theme',
+                'local_name': 'theme',
+                'uri': 'http://www.w3.org/ns/dcat#theme',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'Theme.',
+            },
+            'healthdcatap:healthCategory': {
+                'prefix': 'healthdcatap',
+                'label': 'Health Category',
+                'local_name': 'healthCategory',
+                'uri': 'https://healthdcat-ap.github.io/#healthCategory',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'Health category.',
+            },
+        }
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:dataset_detail', kwargs={'app': 'fair_genomes', 'name': 'test-dataset'}
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'title="http://example.com/type/a"')
+        self.assertContains(response, 'title="http://example.com/type/b"')
+        self.assertContains(response, 'title="http://example.com/spec/a"')
+        self.assertContains(response, 'title="http://example.com/spec/b"')
+        self.assertContains(response, 'title="http://example.com/law/a"')
+        self.assertContains(response, 'title="http://example.com/theme/a"')
+        self.assertContains(response, 'title="clinical"')
+        self.assertNotContains(
+            response,
+            '[&#x27;http://example.com/type/a&#x27;, &#x27;http://example.com/type/b&#x27;]',
+            html=True,
+        )
+
+    @patch(_DATASET_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_missing_dataset_raises_404(self, mock_cls, mock_dataset_lookup):
         """A non-existent dataset triggers Http404 in the view."""
         from django.http import Http404
@@ -452,6 +562,35 @@ class DatasetDetailViewTest(TestCase):
         self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
         self.assertIn('encounter', response.content.decode())
         self.assertIn('patient_id', response.content.decode())
+
+    @patch(_EXPORT_SERVICE_PATH)
+    def test_dataset_specific_jsonld_route_returns_serialized_json_document(self, mock_cls):
+        export_dataset = _make_test_export_dataset(
+            app='warehouse',
+            name='warehouse-dataset',
+            title='Warehouse',
+            identifier='https://example.com/dataset/warehouse-dataset',
+            distributions=[
+                ExportDistribution(
+                    app='warehouse',
+                    name='warehouse-dist',
+                    title='Warehouse Distribution',
+                    access_url='https://example.com/distribution/warehouse-dist',
+                )
+            ],
+        )
+        mock_cls.return_value.get_export_dataset.return_value = export_dataset
+
+        self.client.force_login(self.user)
+        response = self.client.get('/dataset/warehouse/warehouse-dataset/jsonld/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        payload = json.loads(response.content.decode())
+        self.assertEqual(set(payload.keys()), {'@context', '@graph'})
+        self.assertIsInstance(payload['@graph'], list)
+        self.assertNotEqual(response.content.decode(), '@context@graph')
+        self.assertIn('Warehouse Distribution', response.content.decode())
 
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
@@ -578,6 +717,69 @@ class DistributionDetailViewTest(TestCase):
         self.assertContains(response, 'Third Distribution')
         mock_svc.get_tables_with_columns.assert_called_once_with('third_source', 'third-dist')
         mock_svc.get_stat_charts.assert_called_once_with('third_source', 'third-dist')
+
+    @patch(_SCHEMA_LOOKUP_PATH)
+    @patch(_DISTRIBUTION_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_distribution_detail_renders_multi_value_metadata_as_separate_badges(
+        self,
+        mock_cls,
+        mock_get_distribution_lookup,
+        mock_get_schema,
+    ):
+        dataset = _make_test_dataset()
+        dataset.distributions[0].name = 'test-dist'
+        dataset.distributions[0].title = 'Test Distribution'
+        dataset.distributions[0].conforms_to = 'http://example.com/profile/a;http://example.com/profile/b'
+        dataset.distributions[0].applicable_legislation = (
+            'http://example.com/law/a;http://example.com/law/b'
+        )
+
+        mock_get_distribution_lookup.return_value = _make_distribution_lookup(dataset)
+        mock_get_schema.return_value = {
+            'dct:conformsTo': {
+                'prefix': 'dct',
+                'label': 'Conforms To',
+                'local_name': 'conformsTo',
+                'uri': 'http://purl.org/dc/terms/conformsTo',
+                'requirement': 'optional',
+                'cardinality': '0..*',
+                'description': 'A standard or profile the distribution conforms to.',
+            },
+            'dcatap:applicableLegislation': {
+                'prefix': 'dcatap',
+                'label': 'Applicable Legislation',
+                'local_name': 'applicableLegislation',
+                'uri': 'http://data.europa.eu/r5r/applicableLegislation',
+                'requirement': 'mandatory',
+                'cardinality': '1..*',
+                'description': 'Applicable legislation.',
+            },
+        }
+        mock_cls.return_value.get_tables_with_columns.return_value = []
+        mock_cls.return_value.get_stat_charts.return_value = []
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'fair_genomes', 'name': 'test-dist'},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'title="http://example.com/profile/a"')
+        self.assertContains(response, 'title="http://example.com/profile/b"')
+        self.assertContains(response, 'title="http://example.com/law/a"')
+        self.assertContains(response, 'title="http://example.com/law/b"')
+        self.assertNotContains(
+            response,
+            (
+                '[&#x27;http://example.com/profile/a&#x27;, '
+                '&#x27;http://example.com/profile/b&#x27;]'
+            ),
+            html=True,
+        )
 
     @patch(_DISTRIBUTION_LOOKUP_PATH, return_value=None)
     def test_missing_distribution_returns_404(self, _mock_get_distribution_lookup):
@@ -803,7 +1005,10 @@ class SchemaPayloadHelperTest(SimpleTestCase):
         dataset = dataset_to_view_model(
             _make_test_dataset(
                 identifier='https://example.com/datasets/test-dataset',
-                type='http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                type=(
+                    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL;'
+                    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE'
+                ),
             )
         )
         schema = {
@@ -837,7 +1042,10 @@ class SchemaPayloadHelperTest(SimpleTestCase):
             (
                 'dct:type',
                 'Type',
-                'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                [
+                    'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
+                    'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
+                ],
             ),
             rows,
         )
@@ -966,6 +1174,16 @@ class MultiValueMapperTest(SimpleTestCase):
         result = dataset_to_view_model(ds)
         self.assertEqual(result.applicable_legislation, ['http://x', 'http://y'])
 
+    def test_type_split_into_list(self):
+        ds = _make_test_dataset(type='http://a;http://b')
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.type, ['http://a', 'http://b'])
+
+    def test_conforms_to_split_into_list(self):
+        ds = _make_test_dataset(conforms_to='http://spec/a;http://spec/b')
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.conforms_to, ['http://spec/a', 'http://spec/b'])
+
     def test_health_category_split_into_list(self):
         ds = _make_test_dataset(health_category='cat_a;cat_b')
         result = dataset_to_view_model(ds)
@@ -980,3 +1198,17 @@ class MultiValueMapperTest(SimpleTestCase):
         ds = _make_test_dataset(theme=None)
         result = dataset_to_view_model(ds)
         self.assertEqual(result.theme, [])
+
+    def test_distribution_conforms_to_split_into_list(self):
+        ds = _make_test_dataset()
+        ds.distributions = [
+            UnifiedDistribution(
+                app='fair_genomes',
+                name='test-dist',
+                dataset_name='test-dataset',
+                title='Test Distribution',
+                conforms_to='http://profile/a;http://profile/b',
+            ),
+        ]
+        result = dataset_to_view_model(ds)
+        self.assertEqual(result.distributions[0].conforms_to, ['http://profile/a', 'http://profile/b'])
