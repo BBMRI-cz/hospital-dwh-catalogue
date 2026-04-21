@@ -266,8 +266,8 @@ class WarehouseRouterTest(TestCase):
         self.assertFalse(self.router.allow_migrate('default', 'fair_genomes'))
 
     def test_allow_migrate_warehouse(self):
-        """Warehouse can migrate to metadata_db."""
-        self.assertTrue(self.router.allow_migrate('metadata_db', 'warehouse'))
+        """Warehouse models are never migrated by Django."""
+        self.assertFalse(self.router.allow_migrate('metadata_db', 'warehouse'))
 
     def test_allow_migrate_ticketing(self):
         """Ticketing can migrate to default."""

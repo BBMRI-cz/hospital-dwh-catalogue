@@ -412,6 +412,40 @@ class DatasetDetailViewTest(TestCase):
 
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_dataset_detail_distribution_cards_do_not_render_inline_cart_buttons(
+        self, mock_cls, mock_dataset_lookup
+    ):
+        dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
+        dataset.distributions[0].name = 'warehouse-dist'
+        dataset.distributions[0].title = 'Warehouse Distribution'
+        mock_cls.return_value.get_schema_json.return_value = _mock_schema()
+        mock_cls.return_value.get_export_dataset.return_value = _make_test_export_dataset(
+            app='warehouse',
+            name='warehouse-dataset',
+            title='Warehouse',
+        )
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:dataset_detail', kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'}
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dist'},
+            ),
+        )
+        self.assertNotContains(response, '"btn_style": "inline"')
+        self.assertNotContains(response, 'name": "warehouse-dist"')
+
+    @patch(_DATASET_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_dataset_detail_renders_multi_value_metadata_as_separate_badges(
         self,
         mock_cls,
@@ -717,6 +751,38 @@ class DistributionDetailViewTest(TestCase):
         self.assertContains(response, 'Third Distribution')
         mock_svc.get_tables_with_columns.assert_called_once_with('third_source', 'third-dist')
         mock_svc.get_stat_charts.assert_called_once_with('third_source', 'third-dist')
+
+    @patch(_SCHEMA_LOOKUP_PATH)
+    @patch(_DISTRIBUTION_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_distribution_detail_cart_button_targets_parent_dataset(
+        self,
+        mock_cls,
+        mock_get_distribution_lookup,
+        mock_get_schema,
+    ):
+        dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
+        dataset.distributions[0].name = 'warehouse-dist'
+        dataset.distributions[0].title = 'Warehouse Distribution'
+
+        mock_get_distribution_lookup.return_value = _make_distribution_lookup(dataset)
+        mock_get_schema.return_value = _mock_schema()
+        mock_cls.return_value.get_tables_with_columns.return_value = []
+        mock_cls.return_value.get_stat_charts.return_value = []
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:distribution_detail',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dist'},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"name": "warehouse-dataset"')
+        self.assertContains(response, '"title": "Warehouse"')
+        self.assertNotContains(response, '"title": "Warehouse Distribution"')
+        self.assertContains(response, '<span class="font-medium text-txt-muted">Warehouse</span>', html=True)
 
     @patch(_SCHEMA_LOOKUP_PATH)
     @patch(_DISTRIBUTION_LOOKUP_PATH)

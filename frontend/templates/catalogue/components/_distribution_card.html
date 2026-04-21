@@ -9,8 +9,6 @@
       {{ dist.title|default:dist.name }}
     </span>
 
-    {% include "includes/_cart_inline_btn.html" with cart_app=dist.app cart_name=dist.name cart_title=dist.title|default:dist.name %}
-
     {% trans 'View full detail' as t_view_full_detail %}
     {% url 'frontend:distribution_detail' app=dist.app name=dist.name as dist_detail_url %}
     {% include "includes/_icon_action_link.html" with href=dist_detail_url title=t_view_full_detail click_stop=1 only %}

@@ -118,7 +118,7 @@ Check:
 
 - `metadata_db` is reachable
 - the `warehouse` tables exist in the metadata schema
-- startup logs do not say `metadata_db migration skipped`
+- startup logs do not report `metadata_db unavailable`
 
 ### FAIR Genomes charts are empty
 

@@ -82,11 +82,11 @@ class WarehouseRouter:
         return db1 == db2
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        """Ensure models are created in the correct database."""
+        """Ensure managed models are created in the correct database."""
         if app_label == 'fair_genomes':
             return db == 'fair_genomes_db'
         if app_label == 'warehouse':
-            return db == 'metadata_db'
+            return False
         if app_label == 'ticketing':
             return db == 'default'
         return db == 'default'

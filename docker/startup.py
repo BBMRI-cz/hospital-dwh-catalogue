@@ -137,6 +137,17 @@ def _build_tailwind_css(base_dir: Path) -> None:
         print('Tailwind CSS built successfully.', flush=True)
 
 
+def _check_metadata_db() -> None:
+    """Check metadata_db connectivity without writing migration state to it."""
+    try:
+        connections['metadata_db'].ensure_connection()
+    except Exception:
+        print(
+            'metadata_db unavailable — Warehouse data will not appear in the catalogue.',
+            flush=True,
+        )
+
+
 def main() -> None:
     django.setup()
 
@@ -186,15 +197,8 @@ def main() -> None:
         )
         call_command('migrate', 'fair_genomes', database='fair_genomes_db', interactive=False)
 
-    # metadata_db: warehouse
-    try:
-        call_command('migrate', database='metadata_db', interactive=False, verbosity=1)
-    except Exception:
-        print(
-            'metadata_db migration skipped — database unavailable. '
-            'Warehouse data will not appear in the catalogue.',
-            flush=True,
-        )
+    # metadata_db: warehouse schema is managed externally, so only check reachability.
+    _check_metadata_db()
 
     # ── Seed mock data ────────────────────────────────────────────────────────
     if should_seed_mock_fair_genomes(os.environ):

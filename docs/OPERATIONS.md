@@ -71,6 +71,8 @@ All environments need the core Django settings, bootstrap superuser credentials,
 - `METADATA_DB_*`
 - `FAIR_GENOMES_DB_*`
 
+In production, `METADATA_DB_*` should point to the external warehouse-owned database, not to the stack-local `db` container.
+
 ### Authentication
 
 The app supports:
@@ -234,7 +236,7 @@ It:
 4. repairs ticketing migration drift if needed
 5. migrates `fair_genomes_db`
 6. repairs FAIR Genomes migration drift if needed
-7. attempts `metadata_db` migration
+7. checks `metadata_db` connectivity without running Django migrations against it
 8. seeds mock FAIR Genomes data when enabled
 9. builds Tailwind CSS
 10. compiles translations when needed
@@ -252,7 +254,7 @@ The Postgres container creates:
 
 This behavior lives in [docker/postgres/initdb.d/00_create_databases.sh](../docker/postgres/initdb.d/00_create_databases.sh).
 
-`metadata_db` usually points to the same underlying database as `POSTGRES_DB`, but through a dedicated alias in Django.
+`metadata_db` is never created or migrated by Django. In production it typically points to an external warehouse-managed database; in development or staging it can point to a stack-local clone exposed through the same alias.
 
 ## Auth and admin operations
 
@@ -422,7 +424,7 @@ Check:
 
 - `metadata_db` credentials are correct
 - the warehouse schema exists
-- startup logs do not say `metadata_db migration skipped`
+- startup logs do not report `metadata_db unavailable`
 
 ### FAIR Genomes data or charts are missing
 

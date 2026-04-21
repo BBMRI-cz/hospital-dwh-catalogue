@@ -10,7 +10,7 @@ The Hospital DWH Catalogue is a Django application that publishes metadata about
 
 It combines metadata from multiple source applications:
 
-- `warehouse` — the main hospital data warehouse catalogue stored in `metadata_db`
+- `warehouse` — the main hospital data warehouse catalogue loaded through `metadata_db`
 - `fair_genomes` — FAIR Genomes datasets and statistics stored in `fair_genomes_db`
 - `ticketing` — local ticket requests stored in `default`
 - Django auth/admin/session data in `auth_db`
@@ -64,7 +64,7 @@ The runtime uses four aliases:
 |---|---|
 | `default` | Ticketing tables and uncategorized Django app tables |
 | `auth_db` | Users, groups, permissions, sessions, admin logs |
-| `metadata_db` | Warehouse catalogue tables, managed outside Django |
+| `metadata_db` | Warehouse catalogue tables in an externally managed schema; in production this usually points to a warehouse-owned database outside the app stack |
 | `fair_genomes_db` | FAIR Genomes models and statistics |
 
 The routing rules live in [catalogue/routers.py](../catalogue/routers.py).
@@ -75,7 +75,9 @@ The project has three runtime environments:
 
 - `dev` — smallest config surface, all integrations mocked
 - `staging` — LDAP mocked by default, FAIR Genomes and Alvao configured like a live environment
-- `prod` — real integrations only
+- `prod` — real integrations only, with `metadata_db` connected to the external warehouse database
+
+In production, `metadata_db` sits outside the deployed app stack. Development and staging can still point that alias at a stack-local Postgres clone when needed.
 
 Environment templates live in [env-examples/](../env-examples/), and `.env` is created with `./init-env.sh`.
 
