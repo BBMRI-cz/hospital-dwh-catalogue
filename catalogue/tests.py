@@ -69,6 +69,20 @@ class LdapSettingsTest(SimpleTestCase):
         self.assertEqual(line, 'AUTH_LDAP_CA_CERT_PATH=certs/ldap-ca.crt')
 
 
+class SettingsHelpersTest(SimpleTestCase):
+    def test_positive_int_or_default_returns_positive_values(self):
+        from .settings.helpers import positive_int_or_default
+
+        self.assertEqual(positive_int_or_default('25', default=15), 25)
+
+    def test_positive_int_or_default_falls_back_to_default_for_invalid_values(self):
+        from .settings.helpers import positive_int_or_default
+
+        for value in ('0', '-3', 'abc', ''):
+            with self.subTest(value=value):
+                self.assertEqual(positive_int_or_default(value, default=15), 15)
+
+
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):
     def test_reverse_proxy_https_settings_sets_secure_proxy_defaults(self):
         from .settings.helpers import reverse_proxy_https_settings

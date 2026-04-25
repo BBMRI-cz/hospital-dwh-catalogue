@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache as django_cache
 from django.http import QueryDict
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from frontend.presentation.filters import FilterState, build_sidebar_context
@@ -214,6 +214,24 @@ class CatalogueIndexViewTest(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(reverse('frontend:catalogue'))
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(CATALOGUE_PAGE_SIZE=5)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_page_size_comes_from_settings(self, mock_cls):
+        datasets = [
+            _make_test_dataset(name=f'ds-{index}', title=f'Dataset {index}')
+            for index in range(1, 8)
+        ]
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = datasets
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page_obj'].paginator.per_page, 5)
+        self.assertEqual(len(response.context['page_obj'].object_list), 5)
 
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_text_search_filters(self, mock_cls):

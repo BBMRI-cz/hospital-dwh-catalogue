@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404
 
@@ -25,8 +26,6 @@ from shared.export import build_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService
 
-PAGE_SIZE = 15
-
 
 def get_cart_dataset_ids(session) -> set[str]:
     return {item['name'] for item in CartService.get(session)}
@@ -39,7 +38,7 @@ def build_catalogue_index_context(request, *, service: UnifiedCatalogService | N
     filter_state = FilterState.from_query_params(request.GET)
 
     filtered = filter_datasets(snapshot.datasets, filter_state, service=catalog_service)
-    paginator = Paginator(filtered, PAGE_SIZE)
+    paginator = Paginator(filtered, settings.CATALOGUE_PAGE_SIZE)
     page_obj = paginator.get_page(request.GET.get('page', 1))
     sidebar_context = build_sidebar_context(
         filtered,

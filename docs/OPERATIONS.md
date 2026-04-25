@@ -71,6 +71,10 @@ All environments need the core Django settings, bootstrap superuser credentials,
 - `METADATA_DB_*`
 - `FAIR_GENOMES_DB_*`
 
+Optional app tuning:
+
+- `CATALOGUE_PAGE_SIZE` controls how many datasets the main catalogue page shows per page and defaults to `15`
+
 In production, `METADATA_DB_*` should point to the external warehouse-owned database, not to the stack-local `db` container.
 
 ### Authentication

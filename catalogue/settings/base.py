@@ -7,6 +7,8 @@ from decouple import config
 
 from django.utils.translation import gettext_lazy as _
 
+from .helpers import positive_int_or_default
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Environment-specific modules must define runtime configuration such as
@@ -203,3 +205,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 HEALTH_DCAT_VERSION = config('HEALTH_DCAT_VERSION', default='release-6')
+CATALOGUE_PAGE_SIZE_DEFAULT = 15
+CATALOGUE_PAGE_SIZE = config(
+    'CATALOGUE_PAGE_SIZE',
+    default=CATALOGUE_PAGE_SIZE_DEFAULT,
+    cast=lambda value: positive_int_or_default(value, default=CATALOGUE_PAGE_SIZE_DEFAULT),
+)

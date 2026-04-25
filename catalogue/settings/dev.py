@@ -39,6 +39,7 @@ STATIC_URL = base_settings.STATIC_URL
 STATIC_ROOT = base_settings.STATIC_ROOT
 DEFAULT_AUTO_FIELD = base_settings.DEFAULT_AUTO_FIELD
 HEALTH_DCAT_VERSION = base_settings.HEALTH_DCAT_VERSION
+CATALOGUE_PAGE_SIZE = base_settings.CATALOGUE_PAGE_SIZE
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-me')
 DEBUG = True

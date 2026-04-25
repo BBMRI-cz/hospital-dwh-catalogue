@@ -12,6 +12,14 @@ def _split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(',') if item.strip()]
 
 
+def positive_int_or_default(value: str, *, default: int) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
+
+
 def env_list(name: str, *, default: str | None = None) -> list[str]:
     if default is None:
         return config(name, cast=_split_csv)
