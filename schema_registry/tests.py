@@ -343,7 +343,9 @@ class ServiceLayerTest(TestCase):
 
         result = get_context_terms()
         self.assertEqual(result['Concept'], 'http://www.w3.org/2004/02/skos/core#Concept')
-        self.assertEqual(result['LegalResource'], 'http://data.europa.eu/eli/ontology#LegalResource')
+        self.assertEqual(
+            result['LegalResource'], 'http://data.europa.eu/eli/ontology#LegalResource'
+        )
         self.assertEqual(result['LicenceDocument'], 'http://purl.org/dc/terms/LicenseDocument')
 
     def test_get_context_profile_resolves_export_properties(self) -> None:
@@ -363,7 +365,9 @@ class ServiceLayerTest(TestCase):
         self.assertEqual(result['terms']['cv:email'], 'cv:email')
         self.assertEqual(result['terms']['vcard:hasEmail'], 'vcard:hasEmail')
         self.assertEqual(result['terms']['csvw:table'], 'csvw:table')
-        self.assertEqual(result['classes']['ContactPoint'], 'http://data.europa.eu/m8g/ContactPoint')
+        self.assertEqual(
+            result['classes']['ContactPoint'], 'http://data.europa.eu/m8g/ContactPoint'
+        )
         self.assertEqual(result['classes']['TableGroup'], 'http://www.w3.org/ns/csvw#TableGroup')
 
     def test_resolved_export_profile_records_missing_property_warning(self) -> None:
@@ -466,9 +470,7 @@ class BuildJsonldContextTest(TestCase):
             publisher=publisher,
             hdab=hdab,
             access_rights='http://publications.europa.eu/resource/authority/access-right/PUBLIC',
-            health_category=(
-                'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS'
-            ),
+            health_category=('http://13.81.34.152:1101/resource/authority/healthcategories/EHRS'),
             applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
             contact_point=dataset_cp,
             catalog=catalog,
@@ -621,9 +623,7 @@ class BuildJsonldContextTest(TestCase):
 
         self.assertEqual(dataset_values.get('@id'), 'https://example.com/dataset/test-ds')
         self.assertEqual(distribution_node['@id'], 'http://example.com/dist')
-        self.assertFalse(
-            any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph'])
-        )
+        self.assertFalse(any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph']))
         self.assertEqual(len(agent_nodes), 0)
         self.assertGreaterEqual(len(contact_point_nodes), 1)
         self.assertIn(
@@ -773,9 +773,7 @@ class BuildJsonldContextTest(TestCase):
 
         self.assertEqual(result.document['@context'], {})
         self.assertTrue(result.document['@graph'])
-        self.assertTrue(
-            any(warning.code == 'profile_load_failed' for warning in result.warnings)
-        )
+        self.assertTrue(any(warning.code == 'profile_load_failed' for warning in result.warnings))
 
     # ── Multi-value URI field export ────────────────────────────────────────
 
@@ -809,13 +807,7 @@ class BuildJsonldContextTest(TestCase):
         node = self._dataset_node(self._build())
         self.assertEqual(
             node.get('healthdcatap:healthCategory'),
-            [
-                {
-                    '@id': (
-                        'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS'
-                    )
-                }
-            ],
+            [{'@id': ('http://13.81.34.152:1101/resource/authority/healthcategories/EHRS')}],
         )
 
     def test_single_dataset_type_exported_as_single_item_array(self) -> None:
@@ -899,9 +891,7 @@ class BuildJsonldContextTest(TestCase):
             'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj'
         )
         result = self._build(ds)
-        self.assertFalse(
-            any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph'])
-        )
+        self.assertFalse(any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph']))
 
     def test_dataset_specific_export_keeps_dataset_resource_only(
         self,

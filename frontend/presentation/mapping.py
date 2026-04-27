@@ -32,7 +32,9 @@ def _build_search_text(dataset: FrontendDataset) -> str:
         item for distribution in dataset.distributions for item in distribution.conforms_to
     ]
     distribution_legislation = [
-        item for distribution in dataset.distributions for item in distribution.applicable_legislation
+        item
+        for distribution in dataset.distributions
+        for item in distribution.applicable_legislation
     ]
     return ' '.join(
         [

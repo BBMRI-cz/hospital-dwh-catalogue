@@ -20,6 +20,7 @@ from shared.dtos import (
 from shared.normalization import derive_status, parse_keywords, parse_multi_values
 from shared.source_loaders import (
     get_apps_with_table_columns,
+    get_source_apps,
     load_complete_export_catalogue,
     load_export_catalog,
     load_export_dataset,
@@ -56,8 +57,17 @@ class UnifiedCatalogService:
 
         return WarehouseMetadataService()
 
+    @staticmethod
+    def _fair_genomes_service():
+        from fair_genomes.services.catalogue import FairGenomesCatalogueService
+
+        return FairGenomesCatalogueService()
+
     def get_apps_with_table_columns(self) -> frozenset[str]:
         return get_apps_with_table_columns()
+
+    def get_source_apps(self) -> tuple[str, ...]:
+        return get_source_apps()
 
     def get_datasets(self) -> list[UnifiedDataset]:
         return load_unified_datasets()
@@ -137,7 +147,7 @@ class UnifiedCatalogService:
         if app != 'fair_genomes':
             return []
         return self._safe_call(
-            lambda: self._warehouse_service().get_stat_charts(distribution_name),
+            lambda: self._fair_genomes_service().get_stat_charts(distribution_name),
             default=[],
             log_message=f'Failed to load stat charts for distribution={distribution_name}',
         )

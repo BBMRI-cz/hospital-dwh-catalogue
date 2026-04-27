@@ -166,9 +166,7 @@ def _normalise_dataset_defaults(defaults: dict[str, Any]) -> dict[str, Any]:
     normalised['applicable_legislation'] = _normalise_legislation(
         normalised.get('applicable_legislation')
     )
-    normalised['health_category'] = _normalise_health_category(
-        normalised.get('health_category')
-    )
+    normalised['health_category'] = _normalise_health_category(normalised.get('health_category'))
     return normalised
 
 

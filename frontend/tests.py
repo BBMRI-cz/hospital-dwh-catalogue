@@ -264,7 +264,9 @@ class CatalogueIndexViewTest(TestCase):
         mock_svc.get_schema_json.return_value = _mock_schema()
 
         self.client.force_login(self.user)
-        response = self.client.get(reverse('frontend:catalogue'), {'q': 'http://example.com/spec/b'})
+        response = self.client.get(
+            reverse('frontend:catalogue'), {'q': 'http://example.com/spec/b'}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Alpha Dataset')
@@ -295,10 +297,7 @@ class CatalogueIndexViewTest(TestCase):
         )
         self.assertNotContains(
             response,
-            (
-                '[&#x27;http://13.81.34.152:1101/resource/authority/'
-                'healthcategories/EHRS&#x27;]'
-            ),
+            ('[&#x27;http://13.81.34.152:1101/resource/authority/healthcategories/EHRS&#x27;]'),
             html=True,
         )
 
@@ -932,7 +931,9 @@ class DistributionDetailViewTest(TestCase):
         self.assertContains(response, '"name": "warehouse-dataset"')
         self.assertContains(response, '"title": "Warehouse"')
         self.assertNotContains(response, '"title": "Warehouse Distribution"')
-        self.assertContains(response, '<span class="font-medium text-txt-muted">Warehouse</span>', html=True)
+        self.assertContains(
+            response, '<span class="font-medium text-txt-muted">Warehouse</span>', html=True
+        )
 
     @patch(_SCHEMA_LOOKUP_PATH)
     @patch(_DISTRIBUTION_LOOKUP_PATH)
@@ -946,10 +947,12 @@ class DistributionDetailViewTest(TestCase):
         dataset = _make_test_dataset()
         dataset.distributions[0].name = 'test-dist'
         dataset.distributions[0].title = 'Test Distribution'
-        dataset.distributions[0].conforms_to = 'http://example.com/profile/a;http://example.com/profile/b'
-        dataset.distributions[0].applicable_legislation = (
-            'http://example.com/law/a;http://example.com/law/b'
-        )
+        dataset.distributions[
+            0
+        ].conforms_to = 'http://example.com/profile/a;http://example.com/profile/b'
+        dataset.distributions[
+            0
+        ].applicable_legislation = 'http://example.com/law/a;http://example.com/law/b'
 
         mock_get_distribution_lookup.return_value = _make_distribution_lookup(dataset)
         mock_get_schema.return_value = {
@@ -1485,4 +1488,6 @@ class MultiValueMapperTest(SimpleTestCase):
             ),
         ]
         result = dataset_to_view_model(ds)
-        self.assertEqual(result.distributions[0].conforms_to, ['http://profile/a', 'http://profile/b'])
+        self.assertEqual(
+            result.distributions[0].conforms_to, ['http://profile/a', 'http://profile/b']
+        )

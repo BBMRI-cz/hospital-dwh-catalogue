@@ -332,33 +332,37 @@ class AttachDistributionsTest(SimpleTestCase):
 
 
 class SourceLoaderRegistryTest(SimpleTestCase):
-    def test_get_export_source_apps_uses_registered_sources(self):
-        from shared.source_loaders import get_export_source_apps
+    def test_get_source_apps_uses_registered_sources(self):
+        from shared.source_loaders import get_source_apps
 
-        self.assertEqual(get_export_source_apps(), ('warehouse', 'fair_genomes'))
+        self.assertEqual(get_source_apps(), ('warehouse', 'fair_genomes'))
 
     def test_get_apps_with_table_columns_uses_registered_sources(self):
         from shared.source_loaders import get_apps_with_table_columns
 
         self.assertEqual(get_apps_with_table_columns(), frozenset({'warehouse'}))
 
-    def test_get_export_models_returns_none_for_unknown_source(self):
-        from shared.source_loaders import get_export_models
+    def test_get_source_adapter_returns_none_for_unknown_source(self):
+        from shared.source_loaders import get_source_adapter
 
-        self.assertEqual(get_export_models('unknown_source'), (None, None, None))
+        self.assertIsNone(get_source_adapter('unknown_source'))
 
-    def test_get_export_models_resolves_registered_source_models(self):
+    def test_get_source_adapter_resolves_registered_source_models(self):
         from fair_genomes.models import Dataset as FairDataset
-        from shared.source_loaders import get_export_models
+        from shared.source_loaders import get_source_adapter
         from warehouse.models import Dataset as WarehouseDataset
 
-        wh_db_alias, _, wh_dataset_model = get_export_models('warehouse')
-        fg_db_alias, _, fg_dataset_model = get_export_models('fair_genomes')
+        wh_adapter = get_source_adapter('warehouse')
+        fg_adapter = get_source_adapter('fair_genomes')
 
-        self.assertEqual(wh_db_alias, 'metadata_db')
-        self.assertIs(wh_dataset_model, WarehouseDataset)
-        self.assertEqual(fg_db_alias, 'fair_genomes_db')
-        self.assertIs(fg_dataset_model, FairDataset)
+        self.assertIsNotNone(wh_adapter)
+        self.assertIsNotNone(fg_adapter)
+        assert wh_adapter is not None
+        assert fg_adapter is not None
+        self.assertEqual(wh_adapter.db_alias, 'metadata_db')
+        self.assertIs(wh_adapter.dataset_model, WarehouseDataset)
+        self.assertEqual(fg_adapter.db_alias, 'fair_genomes_db')
+        self.assertIs(fg_adapter.dataset_model, FairDataset)
 
     def test_export_loaders_return_none_for_unknown_source(self):
         from shared.source_loaders import load_export_catalog, load_export_dataset
@@ -383,26 +387,22 @@ class CompleteExportCatalogueAssemblerTest(SimpleTestCase):
     ):
         from shared.catalogue_assemblers import build_complete_export_catalogue
 
-        def get_models(app):
-            if app == 'warehouse':
-                return 'metadata_db', object, object
-            return 'fair_genomes_db', object, object
+        class Source:
+            def __init__(self, app):
+                self.app = app
 
-        def get_catalog_queryset(db_alias, _catalog_model):
-            if db_alias == 'fair_genomes_db':
-                raise RuntimeError('boom')
-            return [SimpleNamespace(name='catalog-1')]
+            def export_catalog_queryset(self):
+                if self.app == 'fair_genomes':
+                    raise RuntimeError('boom')
+                return [SimpleNamespace(name='catalog-1')]
 
-        def get_dataset_queryset(app, db_alias, _dataset_model):
-            if db_alias == 'fair_genomes_db':
-                raise RuntimeError('boom')
-            return [SimpleNamespace(name='dataset-1', catalog_id='catalog-1')]
+            def export_dataset_queryset(self):
+                if self.app == 'fair_genomes':
+                    raise RuntimeError('boom')
+                return [SimpleNamespace(name='dataset-1', catalog_id='catalog-1')]
 
         catalogs, orphan_datasets = build_complete_export_catalogue(
-            apps=('warehouse', 'fair_genomes'),
-            get_models=get_models,
-            get_catalog_queryset=get_catalog_queryset,
-            get_dataset_queryset=get_dataset_queryset,
+            [Source('warehouse'), Source('fair_genomes')]
         )
 
         self.assertEqual([catalog.name for catalog in catalogs], ['catalog-1'])

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Required, TypedDict
+from typing import Any, Required, TypedDict
 
 from shared.dtos import ExportCatalog, ExportDataset
 
 ExportResource = ExportDataset | ExportCatalog
 
 JsonLdContext = dict[str, str]
-type JsonLdScalar = str | int | float | bool | None
-type JsonLdValue = JsonLdScalar | JsonLdNode | list[JsonLdValue]
-type JsonLdNode = dict[str, JsonLdValue]
+JsonLdScalar = str | int | float | bool | None
+JsonLdValue = JsonLdScalar | dict[str, Any] | list[Any]
+JsonLdNode = dict[str, Any]
 
 JsonLdIdRef = TypedDict('JsonLdIdRef', {'@id': Required[str]})
 
@@ -24,8 +24,8 @@ JsonLdTypedValue = TypedDict(
     },
 )
 
-type JsonLdLiteralOrUri = str | JsonLdIdRef
-type JsonLdGraph = list[JsonLdNode]
+JsonLdLiteralOrUri = str | JsonLdIdRef
+JsonLdGraph = list[JsonLdNode]
 
 JsonLdDocument = TypedDict(
     'JsonLdDocument',

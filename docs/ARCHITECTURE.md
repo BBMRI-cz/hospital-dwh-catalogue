@@ -44,17 +44,18 @@ The app is server-rendered. Users log in, browse datasets and distributions, fil
 The important architectural pattern is:
 
 1. Source-specific Django models live in `warehouse` and `fair_genomes`
-2. `shared/source_loaders.py` loads source data from the right database alias
+2. `shared/source_loaders.py` registers source adapters that know their database alias and query shape
 3. `shared/mappers.py` converts models into shared DTOs from `shared/dtos.py`
-4. `shared/services.py` provides a single `UnifiedCatalogService`
+4. `shared/services.py` provides a single `UnifiedCatalogService` orchestration facade
 5. `frontend/presentation/*` turns DTOs into view models, filtering, sidebars, and cache snapshots
-6. `shared/export.py` builds aggregate HealthDCAT-AP JSON-LD and Turtle exports
+6. `shared/export.py` exposes the export facade, while focused export helper modules build HealthDCAT-AP JSON-LD and Turtle payloads
 
 This separation is what makes the app easy to extend:
 
 - source-specific schema details stay in the source app
 - the frontend reads normalized DTOs
 - exports do not need to know which database produced a record
+- adding a source means adding a source adapter instead of changing frontend or export code
 
 ## Database layout
 
@@ -100,6 +101,10 @@ The app exposes two authenticated aggregate export endpoints:
 - `/api/rdf`
 
 Dataset detail pages also expose per-dataset exports for logged-in users.
+
+Export builders use the configured schema registry context profile. Missing RDF classes,
+properties, or terms are non-fatal and are returned as export warnings on the page and in
+download/API response headers.
 
 The schema terms shown in the UI come from the configured HealthDCAT-AP release via `schema_registry`.
 

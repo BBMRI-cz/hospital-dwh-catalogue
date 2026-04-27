@@ -151,8 +151,7 @@ class SeedFairGenomesMockCommandTest(TestCase):
         self.assertEqual(catalog.publisher_id, 'FG_AGENT_DWH')
         self.assertEqual(
             catalog.applicable_legislation,
-            'http://data.europa.eu/eli/reg/2016/679/oj;'
-            'http://data.europa.eu/eli/reg/2025/327/oj',
+            'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2025/327/oj',
         )
 
         staging = Catalog.objects.using('fair_genomes_db').get(name='CAT_FG_STAGING')
@@ -169,8 +168,7 @@ class SeedFairGenomesMockCommandTest(TestCase):
         )
         self.assertEqual(
             cohort.applicable_legislation,
-            'http://data.europa.eu/eli/reg/2016/679/oj;'
-            'http://data.europa.eu/eli/reg/2025/327/oj',
+            'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2025/327/oj',
         )
 
         admin = Dataset.objects.using('fair_genomes_db').get(name='DS_FG_ADMIN')
@@ -192,9 +190,7 @@ class SeedFairGenomesMockCommandTest(TestCase):
             .exists()
         )
 
-        parquet = Distribution.objects.using('fair_genomes_db').get(
-            name='DIST_FG_COHORT_PARQUET'
-        )
+        parquet = Distribution.objects.using('fair_genomes_db').get(name='DIST_FG_COHORT_PARQUET')
         self.assertEqual(
             parquet.format,
             'http://publications.europa.eu/resource/authority/file-type/PARQUET',

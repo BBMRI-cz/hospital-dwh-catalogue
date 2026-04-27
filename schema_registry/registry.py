@@ -290,7 +290,9 @@ def _extract_context_profile_terms(
             property_iri = _context_term_iri(property_value)
             if property_iri is None:
                 continue
-            class_properties[property_name] = _uri_to_prefixed(property_iri, prefix_map) or property_iri
+            class_properties[property_name] = (
+                _uri_to_prefixed(property_iri, prefix_map) or property_iri
+            )
         if class_properties:
             properties[key] = class_properties
 

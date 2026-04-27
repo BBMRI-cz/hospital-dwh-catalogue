@@ -83,9 +83,9 @@ Rules of thumb:
 
 Most changes touch one of these layers:
 
-1. source models and database access
+1. source adapters, source models, and database access
 2. shared DTOs and mappers
-3. unified service layer
+3. unified service orchestration
 4. frontend presentation models, filters, and templates
 5. export layer
 
@@ -167,12 +167,12 @@ If the new database should be created automatically in Docker, also update:
 
 Add the new app label to [catalogue/routers.py](../catalogue/routers.py) so reads, writes, relations, and migrations land in the correct DB alias.
 
-### 4. Register the source in the unified loader layer
+### 4. Register the source adapter
 
 Update [shared/source_loaders.py](../shared/source_loaders.py):
 
 - add a `models_loader`
-- add a `SourceConfig`
+- add a `SourceAdapter`
 - choose the `db_alias`
 - set `has_table_columns=True` if the source exposes table/column metadata like `warehouse`
 
@@ -187,8 +187,8 @@ Make sure the new source models can be mapped into the shared DTOs in:
 
 If the new source supports:
 
-- table/column drill-down, update `WarehouseMetadataService` or add a new source-specific service
-- charts/statistics, add a source-specific branch in `UnifiedCatalogService`
+- table/column drill-down, add a source-specific service and expose it through `UnifiedCatalogService`
+- charts/statistics, keep the query in the owning source app and expose it through `UnifiedCatalogService`
 - exports, make sure related models and prefetching are supported
 
 ### 7. Add tests
@@ -211,6 +211,20 @@ Typical pattern:
 5. add tests
 
 For a new authenticated export/API endpoint, copy the style of `frontend/api_views.py`.
+
+## Change exports
+
+The public export entrypoints live in [shared/export.py](../shared/export.py).
+
+Keep implementation details in focused helper modules:
+
+- `shared/export_specs.py` for DTO-field-to-RDF-property declarations
+- `shared/export_values.py` for JSON-LD value coercion
+- `shared/export_graph.py` for graph collection, de-duplication, and context trimming
+- `shared/export_nodes.py` for catalog, dataset, distribution, agent, contact-point, table, and column nodes
+
+Export functions return result objects with `document` or `content` plus non-fatal warnings.
+Surface those warnings through `frontend/export_warnings.py` instead of changing export bodies.
 
 ## Add or change FAIR Genomes statistics
 

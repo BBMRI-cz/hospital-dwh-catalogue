@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import replace
+from typing import Any, Protocol
 
 from shared.dtos import (
     ExportCatalog,
@@ -15,6 +17,14 @@ from shared.dtos import (
 from shared.mappers import map_export_catalog, map_export_dataset
 
 logger = logging.getLogger(__name__)
+
+
+class ExportSource(Protocol):
+    app: str
+
+    def export_catalog_queryset(self) -> Iterable[Any]: ...
+
+    def export_dataset_queryset(self) -> Iterable[Any]: ...
 
 
 def attach_distributions(
@@ -36,30 +46,22 @@ def attach_distributions(
 
 
 def build_complete_export_catalogue(
-    *,
-    apps: tuple[str, ...],
-    get_models,
-    get_catalog_queryset,
-    get_dataset_queryset,
+    sources: Iterable[ExportSource],
 ) -> tuple[list[ExportCatalog], list[ExportDataset]]:
     export_catalogs: list[ExportCatalog] = []
     orphan_datasets: list[ExportDataset] = []
 
-    for app in apps:
-        db_alias, catalog_model, dataset_model = get_models(app)
-        if catalog_model is None or dataset_model is None or db_alias is None:
-            continue
-
+    for source in sources:
         try:
-            catalog_rows = list(get_catalog_queryset(db_alias, catalog_model))
-            dataset_rows = list(get_dataset_queryset(app, db_alias, dataset_model))
+            catalog_rows = list(source.export_catalog_queryset())
+            dataset_rows = list(source.export_dataset_queryset())
         except Exception:
-            logger.exception('Failed to load aggregate export resources for app=%s', app)
+            logger.exception('Failed to load aggregate export resources for app=%s', source.app)
             continue
 
         datasets_by_catalog: dict[str, list[ExportDataset]] = defaultdict(list)
         for dataset in dataset_rows:
-            export_dataset = map_export_dataset(dataset, app, include_catalog=False)
+            export_dataset = map_export_dataset(dataset, source.app, include_catalog=False)
             catalog_name = getattr(dataset, 'catalog_id', None)
             if catalog_name:
                 datasets_by_catalog[catalog_name].append(export_dataset)
@@ -67,7 +69,11 @@ def build_complete_export_catalogue(
                 orphan_datasets.append(export_dataset)
 
         export_catalogs.extend(
-            map_export_catalog(catalog, app, datasets=datasets_by_catalog.get(catalog.name, []))
+            map_export_catalog(
+                catalog,
+                source.app,
+                datasets=datasets_by_catalog.get(catalog.name, []),
+            )
             for catalog in catalog_rows
         )
 
