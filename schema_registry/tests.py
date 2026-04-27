@@ -341,6 +341,14 @@ class ServiceLayerTest(TestCase):
         self.assertIn('dct', result)
         self.assertTrue(result['dct'].startswith('http'))
 
+    def test_get_context_terms_returns_class_iris(self) -> None:
+        from schema_registry.services import get_context_terms
+
+        result = get_context_terms()
+        self.assertEqual(result['Concept'], 'http://www.w3.org/2004/02/skos/core#Concept')
+        self.assertEqual(result['LegalResource'], 'http://data.europa.eu/eli/ontology#LegalResource')
+        self.assertEqual(result['LicenceDocument'], 'http://purl.org/dc/terms/LicenseDocument')
+
 
 class BuildJsonldContextTest(TestCase):
     """Tests for the prefix-filtering behaviour of build_jsonld() in shared.export."""
@@ -422,7 +430,9 @@ class BuildJsonldContextTest(TestCase):
             publisher=publisher,
             hdab=hdab,
             access_rights='http://publications.europa.eu/resource/authority/access-right/PUBLIC',
-            health_category='http://healthdataportal.eu/ns/health#clinical',
+            health_category=(
+                'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS'
+            ),
             applicable_legislation='http://data.europa.eu/eli/reg/2022/868/oj',
             contact_point=dataset_cp,
             catalog=catalog,
@@ -459,6 +469,7 @@ class BuildJsonldContextTest(TestCase):
             'foaf',
             'vcard',
             'geodcatap',
+            'skos',
             'xsd',
         }
         self.assertEqual(set(context.keys()), expected)
@@ -493,7 +504,6 @@ class BuildJsonldContextTest(TestCase):
             'rdf',
             'rdfs',
             'shacl',
-            'skos',
             'cc',
             'lcon',
             'owl',
@@ -537,6 +547,7 @@ class BuildJsonldContextTest(TestCase):
         cols = table['csvw:column']
         self.assertEqual(len(cols), 2)
         self.assertEqual(cols[0]['csvw:name'], 'encounter_id')
+        self.assertEqual(cols[0].get('csvw:titles'), 'Encounter ID')
         self.assertEqual(cols[0].get('csvw:datatype'), 'integer')
         self.assertNotIn('csvw:propertyUrl', cols[0])
         self.assertEqual(
@@ -566,19 +577,17 @@ class BuildJsonldContextTest(TestCase):
             node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset')
         )
         distribution_node = self._distribution_node(result)
-        catalog_node = next(
-            node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')
-        )
         agent_nodes = [node for node in result['@graph'] if _node_has_type(node, 'foaf:Agent')]
         contact_point_nodes = [
             node for node in result['@graph'] if _node_has_type(node, 'cv:ContactPoint')
         ]
         dataset_values = cast(dict[str, object], dataset_node)
-        catalog_values = cast(dict[str, object], catalog_node)
 
         self.assertEqual(dataset_values.get('@id'), 'https://example.com/dataset/test-ds')
         self.assertEqual(distribution_node['@id'], 'http://example.com/dist')
-        self.assertNotIn('@id', catalog_values)
+        self.assertFalse(
+            any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph'])
+        )
         self.assertEqual(len(agent_nodes), 0)
         self.assertGreaterEqual(len(contact_point_nodes), 1)
         self.assertIn(
@@ -593,12 +602,6 @@ class BuildJsonldContextTest(TestCase):
         self.assertEqual(dataset_publisher.get('foaf:name'), 'Acme Hospital')
         self.assertNotIn('@id', dataset_publisher)
 
-        catalog_publisher = cast(dict[str, object] | None, catalog_values.get('dct:publisher'))
-        self.assertIsNotNone(catalog_publisher)
-        if catalog_publisher is None:
-            self.fail('Expected catalog publisher in export')
-        self.assertEqual(catalog_publisher.get('foaf:name'), 'Acme Hospital')
-
         for node in result['@graph']:
             node_id = node.get('@id')
             if node_id is None:
@@ -607,7 +610,7 @@ class BuildJsonldContextTest(TestCase):
             self.assertNotIn('/api/jsonld#', node_id)
             self.assertNotIn('/api/metadata/', node_id)
 
-    def test_source_uses_provided_dataset_identifier(self) -> None:
+    def test_source_is_omitted_from_single_dataset_export(self) -> None:
         ds = self._make_dataset()
         ds.source_name = 'source-ds'
         ds.source_identifier = 'https://example.com/dataset/source-ds'
@@ -617,9 +620,7 @@ class BuildJsonldContextTest(TestCase):
             node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset')
         )
 
-        self.assertEqual(
-            dataset_node.get('dct:source'), {'@id': 'https://example.com/dataset/source-ds'}
-        )
+        self.assertNotIn('dct:source', dataset_node)
 
     def test_build_complete_jsonld_includes_catalogs_and_orphan_datasets(self) -> None:
         from shared.export import build_complete_jsonld
@@ -699,7 +700,13 @@ class BuildJsonldContextTest(TestCase):
         node = self._dataset_node(self._build())
         self.assertEqual(
             node.get('healthdcatap:healthCategory'),
-            [{'@id': 'http://healthdataportal.eu/ns/health#clinical'}],
+            [
+                {
+                    '@id': (
+                        'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS'
+                    )
+                }
+            ],
         )
 
     def test_single_dataset_type_exported_as_single_item_array(self) -> None:
@@ -776,30 +783,24 @@ class BuildJsonldContextTest(TestCase):
         node = self._dataset_node(self._build(ds))
         self.assertEqual(node.get('dct:conformsTo'), [{'@id': 'https://example.com/spec/dataset'}])
 
-    def test_nested_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:
+    def test_dataset_specific_export_omits_nested_catalog_resource(self) -> None:
         ds = self._make_dataset()
         assert ds.catalog is not None
         ds.catalog.applicable_legislation = (
             'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj'
         )
         result = self._build(ds)
-        catalog = next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog'))
-        self.assertEqual(
-            catalog.get('dcatap:applicableLegislation'),
-            [
-                {'@id': 'http://data.europa.eu/eli/reg/2016/679/oj'},
-                {'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'},
-            ],
+        self.assertFalse(
+            any(_node_has_type(node, 'dcat:Catalog') for node in result['@graph'])
         )
 
-    def test_nested_catalog_single_applicable_legislation_exported_as_single_item_array(
+    def test_dataset_specific_export_keeps_dataset_resource_only(
         self,
     ) -> None:
         result = self._build()
-        catalog = next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog'))
         self.assertEqual(
-            catalog.get('dcatap:applicableLegislation'),
-            [{'@id': 'http://data.europa.eu/eli/reg/2022/868/oj'}],
+            sum(1 for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset')),
+            1,
         )
 
     def test_top_level_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:

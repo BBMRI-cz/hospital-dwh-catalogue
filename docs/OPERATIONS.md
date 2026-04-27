@@ -58,7 +58,7 @@ Use `--force` if you intentionally want to overwrite an existing `.env`.
 
 ### Core app and databases
 
-All environments need the core Django settings, bootstrap superuser credentials, and all four PostgreSQL aliases:
+All environments need the core Django settings, env-managed superuser credentials, and all four PostgreSQL aliases:
 
 - `SECRET_KEY`
 - `ALLOWED_HOSTS`
@@ -202,7 +202,7 @@ The deploy script validates the environment before it starts anything.
 Shared requirements for all environments:
 
 - core Django settings such as `SECRET_KEY`, `ALLOWED_HOSTS`, `SITE_URL`, and `HEALTH_DCAT_VERSION`
-- bootstrap superuser credentials
+- env-managed superuser credentials
 - all four PostgreSQL database aliases
 - `FAIR_GENOMES_SYNC_INTERVAL_HOURS`
 
@@ -272,7 +272,7 @@ That account is re-applied on every startup.
 Good practice:
 
 - use a username that does not exist in LDAP
-- treat it as a bootstrap or break-glass admin account
+- treat it as an env-managed superuser account
 - grant real staff access through the Django admin
 
 ## Admin access and roles
@@ -299,7 +299,7 @@ john.smith
 admin
 ```
 
-If you need another superuser outside the env-managed bootstrap account:
+If you need another superuser outside the env-managed account:
 
 ```bash
 ./scripts/compose.sh exec web python manage.py createsuperuser
@@ -324,7 +324,7 @@ On first successful login, Django creates the user automatically in `auth_db`.
 
 New users have no special permissions by default. Grant access through the Django admin by setting:
 
-- `is_staff` for admin and Grafana access
+- `is_staff` for staff and Grafana access
 - `is_superuser` for full administrative control
 - group memberships for any future role-based permissions
 
@@ -372,6 +372,45 @@ Render the effective stack without starting it:
 ./scripts/compose.sh config
 ./scripts/compose.sh --with-observability config
 ```
+
+## Metadata compatibility check
+
+Use the bundled HealthData@EU validator when you need a manual HealthDCAT-AP compatibility check for exported metadata.
+
+First export a Turtle file from the running catalogue:
+
+- sign in and download a dataset-specific RDF export from a dataset detail page
+- or open `/api/rdf` for the aggregate RDF export
+
+For strict HealthDCAT validation, use an export that includes distributions. HealthDCAT requires every `dcat:Dataset` to reference at least one `dcat:Distribution`.
+
+Start the validator for the configured HealthDCAT release:
+
+```bash
+docker compose -f health_dcat_ap/public/releases/release-6/html/shacl/HealthDCAT-AP_validator/docker-compose.yml up -d
+```
+
+If `HEALTH_DCAT_VERSION` is not `release-6`, replace `release-6` in the path with the configured release.
+
+Open:
+
+```text
+http://localhost:9011/shacl/ehds/upload
+```
+
+The root URL `http://localhost:9011/` returns a Tomcat 404; use the `/shacl/ehds/upload` path.
+
+Upload the exported `.ttl` file and select the profile that matches the dataset access rights:
+
+| Access rights URI suffix | Validator profile |
+|---|---|
+| `PUBLIC` | `public` |
+| `RESTRICTED` | `restricted` |
+| `NON_PUBLIC` | `non-public` |
+
+Validate mixed-access aggregate exports per profile. The validator profile enforces the matching `dct:accessRights` value for every dataset in the uploaded file.
+
+Treat `sh:Violation` results as compatibility failures. Treat `sh:Warning` results as metadata quality improvements to schedule or document.
 
 ## Quality and CI
 

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from schema_registry.types import (
+    SchemaRegistryContextTerms,
     SchemaRegistryPayload,
     SchemaRegistryPrefixMap,
     SchemaRequirement,
@@ -28,6 +29,7 @@ _REQUIREMENT_BY_NAME: dict[str, SchemaRequirement] = {
     'deprecated': 'deprecated',
 }
 _registry_cache: dict[Path, tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]] = {}
+_context_terms_cache: dict[Path, SchemaRegistryContextTerms] = {}
 
 
 class _PathTermInfo(TypedDict):
@@ -46,9 +48,18 @@ def get_namespace_prefixes(release_dir: Path) -> SchemaRegistryPrefixMap:
     return _get_cached_entry(release_dir)[1]
 
 
+def get_context_terms(release_dir: Path) -> SchemaRegistryContextTerms:
+    """Return named JSON-LD context terms for a HealthDCAT-AP release directory."""
+    resolved = release_dir.resolve()
+    if resolved not in _context_terms_cache:
+        _context_terms_cache[resolved] = _load_context_terms(resolved)
+    return _context_terms_cache[resolved]
+
+
 def invalidate_cache() -> None:
     """Clear the module-level cache."""
     _registry_cache.clear()
+    _context_terms_cache.clear()
 
 
 def _get_cached_entry(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]:
@@ -96,6 +107,38 @@ def _load(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefi
 
     logger.info('Schema registry loaded: %d terms from %s', len(result), release_dir)
     return result, prefix_map
+
+
+def _load_context_terms(release_dir: Path) -> SchemaRegistryContextTerms:
+    context_json = release_dir / 'context' / 'dcat-ap.jsonld'
+    if not context_json.exists():
+        logger.warning(
+            'JSON-LD context not found: %s — context term lookup unavailable.',
+            context_json,
+        )
+        return {}
+
+    try:
+        data = json.loads(context_json.read_text(encoding='utf-8'))
+    except Exception:
+        logger.exception('Failed to parse JSON-LD context: %s', context_json)
+        return {}
+
+    raw_context = data.get('@context')
+    if not isinstance(raw_context, dict):
+        logger.warning('JSON-LD context has no top-level @context object: %s', context_json)
+        return {}
+
+    terms: SchemaRegistryContextTerms = {}
+    for key, value in raw_context.items():
+        if isinstance(value, str):
+            terms[key] = value
+            continue
+        if isinstance(value, dict):
+            iri = value.get('@id')
+            if isinstance(iri, str):
+                terms[key] = iri
+    return terms
 
 
 def _parse_turtle_graph(graph_cls, path: Path):

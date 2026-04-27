@@ -13,6 +13,7 @@ from shared.dtos import (
 )
 from shared.export_context import clear_export_context_cache, get_export_context_prefixes
 from shared.export_serialization import dump_jsonld, serialise_jsonld_to_turtle
+from shared.export_terms import ExportRdfClass, rdf_class
 from shared.export_types import (
     ExportResource,
     JsonLdAgentNode,
@@ -31,12 +32,15 @@ from shared.export_types import (
     JsonLdIdRefList,
     JsonLdLiteralOrUri,
     JsonLdLiteralOrUriList,
+    JsonLdProvenanceNode,
+    JsonLdReferenceNode,
     JsonLdTableGroupNode,
     JsonLdTableNode,
     JsonLdTypedValue,
 )
 
 _CURIE_RE = re.compile(r'^([A-Za-z][A-Za-z0-9_-]*):[^/]')
+_IRI_LABEL_RE = re.compile(r'[/#]([^/#]+)[/#]?$')
 
 __all__ = [
     'build_complete_jsonld',
@@ -144,6 +148,19 @@ def _typed_datetime(value: str | None) -> JsonLdTypedValue | None:
     return _typed_value('xsd:dateTime', value)
 
 
+def _typed_non_negative_integer(value: int | None) -> JsonLdTypedValue | None:
+    if value is None:
+        return None
+    return _typed_value('xsd:nonNegativeInteger', str(value))
+
+
+def _label_from_iri(iri: str) -> str:
+    match = _IRI_LABEL_RE.search(iri)
+    if not match:
+        return iri
+    return match.group(1).replace('_', ' ').replace('-', ' ')
+
+
 def _append_node(graph: JsonLdGraph, seen: set[str], node: JsonLdGraphNode) -> None:
     iri = node.get('@id')
     if iri is None:
@@ -153,6 +170,53 @@ def _append_node(graph: JsonLdGraph, seen: set[str], node: JsonLdGraphNode) -> N
         return
     graph.append(node)
     seen.add(iri)
+
+
+def _append_reference_node(
+    graph: JsonLdGraph,
+    seen: set[str],
+    iri: str,
+    rdf_type: str | list[str],
+    *,
+    label: str | None = None,
+    description: str | None = None,
+) -> None:
+    node: JsonLdReferenceNode = {
+        '@id': iri,
+        '@type': rdf_type,
+    }
+    if label:
+        node['skos:prefLabel'] = label
+    if description:
+        node['dct:description'] = description
+    _append_node(graph, seen, node)
+
+
+def _append_reference_nodes(
+    graph: JsonLdGraph,
+    seen: set[str],
+    values: str | None,
+    rdf_type: str | list[str],
+    *,
+    skos_labels: bool = False,
+) -> None:
+    for value in _split_values(values):
+        if not _is_http_uri(value):
+            continue
+        _append_reference_node(
+            graph,
+            seen,
+            value,
+            rdf_type,
+            label=_label_from_iri(value) if skos_labels else None,
+        )
+
+
+def _provenance_node(value: str) -> JsonLdProvenanceNode:
+    return {
+        '@type': rdf_class(ExportRdfClass.PROVENANCE_STATEMENT),
+        'dct:description': value,
+    }
 
 
 def _build_contact_point_node(contact_point: ExportContactPoint) -> JsonLdContactPointNode:
@@ -243,6 +307,7 @@ def _build_table_group(distribution: ExportDistribution) -> JsonLdTableGroupNode
             }
             if column.title:
                 column_node['dct:title'] = column.title
+                column_node['csvw:titles'] = column.title
             if column.description:
                 column_node['dct:description'] = column.description
             if column.datatype:
@@ -257,7 +322,11 @@ def _build_table_group(distribution: ExportDistribution) -> JsonLdTableGroupNode
     return table_group
 
 
-def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistributionNode:
+def _build_distribution_node(
+    distribution: ExportDistribution,
+    graph: JsonLdGraph,
+    seen: set[str],
+) -> JsonLdDistributionNode:
     node: JsonLdDistributionNode = {
         '@type': 'dcat:Distribution',
     }
@@ -274,20 +343,55 @@ def _build_distribution_node(distribution: ExportDistribution) -> JsonLdDistribu
         legislation = _uri_list(distribution.applicable_legislation)
         if legislation:
             node['dcatap:applicableLegislation'] = legislation
+            _append_reference_nodes(
+                graph,
+                seen,
+                distribution.applicable_legislation,
+                rdf_class(ExportRdfClass.LEGAL_RESOURCE),
+            )
     format_value = _maybe_uri_ref(distribution.format)
     if format_value is not None:
         node['dct:format'] = format_value
+        if isinstance(format_value, dict):
+            _append_reference_node(
+                graph,
+                seen,
+                format_value['@id'],
+                rdf_class(ExportRdfClass.MEDIA_TYPE_OR_EXTENT),
+            )
     conforms_to = _literal_or_uri_list(distribution.conforms_to)
     if conforms_to:
         node['dct:conformsTo'] = conforms_to
+        _append_reference_nodes(
+            graph,
+            seen,
+            distribution.conforms_to,
+            rdf_class(ExportRdfClass.STANDARD),
+        )
     if distribution.byte_size is not None:
-        node['dcat:byteSize'] = distribution.byte_size
+        byte_size = _typed_non_negative_integer(distribution.byte_size)
+        if byte_size is not None:
+            node['dcat:byteSize'] = byte_size
     rights_value = _maybe_uri_ref(distribution.rights)
     if rights_value is not None:
         node['dct:rights'] = rights_value
+        if isinstance(rights_value, dict):
+            _append_reference_node(
+                graph,
+                seen,
+                rights_value['@id'],
+                rdf_class(ExportRdfClass.RIGHTS_STATEMENT),
+            )
     licence_value = _maybe_uri_ref(distribution.licence)
     if licence_value is not None:
         node['dct:license'] = licence_value
+        if isinstance(licence_value, dict):
+            _append_reference_node(
+                graph,
+                seen,
+                licence_value['@id'],
+                rdf_class(ExportRdfClass.LICENCE_DOCUMENT),
+            )
     issued = _typed_datetime(distribution.release_date)
     if issued is not None:
         node['dct:issued'] = issued
@@ -342,6 +446,12 @@ def _build_dataset_node(
     conforms_to = _literal_or_uri_list(dataset.conforms_to)
     if conforms_to:
         node['dct:conformsTo'] = conforms_to
+        _append_reference_nodes(
+            graph,
+            seen,
+            dataset.conforms_to,
+            rdf_class(ExportRdfClass.STANDARD),
+        )
     issued = _typed_datetime(dataset.issued)
     if issued is not None:
         node['dct:issued'] = issued
@@ -350,22 +460,43 @@ def _build_dataset_node(
         node['dct:modified'] = modified
     if dataset.keywords:
         node['dcat:keyword'] = dataset.keywords
-    if dataset.source_name:
-        source_iri = _dataset_iri(dataset.source_identifier)
-        if source_iri is not None:
-            node['dct:source'] = _id_ref(source_iri)
+    # dct:source ranges to dcat:Dataset. A single-dataset export cannot
+    # guarantee that the referenced dataset is present and profile-compatible.
     if contact_point_value is not None:
         node['dcat:contactPoint'] = contact_point_value
     if dataset.provenance:
-        node['dct:provenance'] = dataset.provenance
+        node['dct:provenance'] = _provenance_node(dataset.provenance)
     if dataset.access_rights:
         node['dct:accessRights'] = _id_ref(dataset.access_rights)
+        _append_reference_node(
+            graph,
+            seen,
+            dataset.access_rights,
+            [
+                rdf_class(ExportRdfClass.RIGHTS_STATEMENT),
+                rdf_class(ExportRdfClass.CONCEPT),
+            ],
+            label=_label_from_iri(dataset.access_rights),
+        )
     applicable_legislation = _uri_list(dataset.applicable_legislation)
     if applicable_legislation:
         node['dcatap:applicableLegislation'] = applicable_legislation
+        _append_reference_nodes(
+            graph,
+            seen,
+            dataset.applicable_legislation,
+            rdf_class(ExportRdfClass.LEGAL_RESOURCE),
+        )
     health_category_values = _uri_list(dataset.health_category)
     if health_category_values:
         node['healthdcatap:healthCategory'] = health_category_values
+        _append_reference_nodes(
+            graph,
+            seen,
+            dataset.health_category,
+            rdf_class(ExportRdfClass.CONCEPT),
+            skos_labels=True,
+        )
     if hdab_value is not None:
         node['healthdcatap:hdab'] = hdab_value
     if custodian_value is not None:
@@ -373,6 +504,20 @@ def _build_dataset_node(
     dataset_types = _uri_list(dataset.type)
     if dataset_types:
         node['dct:type'] = dataset_types
+        _append_reference_nodes(
+            graph,
+            seen,
+            dataset.type,
+            rdf_class(ExportRdfClass.CONCEPT),
+            skos_labels=True,
+        )
+    _append_reference_nodes(
+        graph,
+        seen,
+        dataset.theme,
+        rdf_class(ExportRdfClass.CONCEPT),
+        skos_labels=True,
+    )
     if include_distributions and dataset.distributions:
         dist_refs = [
             _id_ref(iri)
@@ -386,7 +531,7 @@ def _build_dataset_node(
 
 def _add_distributions(dataset: ExportDataset, graph: JsonLdGraph, seen: set[str]) -> None:
     for distribution in dataset.distributions:
-        _append_node(graph, seen, _build_distribution_node(distribution))
+        _append_node(graph, seen, _build_distribution_node(distribution, graph, seen))
 
 
 def _append_dataset_resource(
@@ -415,6 +560,12 @@ def _append_dataset_resource(
             legislation = _uri_list(dataset.catalog.applicable_legislation)
             if legislation:
                 catalog_node['dcatap:applicableLegislation'] = legislation
+                _append_reference_nodes(
+                    graph,
+                    seen,
+                    dataset.catalog.applicable_legislation,
+                    rdf_class(ExportRdfClass.LEGAL_RESOURCE),
+                )
         if dataset.catalog.publisher is not None:
             catalog_node['dct:publisher'] = _build_agent_node(
                 dataset.catalog.publisher, graph, seen
@@ -433,7 +584,7 @@ def _dataset_graph(dataset: ExportDataset) -> JsonLdGraph:
     graph: JsonLdGraph = []
     seen: set[str] = set()
 
-    _append_dataset_resource(dataset, graph, seen, include_catalog=True)
+    _append_dataset_resource(dataset, graph, seen, include_catalog=False)
     return graph
 
 
@@ -463,6 +614,12 @@ def _append_catalog_resource(
         legislation = _uri_list(catalog.applicable_legislation)
         if legislation:
             catalog_node['dcatap:applicableLegislation'] = legislation
+            _append_reference_nodes(
+                graph,
+                seen,
+                catalog.applicable_legislation,
+                rdf_class(ExportRdfClass.LEGAL_RESOURCE),
+            )
     if catalog.publisher is not None:
         catalog_node['dct:publisher'] = _build_agent_node(catalog.publisher, graph, seen)
     _append_node(graph, seen, catalog_node)

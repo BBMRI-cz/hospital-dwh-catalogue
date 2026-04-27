@@ -1,6 +1,6 @@
 # FAIR Genomes
 
-Audience: operators, admins, and developers working with the FAIR Genomes integration.
+Audience: operators, staff users, and developers working with the FAIR Genomes integration.
 
 Use this page to configure FAIR Genomes, run syncs, manage statistics, and troubleshoot missing datasets or charts.
 

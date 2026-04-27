@@ -8,12 +8,12 @@ Activated via MOCK_FAIR_GENOMES=True in the .env file.
 Called from docker/entrypoint.sh after migrations have run.
 
 Coverage:
-  ContactPoint : email+page | email only | page only | neither
-  Agent        : with / without contact_point
-  Catalog      : full fields + minimal fields
-  Dataset      : 5 rows —  varying optionals + all access_rights /
+  ContactPoint : email+page | email only | page only
+  Agent        : publisher / HDAB / custodian examples with contact_point
+  Catalog      : production + staging catalogues with required metadata
+  Dataset      : 20 rows — varying optionals + all access_rights /
                  applicable_legislation / health_category combinations
-  Distribution : 5 rows — varying format / rights / byte_size combos
+  Distribution : 21 rows — varying format / rights / byte_size combos
                  (no db_layer — that field is warehouse-only)
   StatResult   : 6 mock value distributions (instrument model, library prep kit,
                  sequencing type, sample material type, pathological state, genome build)
@@ -39,6 +39,147 @@ from fair_genomes.models import (
 logger = logging.getLogger(__name__)
 
 DB = 'fair_genomes_db'
+
+LEGISLATION_URIS = {
+    'GDPR': 'http://data.europa.eu/eli/reg/2016/679/oj',
+    'EHDS': 'http://data.europa.eu/eli/reg/2025/327/oj',
+    'NIS2': 'http://data.europa.eu/eli/dir/2022/2555/oj',
+    'DGA': 'http://data.europa.eu/eli/reg/2022/868/oj',
+}
+
+HEALTH_CATEGORY_BASE = 'http://13.81.34.152:1101/resource/authority/healthcategories/'
+HEALTH_CATEGORY_URIS = {
+    code: f'{HEALTH_CATEGORY_BASE}{code}'
+    for code in (
+        'EHCT',
+        'HGPD',
+        'HPML',
+        'EINS',
+        'EHRS',
+        'HRAD',
+        'PGEH',
+        'RPDG',
+        'DIOH',
+        'PHDR',
+        'RMMD',
+        'WELA',
+        'IDHP',
+        'MRMR',
+        'NRPE',
+        'RQSH',
+        'EMRD',
+    )
+}
+HEALTH_CATEGORY_URIS.update(
+    {
+        # Backwards-compatible aliases for older mock rows and UI fixtures.
+        'patient_data': HEALTH_CATEGORY_URIS['EHRS'],
+        'diagnostic_data': HEALTH_CATEGORY_URIS['EHRS'],
+        'medication_data': HEALTH_CATEGORY_URIS['HRAD'],
+        'research_data': HEALTH_CATEGORY_URIS['RQSH'],
+        'administrative_data': HEALTH_CATEGORY_URIS['HRAD'],
+    }
+)
+
+FILE_TYPE_BASE = 'http://publications.europa.eu/resource/authority/file-type/'
+FILE_TYPE_URIS = {
+    code: f'{FILE_TYPE_BASE}{code}'
+    for code in (
+        'CSV',
+        'TSV',
+        'JSON',
+        'JSON_LD',
+        'XML',
+        'PARQUET',
+        'GZIP',
+        'ZIP',
+        'OCTET',
+    )
+}
+
+DATASET_HEALTH_CATEGORY_OVERRIDES = {
+    'DS_FG_COHORT': 'HGPD;EINS;RQSH',
+    'DS_FG_VARIANTS': 'HGPD',
+    'DS_FG_CLINICAL': 'EHRS',
+    'DS_FG_BIOBANK': 'EINS',
+    'DS_FG_ADMIN': 'HRAD',
+    'DS_FG_PHENOTYPES': 'EHRS;RQSH',
+    'DS_FG_CONSENT': 'HRAD',
+    'DS_FG_SAMPLES': 'EINS',
+    'DS_FG_FAMILY_HISTORY': 'EHRS',
+    'DS_FG_WES': 'HGPD',
+    'DS_FG_RNA_SEQ': 'HPML',
+    'DS_FG_PROTEOMICS': 'HPML',
+    'DS_FG_METABOLOMICS': 'HPML',
+    'DS_FG_MICROBIOME': 'HPML',
+    'DS_FG_EPIGENOMICS': 'HGPD',
+    'DS_FG_PHARMACOGENOMICS': 'HGPD',
+    'DS_FG_RARE_DISEASES': 'HGPD;MRMR',
+    'DS_FG_IMAGING_MRI': 'EHRS',
+    'DS_FG_SURVIVAL': 'RQSH',
+    'DS_FG_TREATMENT': 'EHRS;HRAD',
+}
+
+
+def _is_http_uri(value: str | None) -> bool:
+    return bool(value and (value.startswith('http://') or value.startswith('https://')))
+
+
+def _split_values(value: str | None) -> list[str]:
+    return [item.strip() for item in (value or '').split(';') if item.strip()]
+
+
+def _mapped_uri_list(value: str | None, mapping: dict[str, str]) -> str:
+    values: list[str] = []
+    for item in _split_values(value):
+        mapped = mapping.get(item) or mapping.get(item.upper()) or mapping.get(item.lower())
+        if mapped is None and _is_http_uri(item):
+            mapped = item
+        if mapped and _is_http_uri(mapped):
+            values.append(mapped)
+    return ';'.join(values)
+
+
+def _normalise_legislation(value: str | None) -> str:
+    return _mapped_uri_list(value, LEGISLATION_URIS)
+
+
+def _normalise_health_category(value: str | None) -> str:
+    return _mapped_uri_list(value, HEALTH_CATEGORY_URIS)
+
+
+def _normalise_file_type(value: str | None) -> str | None:
+    if not value:
+        return None
+    if _is_http_uri(value):
+        return value
+    return FILE_TYPE_URIS.get(value.upper())
+
+
+def _normalise_distribution_rights(value: str | None) -> str | None:
+    # dct:rights expects a RightsStatement node; old textual flags are not valid RDF values.
+    return value if _is_http_uri(value) else None
+
+
+def _normalise_dataset_defaults(defaults: dict[str, Any]) -> dict[str, Any]:
+    normalised = dict(defaults)
+    normalised['applicable_legislation'] = _normalise_legislation(
+        normalised.get('applicable_legislation')
+    )
+    normalised['health_category'] = _normalise_health_category(
+        normalised.get('health_category')
+    )
+    return normalised
+
+
+def _normalise_distribution_defaults(defaults: dict[str, Any]) -> dict[str, Any]:
+    normalised = dict(defaults)
+    normalised['applicable_legislation'] = _normalise_legislation(
+        normalised.get('applicable_legislation')
+    )
+    normalised['format'] = _normalise_file_type(normalised.get('format'))
+    normalised['rights'] = _normalise_distribution_rights(normalised.get('rights'))
+    return normalised
 
 
 class Command(BaseCommand):
@@ -66,19 +207,21 @@ class Command(BaseCommand):
             {'email': 'fg-admin@hospital.cz', 'contact_page': None},
             # page only
             {'email': None, 'contact_page': 'https://hospital.cz/fairgenomes/contact'},
-            # neither
-            {'email': None, 'contact_page': None},
         ]
         cp_objects: list[ContactPoint] = []
         cp_created = 0
         for data in contact_points:
-            obj, created = ContactPoint.objects.using(DB).get_or_create(**data)
+            obj, created = ContactPoint.objects.using(DB).update_or_create(
+                email=data['email'],
+                contact_page=data['contact_page'],
+                defaults={},
+            )
             cp_objects.append(obj)
             if created:
                 cp_created += 1
         created_counts['ContactPoint'] = cp_created
 
-        cp_both, cp_email_only, cp_page_only, _cp_none = cp_objects
+        cp_both, cp_email_only, cp_page_only = cp_objects
 
         agent_data: list[dict[str, Any]] = [
             # with email+page contact + description
@@ -99,14 +242,12 @@ class Command(BaseCommand):
                 'contact_point': cp_page_only,
                 'description': 'Health Data Access Body overseeing access to genomic datasets.',
             },
-            # no contact, no description
-            {'name': 'FG_AGENT_NO_CONTACT', 'contact_point': None, 'description': None},
         ]
         agent_objects: dict[str, Agent] = {}
         ag_created = 0
         for data in agent_data:
             name = data['name']
-            obj, created = Agent.objects.using(DB).get_or_create(
+            obj, created = Agent.objects.using(DB).update_or_create(
                 name=name,
                 defaults={
                     'contact_point': data['contact_point'],
@@ -118,11 +259,16 @@ class Command(BaseCommand):
                 ag_created += 1
         created_counts['Agent'] = ag_created
 
+        Agent.objects.using(DB).filter(name='FG_AGENT_NO_CONTACT').delete()
+        ContactPoint.objects.using(DB).filter(
+            email__isnull=True, contact_page__isnull=True
+        ).delete()
+
         hdab = agent_objects['FG_AGENT_HDAB']
         agent_dwh = agent_objects['FG_AGENT_DWH']
         agent_molgenis = agent_objects['FG_AGENT_MOLGENIS']
 
-        cat_full, cat_created_full = Catalog.objects.using(DB).get_or_create(
+        cat_full, cat_created_full = Catalog.objects.using(DB).update_or_create(
             name='CAT_FAIR_GENOMES',
             defaults={
                 'title': 'FAIR Genomes Catalogue',
@@ -131,13 +277,20 @@ class Command(BaseCommand):
                     'Sourced from the MOLGENIS FAIR Genomes API.'
                 ),
                 'publisher': agent_dwh,
-                'applicable_legislation': 'GDPR;EHDS',
+                'applicable_legislation': _normalise_legislation('GDPR;EHDS'),
             },
         )
-        # Minimal catalog: no title/description/publisher — only mandatory field
-        cat_min, cat_created_min = Catalog.objects.using(DB).get_or_create(
+        cat_min, cat_created_min = Catalog.objects.using(DB).update_or_create(
             name='CAT_FG_STAGING',
-            defaults={'applicable_legislation': 'GDPR'},
+            defaults={
+                'title': 'FAIR Genomes Staging Catalogue',
+                'description': (
+                    'Staging HealthDCAT-AP catalogue used for FAIR Genomes local '
+                    'development and export validation.'
+                ),
+                'publisher': agent_molgenis,
+                'applicable_legislation': _normalise_legislation('GDPR;EHDS'),
+            },
         )
         created_counts['Catalog'] = int(cat_created_full) + int(cat_created_min)
 
@@ -256,7 +409,7 @@ class Command(BaseCommand):
                     ),
                     'applicable_legislation': 'GDPR',
                     'health_category': 'administrative_data',
-                    'hdab': agent_objects['FG_AGENT_NO_CONTACT'],
+                    'hdab': hdab,
                 },
             },
             # DS_FG_PHENOTYPES: detailed phenotype ontology; RESTRICTED; GDPR;EHDS; patient_data
@@ -550,9 +703,12 @@ class Command(BaseCommand):
         ds_created = 0
         dataset_objects: dict[str, Dataset] = {}
         for spec in dataset_specs:
-            obj, created = Dataset.objects.using(DB).get_or_create(
+            defaults = dict(spec['defaults'])
+            if override := DATASET_HEALTH_CATEGORY_OVERRIDES.get(spec['name']):
+                defaults['health_category'] = override
+            obj, created = Dataset.objects.using(DB).update_or_create(
                 name=spec['name'],
-                defaults=spec['defaults'],
+                defaults=_normalise_dataset_defaults(defaults),
             )
             dataset_objects[spec['name']] = obj
             if created:
@@ -627,6 +783,20 @@ class Command(BaseCommand):
                     'dataset_name': dataset_objects['DS_FG_BIOBANK'],
                     'access_url': 'https://fairgenomes.hospital.cz/api/biobank/raw',
                     'applicable_legislation': 'EHDS',
+                },
+            },
+            # DIST_FG_ADMIN_CSV: data access administration export
+            {
+                'name': 'DIST_FG_ADMIN_CSV',
+                'defaults': {
+                    'dataset_name': dataset_objects['DS_FG_ADMIN'],
+                    'title': 'Administrativní záznamy přístupů (CSV)',
+                    'description': 'Auditní export administrace žádostí a přístupových rozhodnutí.',
+                    'format': 'CSV',
+                    'byte_size': 2097152,
+                    'access_url': 'https://fairgenomes.hospital.cz/api/admin/access-audit.csv',
+                    'applicable_legislation': 'GDPR',
+                    'licence': 'https://creativecommons.org/licenses/by-nc/4.0/',
                 },
             },
             # DIST_FG_PHENOTYPES_JSON: HPO JSON-LD export
@@ -841,9 +1011,9 @@ class Command(BaseCommand):
         dist_created = 0
         dist_objects: dict[str, Distribution] = {}
         for spec in distribution_specs:
-            obj, created = Distribution.objects.using(DB).get_or_create(
+            obj, created = Distribution.objects.using(DB).update_or_create(
                 name=spec['name'],
-                defaults=spec['defaults'],
+                defaults=_normalise_distribution_defaults(spec['defaults']),
             )
             dist_objects[spec['name']] = obj
             if created:

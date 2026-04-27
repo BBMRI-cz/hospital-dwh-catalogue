@@ -17,7 +17,7 @@ Authentication depends on the environment:
 - `staging` usually keeps LDAP mocked, but can also use real LDAP
 - `prod` uses real LDAP only
 
-The username that matches `DJANGO_SUPERUSER_USERNAME` becomes the mock admin user in `dev`.
+The username that matches `DJANGO_SUPERUSER_USERNAME` becomes the mock staff/superuser account in `dev`.
 
 ## Main pages
 

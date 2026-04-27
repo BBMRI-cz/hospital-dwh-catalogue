@@ -7,8 +7,12 @@ from pathlib import Path
 
 from django.conf import settings
 
-from schema_registry.registry import get_namespace_prefixes, get_registry
-from schema_registry.types import SchemaRegistryPayload, SchemaRegistryPrefixMap
+from schema_registry import registry
+from schema_registry.types import (
+    SchemaRegistryContextTerms,
+    SchemaRegistryPayload,
+    SchemaRegistryPrefixMap,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +25,14 @@ def _release_dir() -> Path:
 
 def get_schema_dict() -> SchemaRegistryPayload:
     """Return term metadata for the configured HealthDCAT-AP release."""
-    return get_registry(_release_dir())
+    return registry.get_registry(_release_dir())
 
 
 def get_context_prefixes() -> SchemaRegistryPrefixMap:
     """Return the namespace prefixes for the configured HealthDCAT-AP release."""
-    return get_namespace_prefixes(_release_dir())
+    return registry.get_namespace_prefixes(_release_dir())
+
+
+def get_context_terms() -> SchemaRegistryContextTerms:
+    """Return named JSON-LD context terms for the configured HealthDCAT-AP release."""
+    return registry.get_context_terms(_release_dir())

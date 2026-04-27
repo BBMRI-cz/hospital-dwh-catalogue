@@ -99,7 +99,7 @@ INSERT INTO metadata."lm_dataset" (
     'http://publications.europa.eu/resource/authority/dataset-type/SENSITIVE',
     'http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC',
     'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj',
-    'patient_data',
+    'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS',
     'AGENT_HDAB',
     'AGENT_DWH'
 );
@@ -136,7 +136,7 @@ INSERT INTO metadata."lm_dataset" (
     'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL',
     'http://publications.europa.eu/resource/authority/access-right/RESTRICTED',
     'http://data.europa.eu/eli/reg/2016/679/oj',
-    'diagnostic_data',
+    'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS',
     'AGENT_HDAB'
 );
 
@@ -170,7 +170,7 @@ INSERT INTO metadata."lm_dataset" (
     'http://publications.europa.eu/resource/authority/dataset-type/ADMINISTRATIVE',
     'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
     'http://data.europa.eu/eli/reg/2022/868/oj',
-    'administrative_data',
+    'http://13.81.34.152:1101/resource/authority/healthcategories/HRAD',
     'AGENT_HDAB'
 );
 
@@ -195,10 +195,10 @@ INSERT INTO metadata."lm_distribution" (
     'DS_PATIENTS',
     'Surová data pacientů',
     'Denní extrakt pacientských registrací před standardizačními transformacemi.',
-    'PARQUET',
+    'http://publications.europa.eu/resource/authority/file-type/PARQUET',
     'https://healthdcat-ap.eu/spec/v6',
     157286400,
-    'internal',
+    NULL,
     '2024-01-15 00:00:00+01',
     '2026-03-10 00:00:00+01',
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.patients_raw',
@@ -220,8 +220,8 @@ INSERT INTO metadata."lm_distribution" (
     'DIST_PATIENTS_CLEAN',
     'DS_PATIENTS',
     'Čistá vrstva pacientů',
-    'DELTA',
-    'restricted',
+    'http://publications.europa.eu/resource/authority/file-type/PARQUET',
+    NULL,
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.patients_clean',
     'http://data.europa.eu/eli/reg/2016/679/oj;http://data.europa.eu/eli/reg/2022/868/oj',
     'clean'
@@ -240,8 +240,8 @@ INSERT INTO metadata."lm_distribution" (
     'DIST_LABS_RAW',
     'DS_LABS',
     'Surová laboratorní data',
-    'CSV',
-    'internal',
+    'http://publications.europa.eu/resource/authority/file-type/CSV',
+    NULL,
     'jdbc:postgresql://dwh-db:5432/dwh/metadata.labs_raw',
     'http://data.europa.eu/eli/reg/2016/679/oj',
     'raw'
@@ -263,8 +263,8 @@ INSERT INTO metadata."lm_distribution" (
     'DS_CAPACITY',
     'Agregovaná kapacitní fakta',
     'Měsíční analytická vrstva s agregovanými provozními ukazateli vhodná pro interní i veřejné reporty.',
-    'PARQUET',
-    'public',
+    'http://publications.europa.eu/resource/authority/file-type/PARQUET',
+    NULL,
     'jdbc:postgresql://dwh-db:5432/dwh/analytics.fact_capacity_monthly',
     'http://data.europa.eu/eli/reg/2022/868/oj',
     'https://creativecommons.org/licenses/by/4.0/',

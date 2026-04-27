@@ -272,7 +272,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
     def full_sync_view(self, request):
         """Full RDF + GraphQL resync, accessible via admin button."""
         if not request.user.is_staff:
-            messages.error(request, _('Only admins can trigger a full sync.'))
+            messages.error(request, _('Only staff users can trigger a full sync.'))
             return redirect('..')
 
         if request.method == 'POST':

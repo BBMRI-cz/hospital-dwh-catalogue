@@ -53,7 +53,7 @@ def _ensure_env_superuser() -> None:
     credentials = env_superuser_credentials(os.environ)
     if credentials is None:
         print(
-            'DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser bootstrap.',
+            'DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser setup.',
             flush=True,
         )
         return

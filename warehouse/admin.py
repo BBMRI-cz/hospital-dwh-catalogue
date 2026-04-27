@@ -2,7 +2,7 @@
 Admin configuration for the catalogue project — user management.
 
 The admin panel exposes exactly two sections:
-  - Users           — staff can grant admin rights; superusers can also revoke them.
+  - Users           — staff can assign the staff role; superusers can also revoke it.
   - Stat definitions — managed in fair_genomes/admin.py.
 
 Everything else (groups, tickets, distributions, stat results …) is deliberately
@@ -27,12 +27,12 @@ admin.site.unregister(User)
 @admin.register(User)
 class CatalogueUserAdmin(BaseUserAdmin):
     """
-    Simplified user admin restricted to the single task of managing admin rights.
+    Simplified user admin restricted to the single task of managing the staff role.
 
     Permission model
     ----------------
-    Superuser  — can grant *and* revoke admin rights (is_staff) for any user.
-    Staff user — can only grant admin rights; once a user is already an admin they
+    Superuser  — can assign *and* revoke the staff role (is_staff) for any user.
+    Staff user — can only assign the staff role; once a user already has staff status they
                  cannot be changed by a regular staff member.
 
     Users are created automatically on first LDAP login; the add flow is therefore
@@ -49,7 +49,7 @@ class CatalogueUserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username',)}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
-        (_('Admin rights'), {'fields': ('is_staff',)}),
+        (_('Staff role'), {'fields': ('is_staff',)}),
     )
 
     # All staff can view and change users (to grant is_staff).

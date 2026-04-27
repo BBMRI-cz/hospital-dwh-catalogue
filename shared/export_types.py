@@ -24,12 +24,33 @@ JsonLdLiteralOrUri = str | JsonLdIdRef
 JsonLdLiteralOrUriList = list[JsonLdLiteralOrUri]
 JsonLdIdRefList = list[JsonLdIdRef]
 
+JsonLdReferenceNode = TypedDict(
+    'JsonLdReferenceNode',
+    {
+        '@id': Required[str],
+        '@type': Required[str | list[str]],
+        'skos:prefLabel': NotRequired[str],
+        'dct:description': NotRequired[str],
+    },
+    total=False,
+)
+
+JsonLdProvenanceNode = TypedDict(
+    'JsonLdProvenanceNode',
+    {
+        '@type': Required[str],
+        'dct:description': Required[str],
+    },
+    total=False,
+)
+
 JsonLdColumnNode = TypedDict(
     'JsonLdColumnNode',
     {
         '@type': Required[str],
         'csvw:name': Required[str],
         'dct:title': NotRequired[str],
+        'csvw:titles': NotRequired[str],
         'dct:description': NotRequired[str],
         'csvw:datatype': NotRequired[str],
         'csvw:propertyUrl': NotRequired[JsonLdIdRef],
@@ -99,7 +120,7 @@ JsonLdDistributionNode = TypedDict(
         'dcatap:applicableLegislation': NotRequired[JsonLdIdRefList],
         'dct:format': NotRequired[JsonLdLiteralOrUri],
         'dct:conformsTo': NotRequired[JsonLdLiteralOrUriList],
-        'dcat:byteSize': NotRequired[int],
+        'dcat:byteSize': NotRequired[JsonLdTypedValue],
         'dct:rights': NotRequired[JsonLdLiteralOrUri],
         'dct:license': NotRequired[JsonLdLiteralOrUri],
         'dct:issued': NotRequired[JsonLdTypedValue],
@@ -127,7 +148,7 @@ JsonLdDatasetNode = TypedDict(
         'dcat:keyword': NotRequired[list[str]],
         'dct:source': NotRequired[JsonLdIdRef],
         'dcat:contactPoint': NotRequired[JsonLdContactPointValue],
-        'dct:provenance': NotRequired[str],
+        'dct:provenance': NotRequired[JsonLdProvenanceNode],
         'dct:accessRights': NotRequired[JsonLdIdRef],
         'dcatap:applicableLegislation': NotRequired[JsonLdIdRefList],
         'healthdcatap:healthCategory': NotRequired[JsonLdIdRefList],
@@ -159,6 +180,7 @@ JsonLdGraphNode = (
     | JsonLdDistributionNode
     | JsonLdAgentNode
     | JsonLdContactPointNode
+    | JsonLdReferenceNode
 )
 
 JsonLdGraph = list[JsonLdGraphNode]

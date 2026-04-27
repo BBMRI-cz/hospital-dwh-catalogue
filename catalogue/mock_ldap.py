@@ -28,7 +28,7 @@ class MockLDAPBackend(ModelBackend):
         logger.info('Mock LDAP authenticated %s', username)
 
         superuser_username = os.environ.get('DJANGO_SUPERUSER_USERNAME', '').strip()
-        is_admin = bool(superuser_username) and username == superuser_username
+        is_superuser = bool(superuser_username) and username == superuser_username
 
         try:
             user, created = User.objects.get_or_create(
@@ -37,8 +37,8 @@ class MockLDAPBackend(ModelBackend):
                     'first_name': username.capitalize(),
                     'last_name': 'User',
                     'email': f'{username}@example.com',
-                    'is_staff': is_admin,
-                    'is_superuser': is_admin,
+                    'is_staff': is_superuser,
+                    'is_superuser': is_superuser,
                 },
             )
             user = cast(AbstractUser, user)
@@ -47,7 +47,7 @@ class MockLDAPBackend(ModelBackend):
                 logger.info('Mock LDAP created user %s', username)
             else:
                 logger.debug('Mock LDAP found existing user %s', username)
-                if is_admin and not user.is_staff:
+                if is_superuser and not user.is_staff:
                     user.is_staff = True
                     user.is_superuser = True
                     user.save(update_fields=['is_staff', 'is_superuser'])

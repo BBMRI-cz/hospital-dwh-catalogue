@@ -9,7 +9,7 @@ calls are made.
 import os
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition, StatResult
 from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
@@ -125,6 +125,101 @@ class DistributionModelTest(TestCase):
         for field_name in ('access_url', 'applicable_legislation'):
             field = Distribution._meta.get_field(field_name)
             self.assertFalse(field.blank, msg=f'{field_name} should have blank=False')
+
+
+class SeedFairGenomesMockCommandTest(TestCase):
+    """The mock seed should be useful as a HealthDCAT export fixture."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    @override_settings(MOCK_FAIR_GENOMES=True)
+    def test_seed_writes_healthdcat_compatible_mock_values(self):
+        from django.core.management import call_command
+
+        Catalog.objects.using('fair_genomes_db').create(
+            name='CAT_FAIR_GENOMES',
+            title='Old title',
+            description='Old description',
+            applicable_legislation='GDPR',
+        )
+        ContactPoint.objects.using('fair_genomes_db').create()
+        Agent.objects.using('fair_genomes_db').create(name='FG_AGENT_NO_CONTACT')
+
+        call_command('seed_fair_genomes_mock', verbosity=0)
+
+        catalog = Catalog.objects.using('fair_genomes_db').get(name='CAT_FAIR_GENOMES')
+        self.assertEqual(catalog.publisher_id, 'FG_AGENT_DWH')
+        self.assertEqual(
+            catalog.applicable_legislation,
+            'http://data.europa.eu/eli/reg/2016/679/oj;'
+            'http://data.europa.eu/eli/reg/2025/327/oj',
+        )
+
+        staging = Catalog.objects.using('fair_genomes_db').get(name='CAT_FG_STAGING')
+        self.assertEqual(staging.publisher_id, 'FG_AGENT_MOLGENIS')
+        self.assertTrue(staging.title)
+        self.assertTrue(staging.description)
+
+        cohort = Dataset.objects.using('fair_genomes_db').get(name='DS_FG_COHORT')
+        self.assertEqual(
+            cohort.health_category,
+            'http://13.81.34.152:1101/resource/authority/healthcategories/HGPD;'
+            'http://13.81.34.152:1101/resource/authority/healthcategories/EINS;'
+            'http://13.81.34.152:1101/resource/authority/healthcategories/RQSH',
+        )
+        self.assertEqual(
+            cohort.applicable_legislation,
+            'http://data.europa.eu/eli/reg/2016/679/oj;'
+            'http://data.europa.eu/eli/reg/2025/327/oj',
+        )
+
+        admin = Dataset.objects.using('fair_genomes_db').get(name='DS_FG_ADMIN')
+        self.assertIsNotNone(admin.hdab.contact_point_id)
+        self.assertTrue(
+            Distribution.objects.using('fair_genomes_db')
+            .filter(dataset_name=admin, name='DIST_FG_ADMIN_CSV')
+            .exists()
+        )
+        self.assertFalse(
+            Dataset.objects.using('fair_genomes_db').filter(distributions__isnull=True).exists()
+        )
+        self.assertFalse(
+            Agent.objects.using('fair_genomes_db').filter(name='FG_AGENT_NO_CONTACT').exists()
+        )
+        self.assertFalse(
+            ContactPoint.objects.using('fair_genomes_db')
+            .filter(email__isnull=True, contact_page__isnull=True)
+            .exists()
+        )
+
+        parquet = Distribution.objects.using('fair_genomes_db').get(
+            name='DIST_FG_COHORT_PARQUET'
+        )
+        self.assertEqual(
+            parquet.format,
+            'http://publications.europa.eu/resource/authority/file-type/PARQUET',
+        )
+        self.assertIsNone(parquet.rights)
+
+        vcf = Distribution.objects.using('fair_genomes_db').get(name='DIST_FG_COHORT_VCF')
+        self.assertIsNone(vcf.format)
+        self.assertIsNone(vcf.rights)
+
+        from shared.export import build_turtle
+        from shared.mappers import map_export_dataset
+
+        turtle = build_turtle(map_export_dataset(cohort, 'fair_genomes'))
+        self.assertIn(
+            'http://13.81.34.152:1101/resource/authority/healthcategories/HGPD',
+            turtle,
+        )
+        self.assertIn(
+            'http://publications.europa.eu/resource/authority/file-type/PARQUET',
+            turtle,
+        )
+        self.assertNotIn('patient_data', turtle)
+        self.assertNotIn('"GDPR"', turtle)
+        self.assertNotIn('"internal"', turtle)
 
 
 class FairGenomesServiceTest(TestCase):

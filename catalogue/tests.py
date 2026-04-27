@@ -164,7 +164,7 @@ class GrafanaAuthCheckTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_returns_200_for_staff_user(self):
-        user = User.objects.create_user(username='admin-user', password='secret', is_staff=True)
+        user = User.objects.create_user(username='staff-user', password='secret', is_staff=True)
         self.client.force_login(user)
 
         response = self.client.get(self.url)

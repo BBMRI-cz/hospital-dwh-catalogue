@@ -122,7 +122,7 @@ def _make_test_export_dataset(**overrides):
         'contact_point': contact_point,
         'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
         'applicable_legislation': 'http://data.europa.eu/eli/reg/2022/868/oj',
-        'health_category': 'http://healthdataportal.eu/ns/health#clinical',
+        'health_category': 'http://13.81.34.152:1101/resource/authority/healthcategories/EHRS',
         'hdab': hdab,
         'catalog': ExportCatalog(
             app=app,
@@ -273,7 +273,7 @@ class CatalogueIndexViewTest(TestCase):
     def test_catalogue_preview_renders_list_metadata_without_python_list_repr(self, mock_cls):
         dataset = _make_test_dataset(
             theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
-            health_category='http://healthdataportal.eu/ns/health#clinical',
+            health_category='http://13.81.34.152:1101/resource/authority/healthcategories/EHRS',
         )
         mock_svc = mock_cls.return_value
         mock_svc.get_datasets_with_distributions.return_value = [dataset]
@@ -294,7 +294,10 @@ class CatalogueIndexViewTest(TestCase):
         )
         self.assertNotContains(
             response,
-            '[&#x27;http://healthdataportal.eu/ns/health#clinical&#x27;]',
+            (
+                '[&#x27;http://13.81.34.152:1101/resource/authority/'
+                'healthcategories/EHRS&#x27;]'
+            ),
             html=True,
         )
 
