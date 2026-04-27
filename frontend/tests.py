@@ -36,6 +36,7 @@ from shared.dtos import (
     UnifiedTable,
     UnifiedTableColumn,
 )
+from shared.export_types import ExportWarning, JsonLdExportResult, TurtleExportResult
 
 
 def _make_test_dataset(**overrides):
@@ -431,6 +432,56 @@ class DatasetDetailViewTest(TestCase):
         self.assertNotContains(response, reverse('frontend_api:jsonld'))
         self.assertNotContains(response, reverse('frontend_api:rdf'))
 
+    @patch('frontend.presentation.context.build_jsonld_result')
+    @patch(_DATASET_LOOKUP_PATH)
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_dataset_detail_notifies_when_export_context_is_invalid(
+        self,
+        mock_cls,
+        mock_dataset_lookup,
+        mock_build_jsonld_result,
+    ):
+        dataset = _make_test_dataset(app='warehouse', name='warehouse-dataset', title='Warehouse')
+        export_dataset = _make_test_export_dataset(app='warehouse', name='warehouse-dataset')
+        mock_svc = mock_cls.return_value
+        mock_svc.get_schema_json.return_value = _mock_schema()
+        mock_svc.get_export_dataset.return_value = export_dataset
+        mock_dataset_lookup.return_value = dataset_to_view_model(dataset)
+        mock_build_jsonld_result.return_value = JsonLdExportResult(
+            document={'@context': {}, '@graph': []},
+            warnings=(
+                ExportWarning(
+                    code='missing_property',
+                    message='Missing RDF property "title"',
+                ),
+            ),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'frontend:dataset_detail', kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'}
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Export warnings')
+        self.assertContains(response, 'Missing RDF property')
+        self.assertContains(
+            response,
+            reverse(
+                'frontend:dataset_jsonld_download',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
+            ),
+        )
+        self.assertContains(
+            response,
+            reverse(
+                'frontend:dataset_rdf_export',
+                kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
+            ),
+        )
+
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_dataset_detail_distribution_cards_do_not_render_inline_cart_buttons(
@@ -615,8 +666,47 @@ class DatasetDetailViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '0')
         self.assertIn('encounter', response.content.decode())
         self.assertIn('patient_id', response.content.decode())
+
+    @patch('frontend.views.build_turtle_result')
+    @patch(_EXPORT_SERVICE_PATH)
+    def test_dataset_specific_rdf_route_notifies_when_export_is_invalid(
+        self,
+        mock_cls,
+        mock_build_turtle_result,
+    ):
+        export_dataset = _make_test_export_dataset(
+            app='warehouse',
+            name='warehouse-dataset',
+            distributions=[
+                ExportDistribution(
+                    app='warehouse',
+                    name='warehouse-dist',
+                    access_url='https://example.com/distribution/warehouse-dist',
+                )
+            ],
+        )
+        mock_cls.return_value.get_export_dataset.return_value = export_dataset
+        mock_build_turtle_result.return_value = TurtleExportResult(
+            content='@prefix dcat: <http://www.w3.org/ns/dcat#> .\n',
+            warnings=(
+                ExportWarning(
+                    code='missing_term',
+                    message='Missing RDF term "csvw:table"',
+                ),
+            ),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get('/dataset/warehouse/warehouse-dataset/rdf/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '1')
+        self.assertIn('Missing RDF term', response['X-Metadata-Export-Warnings'])
+        self.assertNotIn('Missing RDF term', response.content.decode())
 
     @patch(_EXPORT_SERVICE_PATH)
     def test_dataset_specific_jsonld_route_returns_serialized_json_document(self, mock_cls):
@@ -641,11 +731,50 @@ class DatasetDetailViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '0')
         payload = json.loads(response.content.decode())
         self.assertEqual(set(payload.keys()), {'@context', '@graph'})
         self.assertIsInstance(payload['@graph'], list)
         self.assertNotEqual(response.content.decode(), '@context@graph')
         self.assertIn('Warehouse Distribution', response.content.decode())
+
+    @patch('frontend.views.build_jsonld_result')
+    @patch(_EXPORT_SERVICE_PATH)
+    def test_dataset_specific_jsonld_route_notifies_when_export_is_invalid(
+        self,
+        mock_cls,
+        mock_build_jsonld_result,
+    ):
+        export_dataset = _make_test_export_dataset(
+            app='warehouse',
+            name='warehouse-dataset',
+            distributions=[
+                ExportDistribution(
+                    app='warehouse',
+                    name='warehouse-dist',
+                    access_url='https://example.com/distribution/warehouse-dist',
+                )
+            ],
+        )
+        mock_cls.return_value.get_export_dataset.return_value = export_dataset
+        mock_build_jsonld_result.return_value = JsonLdExportResult(
+            document={'@context': {}, '@graph': []},
+            warnings=(
+                ExportWarning(
+                    code='missing_class',
+                    message='Missing RDF class "Dataset"',
+                ),
+            ),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get('/dataset/warehouse/warehouse-dataset/jsonld/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '1')
+        self.assertIn('Missing RDF class', response['X-Metadata-Export-Warnings'])
+        self.assertNotIn('Missing RDF class', response.content.decode())
 
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
@@ -911,8 +1040,37 @@ class MetadataApiViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '0')
         self.assertContains(response, 'FAIR Genomes Catalogue')
         self.assertContains(response, 'Test Dataset')
+
+    @patch('frontend.api_views.build_complete_jsonld_result')
+    @patch('frontend.api_views.UnifiedCatalogService')
+    def test_jsonld_endpoint_notifies_when_export_is_invalid(
+        self,
+        mock_cls,
+        mock_build_complete_jsonld_result,
+    ):
+        mock_svc = mock_cls.return_value
+        mock_svc.get_complete_export_catalogue.return_value = ([_make_test_export_catalog()], [])
+        mock_build_complete_jsonld_result.return_value = JsonLdExportResult(
+            document={'@context': {}, '@graph': []},
+            warnings=(
+                ExportWarning(
+                    code='missing_property',
+                    message='Missing RDF property "title"',
+                ),
+            ),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend_api:jsonld'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '1')
+        self.assertIn('Missing RDF property', response['X-Metadata-Export-Warnings'])
+        self.assertNotIn('Missing RDF property', response.content.decode())
 
     @patch('frontend.api_views.UnifiedCatalogService')
     def test_turtle_endpoint_returns_data_when_authenticated(self, mock_cls):
@@ -924,8 +1082,37 @@ class MetadataApiViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '0')
         self.assertIn('dcat:Catalog', response.content.decode())
         self.assertIn('dcat:Dataset', response.content.decode())
+
+    @patch('frontend.api_views.build_complete_turtle_result')
+    @patch('frontend.api_views.UnifiedCatalogService')
+    def test_turtle_endpoint_notifies_when_export_is_invalid(
+        self,
+        mock_cls,
+        mock_build_complete_turtle_result,
+    ):
+        mock_svc = mock_cls.return_value
+        mock_svc.get_complete_export_catalogue.return_value = ([_make_test_export_catalog()], [])
+        mock_build_complete_turtle_result.return_value = TurtleExportResult(
+            content='@prefix dcat: <http://www.w3.org/ns/dcat#> .\n',
+            warnings=(
+                ExportWarning(
+                    code='missing_class',
+                    message='Missing RDF class "Dataset"',
+                ),
+            ),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend_api:rdf'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
+        self.assertEqual(response['X-Metadata-Export-Warning-Count'], '1')
+        self.assertIn('Missing RDF class', response['X-Metadata-Export-Warnings'])
+        self.assertNotIn('Missing RDF class', response.content.decode())
 
     @patch('frontend.api_views.UnifiedCatalogService')
     def test_jsonld_endpoint_includes_orphan_datasets(self, mock_cls):

@@ -20,3 +20,11 @@ class SchemaRegistryTermDTO(TypedDict):
 SchemaRegistryPayload = dict[str, SchemaRegistryTermDTO]
 SchemaRegistryPrefixMap = dict[str, str]
 SchemaRegistryContextTerms = dict[str, str]
+SchemaRegistryContextProperties = dict[str, dict[str, str]]
+
+
+class SchemaRegistryContextProfile(TypedDict):
+    prefixes: SchemaRegistryPrefixMap
+    classes: SchemaRegistryContextTerms
+    properties: SchemaRegistryContextProperties
+    terms: SchemaRegistryContextTerms

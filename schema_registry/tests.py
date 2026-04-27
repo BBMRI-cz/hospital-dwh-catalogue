@@ -11,9 +11,11 @@ No database is involved.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TypeGuard, cast
+from typing import cast
+from unittest.mock import patch
 
 from django.conf import settings
 from django.test import TestCase, override_settings
@@ -29,22 +31,17 @@ from shared.dtos import (
     ExportDistribution,
     ExportTable,
 )
-from shared.export_types import (
-    JsonLdDatasetNode,
-    JsonLdDistributionNode,
-    JsonLdDocument,
-    JsonLdGraphNode,
-)
+from shared.export_types import JsonLdDocument, JsonLdNode
 
 # Absolute path to the release-6 directory inside the submodule.
 _RELEASE_6 = settings.BASE_DIR / 'health_dcat_ap' / 'public' / 'releases' / 'release-6'
 
 
-def _is_distribution_node(node: JsonLdGraphNode) -> TypeGuard[JsonLdDistributionNode]:
+def _is_distribution_node(node: JsonLdNode) -> bool:
     return node.get('@type') == 'dcat:Distribution'
 
 
-def _node_has_type(node: JsonLdGraphNode, rdf_type: str) -> bool:
+def _node_has_type(node: JsonLdNode, rdf_type: str) -> bool:
     value = node.get('@type')
     if isinstance(value, list):
         return rdf_type in value
@@ -349,9 +346,48 @@ class ServiceLayerTest(TestCase):
         self.assertEqual(result['LegalResource'], 'http://data.europa.eu/eli/ontology#LegalResource')
         self.assertEqual(result['LicenceDocument'], 'http://purl.org/dc/terms/LicenseDocument')
 
+    def test_get_context_profile_resolves_export_properties(self) -> None:
+        from schema_registry.services import get_context_profile
+
+        result = get_context_profile()
+        self.assertEqual(result['properties']['Dataset']['title'], 'dct:title')
+        self.assertEqual(result['properties']['Distribution']['licence'], 'dct:license')
+        self.assertEqual(result['properties']['Catalogue']['dataset'], 'dcat:dataset')
+        self.assertEqual(
+            result['properties']['Dataset']['healthCategory'],
+            'healthdcatap:healthCategory',
+        )
+        self.assertEqual(result['properties']['Dataset']['hdab'], 'healthdcatap:hdab')
+        self.assertEqual(result['properties']['Dataset']['custodian'], 'geodcatap:custodian')
+        self.assertEqual(result['terms']['cv:contactPoint'], 'cv:contactPoint')
+        self.assertEqual(result['terms']['cv:email'], 'cv:email')
+        self.assertEqual(result['terms']['vcard:hasEmail'], 'vcard:hasEmail')
+        self.assertEqual(result['terms']['csvw:table'], 'csvw:table')
+        self.assertEqual(result['classes']['ContactPoint'], 'http://data.europa.eu/m8g/ContactPoint')
+        self.assertEqual(result['classes']['TableGroup'], 'http://www.w3.org/ns/csvw#TableGroup')
+
+    def test_resolved_export_profile_records_missing_property_warning(self) -> None:
+        from shared.export_terms import ExportEntity, ResolvedExportProfile
+
+        empty_profile = {
+            'prefixes': {},
+            'classes': {},
+            'properties': {'Dataset': {}},
+            'terms': {},
+        }
+        profile = ResolvedExportProfile(profile=empty_profile)
+
+        self.assertIsNone(profile.property_alias(ExportEntity.DATASET, 'title'))
+        self.assertTrue(
+            any(
+                warning.code == 'missing_property' and warning.alias == 'title'
+                for warning in profile.warnings
+            )
+        )
+
 
 class BuildJsonldContextTest(TestCase):
-    """Tests for the prefix-filtering behaviour of build_jsonld() in shared.export."""
+    """Tests for the prefix-filtering behaviour of build_jsonld_result()."""
 
     def _make_contact_point(
         self,
@@ -450,9 +486,9 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def _build(self, ds: ExportDataset | None = None) -> JsonLdDocument:
-        from shared.export import build_jsonld
+        from shared.export import build_jsonld_result
 
-        return build_jsonld(ds if ds is not None else self._make_dataset())
+        return build_jsonld_result(ds if ds is not None else self._make_dataset()).document
 
     def test_context_is_first_key(self) -> None:
         result = self._build()
@@ -526,7 +562,7 @@ class BuildJsonldContextTest(TestCase):
 
     # ── CSVW table/column export ─────────────────────────────────────────────
 
-    def _distribution_node(self, result: JsonLdDocument) -> JsonLdDistributionNode:
+    def _distribution_node(self, result: JsonLdDocument) -> JsonLdNode:
         return next(node for node in result['@graph'] if _is_distribution_node(node))
 
     def test_tables_emit_csvw_hierarchy(self) -> None:
@@ -623,7 +659,7 @@ class BuildJsonldContextTest(TestCase):
         self.assertNotIn('dct:source', dataset_node)
 
     def test_build_complete_jsonld_includes_catalogs_and_orphan_datasets(self) -> None:
-        from shared.export import build_complete_jsonld
+        from shared.export import build_complete_jsonld_result
 
         catalog_dataset = self._make_dataset()
         catalog_dataset.catalog = None
@@ -644,7 +680,7 @@ class BuildJsonldContextTest(TestCase):
             datasets=[catalog_dataset],
         )
 
-        result = build_complete_jsonld([catalog], [orphan_dataset])
+        result = build_complete_jsonld_result([catalog], [orphan_dataset]).document
         ids = {node['@id'] for node in result['@graph'] if '@id' in node}
         catalog_nodes = [node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')]
 
@@ -656,21 +692,94 @@ class BuildJsonldContextTest(TestCase):
     # ── RDF Turtle export ────────────────────────────────────────────────────
 
     def test_build_turtle_returns_valid_turtle(self) -> None:
-        from shared.export import build_turtle
+        from shared.export import build_turtle_result
 
-        turtle = build_turtle(self._make_dataset())
+        turtle = build_turtle_result(self._make_dataset()).content
         self.assertIsInstance(turtle, str)
         self.assertIn('dcat:Dataset', turtle)
 
     def test_build_turtle_contains_dataset_title(self) -> None:
-        from shared.export import build_turtle
+        from shared.export import build_turtle_result
 
-        turtle = build_turtle(self._make_dataset())
+        turtle = build_turtle_result(self._make_dataset()).content
         self.assertIn('Test dataset', turtle)
+
+    def test_build_jsonld_result_omits_missing_property_and_records_warning(self) -> None:
+        from schema_registry.services import get_context_profile
+        from shared.export import build_jsonld_result
+
+        profile = deepcopy(get_context_profile())
+        del profile['properties']['Dataset']['title']
+
+        with patch('shared.export_terms.get_export_context_profile', return_value=profile):
+            result = build_jsonld_result(self._make_dataset())
+
+        dataset_node = next(
+            node for node in result.document['@graph'] if _node_has_type(node, 'dcat:Dataset')
+        )
+        self.assertNotIn('dct:title', dataset_node)
+        self.assertTrue(
+            any(
+                warning.code == 'missing_property' and warning.alias == 'title'
+                for warning in result.warnings
+            )
+        )
+
+    def test_build_jsonld_result_omits_missing_type_and_records_warning(self) -> None:
+        from schema_registry.services import get_context_profile
+        from shared.export import build_jsonld_result
+
+        profile = deepcopy(get_context_profile())
+        del profile['classes']['Dataset']
+
+        with patch('shared.export_terms.get_export_context_profile', return_value=profile):
+            result = build_jsonld_result(self._make_dataset())
+
+        dataset_node = next(
+            node
+            for node in result.document['@graph']
+            if node.get('@id') == 'https://example.com/dataset/test-ds'
+        )
+        self.assertNotEqual(dataset_node.get('@type'), 'dcat:Dataset')
+        self.assertEqual(dataset_node.get('dct:title'), 'Test dataset')
+        self.assertTrue(
+            any(
+                warning.code == 'missing_class' and warning.alias == 'Dataset'
+                for warning in result.warnings
+            )
+        )
+
+    def test_build_turtle_result_returns_content_and_warnings(self) -> None:
+        from schema_registry.services import get_context_profile
+        from shared.export import build_turtle_result
+
+        profile = deepcopy(get_context_profile())
+        del profile['properties']['Dataset']['title']
+
+        with patch('shared.export_terms.get_export_context_profile', return_value=profile):
+            result = build_turtle_result(self._make_dataset())
+
+        self.assertIsInstance(result.content, str)
+        self.assertTrue(any(warning.code == 'missing_property' for warning in result.warnings))
+
+    def test_build_jsonld_result_continues_when_profile_loading_fails(self) -> None:
+        from shared.export import build_jsonld_result
+
+        with patch(
+            'shared.export_terms.get_export_context_profile',
+            side_effect=RuntimeError('profile unavailable'),
+        ):
+            result = build_jsonld_result(self._make_dataset())
+
+        self.assertEqual(result.document['@context'], {})
+        self.assertTrue(result.document['@graph'])
+        self.assertTrue(
+            any(warning.code == 'profile_load_failed' for warning in result.warnings)
+        )
 
     # ── Multi-value URI field export ────────────────────────────────────────
 
-    def _dataset_node(self, result: JsonLdDocument) -> JsonLdDatasetNode:
+    def _dataset_node(self, result: JsonLdDocument) -> JsonLdNode:
         return next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset'))
 
     def test_multiple_themes_exported_as_array(self) -> None:
@@ -804,7 +913,7 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def test_top_level_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:
-        from shared.export import build_complete_jsonld
+        from shared.export import build_complete_jsonld_result
 
         dataset = self._make_dataset()
         dataset.catalog = None
@@ -821,7 +930,7 @@ class BuildJsonldContextTest(TestCase):
             datasets=[dataset],
         )
 
-        result = build_complete_jsonld([catalog], [])
+        result = build_complete_jsonld_result([catalog], []).document
         catalog_node = next(
             node for node in result['@graph'] if _node_has_type(node, 'dcat:Catalog')
         )

@@ -205,10 +205,10 @@ class SeedFairGenomesMockCommandTest(TestCase):
         self.assertIsNone(vcf.format)
         self.assertIsNone(vcf.rights)
 
-        from shared.export import build_turtle
+        from shared.export import build_turtle_result
         from shared.mappers import map_export_dataset
 
-        turtle = build_turtle(map_export_dataset(cohort, 'fair_genomes'))
+        turtle = build_turtle_result(map_export_dataset(cohort, 'fair_genomes')).content
         self.assertIn(
             'http://13.81.34.152:1101/resource/authority/healthcategories/HGPD',
             turtle,

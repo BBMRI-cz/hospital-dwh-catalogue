@@ -3,7 +3,8 @@ from __future__ import annotations
 from django.http import HttpRequest, HttpResponse
 from django.views.generic import View
 
-from shared.export import build_complete_jsonld, build_complete_turtle, dump_jsonld
+from frontend.export_warnings import add_export_warning_headers
+from shared.export import build_complete_jsonld_result, build_complete_turtle_result, dump_jsonld
 from shared.services import UnifiedCatalogService
 
 
@@ -16,18 +17,30 @@ def _require_auth(request: HttpRequest) -> HttpResponse | None:
 
 def _jsonld_response() -> HttpResponse:
     catalogs, orphan_datasets = UnifiedCatalogService().get_complete_export_catalogue()
-    return HttpResponse(
-        dump_jsonld(build_complete_jsonld(catalogs, orphan_datasets, include_distributions=False)),
+    result = build_complete_jsonld_result(
+        catalogs,
+        orphan_datasets,
+        include_distributions=False,
+    )
+    response = HttpResponse(
+        dump_jsonld(result.document),
         content_type='application/ld+json; charset=utf-8',
     )
+    return add_export_warning_headers(response, result.warnings)
 
 
 def _turtle_response() -> HttpResponse:
     catalogs, orphan_datasets = UnifiedCatalogService().get_complete_export_catalogue()
-    return HttpResponse(
-        build_complete_turtle(catalogs, orphan_datasets, include_distributions=False),
+    result = build_complete_turtle_result(
+        catalogs,
+        orphan_datasets,
+        include_distributions=False,
+    )
+    response = HttpResponse(
+        result.content,
         content_type='text/turtle; charset=utf-8',
     )
+    return add_export_warning_headers(response, result.warnings)
 
 
 class CatalogueJsonLdApiView(View):

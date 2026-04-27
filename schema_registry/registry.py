@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from schema_registry.types import (
+    SchemaRegistryContextProfile,
+    SchemaRegistryContextProperties,
     SchemaRegistryContextTerms,
     SchemaRegistryPayload,
     SchemaRegistryPrefixMap,
@@ -30,6 +32,7 @@ _REQUIREMENT_BY_NAME: dict[str, SchemaRequirement] = {
 }
 _registry_cache: dict[Path, tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]] = {}
 _context_terms_cache: dict[Path, SchemaRegistryContextTerms] = {}
+_context_profile_cache: dict[Path, SchemaRegistryContextProfile] = {}
 
 
 class _PathTermInfo(TypedDict):
@@ -56,10 +59,19 @@ def get_context_terms(release_dir: Path) -> SchemaRegistryContextTerms:
     return _context_terms_cache[resolved]
 
 
+def get_context_profile(release_dir: Path) -> SchemaRegistryContextProfile:
+    """Return the JSON-LD export context profile for a HealthDCAT-AP release."""
+    resolved = release_dir.resolve()
+    if resolved not in _context_profile_cache:
+        _context_profile_cache[resolved] = _load_context_profile(resolved)
+    return _context_profile_cache[resolved]
+
+
 def invalidate_cache() -> None:
     """Clear the module-level cache."""
     _registry_cache.clear()
     _context_terms_cache.clear()
+    _context_profile_cache.clear()
 
 
 def _get_cached_entry(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefixMap]:
@@ -110,6 +122,130 @@ def _load(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefi
 
 
 def _load_context_terms(release_dir: Path) -> SchemaRegistryContextTerms:
+    raw_context = _load_jsonld_context(release_dir)
+    terms: SchemaRegistryContextTerms = {}
+    for key, value in raw_context.items():
+        iri = _context_term_iri(value)
+        if iri is not None:
+            terms[key] = iri
+    return terms
+
+
+def _load_context_profile(release_dir: Path) -> SchemaRegistryContextProfile:
+    payload, prefix_map = _get_cached_entry(release_dir)
+    raw_context = _load_jsonld_context(release_dir)
+    classes, properties = _extract_context_profile_terms(raw_context, prefix_map)
+    terms = _build_global_term_map(payload)
+    _merge_context_property_terms(terms, properties)
+    _merge_shacl_profile_terms(release_dir, prefix_map, classes, properties, terms)
+
+    return {
+        'prefixes': prefix_map,
+        'classes': classes,
+        'properties': properties,
+        'terms': terms,
+    }
+
+
+def _merge_context_property_terms(
+    terms: SchemaRegistryContextTerms,
+    properties: SchemaRegistryContextProperties,
+) -> None:
+    for class_properties in properties.values():
+        for alias, semantics in class_properties.items():
+            _store_profile_term(terms, alias, semantics)
+
+
+def _merge_shacl_profile_terms(
+    release_dir: Path,
+    prefix_map: SchemaRegistryPrefixMap,
+    classes: SchemaRegistryContextTerms,
+    properties: SchemaRegistryContextProperties,
+    terms: SchemaRegistryContextTerms,
+) -> None:
+    try:
+        from rdflib import Graph, URIRef  # type: ignore[import-untyped]
+        from rdflib.namespace import SH  # type: ignore[import-untyped]
+    except ImportError:
+        logger.error('rdflib is not installed. Install it with: pip install rdflib>=7.0.0')
+        return
+
+    for ttl_path in _context_profile_shape_paths(release_dir):
+        if not ttl_path.exists():
+            continue
+
+        graph = _parse_turtle_graph(Graph, ttl_path)
+        if graph is None:
+            continue
+
+        for path_node in graph.objects(None, SH.path):
+            if isinstance(path_node, URIRef):
+                semantics = _uri_to_prefixed(str(path_node), prefix_map)
+                if semantics is not None:
+                    _store_profile_term(terms, semantics, semantics)
+
+        _merge_shacl_class_properties(graph, SH, prefix_map, classes, properties)
+
+        for class_predicate in (SH.targetClass, SH['class']):
+            for class_node in graph.objects(None, class_predicate):
+                if isinstance(class_node, URIRef):
+                    _store_profile_class(classes, str(class_node), prefix_map)
+
+
+def _merge_shacl_class_properties(
+    graph,
+    sh_namespace,
+    prefix_map: SchemaRegistryPrefixMap,
+    classes: SchemaRegistryContextTerms,
+    properties: SchemaRegistryContextProperties,
+) -> None:
+    for shape_node, class_node in graph.subject_objects(sh_namespace.targetClass):
+        class_uri = str(class_node)
+        class_alias = _class_alias_for_uri(class_uri, classes, prefix_map)
+        if class_alias is None:
+            continue
+
+        for property_shape in graph.objects(shape_node, sh_namespace.property):
+            path_node = graph.value(property_shape, sh_namespace.path)
+            if path_node is None:
+                continue
+            semantics = _uri_to_prefixed(str(path_node), prefix_map)
+            if semantics is None:
+                continue
+            _store_class_property(properties, class_alias, semantics)
+
+
+def _class_alias_for_uri(
+    uri: str,
+    classes: SchemaRegistryContextTerms,
+    prefix_map: SchemaRegistryPrefixMap,
+) -> str | None:
+    for alias, class_uri in classes.items():
+        if class_uri == uri and ':' not in alias:
+            return alias
+
+    semantics = _uri_to_prefixed(uri, prefix_map)
+    if semantics is None:
+        return None
+
+    local_name = semantics.split(':', 1)[1]
+    if local_name in classes:
+        return local_name
+    return local_name
+
+
+def _context_profile_shape_paths(release_dir: Path) -> tuple[Path, ...]:
+    html_shacl = release_dir / 'html' / 'shacl'
+    return (
+        release_dir / 'shacl' / 'dcat-ap-SHACL.ttl',
+        html_shacl / 'public-shapes.ttl',
+        html_shacl / 'restricted-shapes.ttl',
+        html_shacl / 'non-public-shapes.ttl',
+        html_shacl / 'range.ttl',
+    )
+
+
+def _load_jsonld_context(release_dir: Path) -> dict[str, Any]:
     context_json = release_dir / 'context' / 'dcat-ap.jsonld'
     if not context_json.exists():
         logger.warning(
@@ -128,17 +264,90 @@ def _load_context_terms(release_dir: Path) -> SchemaRegistryContextTerms:
     if not isinstance(raw_context, dict):
         logger.warning('JSON-LD context has no top-level @context object: %s', context_json)
         return {}
+    return raw_context
 
-    terms: SchemaRegistryContextTerms = {}
+
+def _extract_context_profile_terms(
+    raw_context: dict[str, Any],
+    prefix_map: SchemaRegistryPrefixMap,
+) -> tuple[SchemaRegistryContextTerms, SchemaRegistryContextProperties]:
+    classes: SchemaRegistryContextTerms = {}
+    properties: SchemaRegistryContextProperties = {}
+
     for key, value in raw_context.items():
-        if isinstance(value, str):
-            terms[key] = value
+        iri = _context_term_iri(value)
+        if iri is not None:
+            classes[key] = iri
+        if not isinstance(value, dict):
             continue
-        if isinstance(value, dict):
-            iri = value.get('@id')
-            if isinstance(iri, str):
-                terms[key] = iri
+
+        nested_context = value.get('@context')
+        if not isinstance(nested_context, dict):
+            continue
+
+        class_properties: dict[str, str] = {}
+        for property_name, property_value in nested_context.items():
+            property_iri = _context_term_iri(property_value)
+            if property_iri is None:
+                continue
+            class_properties[property_name] = _uri_to_prefixed(property_iri, prefix_map) or property_iri
+        if class_properties:
+            properties[key] = class_properties
+
+    return classes, properties
+
+
+def _context_term_iri(value: Any) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        iri = value.get('@id')
+        if isinstance(iri, str):
+            return iri
+    return None
+
+
+def _build_global_term_map(payload: SchemaRegistryPayload) -> SchemaRegistryContextTerms:
+    terms: SchemaRegistryContextTerms = {}
+    for semantics, term in payload.items():
+        _store_profile_term(terms, term['local_name'], semantics)
     return terms
+
+
+def _store_profile_term(
+    terms: SchemaRegistryContextTerms,
+    alias: str,
+    semantics: str,
+) -> None:
+    terms.setdefault(alias, semantics)
+    terms.setdefault(semantics, semantics)
+    if ':' in semantics and not semantics.startswith(('http://', 'https://')):
+        terms.setdefault(semantics.split(':', 1)[1], semantics)
+
+
+def _store_profile_class(
+    classes: SchemaRegistryContextTerms,
+    uri: str,
+    prefix_map: SchemaRegistryPrefixMap,
+) -> None:
+    semantics = _uri_to_prefixed(uri, prefix_map)
+    if semantics is None:
+        return
+
+    local_name = semantics.split(':', 1)[1]
+    classes.setdefault(local_name, uri)
+    classes.setdefault(semantics, uri)
+
+
+def _store_class_property(
+    properties: SchemaRegistryContextProperties,
+    class_alias: str,
+    semantics: str,
+) -> None:
+    class_properties = properties.setdefault(class_alias, {})
+    class_properties.setdefault(semantics, semantics)
+    if ':' in semantics and not semantics.startswith(('http://', 'https://')):
+        class_properties.setdefault(semantics.split(':', 1)[1], semantics)
 
 
 def _parse_turtle_graph(graph_cls, path: Path):

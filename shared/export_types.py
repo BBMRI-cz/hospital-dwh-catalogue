@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import NotRequired, Required, TypedDict
+from dataclasses import dataclass
+from typing import Required, TypedDict
 
 from shared.dtos import ExportCatalog, ExportDataset
 
 ExportResource = ExportDataset | ExportCatalog
 
 JsonLdContext = dict[str, str]
+type JsonLdScalar = str | int | float | bool | None
+type JsonLdValue = JsonLdScalar | JsonLdNode | list[JsonLdValue]
+type JsonLdNode = dict[str, JsonLdValue]
 
 JsonLdIdRef = TypedDict('JsonLdIdRef', {'@id': Required[str]})
 
@@ -20,170 +24,8 @@ JsonLdTypedValue = TypedDict(
     },
 )
 
-JsonLdLiteralOrUri = str | JsonLdIdRef
-JsonLdLiteralOrUriList = list[JsonLdLiteralOrUri]
-JsonLdIdRefList = list[JsonLdIdRef]
-
-JsonLdReferenceNode = TypedDict(
-    'JsonLdReferenceNode',
-    {
-        '@id': Required[str],
-        '@type': Required[str | list[str]],
-        'skos:prefLabel': NotRequired[str],
-        'dct:description': NotRequired[str],
-    },
-    total=False,
-)
-
-JsonLdProvenanceNode = TypedDict(
-    'JsonLdProvenanceNode',
-    {
-        '@type': Required[str],
-        'dct:description': Required[str],
-    },
-    total=False,
-)
-
-JsonLdColumnNode = TypedDict(
-    'JsonLdColumnNode',
-    {
-        '@type': Required[str],
-        'csvw:name': Required[str],
-        'dct:title': NotRequired[str],
-        'csvw:titles': NotRequired[str],
-        'dct:description': NotRequired[str],
-        'csvw:datatype': NotRequired[str],
-        'csvw:propertyUrl': NotRequired[JsonLdIdRef],
-    },
-    total=False,
-)
-
-JsonLdTableNode = TypedDict(
-    'JsonLdTableNode',
-    {
-        '@type': Required[str],
-        'csvw:name': Required[str],
-        'csvw:column': Required[list[JsonLdColumnNode]],
-        'dct:title': NotRequired[str],
-        'dct:description': NotRequired[str],
-        'csvw:url': NotRequired[JsonLdIdRef],
-    },
-    total=False,
-)
-
-JsonLdTableGroupNode = TypedDict(
-    'JsonLdTableGroupNode',
-    {
-        '@type': Required[str],
-        'csvw:table': Required[list[JsonLdTableNode]],
-    },
-    total=False,
-)
-
-JsonLdContactPointNode = TypedDict(
-    'JsonLdContactPointNode',
-    {
-        '@id': NotRequired[str],
-        '@type': Required[list[str]],
-        'cv:email': NotRequired[str],
-        'vcard:hasEmail': NotRequired[JsonLdIdRef],
-        'cv:contactPage': NotRequired[JsonLdIdRef],
-        'vcard:hasURL': NotRequired[JsonLdIdRef],
-    },
-    total=False,
-)
-
-JsonLdContactPointValue = JsonLdIdRef | JsonLdContactPointNode
-
-JsonLdAgentNode = TypedDict(
-    'JsonLdAgentNode',
-    {
-        '@id': NotRequired[str],
-        '@type': Required[str],
-        'foaf:name': Required[str],
-        'dct:description': NotRequired[str],
-        'cv:contactPoint': NotRequired[JsonLdContactPointValue],
-    },
-    total=False,
-)
-
-JsonLdAgentValue = JsonLdIdRef | JsonLdAgentNode
-
-JsonLdDistributionNode = TypedDict(
-    'JsonLdDistributionNode',
-    {
-        '@id': NotRequired[str],
-        '@type': Required[str],
-        'dct:title': NotRequired[str],
-        'dct:description': NotRequired[str],
-        'dcat:accessURL': NotRequired[JsonLdIdRef],
-        'dcatap:applicableLegislation': NotRequired[JsonLdIdRefList],
-        'dct:format': NotRequired[JsonLdLiteralOrUri],
-        'dct:conformsTo': NotRequired[JsonLdLiteralOrUriList],
-        'dcat:byteSize': NotRequired[JsonLdTypedValue],
-        'dct:rights': NotRequired[JsonLdLiteralOrUri],
-        'dct:license': NotRequired[JsonLdLiteralOrUri],
-        'dct:issued': NotRequired[JsonLdTypedValue],
-        'dct:modified': NotRequired[JsonLdTypedValue],
-        'adms:sample': NotRequired[JsonLdTableGroupNode],
-    },
-    total=False,
-)
-
-JsonLdDatasetNode = TypedDict(
-    'JsonLdDatasetNode',
-    {
-        '@id': NotRequired[str],
-        '@type': Required[str],
-        'dct:title': NotRequired[str],
-        'dct:description': NotRequired[str],
-        'dct:identifier': NotRequired[JsonLdTypedValue],
-        'dcat:version': NotRequired[str],
-        'dcat:theme': NotRequired[JsonLdIdRefList],
-        'dct:publisher': NotRequired[JsonLdAgentValue],
-        'dct:creator': NotRequired[JsonLdAgentValue],
-        'dct:conformsTo': NotRequired[JsonLdLiteralOrUriList],
-        'dct:issued': NotRequired[JsonLdTypedValue],
-        'dct:modified': NotRequired[JsonLdTypedValue],
-        'dcat:keyword': NotRequired[list[str]],
-        'dct:source': NotRequired[JsonLdIdRef],
-        'dcat:contactPoint': NotRequired[JsonLdContactPointValue],
-        'dct:provenance': NotRequired[JsonLdProvenanceNode],
-        'dct:accessRights': NotRequired[JsonLdIdRef],
-        'dcatap:applicableLegislation': NotRequired[JsonLdIdRefList],
-        'healthdcatap:healthCategory': NotRequired[JsonLdIdRefList],
-        'healthdcatap:hdab': NotRequired[JsonLdAgentValue],
-        'geodcatap:custodian': NotRequired[JsonLdAgentValue],
-        'dct:type': NotRequired[JsonLdIdRefList],
-        'dcat:distribution': NotRequired[JsonLdIdRefList],
-    },
-    total=False,
-)
-
-JsonLdCatalogNode = TypedDict(
-    'JsonLdCatalogNode',
-    {
-        '@id': NotRequired[str],
-        '@type': Required[str],
-        'dcat:dataset': Required[JsonLdIdRefList],
-        'dct:title': NotRequired[str],
-        'dct:description': NotRequired[str],
-        'dcatap:applicableLegislation': NotRequired[JsonLdIdRefList],
-        'dct:publisher': NotRequired[JsonLdAgentValue],
-    },
-    total=False,
-)
-
-JsonLdGraphNode = (
-    JsonLdCatalogNode
-    | JsonLdDatasetNode
-    | JsonLdDistributionNode
-    | JsonLdAgentNode
-    | JsonLdContactPointNode
-    | JsonLdReferenceNode
-)
-
-JsonLdGraph = list[JsonLdGraphNode]
+type JsonLdLiteralOrUri = str | JsonLdIdRef
+type JsonLdGraph = list[JsonLdNode]
 
 JsonLdDocument = TypedDict(
     'JsonLdDocument',
@@ -192,3 +34,30 @@ JsonLdDocument = TypedDict(
         '@graph': Required[JsonLdGraph],
     },
 )
+
+
+@dataclass(frozen=True, slots=True)
+class ExportWarning:
+    """Non-fatal warning produced while building a metadata export."""
+
+    code: str
+    message: str
+    severity: str = 'warning'
+    entity: str | None = None
+    alias: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class JsonLdExportResult:
+    """JSON-LD export document with non-fatal export warnings."""
+
+    document: JsonLdDocument
+    warnings: tuple[ExportWarning, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class TurtleExportResult:
+    """Turtle export content with non-fatal export warnings."""
+
+    content: str
+    warnings: tuple[ExportWarning, ...]

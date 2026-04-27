@@ -7,12 +7,13 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
+from frontend.export_warnings import add_export_warning_headers
 from frontend.presentation import (
     build_catalogue_index_context,
     build_dataset_detail_context,
     build_distribution_detail_context,
 )
-from shared.export import build_jsonld, build_turtle, dump_jsonld, has_distributions
+from shared.export import build_jsonld_result, build_turtle_result, dump_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
 
 
@@ -58,12 +59,13 @@ class DatasetRdfExportView(LoginRequiredMixin, View):
         if not has_distributions(export_dataset):
             raise Http404('Dataset has no distributions')
 
+        result = build_turtle_result(export_dataset)
         response = HttpResponse(
-            build_turtle(export_dataset),
+            result.content,
             content_type='text/turtle; charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename="{name}.ttl"'
-        return response
+        return add_export_warning_headers(response, result.warnings)
 
 
 class DatasetJsonLdDownloadView(LoginRequiredMixin, View):
@@ -77,12 +79,13 @@ class DatasetJsonLdDownloadView(LoginRequiredMixin, View):
         if not has_distributions(export_dataset):
             raise Http404('Dataset has no distributions')
 
+        result = build_jsonld_result(export_dataset)
         response = HttpResponse(
-            dump_jsonld(build_jsonld(export_dataset)),
+            dump_jsonld(result.document),
             content_type='application/ld+json; charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename="{name}.jsonld"'
-        return response
+        return add_export_warning_headers(response, result.warnings)
 
 
 class DistributionDetailView(LoginRequiredMixin, View):

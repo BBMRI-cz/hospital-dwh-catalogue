@@ -9,6 +9,7 @@ from django.conf import settings
 
 from schema_registry import registry
 from schema_registry.types import (
+    SchemaRegistryContextProfile,
     SchemaRegistryContextTerms,
     SchemaRegistryPayload,
     SchemaRegistryPrefixMap,
@@ -36,3 +37,8 @@ def get_context_prefixes() -> SchemaRegistryPrefixMap:
 def get_context_terms() -> SchemaRegistryContextTerms:
     """Return named JSON-LD context terms for the configured HealthDCAT-AP release."""
     return registry.get_context_terms(_release_dir())
+
+
+def get_context_profile() -> SchemaRegistryContextProfile:
+    """Return the export context profile for the configured HealthDCAT-AP release."""
+    return registry.get_context_profile(_release_dir())

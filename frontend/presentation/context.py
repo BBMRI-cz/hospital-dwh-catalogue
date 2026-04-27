@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404
 
+from frontend.export_warnings import export_warning_messages
 from frontend.presentation.cache import (
     get_cached_catalogue_snapshot,
     get_cached_dataset,
@@ -22,7 +23,7 @@ from frontend.presentation.mapping import (
     serialise_chart_groups,
     serialise_stat_charts,
 )
-from shared.export import build_jsonld, has_distributions
+from shared.export import build_jsonld_result, has_distributions
 from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService
 
@@ -83,10 +84,13 @@ def build_dataset_detail_context(
         raise Http404('Dataset has no distributions')
 
     schema_json = get_cached_schema_json(service=catalog_service)
+    export_result = build_jsonld_result(export_dataset)
+
     return {
         'dataset': dataset,
         'distributions': dataset.distributions,
-        'export_jsonld': build_jsonld(export_dataset),
+        'export_jsonld': export_result.document,
+        'export_warnings': export_warning_messages(export_result.warnings),
         'schema_json': schema_json,
         'app': app,
         'dcat_rows': build_dataset_dcat_rows(schema_json, dataset),

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from shared.dtos import (
     ExportAgent,
@@ -11,46 +12,279 @@ from shared.dtos import (
     ExportDataset,
     ExportDistribution,
 )
-from shared.export_context import clear_export_context_cache, get_export_context_prefixes
+from shared.export_context import clear_export_context_cache
 from shared.export_serialization import dump_jsonld, serialise_jsonld_to_turtle
-from shared.export_terms import ExportRdfClass, rdf_class
+from shared.export_terms import (
+    ExportEntity,
+    ExportFieldSpec,
+    ExportRdfClass,
+    ExportValueKind,
+    ResolvedExportProfile,
+)
 from shared.export_types import (
     ExportResource,
-    JsonLdAgentNode,
-    JsonLdAgentValue,
-    JsonLdCatalogNode,
-    JsonLdColumnNode,
-    JsonLdContactPointNode,
-    JsonLdContactPointValue,
+    ExportWarning,
     JsonLdContext,
-    JsonLdDatasetNode,
-    JsonLdDistributionNode,
     JsonLdDocument,
+    JsonLdExportResult,
     JsonLdGraph,
-    JsonLdGraphNode,
     JsonLdIdRef,
-    JsonLdIdRefList,
     JsonLdLiteralOrUri,
-    JsonLdLiteralOrUriList,
-    JsonLdProvenanceNode,
-    JsonLdReferenceNode,
-    JsonLdTableGroupNode,
-    JsonLdTableNode,
+    JsonLdNode,
     JsonLdTypedValue,
+    TurtleExportResult,
 )
 
 _CURIE_RE = re.compile(r'^([A-Za-z][A-Za-z0-9_-]*):[^/]')
 _IRI_LABEL_RE = re.compile(r'[/#]([^/#]+)[/#]?$')
 
+_CATALOG_FIELDS: tuple[ExportFieldSpec, ...] = (
+    ExportFieldSpec('title', ExportEntity.CATALOGUE, 'title', ExportValueKind.LITERAL),
+    ExportFieldSpec(
+        'description',
+        ExportEntity.CATALOGUE,
+        'description',
+        ExportValueKind.LITERAL,
+    ),
+    ExportFieldSpec(
+        'applicable_legislation',
+        ExportEntity.CATALOGUE,
+        'applicableLegislation',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.LEGAL_RESOURCE,),
+    ),
+)
+
+_DATASET_FIELDS: tuple[ExportFieldSpec, ...] = (
+    ExportFieldSpec('title', ExportEntity.DATASET, 'title', ExportValueKind.LITERAL),
+    ExportFieldSpec(
+        'description',
+        ExportEntity.DATASET,
+        'description',
+        ExportValueKind.LITERAL,
+    ),
+    ExportFieldSpec(
+        'identifier',
+        ExportEntity.DATASET,
+        'identifier',
+        ExportValueKind.TYPED_ANY_URI,
+    ),
+    ExportFieldSpec('version', ExportEntity.DATASET, 'version', ExportValueKind.LITERAL),
+    ExportFieldSpec(
+        'theme',
+        ExportEntity.DATASET,
+        'theme',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.CONCEPT,),
+        reference_labels=True,
+    ),
+    ExportFieldSpec(
+        'conforms_to',
+        ExportEntity.DATASET,
+        'conformsTo',
+        ExportValueKind.LITERAL_OR_ID_LIST,
+        reference_classes=(ExportRdfClass.STANDARD,),
+    ),
+    ExportFieldSpec('issued', ExportEntity.DATASET, 'releaseDate', ExportValueKind.TYPED_DATETIME),
+    ExportFieldSpec(
+        'modified',
+        ExportEntity.DATASET,
+        'modificationDate',
+        ExportValueKind.TYPED_DATETIME,
+    ),
+    ExportFieldSpec('keywords', ExportEntity.DATASET, 'keyword', ExportValueKind.KEYWORD_LIST),
+    ExportFieldSpec(
+        'access_rights',
+        ExportEntity.DATASET,
+        'accessRights',
+        ExportValueKind.ID,
+        reference_classes=(ExportRdfClass.RIGHTS_STATEMENT, ExportRdfClass.CONCEPT),
+        reference_labels=True,
+    ),
+    ExportFieldSpec(
+        'applicable_legislation',
+        ExportEntity.DATASET,
+        'applicableLegislation',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.LEGAL_RESOURCE,),
+    ),
+    ExportFieldSpec(
+        'health_category',
+        ExportEntity.DATASET,
+        'healthCategory',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.CONCEPT,),
+        reference_labels=True,
+    ),
+    ExportFieldSpec(
+        'type',
+        ExportEntity.DATASET,
+        'type',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.CONCEPT,),
+        reference_labels=True,
+    ),
+)
+
+_DISTRIBUTION_FIELDS: tuple[ExportFieldSpec, ...] = (
+    ExportFieldSpec('title', ExportEntity.DISTRIBUTION, 'title', ExportValueKind.LITERAL),
+    ExportFieldSpec(
+        'description',
+        ExportEntity.DISTRIBUTION,
+        'description',
+        ExportValueKind.LITERAL,
+    ),
+    ExportFieldSpec(
+        'access_url',
+        ExportEntity.DISTRIBUTION,
+        'accessUrl',
+        ExportValueKind.ID,
+    ),
+    ExportFieldSpec(
+        'applicable_legislation',
+        ExportEntity.DISTRIBUTION,
+        'applicableLegislation',
+        ExportValueKind.ID_LIST,
+        reference_classes=(ExportRdfClass.LEGAL_RESOURCE,),
+    ),
+    ExportFieldSpec(
+        'format',
+        ExportEntity.DISTRIBUTION,
+        'format',
+        ExportValueKind.LITERAL_OR_ID,
+        reference_classes=(ExportRdfClass.MEDIA_TYPE_OR_EXTENT,),
+    ),
+    ExportFieldSpec(
+        'conforms_to',
+        ExportEntity.DISTRIBUTION,
+        'linkedSchemas',
+        ExportValueKind.LITERAL_OR_ID_LIST,
+        reference_classes=(ExportRdfClass.STANDARD,),
+    ),
+    ExportFieldSpec(
+        'byte_size',
+        ExportEntity.DISTRIBUTION,
+        'byteSize',
+        ExportValueKind.TYPED_NON_NEGATIVE_INTEGER,
+    ),
+    ExportFieldSpec(
+        'rights',
+        ExportEntity.DISTRIBUTION,
+        'rights',
+        ExportValueKind.LITERAL_OR_ID,
+        reference_classes=(ExportRdfClass.RIGHTS_STATEMENT,),
+    ),
+    ExportFieldSpec(
+        'licence',
+        ExportEntity.DISTRIBUTION,
+        'licence',
+        ExportValueKind.LITERAL_OR_ID,
+        reference_classes=(ExportRdfClass.LICENCE_DOCUMENT,),
+    ),
+    ExportFieldSpec(
+        'release_date',
+        ExportEntity.DISTRIBUTION,
+        'releaseDate',
+        ExportValueKind.TYPED_DATETIME,
+    ),
+    ExportFieldSpec(
+        'modification_date',
+        ExportEntity.DISTRIBUTION,
+        'modificationDate',
+        ExportValueKind.TYPED_DATETIME,
+    ),
+)
+
 __all__ = [
-    'build_complete_jsonld',
-    'build_complete_turtle',
-    'build_jsonld',
-    'build_turtle',
+    'build_complete_jsonld_result',
+    'build_complete_turtle_result',
+    'build_jsonld_result',
+    'build_turtle_result',
     'clear_export_context_cache',
     'dump_jsonld',
     'has_distributions',
 ]
+
+
+class JsonLdGraphBuilder:
+    """Collect JSON-LD graph nodes and supporting reference nodes."""
+
+    def __init__(self, profile: ResolvedExportProfile) -> None:
+        self.profile = profile
+        self.graph: JsonLdGraph = []
+        self._seen: set[str] = set()
+
+    @property
+    def warnings(self) -> tuple[ExportWarning, ...]:
+        return tuple(self.profile.warnings)
+
+    def append(self, node: JsonLdNode) -> None:
+        iri = node.get('@id')
+        if not isinstance(iri, str):
+            self.graph.append(node)
+            return
+        if iri in self._seen:
+            return
+        self.graph.append(node)
+        self._seen.add(iri)
+
+    def id_ref(self, value: str) -> JsonLdIdRef:
+        return _id_ref(value)
+
+    def set_property(
+        self,
+        node: JsonLdNode,
+        property_name: str | None,
+        value: object,
+    ) -> None:
+        if property_name is not None and value is not None:
+            node[property_name] = value
+
+    def set_type(self, node: JsonLdNode, rdf_types: list[str | None]) -> None:
+        resolved_types = [rdf_type for rdf_type in rdf_types if rdf_type is not None]
+        if not resolved_types:
+            return
+        node['@type'] = resolved_types[0] if len(resolved_types) == 1 else resolved_types
+
+    def add_reference_node(
+        self,
+        iri: str,
+        classes: tuple[ExportRdfClass, ...],
+        *,
+        label: str | None = None,
+        description: str | None = None,
+    ) -> None:
+        if not _is_http_uri(iri):
+            return
+
+        node: JsonLdNode = {'@id': iri}
+        self.set_type(node, [self.profile.rdf_class(term) for term in classes])
+        if label:
+            self.set_property(node, self.profile.term('skos:prefLabel'), label)
+        if description:
+            self.set_property(node, self.profile.term('dct:description'), description)
+        self.append(node)
+
+    def add_reference_nodes(
+        self,
+        values: object,
+        classes: tuple[ExportRdfClass, ...],
+        *,
+        labels: bool = False,
+    ) -> None:
+        for value in _values_for_reference_nodes(values):
+            self.add_reference_node(
+                value,
+                classes,
+                label=_label_from_iri(value) if labels else None,
+            )
+
+    def document(self) -> JsonLdDocument:
+        used: set[str] = set()
+        _collect_used_prefixes({'@graph': self.graph}, used)
+        full_context = _build_context(self.profile)
+        context = {key: value for key, value in full_context.items() if key in used}
+        return {'@context': context, '@graph': self.graph}
 
 
 def _collect_used_prefixes(obj: object, prefixes: set[str]) -> None:
@@ -75,9 +309,9 @@ def _collect_used_prefixes(obj: object, prefixes: set[str]) -> None:
             prefixes.add(match.group(1))
 
 
-def _build_context() -> JsonLdContext:
-    """Load namespace prefixes from the schema registry cache."""
-    return get_export_context_prefixes()
+def _build_context(profile: ResolvedExportProfile) -> JsonLdContext:
+    """Return namespace prefixes resolved for this export build."""
+    return profile.prefixes
 
 
 def _catalog_iri(app: str, name: str) -> str | None:
@@ -136,22 +370,34 @@ def _typed_value(value_type: str, value: str) -> JsonLdTypedValue:
     return {'@type': value_type, '@value': value}
 
 
-def _typed_any_uri(value: str | None) -> JsonLdTypedValue | None:
+def _typed_any_uri(
+    value: str | None,
+    profile: ResolvedExportProfile,
+) -> JsonLdTypedValue | None:
     if not value:
         return None
-    return _typed_value('xsd:anyURI', value)
+    value_type = profile.prefixed_name('xsd', 'anyURI')
+    return _typed_value(value_type, value) if value_type is not None else None
 
 
-def _typed_datetime(value: str | None) -> JsonLdTypedValue | None:
+def _typed_datetime(
+    value: str | None,
+    profile: ResolvedExportProfile,
+) -> JsonLdTypedValue | None:
     if not value:
         return None
-    return _typed_value('xsd:dateTime', value)
+    value_type = profile.prefixed_name('xsd', 'dateTime')
+    return _typed_value(value_type, value) if value_type is not None else None
 
 
-def _typed_non_negative_integer(value: int | None) -> JsonLdTypedValue | None:
+def _typed_non_negative_integer(
+    value: int | None,
+    profile: ResolvedExportProfile,
+) -> JsonLdTypedValue | None:
     if value is None:
         return None
-    return _typed_value('xsd:nonNegativeInteger', str(value))
+    value_type = profile.prefixed_name('xsd', 'nonNegativeInteger')
+    return _typed_value(value_type, str(value)) if value_type is not None else None
 
 
 def _label_from_iri(iri: str) -> str:
@@ -161,363 +407,294 @@ def _label_from_iri(iri: str) -> str:
     return match.group(1).replace('_', ' ').replace('-', ' ')
 
 
-def _append_node(graph: JsonLdGraph, seen: set[str], node: JsonLdGraphNode) -> None:
-    iri = node.get('@id')
-    if iri is None:
-        graph.append(node)
-        return
-    if iri in seen:
-        return
-    graph.append(node)
-    seen.add(iri)
+def _values_for_reference_nodes(values: object) -> list[str]:
+    if isinstance(values, str):
+        return [value for value in _split_values(values) if _is_http_uri(value)]
+    if isinstance(values, list):
+        result: list[str] = []
+        for value in values:
+            if isinstance(value, str) and _is_http_uri(value):
+                result.append(value)
+        return result
+    return []
 
 
-def _append_reference_node(
-    graph: JsonLdGraph,
-    seen: set[str],
-    iri: str,
-    rdf_type: str | list[str],
-    *,
-    label: str | None = None,
-    description: str | None = None,
-) -> None:
-    node: JsonLdReferenceNode = {
-        '@id': iri,
-        '@type': rdf_type,
-    }
-    if label:
-        node['skos:prefLabel'] = label
-    if description:
-        node['dct:description'] = description
-    _append_node(graph, seen, node)
-
-
-def _append_reference_nodes(
-    graph: JsonLdGraph,
-    seen: set[str],
-    values: str | None,
-    rdf_type: str | list[str],
-    *,
-    skos_labels: bool = False,
-) -> None:
-    for value in _split_values(values):
-        if not _is_http_uri(value):
-            continue
-        _append_reference_node(
-            graph,
-            seen,
-            value,
-            rdf_type,
-            label=_label_from_iri(value) if skos_labels else None,
-        )
-
-
-def _provenance_node(value: str) -> JsonLdProvenanceNode:
-    return {
-        '@type': rdf_class(ExportRdfClass.PROVENANCE_STATEMENT),
-        'dct:description': value,
-    }
-
-
-def _build_contact_point_node(contact_point: ExportContactPoint) -> JsonLdContactPointNode:
-    node: JsonLdContactPointNode = {'@type': ['cv:ContactPoint', 'vcard:Kind']}
-    contact_point_iri = _contact_point_iri(contact_point)
-    if contact_point_iri is not None:
-        node['@id'] = contact_point_iri
-    if contact_point.email:
-        node['cv:email'] = contact_point.email
-        node['vcard:hasEmail'] = _id_ref(f'mailto:{contact_point.email}')
-    if contact_point.contact_page:
-        node['cv:contactPage'] = _id_ref(contact_point.contact_page)
-        node['vcard:hasURL'] = _id_ref(contact_point.contact_page)
-    return node
-
-
-def _ensure_contact_point(
-    contact_point: ExportContactPoint | None,
-    graph: JsonLdGraph,
-    seen: set[str],
-) -> JsonLdContactPointValue | None:
-    if contact_point is None:
-        return None
-    node = _build_contact_point_node(contact_point)
-    contact_point_iri = node.get('@id')
-    if contact_point_iri is not None:
-        _append_node(graph, seen, node)
-        return _id_ref(contact_point_iri)
-    return node
-
-
-def _build_agent_node(agent: ExportAgent, graph: JsonLdGraph, seen: set[str]) -> JsonLdAgentValue:
-    contact_point_value = _ensure_contact_point(agent.contact_point, graph, seen)
-    node: JsonLdAgentNode = {
-        '@type': 'foaf:Agent',
-        'foaf:name': agent.name,
-    }
-    agent_iri = _agent_iri(agent.app, agent.name)
-    if agent_iri is not None:
-        node['@id'] = agent_iri
-    if agent.description:
-        node['dct:description'] = agent.description
-    if contact_point_value is not None:
-        node['cv:contactPoint'] = contact_point_value
-    if agent_iri is not None:
-        _append_node(graph, seen, node)
-        return _id_ref(agent_iri)
-    return node
-
-
-def _uri_list(values: str | None) -> JsonLdIdRefList:
-    return [_id_ref(value) for value in _split_values(values) if _is_http_uri(value)]
-
-
-def _literal_or_uri_list(values: str | None) -> JsonLdLiteralOrUriList:
-    result: JsonLdLiteralOrUriList = []
+def _literal_or_id_list(values: str | None) -> list[JsonLdLiteralOrUri]:
+    result: list[JsonLdLiteralOrUri] = []
     for value in _split_values(values):
         result.append(_id_ref(value) if _is_http_uri(value) else value)
     return result
 
 
-def _build_table_group(distribution: ExportDistribution) -> JsonLdTableGroupNode | None:
+def _id_list(values: str | None) -> list[JsonLdIdRef]:
+    return [_id_ref(value) for value in _split_values(values) if _is_http_uri(value)]
+
+
+def _jsonld_field_value(
+    value: Any,
+    kind: ExportValueKind,
+    profile: ResolvedExportProfile,
+):
+    if kind == ExportValueKind.LITERAL:
+        return value if value not in (None, '') else None
+    if kind == ExportValueKind.KEYWORD_LIST:
+        return value or None
+    if kind == ExportValueKind.ID:
+        return _id_ref(value) if value else None
+    if kind == ExportValueKind.ID_LIST:
+        values = _id_list(value)
+        return values or None
+    if kind == ExportValueKind.LITERAL_OR_ID:
+        return _maybe_uri_ref(value)
+    if kind == ExportValueKind.LITERAL_OR_ID_LIST:
+        values = _literal_or_id_list(value)
+        return values or None
+    if kind == ExportValueKind.TYPED_ANY_URI:
+        return _typed_any_uri(value, profile)
+    if kind == ExportValueKind.TYPED_DATETIME:
+        return _typed_datetime(value, profile)
+    if kind == ExportValueKind.TYPED_NON_NEGATIVE_INTEGER:
+        return _typed_non_negative_integer(value, profile)
+    raise ValueError(f'Unsupported export value kind: {kind!r}')
+
+
+def _apply_field_specs(
+    node: JsonLdNode,
+    source: object,
+    field_specs: tuple[ExportFieldSpec, ...],
+    builder: JsonLdGraphBuilder,
+) -> None:
+    for spec in field_specs:
+        property_name = builder.profile.property(spec)
+        if property_name is None:
+            continue
+        raw_value = getattr(source, spec.attr, None)
+        value = _jsonld_field_value(raw_value, spec.value_kind, builder.profile)
+        if value is None:
+            continue
+
+        node[property_name] = value
+        if spec.reference_classes:
+            builder.add_reference_nodes(
+                raw_value,
+                spec.reference_classes,
+                labels=spec.reference_labels,
+            )
+
+
+def _provenance_node(value: str, builder: JsonLdGraphBuilder) -> JsonLdNode:
+    node: JsonLdNode = {}
+    builder.set_type(node, [builder.profile.rdf_class(ExportRdfClass.PROVENANCE_STATEMENT)])
+    builder.set_property(node, builder.profile.term('dct:description'), value)
+    return node
+
+
+def _build_contact_point_node(
+    contact_point: ExportContactPoint,
+    builder: JsonLdGraphBuilder,
+) -> JsonLdNode:
+    node: JsonLdNode = {}
+    builder.set_type(
+        node,
+        [builder.profile.named_class('ContactPoint'), builder.profile.named_class('Kind')],
+    )
+    contact_point_iri = _contact_point_iri(contact_point)
+    if contact_point_iri is not None:
+        node['@id'] = contact_point_iri
+    if contact_point.email:
+        builder.set_property(node, builder.profile.term('cv:email'), contact_point.email)
+        builder.set_property(
+            node,
+            builder.profile.term('vcard:hasEmail'),
+            _id_ref(f'mailto:{contact_point.email}'),
+        )
+    if contact_point.contact_page:
+        builder.set_property(
+            node,
+            builder.profile.term('cv:contactPage'),
+            _id_ref(contact_point.contact_page),
+        )
+        builder.set_property(
+            node,
+            builder.profile.term('vcard:hasURL'),
+            _id_ref(contact_point.contact_page),
+        )
+    return node
+
+
+def _ensure_contact_point(
+    contact_point: ExportContactPoint | None,
+    builder: JsonLdGraphBuilder,
+) -> JsonLdIdRef | JsonLdNode | None:
+    if contact_point is None:
+        return None
+    node = _build_contact_point_node(contact_point, builder)
+    contact_point_iri = node.get('@id')
+    if isinstance(contact_point_iri, str):
+        builder.append(node)
+        return _id_ref(contact_point_iri)
+    return node
+
+
+def _build_agent_node(agent: ExportAgent, builder: JsonLdGraphBuilder) -> JsonLdIdRef | JsonLdNode:
+    contact_point_value = _ensure_contact_point(agent.contact_point, builder)
+    node: JsonLdNode = {}
+    builder.set_type(node, [builder.profile.named_class('Agent')])
+    builder.set_property(node, builder.profile.term('foaf:name'), agent.name)
+    agent_iri = _agent_iri(agent.app, agent.name)
+    if agent_iri is not None:
+        node['@id'] = agent_iri
+    if agent.description:
+        builder.set_property(node, builder.profile.term('dct:description'), agent.description)
+    if contact_point_value is not None:
+        builder.set_property(node, builder.profile.term('cv:contactPoint'), contact_point_value)
+    if agent_iri is not None:
+        builder.append(node)
+        return _id_ref(agent_iri)
+    return node
+
+
+def _build_table_group(
+    distribution: ExportDistribution,
+    builder: JsonLdGraphBuilder,
+) -> JsonLdNode | None:
     if not distribution.tables:
         return None
-    table_group: JsonLdTableGroupNode = {
-        '@type': 'csvw:TableGroup',
-        'csvw:table': [],
-    }
+    table_property = builder.profile.term('csvw:table')
+    column_property = builder.profile.term('csvw:column')
+    if table_property is None or column_property is None:
+        return None
 
+    table_group: JsonLdNode = {table_property: []}
+    builder.set_type(table_group, [builder.profile.named_class('TableGroup')])
+
+    tables = table_group[table_property]
+    assert isinstance(tables, list)
     for table in distribution.tables:
-        table_node: JsonLdTableNode = {
-            '@type': 'csvw:Table',
-            'csvw:name': table.name,
-            'csvw:column': [],
-        }
+        table_node: JsonLdNode = {column_property: []}
+        builder.set_type(table_node, [builder.profile.named_class('Table')])
+        builder.set_property(table_node, builder.profile.term('csvw:name'), table.name)
         if table.title:
-            table_node['dct:title'] = table.title
+            builder.set_property(table_node, builder.profile.term('dct:title'), table.title)
         if table.description:
-            table_node['dct:description'] = table.description
+            builder.set_property(
+                table_node,
+                builder.profile.term('dct:description'),
+                table.description,
+            )
         if table.url:
-            table_node['csvw:url'] = _id_ref(table.url)
+            builder.set_property(table_node, builder.profile.term('csvw:url'), _id_ref(table.url))
 
-        columns: list[JsonLdColumnNode] = []
+        columns = table_node[column_property]
+        assert isinstance(columns, list)
         for column in table.columns:
-            column_node: JsonLdColumnNode = {
-                '@type': 'csvw:Column',
-                'csvw:name': column.name,
-            }
+            column_node: JsonLdNode = {}
+            builder.set_type(column_node, [builder.profile.named_class('Column')])
+            builder.set_property(column_node, builder.profile.term('csvw:name'), column.name)
             if column.title:
-                column_node['dct:title'] = column.title
-                column_node['csvw:titles'] = column.title
+                builder.set_property(column_node, builder.profile.term('dct:title'), column.title)
+                builder.set_property(column_node, builder.profile.term('csvw:titles'), column.title)
             if column.description:
-                column_node['dct:description'] = column.description
+                builder.set_property(
+                    column_node,
+                    builder.profile.term('dct:description'),
+                    column.description,
+                )
             if column.datatype:
-                column_node['csvw:datatype'] = column.datatype
+                builder.set_property(
+                    column_node,
+                    builder.profile.term('csvw:datatype'),
+                    column.datatype,
+                )
             if column.property_url:
-                column_node['csvw:propertyUrl'] = _id_ref(column.property_url)
+                builder.set_property(
+                    column_node,
+                    builder.profile.term('csvw:propertyUrl'),
+                    _id_ref(column.property_url),
+                )
             columns.append(column_node)
 
-        table_node['csvw:column'] = columns
-        table_group['csvw:table'].append(table_node)
+        tables.append(table_node)
 
     return table_group
 
 
 def _build_distribution_node(
     distribution: ExportDistribution,
-    graph: JsonLdGraph,
-    seen: set[str],
-) -> JsonLdDistributionNode:
-    node: JsonLdDistributionNode = {
-        '@type': 'dcat:Distribution',
-    }
+    builder: JsonLdGraphBuilder,
+) -> JsonLdNode:
+    node: JsonLdNode = {}
+    builder.set_type(node, [builder.profile.entity_type(ExportEntity.DISTRIBUTION)])
     iri = _distribution_iri(distribution.access_url)
     if iri is not None:
         node['@id'] = iri
-    if distribution.title:
-        node['dct:title'] = distribution.title
-    if distribution.description:
-        node['dct:description'] = distribution.description
-    if distribution.access_url:
-        node['dcat:accessURL'] = _id_ref(distribution.access_url)
-    if distribution.applicable_legislation:
-        legislation = _uri_list(distribution.applicable_legislation)
-        if legislation:
-            node['dcatap:applicableLegislation'] = legislation
-            _append_reference_nodes(
-                graph,
-                seen,
-                distribution.applicable_legislation,
-                rdf_class(ExportRdfClass.LEGAL_RESOURCE),
-            )
-    format_value = _maybe_uri_ref(distribution.format)
-    if format_value is not None:
-        node['dct:format'] = format_value
-        if isinstance(format_value, dict):
-            _append_reference_node(
-                graph,
-                seen,
-                format_value['@id'],
-                rdf_class(ExportRdfClass.MEDIA_TYPE_OR_EXTENT),
-            )
-    conforms_to = _literal_or_uri_list(distribution.conforms_to)
-    if conforms_to:
-        node['dct:conformsTo'] = conforms_to
-        _append_reference_nodes(
-            graph,
-            seen,
-            distribution.conforms_to,
-            rdf_class(ExportRdfClass.STANDARD),
-        )
-    if distribution.byte_size is not None:
-        byte_size = _typed_non_negative_integer(distribution.byte_size)
-        if byte_size is not None:
-            node['dcat:byteSize'] = byte_size
-    rights_value = _maybe_uri_ref(distribution.rights)
-    if rights_value is not None:
-        node['dct:rights'] = rights_value
-        if isinstance(rights_value, dict):
-            _append_reference_node(
-                graph,
-                seen,
-                rights_value['@id'],
-                rdf_class(ExportRdfClass.RIGHTS_STATEMENT),
-            )
-    licence_value = _maybe_uri_ref(distribution.licence)
-    if licence_value is not None:
-        node['dct:license'] = licence_value
-        if isinstance(licence_value, dict):
-            _append_reference_node(
-                graph,
-                seen,
-                licence_value['@id'],
-                rdf_class(ExportRdfClass.LICENCE_DOCUMENT),
-            )
-    issued = _typed_datetime(distribution.release_date)
-    if issued is not None:
-        node['dct:issued'] = issued
-    modified = _typed_datetime(distribution.modification_date)
-    if modified is not None:
-        node['dct:modified'] = modified
-    sample = _build_table_group(distribution)
+
+    _apply_field_specs(node, distribution, _DISTRIBUTION_FIELDS, builder)
+
+    sample = _build_table_group(distribution, builder)
     if sample is not None:
-        node['adms:sample'] = sample
+        builder.set_property(node, builder.profile.term('adms:sample'), sample)
     return node
 
 
 def _build_dataset_node(
     dataset: ExportDataset,
-    graph: JsonLdGraph,
-    seen: set[str],
+    builder: JsonLdGraphBuilder,
     *,
     include_distributions: bool = True,
-) -> JsonLdDatasetNode:
-    publisher_value = (
-        _build_agent_node(dataset.publisher, graph, seen) if dataset.publisher else None
-    )
-    creator_value = _build_agent_node(dataset.creator, graph, seen) if dataset.creator else None
-    hdab_value = _build_agent_node(dataset.hdab, graph, seen) if dataset.hdab else None
-    custodian_value = (
-        _build_agent_node(dataset.custodian, graph, seen) if dataset.custodian else None
-    )
-    contact_point_value = _ensure_contact_point(dataset.contact_point, graph, seen)
+) -> JsonLdNode:
+    publisher_value = _build_agent_node(dataset.publisher, builder) if dataset.publisher else None
+    creator_value = _build_agent_node(dataset.creator, builder) if dataset.creator else None
+    hdab_value = _build_agent_node(dataset.hdab, builder) if dataset.hdab else None
+    custodian_value = _build_agent_node(dataset.custodian, builder) if dataset.custodian else None
+    contact_point_value = _ensure_contact_point(dataset.contact_point, builder)
 
-    node: JsonLdDatasetNode = {
-        '@type': 'dcat:Dataset',
-    }
+    node: JsonLdNode = {}
+    builder.set_type(node, [builder.profile.entity_type(ExportEntity.DATASET)])
     iri = _dataset_iri(dataset.identifier)
     if iri is not None:
         node['@id'] = iri
-    if dataset.title:
-        node['dct:title'] = dataset.title
-    if dataset.description:
-        node['dct:description'] = dataset.description
-    identifier = _typed_any_uri(dataset.identifier)
-    if identifier is not None:
-        node['dct:identifier'] = identifier
-    if dataset.version:
-        node['dcat:version'] = dataset.version
-    theme_values = _uri_list(dataset.theme)
-    if theme_values:
-        node['dcat:theme'] = theme_values
+
+    _apply_field_specs(node, dataset, _DATASET_FIELDS, builder)
+
     if publisher_value is not None:
-        node['dct:publisher'] = publisher_value
-    if creator_value is not None:
-        node['dct:creator'] = creator_value
-    conforms_to = _literal_or_uri_list(dataset.conforms_to)
-    if conforms_to:
-        node['dct:conformsTo'] = conforms_to
-        _append_reference_nodes(
-            graph,
-            seen,
-            dataset.conforms_to,
-            rdf_class(ExportRdfClass.STANDARD),
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'publisher'),
+            publisher_value,
         )
-    issued = _typed_datetime(dataset.issued)
-    if issued is not None:
-        node['dct:issued'] = issued
-    modified = _typed_datetime(dataset.modified)
-    if modified is not None:
-        node['dct:modified'] = modified
-    if dataset.keywords:
-        node['dcat:keyword'] = dataset.keywords
+    if creator_value is not None:
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'creator'),
+            creator_value,
+        )
     # dct:source ranges to dcat:Dataset. A single-dataset export cannot
     # guarantee that the referenced dataset is present and profile-compatible.
     if contact_point_value is not None:
-        node['dcat:contactPoint'] = contact_point_value
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'contactPoint'),
+            contact_point_value,
+        )
     if dataset.provenance:
-        node['dct:provenance'] = _provenance_node(dataset.provenance)
-    if dataset.access_rights:
-        node['dct:accessRights'] = _id_ref(dataset.access_rights)
-        _append_reference_node(
-            graph,
-            seen,
-            dataset.access_rights,
-            [
-                rdf_class(ExportRdfClass.RIGHTS_STATEMENT),
-                rdf_class(ExportRdfClass.CONCEPT),
-            ],
-            label=_label_from_iri(dataset.access_rights),
-        )
-    applicable_legislation = _uri_list(dataset.applicable_legislation)
-    if applicable_legislation:
-        node['dcatap:applicableLegislation'] = applicable_legislation
-        _append_reference_nodes(
-            graph,
-            seen,
-            dataset.applicable_legislation,
-            rdf_class(ExportRdfClass.LEGAL_RESOURCE),
-        )
-    health_category_values = _uri_list(dataset.health_category)
-    if health_category_values:
-        node['healthdcatap:healthCategory'] = health_category_values
-        _append_reference_nodes(
-            graph,
-            seen,
-            dataset.health_category,
-            rdf_class(ExportRdfClass.CONCEPT),
-            skos_labels=True,
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'provenance'),
+            _provenance_node(dataset.provenance, builder),
         )
     if hdab_value is not None:
-        node['healthdcatap:hdab'] = hdab_value
-    if custodian_value is not None:
-        node['geodcatap:custodian'] = custodian_value
-    dataset_types = _uri_list(dataset.type)
-    if dataset_types:
-        node['dct:type'] = dataset_types
-        _append_reference_nodes(
-            graph,
-            seen,
-            dataset.type,
-            rdf_class(ExportRdfClass.CONCEPT),
-            skos_labels=True,
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'hdab'),
+            hdab_value,
         )
-    _append_reference_nodes(
-        graph,
-        seen,
-        dataset.theme,
-        rdf_class(ExportRdfClass.CONCEPT),
-        skos_labels=True,
-    )
+    if custodian_value is not None:
+        builder.set_property(
+            node,
+            builder.profile.property_alias(ExportEntity.DATASET, 'custodian'),
+            custodian_value,
+        )
     if include_distributions and dataset.distributions:
         dist_refs = [
             _id_ref(iri)
@@ -525,19 +702,50 @@ def _build_dataset_node(
             if (iri := _distribution_iri(distribution.access_url)) is not None
         ]
         if dist_refs:
-            node['dcat:distribution'] = dist_refs
+            builder.set_property(
+                node,
+                builder.profile.property_alias(ExportEntity.DATASET, 'distribution'),
+                dist_refs,
+            )
     return node
 
 
-def _add_distributions(dataset: ExportDataset, graph: JsonLdGraph, seen: set[str]) -> None:
+def _add_distributions(dataset: ExportDataset, builder: JsonLdGraphBuilder) -> None:
     for distribution in dataset.distributions:
-        _append_node(graph, seen, _build_distribution_node(distribution, graph, seen))
+        builder.append(_build_distribution_node(distribution, builder))
+
+
+def _build_catalog_node(
+    catalog: ExportCatalog,
+    builder: JsonLdGraphBuilder,
+    *,
+    dataset_refs: list[JsonLdIdRef],
+) -> JsonLdNode:
+    catalog_node: JsonLdNode = {}
+    builder.set_type(catalog_node, [builder.profile.entity_type(ExportEntity.CATALOGUE)])
+    builder.set_property(
+        catalog_node,
+        builder.profile.property_alias(ExportEntity.CATALOGUE, 'dataset'),
+        dataset_refs,
+    )
+    catalog_iri = _catalog_iri(catalog.app, catalog.name)
+    if catalog_iri is not None:
+        catalog_node['@id'] = catalog_iri
+
+    _apply_field_specs(catalog_node, catalog, _CATALOG_FIELDS, builder)
+
+    if catalog.publisher is not None:
+        builder.set_property(
+            catalog_node,
+            builder.profile.property_alias(ExportEntity.CATALOGUE, 'publisher'),
+            _build_agent_node(catalog.publisher, builder),
+        )
+    return catalog_node
 
 
 def _append_dataset_resource(
     dataset: ExportDataset,
-    graph: JsonLdGraph,
-    seen: set[str],
+    builder: JsonLdGraphBuilder,
     *,
     include_catalog: bool,
     include_distributions: bool = True,
@@ -545,150 +753,85 @@ def _append_dataset_resource(
     if include_catalog and dataset.catalog is not None:
         dataset_iri = _dataset_iri(dataset.identifier)
         dataset_refs = [_id_ref(dataset_iri)] if dataset_iri is not None else []
-        catalog_node: JsonLdCatalogNode = {
-            '@type': 'dcat:Catalog',
-            'dcat:dataset': dataset_refs,
-        }
-        catalog_iri = _catalog_iri(dataset.catalog.app, dataset.catalog.name)
-        if catalog_iri is not None:
-            catalog_node['@id'] = catalog_iri
-        if dataset.catalog.title:
-            catalog_node['dct:title'] = dataset.catalog.title
-        if dataset.catalog.description:
-            catalog_node['dct:description'] = dataset.catalog.description
-        if dataset.catalog.applicable_legislation:
-            legislation = _uri_list(dataset.catalog.applicable_legislation)
-            if legislation:
-                catalog_node['dcatap:applicableLegislation'] = legislation
-                _append_reference_nodes(
-                    graph,
-                    seen,
-                    dataset.catalog.applicable_legislation,
-                    rdf_class(ExportRdfClass.LEGAL_RESOURCE),
-                )
-        if dataset.catalog.publisher is not None:
-            catalog_node['dct:publisher'] = _build_agent_node(
-                dataset.catalog.publisher, graph, seen
-            )
-        _append_node(graph, seen, catalog_node)
+        builder.append(_build_catalog_node(dataset.catalog, builder, dataset_refs=dataset_refs))
 
-    dataset_node = _build_dataset_node(
-        dataset, graph, seen, include_distributions=include_distributions
+    builder.append(
+        _build_dataset_node(dataset, builder, include_distributions=include_distributions)
     )
-    _append_node(graph, seen, dataset_node)
     if include_distributions:
-        _add_distributions(dataset, graph, seen)
-
-
-def _dataset_graph(dataset: ExportDataset) -> JsonLdGraph:
-    graph: JsonLdGraph = []
-    seen: set[str] = set()
-
-    _append_dataset_resource(dataset, graph, seen, include_catalog=False)
-    return graph
+        _add_distributions(dataset, builder)
 
 
 def _append_catalog_resource(
     catalog: ExportCatalog,
-    graph: JsonLdGraph,
-    seen: set[str],
+    builder: JsonLdGraphBuilder,
     *,
     include_distributions: bool = True,
 ) -> None:
-    catalog_node: JsonLdCatalogNode = {
-        '@type': 'dcat:Catalog',
-        'dcat:dataset': [
-            _id_ref(iri)
-            for dataset in catalog.datasets
-            if (iri := _dataset_iri(dataset.identifier)) is not None
-        ],
-    }
-    catalog_iri = _catalog_iri(catalog.app, catalog.name)
-    if catalog_iri is not None:
-        catalog_node['@id'] = catalog_iri
-    if catalog.title:
-        catalog_node['dct:title'] = catalog.title
-    if catalog.description:
-        catalog_node['dct:description'] = catalog.description
-    if catalog.applicable_legislation:
-        legislation = _uri_list(catalog.applicable_legislation)
-        if legislation:
-            catalog_node['dcatap:applicableLegislation'] = legislation
-            _append_reference_nodes(
-                graph,
-                seen,
-                catalog.applicable_legislation,
-                rdf_class(ExportRdfClass.LEGAL_RESOURCE),
-            )
-    if catalog.publisher is not None:
-        catalog_node['dct:publisher'] = _build_agent_node(catalog.publisher, graph, seen)
-    _append_node(graph, seen, catalog_node)
+    dataset_refs = [
+        _id_ref(iri)
+        for dataset in catalog.datasets
+        if (iri := _dataset_iri(dataset.identifier)) is not None
+    ]
+    builder.append(_build_catalog_node(catalog, builder, dataset_refs=dataset_refs))
 
     for dataset in catalog.datasets:
         _append_dataset_resource(
-            dataset, graph, seen, include_catalog=False, include_distributions=include_distributions
+            dataset,
+            builder,
+            include_catalog=False,
+            include_distributions=include_distributions,
         )
 
+def _build_resource_result(resource: ExportResource) -> JsonLdExportResult:
+    builder = JsonLdGraphBuilder(ResolvedExportProfile.load())
+    if isinstance(resource, ExportDataset):
+        _append_dataset_resource(resource, builder, include_catalog=False)
+    elif isinstance(resource, ExportCatalog):
+        _append_catalog_resource(resource, builder)
+    else:
+        raise TypeError(f'Unsupported export resource: {type(resource)!r}')
+    return JsonLdExportResult(document=builder.document(), warnings=builder.warnings)
 
-def _catalog_graph(catalog: ExportCatalog) -> JsonLdGraph:
-    graph: JsonLdGraph = []
-    seen: set[str] = set()
 
-    _append_catalog_resource(catalog, graph, seen)
-
-    return graph
-
-
-def _complete_graph(
+def _build_complete_result(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
     *,
     include_distributions: bool = True,
-) -> JsonLdGraph:
-    graph: JsonLdGraph = []
-    seen: set[str] = set()
+) -> JsonLdExportResult:
+    builder = JsonLdGraphBuilder(ResolvedExportProfile.load())
 
     for catalog in catalogs:
-        _append_catalog_resource(catalog, graph, seen, include_distributions=include_distributions)
+        _append_catalog_resource(catalog, builder, include_distributions=include_distributions)
 
     for dataset in orphan_datasets:
         _append_dataset_resource(
-            dataset, graph, seen, include_catalog=False, include_distributions=include_distributions
+            dataset,
+            builder,
+            include_catalog=False,
+            include_distributions=include_distributions,
         )
 
-    return graph
+    return JsonLdExportResult(document=builder.document(), warnings=builder.warnings)
 
 
-def _build_document(graph: JsonLdGraph) -> JsonLdDocument:
-    used: set[str] = set()
-    _collect_used_prefixes({'@graph': graph}, used)
-
-    full_context = _build_context()
-    context = {key: value for key, value in full_context.items() if key in used}
-    return {'@context': context, '@graph': graph}
+def build_jsonld_result(resource: ExportResource) -> JsonLdExportResult:
+    """Build a JSON-LD export document with non-fatal compatibility warnings."""
+    return _build_resource_result(resource)
 
 
-def build_jsonld(resource: ExportResource) -> JsonLdDocument:
-    """Build a HealthDCAT-AP Release 6 JSON-LD document for a dataset or catalog."""
-    if isinstance(resource, ExportDataset):
-        graph = _dataset_graph(resource)
-    elif isinstance(resource, ExportCatalog):
-        graph = _catalog_graph(resource)
-    else:
-        raise TypeError(f'Unsupported export resource: {type(resource)!r}')
-
-    return _build_document(graph)
-
-
-def build_complete_jsonld(
+def build_complete_jsonld_result(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
     *,
     include_distributions: bool = True,
-) -> JsonLdDocument:
-    """Build one aggregate JSON-LD export document for all catalog resources."""
-    return _build_document(
-        _complete_graph(catalogs, orphan_datasets, include_distributions=include_distributions)
+) -> JsonLdExportResult:
+    """Build an aggregate JSON-LD export with non-fatal compatibility warnings."""
+    return _build_complete_result(
+        catalogs,
+        orphan_datasets,
+        include_distributions=include_distributions,
     )
 
 
@@ -697,22 +840,28 @@ def has_distributions(dataset: ExportDataset) -> bool:
     return bool(dataset.distributions)
 
 
-def build_turtle(resource: ExportResource) -> str:
-    """Serialise the JSON-LD export document to Turtle."""
-    return serialise_jsonld_to_turtle(build_jsonld(resource))
+def build_turtle_result(resource: ExportResource) -> TurtleExportResult:
+    """Serialise a JSON-LD export result to Turtle with compatibility warnings."""
+    result = build_jsonld_result(resource)
+    return TurtleExportResult(
+        content=serialise_jsonld_to_turtle(result.document),
+        warnings=result.warnings,
+    )
 
 
-def build_complete_turtle(
+def build_complete_turtle_result(
     catalogs: list[ExportCatalog],
     orphan_datasets: list[ExportDataset],
     *,
     include_distributions: bool = True,
-) -> str:
-    """Serialise the aggregate JSON-LD export document to Turtle."""
-    return serialise_jsonld_to_turtle(
-        build_complete_jsonld(
-            catalogs,
-            orphan_datasets,
-            include_distributions=include_distributions,
-        )
+) -> TurtleExportResult:
+    """Serialise an aggregate JSON-LD export result to Turtle with warnings."""
+    result = build_complete_jsonld_result(
+        catalogs,
+        orphan_datasets,
+        include_distributions=include_distributions,
+    )
+    return TurtleExportResult(
+        content=serialise_jsonld_to_turtle(result.document),
+        warnings=result.warnings,
     )

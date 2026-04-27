@@ -59,6 +59,16 @@
             </a>
           </div>
         </div>
+        {% if export_warnings %}
+          <div class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-snug text-amber-800">
+            <div class="font-semibold">{% trans "Export warnings" %}</div>
+            <ul class="mt-1 list-disc pl-4">
+              {% for warning in export_warnings %}
+                <li>{{ warning }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
         <!-- Add to cart -->
         {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
       </div>
