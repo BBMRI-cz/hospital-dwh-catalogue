@@ -93,30 +93,29 @@ When you make a change, try to keep it inside the narrowest layer possible.
 
 ## Add another filter
 
-The catalogue filters are built from:
+Most dataset metadata filters are configured in Django admin.
 
-- [frontend/presentation/filters.py](../frontend/presentation/filters.py)
-- [frontend/presentation/context.py](../frontend/presentation/context.py)
-- [frontend/templates/catalogue/components/_sidebar_filters.html](../frontend/templates/catalogue/components/_sidebar_filters.html)
-- [frontend/templatetags/frontend_tags.py](../frontend/templatetags/frontend_tags.py)
-- tests in [frontend/tests.py](../frontend/tests.py)
+Typical workflow for an already mapped dataset metadata field:
 
-Typical workflow:
+1. open `/admin/`
+2. go to Catalogue Frontend > Catalogue filter definitions
+3. choose the field name
+4. set the sidebar label, order, and enabled flag
+5. reload the catalogue
 
-1. add a new field to `FilterState`
-2. parse it in `FilterState.from_query_params()`
-3. apply it in `filter_datasets()`
-4. build a counter and sidebar items in `build_sidebar_context()`
-5. extend `FrontendSidebarContext` if the template needs a new context variable
-6. return that new sidebar list from `build_catalogue_index_context()`
-7. add the new group to `_sidebar_filters.html`
-8. add an active-filter chip label in `_FILTER_LABELS`
-9. add or update tests
+The catalogue sidebar and dataset-card preview both use the enabled filter
+definitions. If no preview metadata is available for a dataset, the result card
+does not open.
 
-Rule of thumb:
+Code changes are needed only when the metadata field is not yet mapped into the
+unified catalogue model. In that case:
 
-- if the filter is based on dataset metadata already present in `FrontendDataset`, keep it in the frontend presentation layer
-- if the filter depends on warehouse column data, add the lookup to `UnifiedCatalogService` or `WarehouseMetadataService`
+1. add/map the field through the source model, shared DTO, mapper, and frontend view model
+2. make sure the field matches a HealthDCAT-AP schema local name, or add an explicit extractor in [frontend/presentation/filters.py](../frontend/presentation/filters.py)
+3. add or update frontend tests
+
+The warehouse distribution-column filter is intentionally separate because it
+uses table/column lookup logic from `WarehouseMetadataService`.
 
 ## Add a new field to existing datasets or distributions
 
@@ -231,11 +230,12 @@ Surface those warnings through `frontend/export_warnings.py` instead of changing
 If you want another chart:
 
 1. create or edit a `StatDefinition` in the admin
-2. run `Check and Sync FAIR Genomes`, or use the selected-stat admin action if only the existing statistic values need refreshing
-3. verify that the result appears in `StatResult`
-4. open the distribution detail page
+2. save it; for active definitions, the admin immediately tries to synchronise that one aggregation from MOLGENIS
+3. if the save-time synchronisation fails or the values need refreshing later, use the selected-stat admin action or `Check and Synchronise FAIR Genomes`
+4. verify that the result appears in `StatResult`
+5. open the distribution detail page
 
-If a new FAIR Genomes distribution exists in RDF but is not yet available in the dropdown, run `Check and Sync FAIR Genomes` first. The admin form checks the live RDF inventory through a short-lived cache, but it still saves only locally synchronised `Distribution` rows.
+If a new FAIR Genomes distribution exists in RDF but is not yet available in the dropdown, run `Check and Synchronise FAIR Genomes` first. The admin form checks the live RDF inventory through a short-lived cache, but it still saves only locally synchronised `Distribution` rows.
 
 If you need product-level code changes:
 

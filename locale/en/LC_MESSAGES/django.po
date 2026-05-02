@@ -26,7 +26,7 @@ msgstr "English"
 
 #: fair_genomes/admin.py:67 fair_genomes/models.py:137
 msgid "MOLGENIS table"
-msgstr ""
+msgstr "MOLGENIS table"
 
 #: fair_genomes/admin.py:68 fair_genomes/models.py:138
 #: fair_genomes/models.py:191
@@ -35,43 +35,43 @@ msgstr "MOLGENIS table name, e.g. \"sequencing\""
 
 #: fair_genomes/admin.py:80 fair_genomes/models.py:142
 msgid "MOLGENIS column"
-msgstr ""
+msgstr "MOLGENIS column"
 
 #: fair_genomes/admin.py:81
 msgid "Column name within the table."
-msgstr ""
+msgstr "Column name within the table."
 
 #: fair_genomes/admin.py:145
 msgid "Only superusers can trigger a full sync."
-msgstr ""
+msgstr "Only superusers can trigger a full sync."
 
 #: fair_genomes/admin.py:165
 #, python-format
 msgid "Full sync completed. %(summary)s"
-msgstr ""
+msgstr "Full sync completed. %(summary)s"
 
 #: fair_genomes/admin.py:171
 #, python-format
 msgid "Full sync failed: %(error)s"
-msgstr ""
+msgstr "Full sync failed: %(error)s"
 
 #: fair_genomes/admin.py:179
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:4
 msgid "Full Sync (RDF + Stats)"
-msgstr ""
+msgstr "Full Sync (RDF + Statistics)"
 
 #: fair_genomes/admin.py:182
 msgid "Sync selected stat aggregations now"
-msgstr ""
+msgstr "Synchronise selected statistic aggregations now"
 
 #: fair_genomes/admin.py:189
 msgid "FAIR_GENOMES_API_URL is not configured."
-msgstr ""
+msgstr "FAIR_GENOMES_API_URL is not configured."
 
 #: fair_genomes/admin.py:204
 #, python-format
 msgid "Synced %(ok)d stats, %(fail)d failed."
-msgstr ""
+msgstr "Synchronised %(ok)d statistics, %(fail)d failed."
 
 #: fair_genomes/apps.py:10
 msgid "Fair Genomes Integration"
@@ -129,31 +129,27 @@ msgstr "Distributions"
 
 #: fair_genomes/models.py:133
 msgid "DCAT Distribution whose detail page should show this chart."
-msgstr ""
+msgstr "DCAT Distribution whose detail page should show this chart."
 
 #: fair_genomes/models.py:143
-#, fuzzy
-#| msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
 msgid "Column name within the table, e.g. \"sequencinginstrumentmodel\""
-msgstr "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
+msgstr "Column name within the table, e.g. \"sequencinginstrumentmodel\""
 
 #: fair_genomes/models.py:149
-#, fuzzy
-#| msgid "Display Order"
 msgid "Display label"
-msgstr "Display Order"
+msgstr "Display label"
 
 #: fair_genomes/models.py:150
 msgid "Optional label for the chart. If blank, \"table.column\" is used."
-msgstr ""
+msgstr "Optional label for the chart. If blank, \"table.column\" is used."
 
 #: fair_genomes/models.py:154
 msgid "Sort order"
-msgstr ""
+msgstr "Sort order"
 
 #: fair_genomes/models.py:155
 msgid "Lower numbers are shown first on the distribution page."
-msgstr ""
+msgstr "Lower numbers are shown first on the distribution page."
 
 #: fair_genomes/models.py:159
 msgid "Active"
@@ -161,19 +157,15 @@ msgstr "Active"
 
 #: fair_genomes/models.py:160
 msgid "Inactive definitions are not synced or displayed."
-msgstr ""
+msgstr "Inactive definitions are not synchronised or displayed."
 
 #: fair_genomes/models.py:166
-#, fuzzy
-#| msgid "PK Definition"
 msgid "Stat Definition"
-msgstr "PK Definition"
+msgstr "Statistic Definition"
 
 #: fair_genomes/models.py:167
-#, fuzzy
-#| msgid "PK Definition"
 msgid "Stat Definitions"
-msgstr "PK Definition"
+msgstr "Statistic Definitions"
 
 #: fair_genomes/models.py:190
 msgid "Table name"
@@ -189,7 +181,7 @@ msgstr "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
 
 #: fair_genomes/models.py:202
 msgid "JSON object mapping each distinct value to its record count"
-msgstr ""
+msgstr "JSON object mapping each distinct value to its record count"
 
 #: fair_genomes/models.py:207
 msgid "Last synced"
@@ -205,33 +197,396 @@ msgstr "Stat Results"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html:9
 msgid "Full Resync (RDF + Stats)"
-msgstr ""
+msgstr "Full Resynchronisation (RDF + Statistics)"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:8
 msgid ""
 "This will re-sync all RDF metadata from the FAIR Data Point and re-run all "
 "active stat aggregations from MOLGENIS GraphQL."
 msgstr ""
+"This will re-synchronise all RDF metadata from the FAIR Data Point and re-run "
+"all active statistic aggregations from MOLGENIS GraphQL."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:9
 msgid ""
 "This may take a few seconds depending on the number of datasets and stat "
 "definitions."
 msgstr ""
+"This may take a few seconds depending on the number of datasets and statistic "
+"definitions."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:13
 msgid "Run Full Sync"
-msgstr ""
+msgstr "Run Full Synchronisation"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:14
 msgid "Cancel"
+msgstr "Cancel"
+
+#: fair_genomes/admin.py
+msgid "Complete"
+msgstr "Complete"
+
+#: fair_genomes/admin.py
+msgid "Partial"
+msgstr "Partial"
+
+#: fair_genomes/admin.py fair_genomes/models.py
+msgid "Failed"
+msgstr "Failed"
+
+#: fair_genomes/admin.py fair_genomes/models.py
+msgid "Skipped"
+msgstr "Skipped"
+
+#: fair_genomes/admin.py
+msgid "Nothing saved"
+msgstr "Nothing saved"
+
+#: fair_genomes/admin.py
+msgid "Only staff users can trigger FAIR Genomes synchronisation."
+msgstr "Only staff users can trigger FAIR Genomes synchronisation."
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Status: %(status)s"
+msgstr "Status: %(status)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Duration: %(duration)s s"
+msgstr "Duration: %(duration)s s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Statistics: %(updated)d updated, %(failed)d failed"
+msgstr "Statistics: %(updated)d updated, %(failed)d failed"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "FAIR Genomes synchronisation completed. %(summary)s"
+msgstr "FAIR Genomes synchronisation completed. %(summary)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "%(n)d statistic aggregation(s) failed: %(errors)s"
+msgstr "%(n)d statistic aggregation(s) failed: %(errors)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "FAIR Genomes synchronisation failed: %(error)s"
+msgstr "FAIR Genomes synchronisation failed: %(error)s"
+
+#: fair_genomes/admin.py
+msgid "Check and Synchronise FAIR Genomes Metadata and Statistics"
+msgstr "Check and Synchronise FAIR Genomes Metadata and Statistics"
+
+#: fair_genomes/admin.py
+msgid "Synchronise selected statistic aggregations now"
+msgstr "Synchronise selected statistic aggregations now"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Synchronised %(ok)d statistic aggregation(s), %(fail)d failed."
+msgstr "Synchronised %(ok)d statistic aggregation(s), %(fail)d failed."
+
+#: fair_genomes/admin.py
+msgid ""
+"Statistic definition was saved, but aggregation was not synchronised because "
+"FAIR_GENOMES_API_URL is not configured."
 msgstr ""
+"Statistic definition was saved, but aggregation was not synchronised because "
+"FAIR_GENOMES_API_URL is not configured."
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Statistic definition was saved, but aggregation synchronisation failed: %(error)s"
+msgstr "Statistic definition was saved, but aggregation synchronisation failed: %(error)s"
+
+#: fair_genomes/admin.py
+msgid "Statistic definition was saved and its aggregation was synchronised."
+msgstr "Statistic definition was saved and its aggregation was synchronised."
+
+#: fair_genomes/admin.py
+msgid ""
+"Statistic definition was saved and synchronised, but MOLGENIS returned no "
+"grouped values for this table and column."
+msgstr ""
+"Statistic definition was saved and synchronised, but MOLGENIS returned no "
+"grouped values for this table and column."
+
+#: fair_genomes/admin.py
+msgid "Select a dataset to filter the distribution list."
+msgstr "Select a dataset to filter the distribution list."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"contains %(count)d distribution(s) that are not yet available in the local "
+"catalogue; run \"Check and synchronise FAIR Genomes metadata\" before "
+"configuring charts for them."
+msgstr ""
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"contains %(count)d distribution(s) that are not yet available in the local "
+"catalogue; run \"Check and synchronise FAIR Genomes metadata\" before "
+"configuring charts for them."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. The live RDF "
+"source could not be checked; showing locally synchronised values."
+msgstr ""
+"DCAT Distribution whose detail page should show this chart. The live RDF "
+"source could not be checked; showing locally synchronised values."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. "
+"FAIR_GENOMES_RDF_URL is not configured; showing locally synchronised values."
+msgstr ""
+"DCAT Distribution whose detail page should show this chart. "
+"FAIR_GENOMES_RDF_URL is not configured; showing locally synchronised values."
+
+#: fair_genomes/admin.py
+msgid "MOLGENIS is currently unreachable. Showing known values."
+msgstr "MOLGENIS is currently unreachable. Showing known values."
+
+#: fair_genomes/admin.py
+msgid "Select a valid choice. That choice is not available."
+msgstr "Select a valid choice. That choice is not available."
+
+#: fair_genomes/apps.py
+msgid "FAIR Genomes Integration"
+msgstr "FAIR Genomes Integration"
+
+#: fair_genomes/models.py
+msgid "RDF metadata"
+msgstr "RDF metadata"
+
+#: fair_genomes/models.py
+msgid "Statistics"
+msgstr "Statistics"
+
+#: fair_genomes/models.py
+msgid "Never run"
+msgstr "Never run"
+
+#: fair_genomes/models.py
+msgid "Running"
+msgstr "Running"
+
+#: fair_genomes/models.py
+msgid "Source type"
+msgstr "Source type"
+
+#: fair_genomes/models.py
+msgid "Source URL"
+msgstr "Source URL"
+
+#: fair_genomes/models.py
+msgid "Last checked at"
+msgstr "Last checked at"
+
+#: fair_genomes/models.py
+msgid "Last successful sync at"
+msgstr "Last successful sync at"
+
+#: fair_genomes/models.py
+msgid "Last failed sync at"
+msgstr "Last failed sync at"
+
+#: fair_genomes/models.py
+msgid "Duration in seconds"
+msgstr "Duration in seconds"
+
+#: fair_genomes/models.py
+msgid "Summary"
+msgstr "Summary"
+
+#: fair_genomes/models.py
+msgid "Error message"
+msgstr "Error message"
+
+#: fair_genomes/models.py
+msgid "Updated at"
+msgstr "Updated at"
+
+#: fair_genomes/models.py
+msgid "FAIR Genomes Sync State"
+msgstr "FAIR Genomes Sync State"
+
+#: fair_genomes/models.py
+msgid "FAIR Genomes Sync States"
+msgstr "FAIR Genomes Sync States"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Check and Synchronise FAIR Genomes"
+msgstr "Check and Synchronise FAIR Genomes"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "FAIR Genomes freshness"
+msgstr "FAIR Genomes freshness"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last checked"
+msgstr "Last checked"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last success"
+msgstr "Last success"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last failure"
+msgstr "Last failure"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "Duration (s)"
+msgstr "Duration (s)"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "Last error:"
+msgstr "Last error:"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"Live RDF check succeeded. The source currently exposes %(live)s "
+"distribution(s); %(local)s distribution(s) are available locally for "
+"statistic definitions."
+msgstr ""
+"Live RDF check succeeded. The source currently exposes %(live)s "
+"distribution(s); %(local)s distribution(s) are available locally for "
+"statistic definitions."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"%(count)s distribution(s) from the RDF source are not yet available in the "
+"local catalogue. Run \"Check and Synchronise FAIR Genomes\" before "
+"configuring statistics for them."
+msgstr ""
+"%(count)s distribution(s) from the RDF source are not yet available in the "
+"local catalogue. Run \"Check and Synchronise FAIR Genomes\" before "
+"configuring statistics for them."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"A metadata synchronisation can remove stale local records."
+msgstr ""
+"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"A metadata synchronisation can remove stale local records."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid ""
+"The live RDF source could not be checked. The form is using locally "
+"synchronised distributions."
+msgstr ""
+"The live RDF source could not be checked. The form is using locally "
+"synchronised distributions."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid ""
+"FAIR_GENOMES_RDF_URL is not configured. The form is using locally "
+"synchronised distributions."
+msgstr ""
+"FAIR_GENOMES_RDF_URL is not configured. The form is using locally "
+"synchronised distributions."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"This will check and synchronise RDF metadata from the FAIR Data Point, then "
+"re-run active statistic aggregations from MOLGENIS GraphQL."
+msgstr ""
+"This will check and synchronise RDF metadata from the FAIR Data Point, then "
+"re-run active statistic aggregations from MOLGENIS GraphQL."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"Saving an active statistic definition also tries to synchronise that one "
+"aggregation immediately. If the live RDF source contains new distributions, "
+"run this action before configuring charts for them."
+msgstr ""
+"Saving an active statistic definition also tries to synchronise that one "
+"aggregation immediately. If the live RDF source contains new distributions, "
+"run this action before configuring charts for them."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"This may take a few seconds depending on the number of datasets and statistic "
+"definitions."
+msgstr ""
+"This may take a few seconds depending on the number of datasets and statistic "
+"definitions."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Current freshness state"
+msgstr "Current freshness state"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Check and Synchronise"
+msgstr "Check and Synchronise"
+
+#: frontend/admin.py frontend/models.py
+msgid "%(field)s (currently unavailable)"
+msgstr "%(field)s (currently unavailable)"
+
+#: frontend/admin.py frontend/models.py
+msgid "Field name"
+msgstr "Field name"
+
+#: frontend/admin.py
+msgid "Only dataset metadata fields mapped into the unified catalogue model are available."
+msgstr "Only dataset metadata fields mapped into the unified catalogue model are available."
+
+#: frontend/models.py
+msgid "Dataset metadata field used as the catalogue query parameter."
+msgstr "Dataset metadata field used as the catalogue query parameter."
+
+#: frontend/models.py
+msgid "Label"
+msgstr "Label"
+
+#: frontend/models.py
+msgid "Human-readable filter group title shown in the sidebar."
+msgstr "Human-readable filter group title shown in the sidebar."
+
+#: frontend/models.py
+msgid "Lower numbers are shown first."
+msgstr "Lower numbers are shown first."
+
+#: frontend/models.py
+msgid "Enabled"
+msgstr "Enabled"
+
+#: frontend/models.py
+msgid "Catalogue Filter Definition"
+msgstr "Catalogue Filter Definition"
+
+#: frontend/models.py
+msgid "Catalogue Filter Definitions"
+msgstr "Catalogue Filter Definitions"
+
+#: frontend/models.py
+msgid "%(field_name)s is reserved for built-in catalogue parameters."
+msgstr "%(field_name)s is reserved for built-in catalogue parameters."
 
 #: frontend/apps.py:8
-#, fuzzy
-#| msgid "Catalogue"
 msgid "Catalogue Frontend"
-msgstr "Catalogue"
+msgstr "Catalogue Frontend"
+
+#: warehouse/admin.py
+msgid "Personal info"
+msgstr "Personal info"
+
+#: warehouse/admin.py
+msgid "Staff role"
+msgstr "Staff role"
 
 #: frontend/templates/404.html:3 frontend/templates/404.html:13
 msgid "Page Not Found"
@@ -3054,9 +3409,6 @@ msgstr "Primary key definition expression"
 #~ msgid "Short machine-readable identifier, e.g. \"v6\"."
 #~ msgstr "Short machine-readable identifier, e.g. \"v6\"."
 
-#~ msgid "Label"
-#~ msgstr "Label"
-
 #~ msgid "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
 #~ msgstr "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
 
@@ -3069,9 +3421,6 @@ msgstr "Primary key definition expression"
 
 #~ msgid "Created at"
 #~ msgstr "Created at"
-
-#~ msgid "Updated at"
-#~ msgstr "Updated at"
 
 #~ msgid "Schema Version"
 #~ msgstr "Schema Version"
@@ -3400,9 +3749,6 @@ msgstr "Primary key definition expression"
 
 #~ msgid "Ticket ID"
 #~ msgstr "Ticket ID"
-
-#~ msgid "Failed"
-#~ msgstr "Failed"
 
 #~ msgid "Page navigation"
 #~ msgstr "Page navigation"

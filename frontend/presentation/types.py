@@ -96,6 +96,20 @@ class FrontendSidebarItem:
 
 
 @dataclass(slots=True)
+class FrontendFilterDefinition:
+    field_name: str
+    label: str
+    sort_order: int = 0
+
+
+@dataclass(slots=True)
+class FrontendFilterGroup:
+    title: str
+    field_name: str
+    items: list[FrontendSidebarItem]
+
+
+@dataclass(slots=True)
 class FrontendSidebarCounts:
     ready: int
     raw: int
@@ -104,13 +118,24 @@ class FrontendSidebarCounts:
 
 @dataclass(slots=True)
 class FrontendSidebarContext:
-    sidebar_keywords: list[FrontendSidebarItem]
-    sidebar_sources: list[FrontendSidebarItem]
-    sidebar_custodians: list[FrontendSidebarItem]
-    sidebar_health_categories: list[FrontendSidebarItem]
-    sidebar_themes: list[FrontendSidebarItem]
+    filter_groups: list[FrontendFilterGroup]
     sidebar_columns: list[FrontendSidebarItem]
     sidebar_counts: FrontendSidebarCounts
+
+
+@dataclass(slots=True)
+class FrontendMetadataRow:
+    field_name: str
+    semantics: str
+    label: str
+    value: Any
+
+
+@dataclass(slots=True)
+class FrontendDatasetCard:
+    dataset: FrontendDataset
+    preview_rows: list[FrontendMetadataRow]
+    can_expand: bool
 
 
 @dataclass(slots=True)

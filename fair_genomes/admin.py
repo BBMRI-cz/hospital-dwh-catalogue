@@ -31,6 +31,18 @@ _RDF_INVENTORY_CACHE_KEY_PREFIX = 'fg_rdf_inventory'
 _RDF_INVENTORY_CACHE_TTL = 300  # 5 minutes
 
 
+def _sync_report_status_label(status: str) -> str:
+    labels = {
+        'complete': _('Complete'),
+        'partial': _('Partial'),
+        'failed': _('Failed'),
+        'skipped': _('Skipped'),
+        'nothing_saved': _('Nothing saved'),
+        'unknown': _('Unknown'),
+    }
+    return str(labels.get(status, status))
+
+
 def _get_molgenis_schema() -> dict[str, list[str]]:
     """Return cached MOLGENIS schema or fetch live."""
     cached = cache.get(_SCHEMA_CACHE_KEY)
@@ -211,8 +223,9 @@ class StatDefinitionForm(forms.ModelForm):
         if rdf_status['status'] == 'available' and rdf_status['missing_local_distribution_count']:
             distribution_help_text = _(
                 'DCAT Distribution whose detail page should show this chart. '
-                'Live RDF contains %(count)d distribution(s) not yet synchronised locally; '
-                'run "Check and synchronise FAIR Genomes metadata" before configuring them.'
+                'The RDF source contains %(count)d distribution(s) that are not yet available '
+                'in the local catalogue; run "Check and synchronise FAIR Genomes metadata" '
+                'before configuring charts for them.'
             ) % {'count': rdf_status['missing_local_distribution_count']}
         elif rdf_status['status'] == 'unavailable':
             distribution_help_text = _(
@@ -361,6 +374,102 @@ class StatDefinitionAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('distribution__dataset_name')
 
+    def _stat_result_exists(self, obj: StatDefinition) -> bool:
+        from fair_genomes.models import StatResult
+
+        return (
+            StatResult.objects.using('fair_genomes_db')
+            .filter(table_name=obj.molgenis_table, column_name=obj.molgenis_column)
+            .exists()
+        )
+
+    def _should_sync_saved_stat_definition(self, obj: StatDefinition, form, change: bool) -> bool:
+        if not obj.is_active:
+            return False
+        if not change:
+            return True
+
+        changed_data = set(getattr(form, 'changed_data', []) or [])
+        sync_relevant_fields = {'distribution', 'molgenis_table', 'molgenis_column', 'is_active'}
+        return bool(changed_data & sync_relevant_fields) or not self._stat_result_exists(obj)
+
+    def _sync_saved_stat_definition(self, request, obj: StatDefinition) -> None:
+        from fair_genomes.models import StatResult
+        from fair_genomes.services.fair_genomes_service import FairGenomesService
+
+        api_url = getattr(settings, 'FAIR_GENOMES_API_URL', '')
+        if not api_url:
+            messages.warning(
+                request,
+                _(
+                    'Statistic definition was saved, but aggregation was not synchronised '
+                    'because FAIR_GENOMES_API_URL is not configured.'
+                ),
+            )
+            return
+
+        started_at = time.monotonic()
+        mark_started(FairGenomesSyncState.SourceType.STATISTICS, source_url=api_url)
+        success, error = FairGenomesService().sync_single_stat(
+            obj.molgenis_table,
+            obj.molgenis_column,
+        )
+        duration = round(time.monotonic() - started_at, 2)
+        summary = stats_report_summary(
+            {
+                'updated': 1 if success else 0,
+                'failed': 0 if success else 1,
+                'errors': [] if success else [error],
+            }
+        )
+
+        if not success:
+            mark_failed(
+                FairGenomesSyncState.SourceType.STATISTICS,
+                source_url=api_url,
+                duration_seconds=duration,
+                summary=summary,
+                error_message=error,
+            )
+            messages.warning(
+                request,
+                _(
+                    'Statistic definition was saved, but aggregation synchronisation failed: %(error)s'
+                )
+                % {'error': error},
+            )
+            return
+
+        mark_success(
+            FairGenomesSyncState.SourceType.STATISTICS,
+            source_url=api_url,
+            duration_seconds=duration,
+            summary=summary,
+        )
+        result = (
+            StatResult.objects.using('fair_genomes_db')
+            .filter(table_name=obj.molgenis_table, column_name=obj.molgenis_column)
+            .first()
+        )
+        if result and result.distribution:
+            messages.success(
+                request,
+                _('Statistic definition was saved and its aggregation was synchronised.'),
+            )
+        else:
+            messages.warning(
+                request,
+                _(
+                    'Statistic definition was saved and synchronised, but MOLGENIS returned '
+                    'no grouped values for this table and column.'
+                ),
+            )
+
+    def save_model(self, request, obj, form, change):  # type: ignore[override]
+        super().save_model(request, obj, form, change)
+        if self._should_sync_saved_stat_definition(obj, form, change):
+            self._sync_saved_stat_definition(request, obj)
+
     # All staff can fully manage stat definitions without needing explicit
     # model-level permissions assigned by a superuser.
     def has_module_permission(self, request):  # type: ignore[override]
@@ -424,10 +533,17 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 stats = report.get('stats')
                 duration = report.get('duration_seconds', '?')
 
-                summary_parts = [f'Status: {status}', f'Duration: {duration}s']
+                summary_parts = [
+                    _('Status: %(status)s') % {'status': _sync_report_status_label(status)},
+                    _('Duration: %(duration)s s') % {'duration': duration},
+                ]
                 if stats:
                     summary_parts.append(
-                        f'Statistics: {stats["updated"]} updated, {stats["failed"]} failed'
+                        _('Statistics: %(updated)d updated, %(failed)d failed')
+                        % {
+                            'updated': stats['updated'],
+                            'failed': stats['failed'],
+                        }
                     )
                 message = _('FAIR Genomes synchronisation completed. %(summary)s') % {
                     'summary': ' | '.join(summary_parts)
@@ -441,7 +557,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 if stats and stats['failed']:
                     messages.warning(
                         request,
-                        _('%(n)d stat aggregation(s) failed: %(errors)s')
+                        _('%(n)d statistic aggregation(s) failed: %(errors)s')
                         % {
                             'n': stats['failed'],
                             'errors': '; '.join(stats['errors'][:5]),
@@ -466,7 +582,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
             },
         )
 
-    @admin.action(description=_('Sync selected stat aggregations now'))
+    @admin.action(description=_('Synchronise selected statistic aggregations now'))
     def sync_selected_stats(self, request, queryset):
         """Re-run the _groupBy aggregation for selected StatDefinitions."""
         from fair_genomes.services.fair_genomes_service import FairGenomesService
@@ -513,11 +629,19 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 summary=summary,
             )
 
-        messages.success(
-            request,
-            _('Synchronised %(ok)d statistic(s), %(fail)d failed.')
-            % {'ok': ok_count, 'fail': fail_count},
-        )
+        message_params = {'ok': ok_count, 'fail': fail_count}
+        if fail_count:
+            messages.warning(
+                request,
+                _('Synchronised %(ok)d statistic aggregation(s), %(fail)d failed.')
+                % message_params,
+            )
+        else:
+            messages.success(
+                request,
+                _('Synchronised %(ok)d statistic aggregation(s), %(fail)d failed.')
+                % message_params,
+            )
 
 
 @admin.register(FairGenomesSyncState)

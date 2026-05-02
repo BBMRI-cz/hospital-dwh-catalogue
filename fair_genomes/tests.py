@@ -9,7 +9,12 @@ calls are made.
 import os
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.contrib.admin.sites import AdminSite
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
+from django.utils.translation import override
+
+from fair_genomes.admin import StatDefinitionAdmin
 
 from .models import (
     Agent,
@@ -356,7 +361,8 @@ class FairGenomesSyncStateModelTest(TestCase):
             source_type=FairGenomesSyncState.SourceType.RDF_METADATA,
             status=FairGenomesSyncState.Status.SUCCESS,
         )
-        self.assertIn('RDF metadata', str(state))
+        with override('en'):
+            self.assertIn('RDF metadata', str(state))
 
 
 class SyncStatsTest(TestCase):
@@ -531,6 +537,85 @@ class StatDefinitionModelTest(TestCase):
             distribution_id='DIST_X',
         )
         self.assertEqual(str(sd), 'seq.col → DIST_X')
+
+
+class StatDefinitionAdminSaveTest(TestCase):
+    """Tests for save-time statistic aggregation in Django admin."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        cp = ContactPoint.objects.using('fair_genomes_db').create(email='test@example.org')
+        agent = Agent.objects.using('fair_genomes_db').create(name='test-agent')
+        Catalog.objects.using('fair_genomes_db').create(
+            name='test-cat',
+            title='Test Catalog',
+            description='Description',
+            applicable_legislation='http://example.org/legislation',
+        )
+        Dataset.objects.using('fair_genomes_db').create(
+            name='test-ds',
+            title='Test Dataset',
+            description='Description',
+            access_rights='public',
+            applicable_legislation='http://example.org/legislation',
+            health_category='genomics',
+            catalog_id='test-cat',
+            contact_point=cp,
+            hdab=agent,
+        )
+        self.distribution = Distribution.objects.using('fair_genomes_db').create(
+            name='DIST_TEST',
+            title='Test Distribution',
+            access_url='http://example.org/dist',
+            applicable_legislation='http://example.org/legislation',
+            dataset_name_id='test-ds',
+        )
+        self.admin = StatDefinitionAdmin(StatDefinition, AdminSite())
+
+    def _request(self):
+        request = RequestFactory().post('/admin/fair_genomes/statdefinition/add/')
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        request.user = MagicMock(is_staff=True)
+        return request
+
+    def _make_groupby_response(self):
+        response = MagicMock()
+        response.raise_for_status.return_value = None
+        response.json.return_value = {
+            'data': {
+                'Sequencing_groupBy': [
+                    {'count': 17, 'sequencinginstrumentmodel': {'value': 'MiSeq'}},
+                    {'count': 5, 'sequencinginstrumentmodel': {'value': 'NovaSeq'}},
+                ]
+            }
+        }
+        return response
+
+    @override_settings(FAIR_GENOMES_API_URL='http://mock/graphql', FAIR_GENOMES_API_TOKEN='tok')
+    @patch('fair_genomes.services.stats.requests.post')
+    def test_save_model_synchronises_new_active_stat_definition(self, mock_post):
+        mock_post.return_value = self._make_groupby_response()
+        definition = StatDefinition(
+            distribution=self.distribution,
+            molgenis_table='sequencing',
+            molgenis_column='sequencinginstrumentmodel',
+            is_active=True,
+        )
+
+        self.admin.save_model(self._request(), definition, form=MagicMock(), change=False)
+
+        result = StatResult.objects.using('fair_genomes_db').get(
+            table_name='sequencing',
+            column_name='sequencinginstrumentmodel',
+        )
+        self.assertEqual(result.distribution, {'MiSeq': 17, 'NovaSeq': 5})
+        state = FairGenomesSyncState.objects.using('fair_genomes_db').get(
+            source_type=FairGenomesSyncState.SourceType.STATISTICS,
+        )
+        self.assertEqual(state.status, FairGenomesSyncState.Status.SUCCESS)
+        self.assertEqual(state.summary['updated'], 1)
 
 
 # ---------------------------------------------------------------------------

@@ -7,11 +7,19 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache as django_cache
+from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
-from frontend.presentation.filters import FilterState, build_sidebar_context
+from frontend.models import CatalogueFilterDefinition
+from frontend.presentation.filters import (
+    FilterState,
+    build_dataset_cards,
+    build_sidebar_context,
+    default_filter_definitions,
+    load_enabled_filter_definitions,
+)
 from frontend.presentation.mapping import (
     build_chart_groups,
     build_dataset_dcat_rows,
@@ -98,6 +106,51 @@ def _mock_schema() -> SchemaRegistryPayload:
             'cardinality': '1',
             'description': 'Information that indicates whether the resource is open data.',
         },
+        'dcat:keyword': {
+            'prefix': 'dcat',
+            'label': 'Keyword',
+            'local_name': 'keyword',
+            'uri': 'http://www.w3.org/ns/dcat#keyword',
+            'requirement': 'mandatory',
+            'cardinality': '1..*',
+            'description': 'A keyword or tag describing the Dataset.',
+        },
+        'dct:source': {
+            'prefix': 'dct',
+            'label': 'Source',
+            'local_name': 'source',
+            'uri': 'http://purl.org/dc/terms/source',
+            'requirement': 'optional',
+            'cardinality': '0..1',
+            'description': 'Related source resource.',
+        },
+        'geodcatap:custodian': {
+            'prefix': 'geodcatap',
+            'label': 'Custodian',
+            'local_name': 'custodian',
+            'uri': 'http://data.europa.eu/930/custodian',
+            'requirement': 'optional',
+            'cardinality': '0..1',
+            'description': 'Agent responsible for maintaining the Dataset.',
+        },
+        'healthdcatap:healthCategory': {
+            'prefix': 'healthdcatap',
+            'label': 'Health Category',
+            'local_name': 'healthCategory',
+            'uri': 'http://healthdcat-ap.example/healthCategory',
+            'requirement': 'mandatory',
+            'cardinality': '1..*',
+            'description': 'Health category of the Dataset.',
+        },
+        'dcat:theme': {
+            'prefix': 'dcat',
+            'label': 'Theme',
+            'local_name': 'theme',
+            'uri': 'http://www.w3.org/ns/dcat#theme',
+            'requirement': 'mandatory',
+            'cardinality': '1..*',
+            'description': 'Theme of the Dataset.',
+        },
     }
 
 
@@ -177,6 +230,34 @@ _EXPORT_SERVICE_PATH = 'frontend.views.UnifiedCatalogService'
 _DATASET_LOOKUP_PATH = 'frontend.presentation.context.get_cached_dataset'
 _SCHEMA_LOOKUP_PATH = 'frontend.presentation.context.get_cached_schema_json'
 _DISTRIBUTION_LOOKUP_PATH = 'frontend.presentation.context.get_cached_distribution_lookup'
+
+
+class CatalogueFilterDefinitionModelTest(TestCase):
+    databases = {'default'}
+
+    def test_default_filter_definitions_are_seeded(self):
+        field_names = set(CatalogueFilterDefinition.objects.values_list('field_name', flat=True))
+
+        self.assertTrue(
+            {'keywords', 'custodian', 'health_category', 'source', 'theme'} <= field_names
+        )
+
+    def test_reserved_field_names_are_rejected(self):
+        definition = CatalogueFilterDefinition(
+            field_name='q',
+            label='Reserved',
+            sort_order=1,
+        )
+
+        with self.assertRaises(ValidationError):
+            definition.full_clean()
+
+    def test_disabled_filters_are_not_loaded(self):
+        CatalogueFilterDefinition.objects.filter(field_name='theme').update(is_enabled=False)
+
+        definitions = load_enabled_filter_definitions(_mock_schema())
+
+        self.assertNotIn('theme', {definition.field_name for definition in definitions})
 
 
 class CatalogueIndexViewTest(TestCase):
@@ -332,9 +413,65 @@ class CatalogueIndexViewTest(TestCase):
         response = self.client.get(reverse('frontend:catalogue'), {'theme': theme_value})
 
         self.assertEqual(response.status_code, 200)
-        from django.utils.translation import gettext
+        self.assertContains(response, f'title="Theme: {theme_value}"')
 
-        self.assertContains(response, f'title="{gettext("Theme")}: {theme_value}"')
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_admin_enabled_metadata_field_filters_without_template_change(self, mock_cls):
+        CatalogueFilterDefinition.objects.create(
+            field_name='access_rights',
+            label='Access Rights',
+            sort_order=5,
+            is_enabled=True,
+        )
+        ds1 = _make_test_dataset(name='ds1', title='Public Dataset', access_rights='PUBLIC')
+        ds2 = _make_test_dataset(name='ds2', title='Restricted Dataset', access_rights='RESTRICTED')
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [ds1, ds2]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'), {'access_rights': 'PUBLIC'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Public Dataset')
+        self.assertNotContains(response, 'Restricted Dataset')
+
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_disabled_filter_is_not_rendered_or_used_for_preview(self, mock_cls):
+        CatalogueFilterDefinition.objects.filter(field_name='theme').update(is_enabled=False)
+        dataset = _make_test_dataset(
+            theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
+        )
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [dataset]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(
+            'theme',
+            {group.field_name for group in response.context['filter_groups']},
+        )
+        card = response.context['page_obj'].object_list[0]
+        self.assertNotIn('theme', {row.field_name for row in card.preview_rows})
+
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_preview_expand_is_disabled_when_no_filterable_metadata_is_enabled(self, mock_cls):
+        CatalogueFilterDefinition.objects.update(is_enabled=False)
+        dataset = _make_test_dataset()
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [dataset]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('frontend:catalogue'))
+
+        self.assertEqual(response.status_code, 200)
+        card = response.context['page_obj'].object_list[0]
+        self.assertFalse(card.can_expand)
+        self.assertEqual(card.preview_rows, [])
 
 
 class DatasetDetailViewTest(TestCase):
@@ -1135,6 +1272,25 @@ class MetadataApiViewTest(TestCase):
 
 
 class SidebarContextHelperTest(SimpleTestCase):
+    def test_build_dataset_cards_uses_enabled_filter_definitions_for_preview(self):
+        schema = _mock_schema()
+        definitions = default_filter_definitions(schema)
+        dataset = dataset_to_view_model(
+            _make_test_dataset(
+                keyword='genetics,biobank',
+                custodian='AGENT_DATA_STEWARD',
+                theme='http://publications.europa.eu/resource/authority/data-theme/HEAL',
+            )
+        )
+
+        cards = build_dataset_cards([dataset], schema_json=schema, filter_definitions=definitions)
+
+        self.assertTrue(cards[0].can_expand)
+        self.assertEqual(
+            {row.field_name for row in cards[0].preview_rows},
+            {'keywords', 'custodian', 'health_category', 'theme'},
+        )
+
     @patch('frontend.presentation.filters.UnifiedCatalogService.build_column_counter')
     def test_build_sidebar_context_returns_typed_sidebar_payloads(self, mock_build_column_counter):
         warehouse_dataset = _make_test_dataset(
@@ -1155,22 +1311,25 @@ class SidebarContextHelperTest(SimpleTestCase):
         fair_genomes_dataset.distributions[0].name = 'fg-dist'
 
         mock_build_column_counter.return_value = Counter({'patient_id': 2})
+        schema = _mock_schema()
+        filter_definitions = default_filter_definitions(schema)
+        filter_state = FilterState.from_query_params(
+            QueryDict(
+                'keywords=patient&custodian=AGENT_DATA_STEWARD&health_category=patient_data'
+                '&theme=http://publications.europa.eu/resource/authority/data-theme/HEAL'
+                '&column=patient_id'
+            ),
+            filter_definitions=filter_definitions,
+        )
 
         context = build_sidebar_context(
             [
                 dataset_to_view_model(warehouse_dataset),
                 dataset_to_view_model(fair_genomes_dataset),
             ],
-            filter_state=FilterState(
-                q='',
-                status=set(),
-                keywords={'patient'},
-                source=set(),
-                custodian={'AGENT_DATA_STEWARD'},
-                health_category={'patient_data'},
-                theme={'http://publications.europa.eu/resource/authority/data-theme/HEAL'},
-                column={'patient_id'},
-            ),
+            filter_state=filter_state,
+            schema_json=schema,
+            filter_definitions=filter_definitions,
         )
 
         mock_build_column_counter.assert_called_once_with(
@@ -1178,16 +1337,19 @@ class SidebarContextHelperTest(SimpleTestCase):
             {'wh-dist': 'warehouse-dataset'},
         )
 
-        patient_keyword = next(item for item in context.sidebar_keywords if item.value == 'patient')
+        filter_groups = {group.field_name: group for group in context.filter_groups}
+        patient_keyword = next(
+            item for item in filter_groups['keywords'].items if item.value == 'patient'
+        )
         custodian = next(
-            item for item in context.sidebar_custodians if item.value == 'AGENT_DATA_STEWARD'
+            item for item in filter_groups['custodian'].items if item.value == 'AGENT_DATA_STEWARD'
         )
         health_category = next(
-            item for item in context.sidebar_health_categories if item.value == 'patient_data'
+            item for item in filter_groups['health_category'].items if item.value == 'patient_data'
         )
         theme = next(
             item
-            for item in context.sidebar_themes
+            for item in filter_groups['theme'].items
             if item.value == 'http://publications.europa.eu/resource/authority/data-theme/HEAL'
         )
         column = next(item for item in context.sidebar_columns if item.value == 'patient_id')
@@ -1267,8 +1429,12 @@ class AuthGuardHelperTest(SimpleTestCase):
 class SchemaPayloadHelperTest(SimpleTestCase):
     def test_build_dataset_dcat_rows_uses_typed_schema_payload(self):
         dataset = dataset_to_view_model(_make_test_dataset())
+        schema = {
+            'dct:title': _mock_schema()['dct:title'],
+            'dct:accessRights': _mock_schema()['dct:accessRights'],
+        }
 
-        rows = build_dataset_dcat_rows(_mock_schema(), dataset)
+        rows = build_dataset_dcat_rows(schema, dataset)
 
         self.assertEqual(
             rows,

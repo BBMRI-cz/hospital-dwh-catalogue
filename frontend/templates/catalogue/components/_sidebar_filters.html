@@ -15,12 +15,11 @@
       {% include "includes/_search_input.html" with search_id="sidebar-search" search_name="q" search_value=filter_params.q search_placeholder=sidebar_search_placeholder search_input_class="w-full" only %}
     </div>
 
-    {% trans "Keywords" as t_kw %}{% trans "Custodian" as t_custodian %}{% trans "Health Category" as t_hc %}{% trans "Source" as t_src %}{% trans "Theme" as t_theme %}{% trans "Distribution Columns" as t_cols %}
-    {% include "includes/_filter_group.html" with title=t_kw items=sidebar_keywords list_id='kw-list' field_name='keywords' only %}
-    {% include "includes/_filter_group.html" with title=t_custodian items=sidebar_custodians list_id='custodian-list' field_name='custodian' only %}
-    {% include "includes/_filter_group.html" with title=t_hc items=sidebar_health_categories list_id='hc-list' field_name='health_category' only %}
-    {% include "includes/_filter_group.html" with title=t_src items=sidebar_sources list_id='src-list' field_name='source' only %}
-    {% include "includes/_filter_group.html" with title=t_theme items=sidebar_themes list_id='theme-list' field_name='theme' only %}
+    {% for group in filter_groups %}
+    {% include "includes/_filter_group.html" with title=group.title items=group.items list_id=group.field_name field_name=group.field_name only %}
+    {% endfor %}
+
+    {% trans "Distribution Columns" as t_cols %}
     {% include "includes/_filter_group.html" with title=t_cols items=sidebar_columns list_id='col-list' field_name='column' only %}
 
   </div>

@@ -13,7 +13,13 @@ from frontend.presentation.cache import (
     get_cached_distribution_lookup,
     get_cached_schema_json,
 )
-from frontend.presentation.filters import FilterState, build_sidebar_context, filter_datasets
+from frontend.presentation.filters import (
+    FilterState,
+    build_dataset_cards,
+    build_sidebar_context,
+    filter_datasets,
+    load_enabled_filter_definitions,
+)
 from frontend.presentation.mapping import (
     build_chart_groups,
     build_dataset_dcat_rows,
@@ -36,25 +42,38 @@ def build_catalogue_index_context(request, *, service: UnifiedCatalogService | N
     catalog_service = service or UnifiedCatalogService()
     snapshot = get_cached_catalogue_snapshot(service=catalog_service)
     schema_json = get_cached_schema_json(service=catalog_service)
-    filter_state = FilterState.from_query_params(request.GET)
+    filter_definitions = load_enabled_filter_definitions(schema_json)
+    filter_state = FilterState.from_query_params(
+        request.GET,
+        filter_definitions=filter_definitions,
+    )
 
-    filtered = filter_datasets(snapshot.datasets, filter_state, service=catalog_service)
-    paginator = Paginator(filtered, settings.CATALOGUE_PAGE_SIZE)
+    filtered = filter_datasets(
+        snapshot.datasets,
+        filter_state,
+        schema_json=schema_json,
+        filter_definitions=filter_definitions,
+        service=catalog_service,
+    )
+    cards = build_dataset_cards(
+        filtered,
+        schema_json=schema_json,
+        filter_definitions=filter_definitions,
+    )
+    paginator = Paginator(cards, settings.CATALOGUE_PAGE_SIZE)
     page_obj = paginator.get_page(request.GET.get('page', 1))
     sidebar_context = build_sidebar_context(
         filtered,
         filter_state=filter_state,
+        schema_json=schema_json,
+        filter_definitions=filter_definitions,
         service=catalog_service,
     )
 
     return {
         'page_obj': page_obj,
         'filter_params': filter_state,
-        'sidebar_keywords': sidebar_context.sidebar_keywords,
-        'sidebar_sources': sidebar_context.sidebar_sources,
-        'sidebar_custodians': sidebar_context.sidebar_custodians,
-        'sidebar_health_categories': sidebar_context.sidebar_health_categories,
-        'sidebar_themes': sidebar_context.sidebar_themes,
+        'filter_groups': sidebar_context.filter_groups,
         'sidebar_columns': sidebar_context.sidebar_columns,
         'sidebar_counts': sidebar_context.sidebar_counts,
         'total_count': len(snapshot.datasets),

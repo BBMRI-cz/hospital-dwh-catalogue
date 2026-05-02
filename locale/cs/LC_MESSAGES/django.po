@@ -26,7 +26,7 @@ msgstr "Angličtina"
 
 #: fair_genomes/admin.py:67 fair_genomes/models.py:137
 msgid "MOLGENIS table"
-msgstr ""
+msgstr "Tabulka MOLGENIS"
 
 #: fair_genomes/admin.py:68 fair_genomes/models.py:138
 #: fair_genomes/models.py:191
@@ -35,43 +35,43 @@ msgstr "Název tabulky v MOLGENIS, např. \"sequencing\""
 
 #: fair_genomes/admin.py:80 fair_genomes/models.py:142
 msgid "MOLGENIS column"
-msgstr ""
+msgstr "Sloupec MOLGENIS"
 
 #: fair_genomes/admin.py:81
 msgid "Column name within the table."
-msgstr ""
+msgstr "Název sloupce v tabulce."
 
 #: fair_genomes/admin.py:145
 msgid "Only superusers can trigger a full sync."
-msgstr ""
+msgstr "Plnou synchronizaci mohou spustit pouze superuživatelé."
 
 #: fair_genomes/admin.py:165
 #, python-format
 msgid "Full sync completed. %(summary)s"
-msgstr ""
+msgstr "Plná synchronizace byla dokončena. %(summary)s"
 
 #: fair_genomes/admin.py:171
 #, python-format
 msgid "Full sync failed: %(error)s"
-msgstr ""
+msgstr "Plná synchronizace selhala: %(error)s"
 
 #: fair_genomes/admin.py:179
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:4
 msgid "Full Sync (RDF + Stats)"
-msgstr ""
+msgstr "Plná synchronizace (RDF + statistiky)"
 
 #: fair_genomes/admin.py:182
 msgid "Sync selected stat aggregations now"
-msgstr ""
+msgstr "Synchronizovat vybrané statistické agregace"
 
 #: fair_genomes/admin.py:189
 msgid "FAIR_GENOMES_API_URL is not configured."
-msgstr ""
+msgstr "FAIR_GENOMES_API_URL není nastavena."
 
 #: fair_genomes/admin.py:204
 #, python-format
 msgid "Synced %(ok)d stats, %(fail)d failed."
-msgstr ""
+msgstr "Synchronizováno %(ok)d statistik, %(fail)d selhalo."
 
 #: fair_genomes/apps.py:10
 msgid "Fair Genomes Integration"
@@ -129,31 +129,27 @@ msgstr "Distribuce"
 
 #: fair_genomes/models.py:133
 msgid "DCAT Distribution whose detail page should show this chart."
-msgstr ""
+msgstr "Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf."
 
 #: fair_genomes/models.py:143
-#, fuzzy
-#| msgid "Unqualified column name, e.g. \"sequencinginstrumentmodel\""
 msgid "Column name within the table, e.g. \"sequencinginstrumentmodel\""
-msgstr "Nekvalifikovaný název sloupce, např. \"sequencinginstrumentmodel\""
+msgstr "Název sloupce v tabulce, např. \"sequencinginstrumentmodel\""
 
 #: fair_genomes/models.py:149
-#, fuzzy
-#| msgid "Display Order"
 msgid "Display label"
-msgstr "Pořadí zobrazení"
+msgstr "Zobrazený popisek"
 
 #: fair_genomes/models.py:150
 msgid "Optional label for the chart. If blank, \"table.column\" is used."
-msgstr ""
+msgstr "Volitelný popisek grafu. Pokud je prázdný, použije se \"table.column\"."
 
 #: fair_genomes/models.py:154
 msgid "Sort order"
-msgstr ""
+msgstr "Pořadí řazení"
 
 #: fair_genomes/models.py:155
 msgid "Lower numbers are shown first on the distribution page."
-msgstr ""
+msgstr "Nižší čísla se na stránce distribuce zobrazují jako první."
 
 #: fair_genomes/models.py:159
 msgid "Active"
@@ -161,19 +157,15 @@ msgstr "Aktivní"
 
 #: fair_genomes/models.py:160
 msgid "Inactive definitions are not synced or displayed."
-msgstr ""
+msgstr "Neaktivní definice se nesynchronizují ani nezobrazují."
 
 #: fair_genomes/models.py:166
-#, fuzzy
-#| msgid "PK Definition"
 msgid "Stat Definition"
-msgstr "Definice PK"
+msgstr "Definice statistiky"
 
 #: fair_genomes/models.py:167
-#, fuzzy
-#| msgid "PK Definition"
 msgid "Stat Definitions"
-msgstr "Definice PK"
+msgstr "Definice statistik"
 
 #: fair_genomes/models.py:190
 msgid "Table name"
@@ -189,7 +181,7 @@ msgstr "Nekvalifikovaný název sloupce, např. \"sequencinginstrumentmodel\""
 
 #: fair_genomes/models.py:202
 msgid "JSON object mapping each distinct value to its record count"
-msgstr ""
+msgstr "Objekt JSON mapující každou jedinečnou hodnotu na počet záznamů"
 
 #: fair_genomes/models.py:207
 msgid "Last synced"
@@ -205,33 +197,395 @@ msgstr "Výsledky statistik"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html:9
 msgid "Full Resync (RDF + Stats)"
-msgstr ""
+msgstr "Plná resynchronizace (RDF + statistiky)"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:8
 msgid ""
 "This will re-sync all RDF metadata from the FAIR Data Point and re-run all "
 "active stat aggregations from MOLGENIS GraphQL."
 msgstr ""
+"Tato akce znovu synchronizuje všechna metadata RDF z FAIR Data Point a "
+"znovu spustí všechny aktivní statistické agregace z MOLGENIS GraphQL."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:9
 msgid ""
 "This may take a few seconds depending on the number of datasets and stat "
 "definitions."
-msgstr ""
+msgstr "Může to trvat několik sekund podle počtu datových sad a definic statistik."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:13
 msgid "Run Full Sync"
-msgstr ""
+msgstr "Spustit plnou synchronizaci"
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html:14
 msgid "Cancel"
+msgstr "Zrušit"
+
+#: fair_genomes/admin.py
+msgid "Complete"
+msgstr "Dokončeno"
+
+#: fair_genomes/admin.py
+msgid "Partial"
+msgstr "Částečně dokončeno"
+
+#: fair_genomes/admin.py fair_genomes/models.py
+msgid "Failed"
+msgstr "Selhalo"
+
+#: fair_genomes/admin.py fair_genomes/models.py
+msgid "Skipped"
+msgstr "Přeskočeno"
+
+#: fair_genomes/admin.py
+msgid "Nothing saved"
+msgstr "Nic nebylo uloženo"
+
+#: fair_genomes/admin.py
+msgid "Only staff users can trigger FAIR Genomes synchronisation."
+msgstr "Synchronizaci FAIR Genomes mohou spustit pouze staff uživatelé."
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Status: %(status)s"
+msgstr "Stav: %(status)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Duration: %(duration)s s"
+msgstr "Doba trvání: %(duration)s s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Statistics: %(updated)d updated, %(failed)d failed"
+msgstr "Statistiky: %(updated)d aktualizováno, %(failed)d selhalo"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "FAIR Genomes synchronisation completed. %(summary)s"
+msgstr "Synchronizace FAIR Genomes byla dokončena. %(summary)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "%(n)d statistic aggregation(s) failed: %(errors)s"
+msgstr "%(n)d statistických agregací selhalo: %(errors)s"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "FAIR Genomes synchronisation failed: %(error)s"
+msgstr "Synchronizace FAIR Genomes selhala: %(error)s"
+
+#: fair_genomes/admin.py
+msgid "Check and Synchronise FAIR Genomes Metadata and Statistics"
+msgstr "Zkontrolovat a synchronizovat metadata a statistiky FAIR Genomes"
+
+#: fair_genomes/admin.py
+msgid "Synchronise selected statistic aggregations now"
+msgstr "Synchronizovat vybrané statistické agregace"
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Synchronised %(ok)d statistic aggregation(s), %(fail)d failed."
+msgstr "Synchronizováno %(ok)d statistických agregací, %(fail)d selhalo."
+
+#: fair_genomes/admin.py
+msgid ""
+"Statistic definition was saved, but aggregation was not synchronised because "
+"FAIR_GENOMES_API_URL is not configured."
 msgstr ""
+"Definice statistiky byla uložena, ale agregace nebyla synchronizována, "
+"protože FAIR_GENOMES_API_URL není nastavena."
+
+#: fair_genomes/admin.py
+#, python-format
+msgid "Statistic definition was saved, but aggregation synchronisation failed: %(error)s"
+msgstr "Definice statistiky byla uložena, ale synchronizace agregace selhala: %(error)s"
+
+#: fair_genomes/admin.py
+msgid "Statistic definition was saved and its aggregation was synchronised."
+msgstr "Definice statistiky byla uložena a její agregace byla synchronizována."
+
+#: fair_genomes/admin.py
+msgid ""
+"Statistic definition was saved and synchronised, but MOLGENIS returned no "
+"grouped values for this table and column."
+msgstr ""
+"Definice statistiky byla uložena a synchronizována, ale MOLGENIS nevrátil "
+"žádné seskupené hodnoty pro tuto tabulku a sloupec."
+
+#: fair_genomes/admin.py
+msgid "Select a dataset to filter the distribution list."
+msgstr "Vyberte datovou sadu pro filtrování seznamu distribucí."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"contains %(count)d distribution(s) that are not yet available in the local "
+"catalogue; run \"Check and synchronise FAIR Genomes metadata\" before "
+"configuring charts for them."
+msgstr ""
+"Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf. V "
+"lokálním katalogu zatím chybí %(count)d distribucí ze zdroje RDF; před "
+"konfigurací jejich grafů spusťte \"Zkontrolovat a synchronizovat metadata "
+"FAIR Genomes\"."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. The live RDF "
+"source could not be checked; showing locally synchronised values."
+msgstr ""
+"Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf. Zdroj "
+"RDF se nepodařilo zkontrolovat; zobrazují se lokálně synchronizované "
+"hodnoty."
+
+#: fair_genomes/admin.py
+msgid ""
+"DCAT Distribution whose detail page should show this chart. "
+"FAIR_GENOMES_RDF_URL is not configured; showing locally synchronised values."
+msgstr ""
+"Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf. "
+"FAIR_GENOMES_RDF_URL není nastavena; zobrazují se lokálně synchronizované "
+"hodnoty."
+
+#: fair_genomes/admin.py
+msgid "MOLGENIS is currently unreachable. Showing known values."
+msgstr "MOLGENIS je momentálně nedostupný. Zobrazují se známé hodnoty."
+
+#: fair_genomes/admin.py
+msgid "Select a valid choice. That choice is not available."
+msgstr "Vyberte platnou možnost. Tato možnost není dostupná."
+
+#: fair_genomes/apps.py
+msgid "FAIR Genomes Integration"
+msgstr "Integrace FAIR Genomes"
+
+#: fair_genomes/models.py
+msgid "RDF metadata"
+msgstr "Metadata RDF"
+
+#: fair_genomes/models.py
+msgid "Statistics"
+msgstr "Statistiky"
+
+#: fair_genomes/models.py
+msgid "Never run"
+msgstr "Dosud nespuštěno"
+
+#: fair_genomes/models.py
+msgid "Running"
+msgstr "Probíhá"
+
+#: fair_genomes/models.py
+msgid "Source type"
+msgstr "Typ zdroje"
+
+#: fair_genomes/models.py
+msgid "Source URL"
+msgstr "URL zdroje"
+
+#: fair_genomes/models.py
+msgid "Last checked at"
+msgstr "Naposledy zkontrolováno"
+
+#: fair_genomes/models.py
+msgid "Last successful sync at"
+msgstr "Poslední úspěšná synchronizace"
+
+#: fair_genomes/models.py
+msgid "Last failed sync at"
+msgstr "Poslední neúspěšná synchronizace"
+
+#: fair_genomes/models.py
+msgid "Duration in seconds"
+msgstr "Doba trvání v sekundách"
+
+#: fair_genomes/models.py
+msgid "Summary"
+msgstr "Souhrn"
+
+#: fair_genomes/models.py
+msgid "Error message"
+msgstr "Chybová zpráva"
+
+#: fair_genomes/models.py
+msgid "Updated at"
+msgstr "Aktualizováno"
+
+#: fair_genomes/models.py
+msgid "FAIR Genomes Sync State"
+msgstr "Stav synchronizace FAIR Genomes"
+
+#: fair_genomes/models.py
+msgid "FAIR Genomes Sync States"
+msgstr "Stavy synchronizace FAIR Genomes"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Check and Synchronise FAIR Genomes"
+msgstr "Zkontrolovat a synchronizovat FAIR Genomes"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "FAIR Genomes freshness"
+msgstr "Aktuálnost FAIR Genomes"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last checked"
+msgstr "Poslední kontrola"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last success"
+msgstr "Poslední úspěch"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Last failure"
+msgstr "Poslední selhání"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "Duration (s)"
+msgstr "Doba trvání (s)"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid "Last error:"
+msgstr "Poslední chyba:"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"Live RDF check succeeded. The source currently exposes %(live)s "
+"distribution(s); %(local)s distribution(s) are available locally for "
+"statistic definitions."
+msgstr ""
+"Kontrola zdroje RDF proběhla úspěšně. Zdroj aktuálně poskytuje %(live)s "
+"distribucí; %(local)s distribucí je lokálně dostupných pro definice "
+"statistik."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"%(count)s distribution(s) from the RDF source are not yet available in the "
+"local catalogue. Run \"Check and Synchronise FAIR Genomes\" before "
+"configuring statistics for them."
+msgstr ""
+"V lokálním katalogu zatím chybí %(count)s distribucí ze zdroje RDF. Před "
+"konfigurací jejich statistik spusťte \"Zkontrolovat a synchronizovat FAIR "
+"Genomes\"."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+#, python-format
+msgid ""
+"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"A metadata synchronisation can remove stale local records."
+msgstr ""
+"%(count)s lokálních distribucí nebylo nalezeno v uloženém výsledku kontroly "
+"zdroje RDF. Synchronizace metadat může odstranit zastaralé lokální záznamy."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid ""
+"The live RDF source could not be checked. The form is using locally "
+"synchronised distributions."
+msgstr ""
+"Zdroj RDF se nepodařilo zkontrolovat. Formulář používá lokálně "
+"synchronizované distribuce."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
+msgid ""
+"FAIR_GENOMES_RDF_URL is not configured. The form is using locally "
+"synchronised distributions."
+msgstr ""
+"FAIR_GENOMES_RDF_URL není nastavena. Formulář používá lokálně "
+"synchronizované distribuce."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"This will check and synchronise RDF metadata from the FAIR Data Point, then "
+"re-run active statistic aggregations from MOLGENIS GraphQL."
+msgstr ""
+"Tato akce zkontroluje a synchronizuje metadata RDF z FAIR Data Point a poté "
+"znovu spustí aktivní statistické agregace z MOLGENIS GraphQL."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"Saving an active statistic definition also tries to synchronise that one "
+"aggregation immediately. If the live RDF source contains new distributions, "
+"run this action before configuring charts for them."
+msgstr ""
+"Uložení aktivní definice statistiky se zároveň pokusí okamžitě synchronizovat "
+"danou agregaci. Pokud zdroj RDF obsahuje nové distribuce, spusťte tuto "
+"akci před konfigurací jejich grafů."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid ""
+"This may take a few seconds depending on the number of datasets and statistic "
+"definitions."
+msgstr ""
+"Může to trvat několik sekund podle počtu datových sad a definic statistik."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Current freshness state"
+msgstr "Aktuální stav aktuálnosti"
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
+msgid "Check and Synchronise"
+msgstr "Zkontrolovat a synchronizovat"
+
+#: frontend/admin.py frontend/models.py
+msgid "%(field)s (currently unavailable)"
+msgstr "%(field)s (momentálně nedostupné)"
+
+#: frontend/admin.py frontend/models.py
+msgid "Field name"
+msgstr "Název pole"
+
+#: frontend/admin.py
+msgid "Only dataset metadata fields mapped into the unified catalogue model are available."
+msgstr "Dostupná jsou pouze metadata datové sady namapovaná do jednotného modelu katalogu."
+
+#: frontend/models.py
+msgid "Dataset metadata field used as the catalogue query parameter."
+msgstr "Pole metadat datové sady používané jako parametr dotazu katalogu."
+
+#: frontend/models.py
+msgid "Label"
+msgstr "Popisek"
+
+#: frontend/models.py
+msgid "Human-readable filter group title shown in the sidebar."
+msgstr "Čitelný název skupiny filtrů zobrazený v postranním panelu."
+
+#: frontend/models.py
+msgid "Lower numbers are shown first."
+msgstr "Nižší čísla se zobrazují jako první."
+
+#: frontend/models.py
+msgid "Enabled"
+msgstr "Povoleno"
+
+#: frontend/models.py
+msgid "Catalogue Filter Definition"
+msgstr "Definice katalogového filtru"
+
+#: frontend/models.py
+msgid "Catalogue Filter Definitions"
+msgstr "Definice katalogových filtrů"
+
+#: frontend/models.py
+msgid "%(field_name)s is reserved for built-in catalogue parameters."
+msgstr "%(field_name)s je vyhrazeno pro vestavěné parametry katalogu."
 
 #: frontend/apps.py:8
-#, fuzzy
-#| msgid "Catalogue"
 msgid "Catalogue Frontend"
-msgstr "Katalog"
+msgstr "Katalogové rozhraní"
+
+#: warehouse/admin.py
+msgid "Personal info"
+msgstr "Osobní údaje"
+
+#: warehouse/admin.py
+msgid "Staff role"
+msgstr "Role staff uživatele"
 
 #: frontend/templates/404.html:3 frontend/templates/404.html:13
 msgid "Page Not Found"
@@ -3085,9 +3439,6 @@ msgstr "Výraz definice primárního klíče"
 #~ msgid "Short machine-readable identifier, e.g. \"v6\"."
 #~ msgstr "Krátký strojově čitelný identifikátor, např. \"v6\"."
 
-#~ msgid "Label"
-#~ msgstr "Popisek"
-
 #~ msgid "Human-readable version label, e.g. \"Health DCAT-AP v6\"."
 #~ msgstr "Lidsky čitelný popisek verze, např. \"Health DCAT-AP v6\"."
 
@@ -3100,9 +3451,6 @@ msgstr "Výraz definice primárního klíče"
 
 #~ msgid "Created at"
 #~ msgstr "Vytvořeno"
-
-#~ msgid "Updated at"
-#~ msgstr "Aktualizováno"
 
 #~ msgid "Schema Version"
 #~ msgstr "Verze schématu"
@@ -3431,9 +3779,6 @@ msgstr "Výraz definice primárního klíče"
 
 #~ msgid "Ticket ID"
 #~ msgstr "ID ticketu"
-
-#~ msgid "Failed"
-#~ msgstr "Selhalo"
 
 #~ msgid "Page navigation"
 #~ msgstr "Navigace stránek"

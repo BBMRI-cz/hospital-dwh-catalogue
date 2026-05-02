@@ -6,7 +6,7 @@
     {% if show_full_sync_button %}
     <li>
         <a href="{{ full_sync_url }}" class="historylink">
-            {% trans "Check and Sync FAIR Genomes" %}
+            {% trans "Check and Synchronise FAIR Genomes" %}
         </a>
     </li>
     {% endif %}
@@ -52,15 +52,15 @@
         {% if rdf_inventory_status %}
             {% if rdf_inventory_status.status == "available" %}
             <p>
-                {% blocktrans with live=rdf_inventory_status.live_distribution_count local=rdf_inventory_status.local_distribution_count %}
+                {% blocktrans trimmed with live=rdf_inventory_status.live_distribution_count local=rdf_inventory_status.local_distribution_count %}
                 Live RDF check succeeded. The source currently exposes {{ live }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
                 {% endblocktrans %}
             </p>
                 {% if rdf_inventory_status.missing_local_distribution_count %}
                 <p class="messagelist">
                     <span class="warning">
-                        {% blocktrans with count=rdf_inventory_status.missing_local_distribution_count %}
-                        {{ count }} live RDF distribution(s) are not yet synchronised locally. Run "Check and Sync FAIR Genomes" before configuring statistics for them.
+                        {% blocktrans trimmed with count=rdf_inventory_status.missing_local_distribution_count %}
+                        {{ count }} distribution(s) from the RDF source are not yet available in the local catalogue. Run "Check and Synchronise FAIR Genomes" before configuring statistics for them.
                         {% endblocktrans %}
                     </span>
                 </p>
@@ -68,7 +68,7 @@
                 {% if rdf_inventory_status.stale_local_distribution_count %}
                 <p class="messagelist">
                     <span class="warning">
-                        {% blocktrans with count=rdf_inventory_status.stale_local_distribution_count %}
+                        {% blocktrans trimmed with count=rdf_inventory_status.stale_local_distribution_count %}
                         {{ count }} local distribution(s) were not found in the cached live RDF check. A metadata synchronisation can remove stale local records.
                         {% endblocktrans %}
                     </span>

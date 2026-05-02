@@ -9,16 +9,6 @@ from frontend.presentation.types import FrontendFilterChip
 
 register = template.Library()
 
-_FILTER_LABELS: tuple[tuple[str, str], ...] = (
-    ('q', gettext('Search')),
-    ('keywords', gettext('Keyword')),
-    ('custodian', gettext('Custodian')),
-    ('health_category', gettext('Health Category')),
-    ('source', gettext('Source')),
-    ('theme', gettext('Theme')),
-    ('column', gettext('Column')),
-)
-
 _DEFAULT_CHIP_CLASS = (
     'inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border '
     'bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm'
@@ -30,12 +20,20 @@ _KEYWORD_CHIP_CLASS = (
 
 
 def _chip_values(filter_params: FilterState, key: str) -> list[str]:
-    value = getattr(filter_params, key, None)
     if key == 'q':
+        value = filter_params.q
         return [value] if isinstance(value, str) and value else []
-    if isinstance(value, set):
-        return sorted(item for item in value if item)
-    return []
+    if key == 'column':
+        return sorted(item for item in filter_params.column if item)
+    return sorted(item for item in filter_params.values_for(key) if item)
+
+
+def _chip_label(filter_params: FilterState, key: str) -> str:
+    if key == 'q':
+        return gettext('Search')
+    if key == 'column':
+        return gettext('Column')
+    return filter_params.filter_labels.get(key, key.replace('_', ' ').title())
 
 
 def _build_remove_url(base_url: str, query_params: QueryDict, key: str, value: str) -> str:
@@ -61,7 +59,9 @@ def active_filter_chips(
 ) -> list[FrontendFilterChip]:
     """Return the rendered active-filter chip data for the catalogue results partial."""
     chips: list[FrontendFilterChip] = []
-    for key, label in _FILTER_LABELS:
+    filter_keys = ('q', *filter_params.filter_order, 'column')
+    for key in filter_keys:
+        label = _chip_label(filter_params, key)
         for value in _chip_values(filter_params, key):
             chips.append(
                 FrontendFilterChip(

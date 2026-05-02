@@ -118,7 +118,8 @@ From there you can:
 - add or edit stat definitions
 - activate or deactivate charts
 - reorder charts with `sort_order`
-- run `Check and Sync FAIR Genomes`, which synchronises RDF metadata and then refreshes active statistics
+- save an active stat definition and immediately attempt to synchronise that one aggregation
+- run `Check and Synchronise FAIR Genomes`, which synchronises RDF metadata and then refreshes active statistics
 - re-run only selected statistics with the admin action
 
 If MOLGENIS schema introspection is available, the admin form offers dropdowns for table and column selection. If it is unavailable, the form falls back to known values already stored in the database.
@@ -142,7 +143,7 @@ Check:
 Check:
 
 - there are active `StatDefinition` rows for that distribution
-- the statistics phase or selected-stat action has created matching `StatResult` rows
+- the save-time synchronisation, statistics phase, or selected-stat action has created matching `StatResult` rows
 - `FAIR_GENOMES_API_URL` and `FAIR_GENOMES_API_TOKEN` are set when mocks are off
 - the FAIR Genomes freshness panel in admin shows a recent successful statistics synchronisation
 
@@ -152,7 +153,7 @@ That usually means schema introspection failed. The form should still work with 
 
 ### The admin form does not show new RDF distributions
 
-The form saves only locally synchronised `Distribution` rows. If the live RDF warning says new distributions exist, run `Check and Sync FAIR Genomes` first. If the live RDF source is unavailable, the form keeps using locally synchronised distributions.
+The form saves only locally synchronised `Distribution` rows. If the live RDF warning says new distributions exist, run `Check and Synchronise FAIR Genomes` first. If the live RDF source is unavailable, the form keeps using locally synchronised distributions.
 
 ## Related guides
 

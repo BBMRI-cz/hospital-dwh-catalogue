@@ -95,6 +95,7 @@ Items are sent through the configured ticketing backend:
 Staff and superusers can use `/admin/` to:
 
 - manage users and permissions
+- manage catalogue filter definitions
 - manage FAIR Genomes stat definitions
 - trigger FAIR Genomes synchronisation and selected-stat refresh actions
 - inspect ticket requests
@@ -127,6 +128,7 @@ Check:
 - `MOCK_FAIR_GENOMES` is set correctly
 - FAIR Genomes synchronisation completed
 - there are active `StatDefinition` rows for the distribution
+- newly added statistic definitions were saved successfully, including the save-time aggregation synchronisation message
 - the FAIR Genomes freshness panel in admin shows a recent successful statistics synchronisation
 
 ### Grafana is blocked
