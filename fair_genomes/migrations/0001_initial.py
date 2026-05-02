@@ -156,4 +156,26 @@ class Migration(migrations.Migration):
                 'unique_together': {('distribution', 'molgenis_table', 'molgenis_column')},
             },
         ),
+        migrations.CreateModel(
+            name='FairGenomesSyncState',
+            fields=[
+                ('source_type', models.CharField(choices=[('rdf_metadata', 'RDF metadata'), ('statistics', 'Statistics')], max_length=32, primary_key=True, serialize=False, verbose_name='Source type')),
+                ('source_url', models.CharField(blank=True, default='', max_length=500, verbose_name='Source URL')),
+                ('status', models.CharField(choices=[('never_run', 'Never run'), ('running', 'Running'), ('success', 'Success'), ('failed', 'Failed'), ('skipped', 'Skipped')], default='never_run', max_length=32, verbose_name='Status')),
+                ('last_checked_at', models.DateTimeField(blank=True, null=True, verbose_name='Last checked at')),
+                ('last_success_at', models.DateTimeField(blank=True, null=True, verbose_name='Last successful sync at')),
+                ('last_failure_at', models.DateTimeField(blank=True, null=True, verbose_name='Last failed sync at')),
+                ('duration_seconds', models.FloatField(blank=True, null=True, verbose_name='Duration in seconds')),
+                ('summary', models.JSONField(blank=True, default=dict, verbose_name='Summary')),
+                ('error_message', models.TextField(blank=True, default='', verbose_name='Error message')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
+            ],
+            options={
+                'verbose_name': 'FAIR Genomes Sync State',
+                'verbose_name_plural': 'FAIR Genomes Sync States',
+                'db_table': 'fair_genomes_sync_state',
+                'ordering': ['source_type'],
+                'managed': True,
+            },
+        ),
     ]

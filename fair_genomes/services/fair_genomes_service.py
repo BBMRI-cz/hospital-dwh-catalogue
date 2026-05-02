@@ -17,8 +17,19 @@ from fair_genomes.services.stats import (
 from fair_genomes.services.stats import (
     sync_single_stat as sync_single_stat_helper,
 )
+from fair_genomes.services.sync_state import (
+    mark_failed,
+    mark_skipped,
+    mark_started,
+    mark_success,
+    rdf_report_summary,
+    stats_report_summary,
+)
 
 logger = logging.getLogger(__name__)
+
+RDF_METADATA_SOURCE = 'rdf_metadata'
+STATISTICS_SOURCE = 'statistics'
 
 
 class FairGenomesAPIException(Exception):
@@ -45,6 +56,14 @@ class FairGenomesService:
 
     def sync(self) -> dict:
         if not self.rdf_url and not self.graphql_url:
+            mark_skipped(
+                RDF_METADATA_SOURCE,
+                reason='FAIR_GENOMES_RDF_URL is not configured',
+            )
+            mark_skipped(
+                STATISTICS_SOURCE,
+                reason='FAIR_GENOMES_API_URL is not configured',
+            )
             return {
                 'status': 'skipped',
                 'reason': (
@@ -60,7 +79,10 @@ class FairGenomesService:
         )
 
         graph = None
+        report = empty_rdf_report()
         if self.rdf_url:
+            rdf_started_at = time.monotonic()
+            mark_started(RDF_METADATA_SOURCE, source_url=self.rdf_url)
             try:
                 response = fetch_rdf(self.rdf_url, self.timeout)
                 rdf_format = detect_rdf_format(response)
@@ -68,25 +90,85 @@ class FairGenomesService:
 
                 graph = Graph()
                 graph.parse(data=response.text, format=rdf_format)
-            except Exception as exc:  # - preserve existing API surface
-                raise FairGenomesAPIException(
-                    f'Failed to parse RDF from {self.rdf_url}: {exc}'
-                ) from exc
-            logger.info('RDF fetched and parsed', extra={'triples': len(graph)})
 
-        with transaction.atomic(using='fair_genomes_db'):
-            report = process_graph(graph, rdf_url=self.rdf_url) if graph else empty_rdf_report()
+                with transaction.atomic(using='fair_genomes_db'):
+                    report = process_graph(graph, rdf_url=self.rdf_url)
+            except Exception as exc:
+                message = f'Failed to parse RDF from {self.rdf_url}: {exc}'
+                mark_failed(
+                    RDF_METADATA_SOURCE,
+                    source_url=self.rdf_url,
+                    duration_seconds=round(time.monotonic() - rdf_started_at, 2),
+                    error_message=message,
+                )
+                report['status'] = 'failed'
+                report['rdf_url'] = self.rdf_url
+                report['error'] = message
+                logger.exception('RDF metadata sync failed')
+            else:
+                logger.info('RDF fetched and parsed', extra={'triples': len(graph)})
+                mark_success(
+                    RDF_METADATA_SOURCE,
+                    source_url=self.rdf_url,
+                    duration_seconds=round(time.monotonic() - rdf_started_at, 2),
+                    summary=rdf_report_summary(report),
+                )
+        else:
+            mark_skipped(
+                RDF_METADATA_SOURCE,
+                reason='FAIR_GENOMES_RDF_URL is not configured',
+            )
 
         report['graphql_url'] = self.graphql_url or ''
-        report['stats'] = (
-            sync_stats(
-                graphql_url=self.graphql_url,
-                api_token=self.api_token,
-                timeout=self.timeout,
+        if self.graphql_url:
+            stats_started_at = time.monotonic()
+            mark_started(STATISTICS_SOURCE, source_url=self.graphql_url)
+            try:
+                stats = sync_stats(
+                    graphql_url=self.graphql_url,
+                    api_token=self.api_token,
+                    timeout=self.timeout,
+                )
+            except Exception as exc:
+                message = f'Failed to synchronise statistics from {self.graphql_url}: {exc}'
+                stats = {
+                    'updated': 0,
+                    'failed': 1,
+                    'errors': [message],
+                }
+                stats_summary = stats_report_summary(stats)
+                mark_failed(
+                    STATISTICS_SOURCE,
+                    source_url=self.graphql_url,
+                    duration_seconds=round(time.monotonic() - stats_started_at, 2),
+                    summary=stats_summary,
+                    error_message=message,
+                )
+                logger.exception('FAIR Genomes statistics sync failed')
+            else:
+                stats_summary = stats_report_summary(stats)
+                if stats.get('failed'):
+                    mark_failed(
+                        STATISTICS_SOURCE,
+                        source_url=self.graphql_url,
+                        duration_seconds=round(time.monotonic() - stats_started_at, 2),
+                        summary=stats_summary,
+                        error_message='; '.join(stats_summary['errors']),
+                    )
+                else:
+                    mark_success(
+                        STATISTICS_SOURCE,
+                        source_url=self.graphql_url,
+                        duration_seconds=round(time.monotonic() - stats_started_at, 2),
+                        summary=stats_summary,
+                    )
+            report['stats'] = stats
+        else:
+            report['stats'] = None
+            mark_skipped(
+                STATISTICS_SOURCE,
+                reason='FAIR_GENOMES_API_URL is not configured',
             )
-            if self.graphql_url
-            else None
-        )
         report['duration_seconds'] = round(time.monotonic() - started_at, 2)
 
         logger.info(

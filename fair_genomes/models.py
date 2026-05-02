@@ -218,3 +218,81 @@ class StatResult(models.Model):
     def __str__(self) -> str:
         n = len(self.distribution) if self.distribution else 0
         return f'{self.table_name}.{self.column_name} ({n} values)'
+
+
+class FairGenomesSyncState(models.Model):
+    """Operational freshness state for FAIR Genomes metadata/statistics sync."""
+
+    class SourceType(models.TextChoices):
+        RDF_METADATA = 'rdf_metadata', _('RDF metadata')
+        STATISTICS = 'statistics', _('Statistics')
+
+    class Status(models.TextChoices):
+        NEVER_RUN = 'never_run', _('Never run')
+        RUNNING = 'running', _('Running')
+        SUCCESS = 'success', _('Success')
+        FAILED = 'failed', _('Failed')
+        SKIPPED = 'skipped', _('Skipped')
+
+    source_type = models.CharField(
+        max_length=32,
+        choices=SourceType.choices,
+        primary_key=True,
+        verbose_name=_('Source type'),
+    )
+    source_url = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        verbose_name=_('Source URL'),
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.NEVER_RUN,
+        verbose_name=_('Status'),
+    )
+    last_checked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last checked at'),
+    )
+    last_success_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last successful sync at'),
+    )
+    last_failure_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last failed sync at'),
+    )
+    duration_seconds = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('Duration in seconds'),
+    )
+    summary = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_('Summary'),
+    )
+    error_message = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Error message'),
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Updated at'),
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'fair_genomes_sync_state'
+        verbose_name = _('FAIR Genomes Sync State')
+        verbose_name_plural = _('FAIR Genomes Sync States')
+        ordering = ['source_type']
+
+    def __str__(self) -> str:
+        return f'{self.get_source_type_display()}: {self.get_status_display()}'

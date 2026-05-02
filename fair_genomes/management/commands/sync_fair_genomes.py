@@ -1,5 +1,5 @@
 """
-Management command to sync Fair Genomes data from:
+Management command to synchronise FAIR Genomes metadata and statistics from:
   - a FAIR Data Point RDF endpoint  (FAIR_GENOMES_RDF_URL)
   - a MOLGENIS EMX2 GraphQL endpoint (FAIR_GENOMES_API_URL + FAIR_GENOMES_API_TOKEN)
     for aggregation stats
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = (
-        'Sync Fair Genomes catalogue data from a FAIR Data Point RDF endpoint '
-        'and a MOLGENIS EMX2 GraphQL schema endpoint'
+        'Synchronise FAIR Genomes catalogue metadata from a FAIR Data Point RDF '
+        'endpoint and statistics from a MOLGENIS EMX2 GraphQL schema endpoint'
     )
 
     def handle(self, *args, **options):
@@ -42,6 +42,8 @@ class Command(BaseCommand):
         style_fn = self.style.SUCCESS if status == 'complete' else self.style.WARNING
         self.stdout.write(style_fn(f'Sync status: {status.upper()}'))
         self.stdout.write(f'RDF source: {report.get("rdf_url", "")}')
+        if report.get('error'):
+            self.stderr.write(self.style.ERROR(f'RDF metadata sync error: {report["error"]}'))
         duration = report.get('duration_seconds')
         if duration is not None:
             self.stdout.write(f'Duration: {duration}s')

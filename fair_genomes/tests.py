@@ -11,7 +11,16 @@ from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase, TestCase, override_settings
 
-from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition, StatResult
+from .models import (
+    Agent,
+    Catalog,
+    ContactPoint,
+    Dataset,
+    Distribution,
+    FairGenomesSyncState,
+    StatDefinition,
+    StatResult,
+)
 from .services.fair_genomes_service import FairGenomesAPIException, FairGenomesService
 from .services.rdf_schema import discover_graph_schema
 
@@ -221,7 +230,7 @@ class SeedFairGenomesMockCommandTest(TestCase):
 class FairGenomesServiceTest(TestCase):
     """Tests for the FairGenomesService."""
 
-    databases = {'default', 'auth_db'}
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def test_sync_skips_when_no_urls_configured(self):
         """sync() returns status=skipped when neither URL is explicitly set to ''."""
@@ -230,6 +239,14 @@ class FairGenomesServiceTest(TestCase):
             result = svc.sync()
         self.assertEqual(result['status'], 'skipped')
         self.assertIn('reason', result)
+        self.assertEqual(
+            FairGenomesSyncState.objects.using('fair_genomes_db')
+            .get(
+                source_type=FairGenomesSyncState.SourceType.RDF_METADATA,
+            )
+            .status,
+            FairGenomesSyncState.Status.SKIPPED,
+        )
 
     def test_context_manager(self):
         """Service can be used as a context manager."""
@@ -323,6 +340,25 @@ class StatResultModelTest(TestCase):
         self.assertEqual(sr.distribution, {'MiSeq': 42, 'NovaSeq': 10})
 
 
+class FairGenomesSyncStateModelTest(TestCase):
+    """Tests for FAIR Genomes operational sync-state model."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def test_meta_managed_true(self):
+        self.assertTrue(FairGenomesSyncState._meta.managed)
+
+    def test_meta_db_table(self):
+        self.assertEqual(FairGenomesSyncState._meta.db_table, 'fair_genomes_sync_state')
+
+    def test_str_representation(self):
+        state = FairGenomesSyncState(
+            source_type=FairGenomesSyncState.SourceType.RDF_METADATA,
+            status=FairGenomesSyncState.Status.SUCCESS,
+        )
+        self.assertIn('RDF metadata', str(state))
+
+
 class SyncStatsTest(TestCase):
     """Tests for FairGenomesService._sync_stats() — HTTP is always mocked."""
 
@@ -413,6 +449,28 @@ class SyncStatsTest(TestCase):
         self.assertEqual(sr.distribution, {'MiSeq': 17, 'NovaSeq': 5})
 
     @patch('fair_genomes.services.stats.requests.post')
+    def test_full_service_sync_records_statistics_state(self, mock_post):
+        n = len(self.STAT_DEFS)
+        mock_post.side_effect = [
+            self._make_groupby_response(
+                'sequencing',
+                'sequencinginstrumentmodel',
+                {'MiSeq': 17},
+            )
+        ] + [self._make_groupby_response(table, column, {}) for table, column in self.STAT_DEFS[1:]]
+
+        svc = FairGenomesService(rdf_url='', api_url='http://mock/graphql', api_token='tok')
+        report = svc.sync()
+
+        self.assertEqual(report['stats']['updated'], n)
+        state = FairGenomesSyncState.objects.using('fair_genomes_db').get(
+            source_type=FairGenomesSyncState.SourceType.STATISTICS,
+        )
+        self.assertEqual(state.status, FairGenomesSyncState.Status.SUCCESS)
+        self.assertIsNotNone(state.last_success_at)
+        self.assertEqual(state.summary['updated'], n)
+
+    @patch('fair_genomes.services.stats.requests.post')
     def test_sync_stats_http_error(self, mock_post):
         import requests as req_lib
 
@@ -493,6 +551,30 @@ def _load_graph(filename: str):
     graph = Graph()
     graph.parse(data=_load_turtle(filename), format='turtle')
     return graph
+
+
+class FairGenomesFullSyncStateTest(TestCase):
+    """Full service sync records RDF metadata freshness state."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    @patch('fair_genomes.services.fair_genomes_service.fetch_rdf')
+    def test_full_service_sync_records_metadata_state(self, mock_fetch_rdf):
+        response = MagicMock()
+        response.text = _load_turtle('test_full_graph.ttl')
+        response.headers = {'Content-Type': 'text/turtle'}
+        mock_fetch_rdf.return_value = response
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        report = svc.sync()
+
+        self.assertEqual(report['status'], 'complete')
+        state = FairGenomesSyncState.objects.using('fair_genomes_db').get(
+            source_type=FairGenomesSyncState.SourceType.RDF_METADATA,
+        )
+        self.assertEqual(state.status, FairGenomesSyncState.Status.SUCCESS)
+        self.assertIsNotNone(state.last_success_at)
+        self.assertEqual(state.summary['fetched']['datasets'], 1)
 
 
 class ProcessGraphFullTest(TestCase):

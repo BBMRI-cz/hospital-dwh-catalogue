@@ -1,16 +1,45 @@
 {% extends "admin/base_site.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Full Sync (RDF + Stats)" %}{% endblock %}
+{% block title %}{% trans "Check and Synchronise FAIR Genomes" %}{% endblock %}
 
 {% block content %}
 <div id="content-main">
-    <p>{% trans "This will re-sync all RDF metadata from the FAIR Data Point and re-run all active stat aggregations from MOLGENIS GraphQL." %}</p>
-    <p>{% trans "This may take a few seconds depending on the number of datasets and stat definitions." %}</p>
+    <p>{% trans "This will check and synchronise RDF metadata from the FAIR Data Point, then re-run active statistic aggregations from MOLGENIS GraphQL." %}</p>
+    <p>{% trans "The statistic-definition form still saves only locally synchronised distributions. If the live RDF source contains new distributions, run this action before configuring charts for them." %}</p>
+    <p>{% trans "This may take a few seconds depending on the number of datasets and statistic definitions." %}</p>
+
+    {% if sync_states %}
+    <div class="module" style="padding: 12px 16px; margin-bottom: 16px;">
+        <h2>{% trans "Current freshness state" %}</h2>
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>{% trans "Source" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Last checked" %}</th>
+                    <th>{% trans "Last success" %}</th>
+                    <th>{% trans "Last failure" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for state in sync_states %}
+                <tr>
+                    <td>{{ state.get_source_type_display }}</td>
+                    <td>{{ state.get_status_display }}</td>
+                    <td>{{ state.last_checked_at|default:"-" }}</td>
+                    <td>{{ state.last_success_at|default:"-" }}</td>
+                    <td>{{ state.last_failure_at|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}
-        <input type="submit" value="{% trans 'Run Full Sync' %}" class="default" />
+        <input type="submit" value="{% trans 'Check and Synchronise' %}" class="default" />
         <a href="../" class="button cancel-link">{% trans "Cancel" %}</a>
     </form>
 </div>

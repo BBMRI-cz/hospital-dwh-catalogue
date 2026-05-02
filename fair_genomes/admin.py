@@ -4,6 +4,7 @@ Fair Genomes Admin Configuration
 
 import json
 import logging
+import time
 
 from django import forms
 from django.conf import settings
@@ -13,12 +14,21 @@ from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
 
-from fair_genomes.models import Dataset, Distribution, StatDefinition
+from fair_genomes.models import Dataset, Distribution, FairGenomesSyncState, StatDefinition
+from fair_genomes.services.sync_state import (
+    get_state_map,
+    mark_failed,
+    mark_started,
+    mark_success,
+    stats_report_summary,
+)
 
 logger = logging.getLogger(__name__)
 
 _SCHEMA_CACHE_KEY = 'fg_molgenis_schema'
 _SCHEMA_CACHE_TTL = 300  # 5 minutes
+_RDF_INVENTORY_CACHE_KEY_PREFIX = 'fg_rdf_inventory'
+_RDF_INVENTORY_CACHE_TTL = 300  # 5 minutes
 
 
 def _get_molgenis_schema() -> dict[str, list[str]]:
@@ -38,6 +48,113 @@ def _get_molgenis_schema() -> dict[str, list[str]]:
 
     cache.set(_SCHEMA_CACHE_KEY, schema, _SCHEMA_CACHE_TTL)
     return schema
+
+
+def _rdf_inventory_cache_key(url: str) -> str:
+    return f'{_RDF_INVENTORY_CACHE_KEY_PREFIX}:{url}'
+
+
+def _get_live_rdf_inventory() -> dict:
+    """Return cached live RDF dataset/distribution names without writing to DB."""
+    url = getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
+    if not url:
+        return {
+            'status': 'not_configured',
+            'source_url': '',
+            'datasets': set(),
+            'distributions': set(),
+            'error': 'FAIR_GENOMES_RDF_URL is not configured.',
+        }
+
+    cache_key = _rdf_inventory_cache_key(url)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        from rdflib import Graph
+
+        from fair_genomes.services.client import detect_rdf_format, fetch_rdf
+        from fair_genomes.services.parser import parse_raw_records
+
+        response = fetch_rdf(url, timeout=(5, 20))
+        graph = Graph()
+        graph.parse(data=response.text, format=detect_rdf_format(response))
+        records = parse_raw_records(graph)
+        inventory = {
+            'status': 'available',
+            'source_url': url,
+            'datasets': {
+                str(record.values.get('name'))
+                for record in records.get('Dataset', [])
+                if record.values.get('name')
+            },
+            'distributions': {
+                str(record.values.get('name'))
+                for record in records.get('Distribution', [])
+                if record.values.get('name')
+            },
+            'error': '',
+        }
+    except Exception as exc:
+        logger.warning('Failed to inspect live FAIR Genomes RDF inventory: %s', exc)
+        inventory = {
+            'status': 'unavailable',
+            'source_url': url,
+            'datasets': set(),
+            'distributions': set(),
+            'error': str(exc),
+        }
+
+    cache.set(cache_key, inventory, _RDF_INVENTORY_CACHE_TTL)
+    return inventory
+
+
+def _clear_live_rdf_inventory_cache() -> None:
+    url = getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
+    if url:
+        cache.delete(_rdf_inventory_cache_key(url))
+
+
+def _get_rdf_inventory_status() -> dict:
+    inventory = _get_live_rdf_inventory()
+    local_distribution_names = set(
+        Distribution.objects.using('fair_genomes_db').values_list('name', flat=True)
+    )
+    local_dataset_names = set(
+        Dataset.objects.using('fair_genomes_db').values_list('name', flat=True)
+    )
+
+    live_distributions = set(inventory.get('distributions') or set())
+    live_datasets = set(inventory.get('datasets') or set())
+    missing_local_distributions = sorted(live_distributions - local_distribution_names)
+    stale_local_distributions = sorted(local_distribution_names - live_distributions)
+
+    return {
+        **inventory,
+        'local_dataset_count': len(local_dataset_names),
+        'local_distribution_count': len(local_distribution_names),
+        'live_dataset_count': len(live_datasets),
+        'live_distribution_count': len(live_distributions),
+        'missing_local_distributions': missing_local_distributions[:10],
+        'missing_local_distribution_count': len(missing_local_distributions),
+        'stale_local_distributions': stale_local_distributions[:10],
+        'stale_local_distribution_count': len(stale_local_distributions),
+    }
+
+
+def _get_sync_state_context() -> list[FairGenomesSyncState]:
+    states = get_state_map()
+    return [
+        states.get(
+            source_type,
+            FairGenomesSyncState(source_type=source_type),
+        )
+        for source_type in (
+            FairGenomesSyncState.SourceType.RDF_METADATA,
+            FairGenomesSyncState.SourceType.STATISTICS,
+        )
+    ]
 
 
 class StatDefinitionForm(forms.ModelForm):
@@ -89,10 +206,29 @@ class StatDefinitionForm(forms.ModelForm):
         # Mapping dist pk → dataset pk, embedded as JSON for client-side
         # filtering so JS knows which distributions belong to which dataset.
         dist_dataset_map = {d.name: d.dataset_name_id for d in distributions_qs}
+        distribution_help_text = _('DCAT Distribution whose detail page should show this chart.')
+        rdf_status = _get_rdf_inventory_status()
+        if rdf_status['status'] == 'available' and rdf_status['missing_local_distribution_count']:
+            distribution_help_text = _(
+                'DCAT Distribution whose detail page should show this chart. '
+                'Live RDF contains %(count)d distribution(s) not yet synchronised locally; '
+                'run "Check and synchronise FAIR Genomes metadata" before configuring them.'
+            ) % {'count': rdf_status['missing_local_distribution_count']}
+        elif rdf_status['status'] == 'unavailable':
+            distribution_help_text = _(
+                'DCAT Distribution whose detail page should show this chart. '
+                'The live RDF source could not be checked; showing locally synchronised values.'
+            )
+        elif rdf_status['status'] == 'not_configured':
+            distribution_help_text = _(
+                'DCAT Distribution whose detail page should show this chart. '
+                'FAIR_GENOMES_RDF_URL is not configured; showing locally synchronised values.'
+            )
+
         self.fields['distribution'] = forms.ChoiceField(
             choices=dist_choices,
             label=_('Distribution'),
-            help_text=_('DCAT Distribution whose detail page should show this chart.'),
+            help_text=distribution_help_text,
             widget=forms.Select(attrs={'data-dist-map': json.dumps(dist_dataset_map)}),
         )
 
@@ -260,6 +396,8 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         extra_context['show_full_sync_button'] = True
         extra_context['full_sync_url'] = reverse('admin:fair_genomes_full_sync')
+        extra_context['sync_states'] = _get_sync_state_context()
+        extra_context['rdf_inventory_status'] = _get_rdf_inventory_status()
         return super().changelist_view(request, extra_context=extra_context)
 
     def change_list_template_or_default(self):
@@ -270,9 +408,9 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         return 'admin/fair_genomes/statdefinition/change_list.html'
 
     def full_sync_view(self, request):
-        """Full RDF + GraphQL resync, accessible via admin button."""
+        """Run RDF metadata synchronisation and GraphQL statistic aggregation."""
         if not request.user.is_staff:
-            messages.error(request, _('Only staff users can trigger a full sync.'))
+            messages.error(request, _('Only staff users can trigger FAIR Genomes synchronisation.'))
             return redirect('..')
 
         if request.method == 'POST':
@@ -281,6 +419,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
             try:
                 svc = FairGenomesService()
                 report = svc.sync()
+                _clear_live_rdf_inventory_cache()
                 status = report.get('status', 'unknown')
                 stats = report.get('stats')
                 duration = report.get('duration_seconds', '?')
@@ -288,12 +427,17 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 summary_parts = [f'Status: {status}', f'Duration: {duration}s']
                 if stats:
                     summary_parts.append(
-                        f'Stats: {stats["updated"]} updated, {stats["failed"]} failed'
+                        f'Statistics: {stats["updated"]} updated, {stats["failed"]} failed'
                     )
-                messages.success(
-                    request,
-                    _('Full sync completed. %(summary)s') % {'summary': ' | '.join(summary_parts)},
-                )
+                message = _('FAIR Genomes synchronisation completed. %(summary)s') % {
+                    'summary': ' | '.join(summary_parts)
+                }
+                if report.get('error') or status == 'failed':
+                    messages.error(request, message)
+                elif status == 'partial' or (stats and stats.get('failed')):
+                    messages.warning(request, message)
+                else:
+                    messages.success(request, message)
                 if stats and stats['failed']:
                     messages.warning(
                         request,
@@ -304,10 +448,10 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                         },
                     )
             except Exception as exc:
-                logger.exception('Full sync failed')
+                logger.exception('FAIR Genomes synchronisation failed')
                 messages.error(
                     request,
-                    _('Full sync failed: %(error)s') % {'error': str(exc)},
+                    _('FAIR Genomes synchronisation failed: %(error)s') % {'error': str(exc)},
                 )
 
             return redirect('..')
@@ -315,7 +459,11 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         return render(
             request,
             'admin/fair_genomes/statdefinition/full_sync.html',
-            {'title': _('Full Sync (RDF + Stats)')},
+            {
+                'title': _('Check and Synchronise FAIR Genomes Metadata and Statistics'),
+                'sync_states': _get_sync_state_context(),
+                'rdf_inventory_status': _get_rdf_inventory_status(),
+            },
         )
 
     @admin.action(description=_('Sync selected stat aggregations now'))
@@ -331,14 +479,82 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         svc = FairGenomesService()
         ok_count = 0
         fail_count = 0
+        errors: list[str] = []
+        started_at = time.monotonic()
+        mark_started(FairGenomesSyncState.SourceType.STATISTICS, source_url=api_url)
         for defn in queryset.filter(is_active=True):
-            success, _err = svc.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
+            success, err = svc.sync_single_stat(defn.molgenis_table, defn.molgenis_column)
             if success:
                 ok_count += 1
             else:
                 fail_count += 1
+                errors.append(err)
+
+        summary = stats_report_summary(
+            {
+                'updated': ok_count,
+                'failed': fail_count,
+                'errors': errors,
+            }
+        )
+        if fail_count:
+            mark_failed(
+                FairGenomesSyncState.SourceType.STATISTICS,
+                source_url=api_url,
+                duration_seconds=round(time.monotonic() - started_at, 2),
+                summary=summary,
+                error_message='; '.join(errors[:5]),
+            )
+        else:
+            mark_success(
+                FairGenomesSyncState.SourceType.STATISTICS,
+                source_url=api_url,
+                duration_seconds=round(time.monotonic() - started_at, 2),
+                summary=summary,
+            )
 
         messages.success(
             request,
-            _('Synced %(ok)d stats, %(fail)d failed.') % {'ok': ok_count, 'fail': fail_count},
+            _('Synchronised %(ok)d statistic(s), %(fail)d failed.')
+            % {'ok': ok_count, 'fail': fail_count},
         )
+
+
+@admin.register(FairGenomesSyncState)
+class FairGenomesSyncStateAdmin(admin.ModelAdmin):
+    list_display = (
+        'source_type',
+        'status',
+        'last_checked_at',
+        'last_success_at',
+        'last_failure_at',
+        'duration_seconds',
+    )
+    readonly_fields = (
+        'source_type',
+        'source_url',
+        'status',
+        'last_checked_at',
+        'last_success_at',
+        'last_failure_at',
+        'duration_seconds',
+        'summary',
+        'error_message',
+        'updated_at',
+    )
+    fields = readonly_fields
+
+    def has_module_permission(self, request):
+        return request.user.is_staff
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_staff
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

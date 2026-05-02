@@ -231,17 +231,34 @@ Surface those warnings through `frontend/export_warnings.py` instead of changing
 If you want another chart:
 
 1. create or edit a `StatDefinition` in the admin
-2. run the FAIR Genomes sync
+2. run `Check and Sync FAIR Genomes`, or use the selected-stat admin action if only the existing statistic values need refreshing
 3. verify that the result appears in `StatResult`
 4. open the distribution detail page
+
+If a new FAIR Genomes distribution exists in RDF but is not yet available in the dropdown, run `Check and Sync FAIR Genomes` first. The admin form checks the live RDF inventory through a short-lived cache, but it still saves only locally synchronised `Distribution` rows.
 
 If you need product-level code changes:
 
 - model definitions are in `fair_genomes/models.py`
 - stat sync logic is in `fair_genomes/services/stats.py`
+- operational freshness state is in `fair_genomes/services/sync_state.py`
 - stat loading for distribution pages is in `warehouse/services.py`
 - chart normalization is in `frontend/presentation/mapping.py`
 - chart rendering templates live under `frontend/templates/catalogue/components/`
+
+## Change FAIR Genomes synchronisation
+
+The main orchestration is in [fair_genomes/services/fair_genomes_service.py](../fair_genomes/services/fair_genomes_service.py).
+
+Current behavior:
+
+- one scheduled/admin run performs an RDF metadata phase and a statistics phase
+- `FairGenomesSyncState` stores freshness state for `rdf_metadata` and `statistics` separately
+- RDF metadata is fetched, parsed, and persisted from the configured `FAIR_GENOMES_RDF_URL`
+- statistics are refreshed from active `StatDefinition` rows through MOLGENIS GraphQL
+- the stat-definition admin checks live RDF inventory through a five-minute cache and falls back to locally synchronised distributions
+
+When changing this area, keep RDF metadata freshness and statistic freshness separate. Grouped counts can change even when descriptive RDF metadata does not.
 
 ## Add or change ticketing behavior
 

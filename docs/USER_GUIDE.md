@@ -96,7 +96,7 @@ Staff and superusers can use `/admin/` to:
 
 - manage users and permissions
 - manage FAIR Genomes stat definitions
-- trigger sync actions
+- trigger FAIR Genomes synchronisation and selected-stat refresh actions
 - inspect ticket requests
 
 Staff users can also open `/grafana/`. Grafana has no separate password; access is gated by Django login plus the staff check.
@@ -125,8 +125,9 @@ Check:
 Check:
 
 - `MOCK_FAIR_GENOMES` is set correctly
-- FAIR Genomes sync completed
+- FAIR Genomes synchronisation completed
 - there are active `StatDefinition` rows for the distribution
+- the FAIR Genomes freshness panel in admin shows a recent successful statistics synchronisation
 
 ### Grafana is blocked
 

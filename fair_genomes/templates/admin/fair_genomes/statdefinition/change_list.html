@@ -6,8 +6,89 @@
     {% if show_full_sync_button %}
     <li>
         <a href="{{ full_sync_url }}" class="historylink">
-            {% trans "Full Resync (RDF + Stats)" %}
+            {% trans "Check and Sync FAIR Genomes" %}
         </a>
     </li>
     {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if sync_states or rdf_inventory_status %}
+    <div class="module" style="padding: 12px 16px; margin-bottom: 16px;">
+        <h2>{% trans "FAIR Genomes freshness" %}</h2>
+
+        {% if sync_states %}
+        <table style="width: 100%; margin-bottom: 12px;">
+            <thead>
+                <tr>
+                    <th>{% trans "Source" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Last checked" %}</th>
+                    <th>{% trans "Last success" %}</th>
+                    <th>{% trans "Last failure" %}</th>
+                    <th>{% trans "Duration (s)" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for state in sync_states %}
+                <tr>
+                    <td>{{ state.get_source_type_display }}</td>
+                    <td>{{ state.get_status_display }}</td>
+                    <td>{{ state.last_checked_at|default:"-" }}</td>
+                    <td>{{ state.last_success_at|default:"-" }}</td>
+                    <td>{{ state.last_failure_at|default:"-" }}</td>
+                    <td>{{ state.duration_seconds|default:"-" }}</td>
+                </tr>
+                {% if state.error_message %}
+                <tr>
+                    <td colspan="6"><strong>{% trans "Last error:" %}</strong> {{ state.error_message }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if rdf_inventory_status %}
+            {% if rdf_inventory_status.status == "available" %}
+            <p>
+                {% blocktrans with live=rdf_inventory_status.live_distribution_count local=rdf_inventory_status.local_distribution_count %}
+                Live RDF check succeeded. The source currently exposes {{ live }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
+                {% endblocktrans %}
+            </p>
+                {% if rdf_inventory_status.missing_local_distribution_count %}
+                <p class="messagelist">
+                    <span class="warning">
+                        {% blocktrans with count=rdf_inventory_status.missing_local_distribution_count %}
+                        {{ count }} live RDF distribution(s) are not yet synchronised locally. Run "Check and Sync FAIR Genomes" before configuring statistics for them.
+                        {% endblocktrans %}
+                    </span>
+                </p>
+                {% endif %}
+                {% if rdf_inventory_status.stale_local_distribution_count %}
+                <p class="messagelist">
+                    <span class="warning">
+                        {% blocktrans with count=rdf_inventory_status.stale_local_distribution_count %}
+                        {{ count }} local distribution(s) were not found in the cached live RDF check. A metadata synchronisation can remove stale local records.
+                        {% endblocktrans %}
+                    </span>
+                </p>
+                {% endif %}
+            {% elif rdf_inventory_status.status == "unavailable" %}
+            <p class="messagelist">
+                <span class="warning">
+                    {% trans "The live RDF source could not be checked. The form is using locally synchronised distributions." %}
+                </span>
+            </p>
+            {% elif rdf_inventory_status.status == "not_configured" %}
+            <p class="messagelist">
+                <span class="warning">
+                    {% trans "FAIR_GENOMES_RDF_URL is not configured. The form is using locally synchronised distributions." %}
+                </span>
+            </p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+    {{ block.super }}
 {% endblock %}

@@ -474,8 +474,9 @@ Check:
 Check:
 
 - `MOCK_FAIR_GENOMES` matches the environment you want
-- the scheduler or manual sync has run
+- the scheduler or manual synchronisation has run
 - `FAIR_GENOMES_RDF_URL`, `FAIR_GENOMES_API_URL`, and `FAIR_GENOMES_API_TOKEN` are set when mocks are off
+- the FAIR Genomes freshness panel in admin shows recent successful RDF metadata and statistics synchronisations
 
 ### Ticket requests are not reaching Alvao
 
