@@ -331,8 +331,8 @@ msgstr ""
 
 #: fair_genomes/admin.py
 msgid ""
-"DCAT Distribution whose detail page should show this chart. The live RDF "
-"source could not be checked; showing locally synchronised values."
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"could not be checked; showing locally synchronised values."
 msgstr ""
 "Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf. Zdroj "
 "RDF se nepodařilo zkontrolovat; zobrazují se lokálně synchronizované "
@@ -454,7 +454,7 @@ msgstr "Poslední chyba:"
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 #, python-format
 msgid ""
-"Live RDF check succeeded. The source currently exposes %(live)s "
+"RDF source check succeeded. The source currently exposes %(live)s "
 "distribution(s); %(local)s distribution(s) are available locally for "
 "statistic definitions."
 msgstr ""
@@ -476,7 +476,7 @@ msgstr ""
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 #, python-format
 msgid ""
-"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"%(count)s local distribution(s) were not found in the cached RDF source check. "
 "A metadata synchronisation can remove stale local records."
 msgstr ""
 "%(count)s lokálních distribucí nebylo nalezeno v uloženém výsledku kontroly "
@@ -484,7 +484,7 @@ msgstr ""
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 msgid ""
-"The live RDF source could not be checked. The form is using locally "
+"The RDF source could not be checked. The form is using locally "
 "synchronised distributions."
 msgstr ""
 "Zdroj RDF se nepodařilo zkontrolovat. Formulář používá lokálně "
@@ -509,7 +509,7 @@ msgstr ""
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
 msgid ""
 "Saving an active statistic definition also tries to synchronise that one "
-"aggregation immediately. If the live RDF source contains new distributions, "
+"aggregation immediately. If the RDF source contains new distributions, "
 "run this action before configuring charts for them."
 msgstr ""
 "Uložení aktivní definice statistiky se zároveň pokusí okamžitě synchronizovat "

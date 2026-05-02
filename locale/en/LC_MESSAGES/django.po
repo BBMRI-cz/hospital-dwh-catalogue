@@ -333,11 +333,11 @@ msgstr ""
 
 #: fair_genomes/admin.py
 msgid ""
-"DCAT Distribution whose detail page should show this chart. The live RDF "
-"source could not be checked; showing locally synchronised values."
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"could not be checked; showing locally synchronised values."
 msgstr ""
-"DCAT Distribution whose detail page should show this chart. The live RDF "
-"source could not be checked; showing locally synchronised values."
+"DCAT Distribution whose detail page should show this chart. The RDF source "
+"could not be checked; showing locally synchronised values."
 
 #: fair_genomes/admin.py
 msgid ""
@@ -454,11 +454,11 @@ msgstr "Last error:"
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 #, python-format
 msgid ""
-"Live RDF check succeeded. The source currently exposes %(live)s "
+"RDF source check succeeded. The source currently exposes %(live)s "
 "distribution(s); %(local)s distribution(s) are available locally for "
 "statistic definitions."
 msgstr ""
-"Live RDF check succeeded. The source currently exposes %(live)s "
+"RDF source check succeeded. The source currently exposes %(live)s "
 "distribution(s); %(local)s distribution(s) are available locally for "
 "statistic definitions."
 
@@ -476,18 +476,18 @@ msgstr ""
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 #, python-format
 msgid ""
-"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"%(count)s local distribution(s) were not found in the cached RDF source check. "
 "A metadata synchronisation can remove stale local records."
 msgstr ""
-"%(count)s local distribution(s) were not found in the cached live RDF check. "
+"%(count)s local distribution(s) were not found in the cached RDF source check. "
 "A metadata synchronisation can remove stale local records."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 msgid ""
-"The live RDF source could not be checked. The form is using locally "
+"The RDF source could not be checked. The form is using locally "
 "synchronised distributions."
 msgstr ""
-"The live RDF source could not be checked. The form is using locally "
+"The RDF source could not be checked. The form is using locally "
 "synchronised distributions."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
@@ -509,11 +509,11 @@ msgstr ""
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html
 msgid ""
 "Saving an active statistic definition also tries to synchronise that one "
-"aggregation immediately. If the live RDF source contains new distributions, "
+"aggregation immediately. If the RDF source contains new distributions, "
 "run this action before configuring charts for them."
 msgstr ""
 "Saving an active statistic definition also tries to synchronise that one "
-"aggregation immediately. If the live RDF source contains new distributions, "
+"aggregation immediately. If the RDF source contains new distributions, "
 "run this action before configuring charts for them."
 
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/full_sync.html

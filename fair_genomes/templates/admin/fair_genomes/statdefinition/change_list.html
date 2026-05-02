@@ -53,7 +53,7 @@
             {% if rdf_inventory_status.status == "available" %}
             <p>
                 {% blocktrans trimmed with live=rdf_inventory_status.live_distribution_count local=rdf_inventory_status.local_distribution_count %}
-                Live RDF check succeeded. The source currently exposes {{ live }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
+                RDF source check succeeded. The source currently exposes {{ live }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
                 {% endblocktrans %}
             </p>
                 {% if rdf_inventory_status.missing_local_distribution_count %}
@@ -69,7 +69,7 @@
                 <p class="messagelist">
                     <span class="warning">
                         {% blocktrans trimmed with count=rdf_inventory_status.stale_local_distribution_count %}
-                        {{ count }} local distribution(s) were not found in the cached live RDF check. A metadata synchronisation can remove stale local records.
+                        {{ count }} local distribution(s) were not found in the cached RDF source check. A metadata synchronisation can remove stale local records.
                         {% endblocktrans %}
                     </span>
                 </p>
@@ -77,7 +77,7 @@
             {% elif rdf_inventory_status.status == "unavailable" %}
             <p class="messagelist">
                 <span class="warning">
-                    {% trans "The live RDF source could not be checked. The form is using locally synchronised distributions." %}
+                    {% trans "The RDF source could not be checked. The form is using locally synchronised distributions." %}
                 </span>
             </p>
             {% elif rdf_inventory_status.status == "not_configured" %}

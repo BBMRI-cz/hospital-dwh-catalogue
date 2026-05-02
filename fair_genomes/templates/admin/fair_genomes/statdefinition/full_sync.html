@@ -6,7 +6,7 @@
 {% block content %}
 <div id="content-main">
     <p>{% trans "This will check and synchronise RDF metadata from the FAIR Data Point, then re-run active statistic aggregations from MOLGENIS GraphQL." %}</p>
-    <p>{% trans "Saving an active statistic definition also tries to synchronise that one aggregation immediately. If the live RDF source contains new distributions, run this action before configuring charts for them." %}</p>
+    <p>{% trans "Saving an active statistic definition also tries to synchronise that one aggregation immediately. If the RDF source contains new distributions, run this action before configuring charts for them." %}</p>
     <p>{% trans "This may take a few seconds depending on the number of datasets and statistic definitions." %}</p>
 
     {% if sync_states %}

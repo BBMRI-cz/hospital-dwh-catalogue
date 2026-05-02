@@ -160,7 +160,7 @@ Update:
 
 - [catalogue/settings/helpers.py](../catalogue/settings/helpers.py)
 - the relevant environment templates in `env-examples/`
-- [deploy.sh](../deploy.sh) validation
+- [scripts/lib/deploy_contract.sh](../scripts/lib/deploy_contract.sh) validation
 
 If the new database should be created automatically in Docker, also update:
 
@@ -239,7 +239,7 @@ If you want another chart:
 4. verify that the result appears in `StatResult`
 5. open the distribution detail page
 
-If a new FAIR Genomes distribution exists in RDF but is not yet available in the dropdown, run `Check and Synchronise FAIR Genomes` first. The admin form checks the live RDF inventory through a short-lived cache, but it still saves only locally synchronised `Distribution` rows.
+If a new FAIR Genomes distribution exists in the RDF source but is not yet available in the dropdown, run `Check and Synchronise FAIR Genomes` first. The admin form checks the RDF source inventory through a short-lived cache, but it still saves only locally synchronised `Distribution` rows.
 
 If you need product-level code changes:
 
@@ -260,7 +260,7 @@ Current behavior:
 - `FairGenomesSyncState` stores freshness state for `rdf_metadata` and `statistics` separately
 - RDF metadata is fetched, parsed, and persisted from the configured `FAIR_GENOMES_RDF_URL`
 - statistics are refreshed from active `StatDefinition` rows through MOLGENIS GraphQL
-- the stat-definition admin checks live RDF inventory through a five-minute cache and falls back to locally synchronised distributions
+- the stat-definition admin checks RDF source inventory through a five-minute cache and falls back to locally synchronised distributions
 
 When changing this area, keep RDF metadata freshness and statistic freshness separate. Grouped counts can change even when descriptive RDF metadata does not.
 
@@ -325,7 +325,7 @@ Keep env changes disciplined:
 1. decide which environment(s) actually need it
 2. add it only to the relevant file(s) in `env-examples/`
 3. load it in `catalogue/settings/*` or another real consumer
-4. update `deploy.sh` validation if it is required
+4. update `scripts/lib/deploy_contract.sh` validation if it is required
 5. document it in README or the relevant focused doc
 
 Avoid adding env variables that are not read by code.

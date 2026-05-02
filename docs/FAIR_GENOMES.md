@@ -124,7 +124,7 @@ From there you can:
 
 If MOLGENIS schema introspection is available, the admin form offers dropdowns for table and column selection. If it is unavailable, the form falls back to known values already stored in the database.
 
-The stat-definition admin also checks the live RDF endpoint through a short-lived cache. This check is read-only and does not write metadata to the database. It helps staff notice when the live RDF source exposes distributions that have not yet been synchronised locally. If the live RDF check fails, the form falls back to locally synchronised distributions so existing configuration remains editable.
+The stat-definition admin also checks the RDF source through a short-lived cache. This check is read-only and does not write metadata to the database. It helps staff notice when the RDF source exposes distributions that are not yet available in the local catalogue. If the RDF source check fails, the form falls back to locally synchronised distributions so existing configuration remains editable.
 
 ## Troubleshooting
 
@@ -153,7 +153,7 @@ That usually means schema introspection failed. The form should still work with 
 
 ### The admin form does not show new RDF distributions
 
-The form saves only locally synchronised `Distribution` rows. If the live RDF warning says new distributions exist, run `Check and Synchronise FAIR Genomes` first. If the live RDF source is unavailable, the form keeps using locally synchronised distributions.
+The form saves only locally synchronised `Distribution` rows. If the RDF source warning says new distributions exist, run `Check and Synchronise FAIR Genomes` first. If the RDF source is unavailable, the form keeps using locally synchronised distributions.
 
 ## Related guides
 

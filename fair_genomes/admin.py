@@ -66,8 +66,8 @@ def _rdf_inventory_cache_key(url: str) -> str:
     return f'{_RDF_INVENTORY_CACHE_KEY_PREFIX}:{url}'
 
 
-def _get_live_rdf_inventory() -> dict:
-    """Return cached live RDF dataset/distribution names without writing to DB."""
+def _get_rdf_source_inventory() -> dict:
+    """Return cached RDF source dataset/distribution names without writing to DB."""
     url = getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
     if not url:
         return {
@@ -109,7 +109,7 @@ def _get_live_rdf_inventory() -> dict:
             'error': '',
         }
     except Exception as exc:
-        logger.warning('Failed to inspect live FAIR Genomes RDF inventory: %s', exc)
+        logger.warning('Failed to inspect FAIR Genomes RDF source inventory: %s', exc)
         inventory = {
             'status': 'unavailable',
             'source_url': url,
@@ -129,7 +129,7 @@ def _clear_live_rdf_inventory_cache() -> None:
 
 
 def _get_rdf_inventory_status() -> dict:
-    inventory = _get_live_rdf_inventory()
+    inventory = _get_rdf_source_inventory()
     local_distribution_names = set(
         Distribution.objects.using('fair_genomes_db').values_list('name', flat=True)
     )
@@ -230,7 +230,7 @@ class StatDefinitionForm(forms.ModelForm):
         elif rdf_status['status'] == 'unavailable':
             distribution_help_text = _(
                 'DCAT Distribution whose detail page should show this chart. '
-                'The live RDF source could not be checked; showing locally synchronised values.'
+                'The RDF source could not be checked; showing locally synchronised values.'
             )
         elif rdf_status['status'] == 'not_configured':
             distribution_help_text = _(

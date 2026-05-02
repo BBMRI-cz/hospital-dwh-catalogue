@@ -198,6 +198,9 @@ only when the files live somewhere else inside or relative to the repository che
 ## Validation contract
 
 The deploy script validates the environment before it starts anything.
+The high-level flow lives in [deploy.sh](../deploy.sh); the detailed
+environment contract lives in
+[scripts/lib/deploy_contract.sh](../scripts/lib/deploy_contract.sh).
 
 Shared requirements for all environments:
 
