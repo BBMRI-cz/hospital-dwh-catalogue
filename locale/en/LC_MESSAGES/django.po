@@ -454,11 +454,11 @@ msgstr "Last error:"
 #: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html
 #, python-format
 msgid ""
-"RDF source check succeeded. The source currently exposes %(live)s "
+"RDF source check succeeded. The source currently exposes %(source)s "
 "distribution(s); %(local)s distribution(s) are available locally for "
 "statistic definitions."
 msgstr ""
-"RDF source check succeeded. The source currently exposes %(live)s "
+"RDF source check succeeded. The source currently exposes %(source)s "
 "distribution(s); %(local)s distribution(s) are available locally for "
 "statistic definitions."
 

@@ -244,6 +244,8 @@ If a new FAIR Genomes distribution exists in the RDF source but is not yet avail
 If you need product-level code changes:
 
 - model definitions are in `fair_genomes/models.py`
+- admin form construction is in `fair_genomes/services/admin_forms.py`
+- admin freshness/source checks are in `fair_genomes/services/admin_support.py`
 - stat sync logic is in `fair_genomes/services/stats.py`
 - operational freshness state is in `fair_genomes/services/sync_state.py`
 - stat loading for distribution pages is in `warehouse/services.py`

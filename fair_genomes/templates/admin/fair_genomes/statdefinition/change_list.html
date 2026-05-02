@@ -52,8 +52,8 @@
         {% if rdf_inventory_status %}
             {% if rdf_inventory_status.status == "available" %}
             <p>
-                {% blocktrans trimmed with live=rdf_inventory_status.live_distribution_count local=rdf_inventory_status.local_distribution_count %}
-                RDF source check succeeded. The source currently exposes {{ live }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
+                {% blocktrans trimmed with source=rdf_inventory_status.source_distribution_count local=rdf_inventory_status.local_distribution_count %}
+                RDF source check succeeded. The source currently exposes {{ source }} distribution(s); {{ local }} distribution(s) are available locally for statistic definitions.
                 {% endblocktrans %}
             </p>
                 {% if rdf_inventory_status.missing_local_distribution_count %}

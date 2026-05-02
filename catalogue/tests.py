@@ -6,6 +6,7 @@ Covers URL routing, views, and database routers.
 
 import importlib
 import os
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -14,6 +15,27 @@ from django.contrib.auth.models import User
 from django.test import SimpleTestCase, TestCase
 
 from .routers import AuthRouter, WarehouseRouter
+
+
+class _FakeLDAPSearch:
+    def __init__(self, base_dn, scope, filterstr):
+        self.base_dn = base_dn
+        self.scope = scope
+        self.filterstr = filterstr
+
+
+def _ldap_test_modules():
+    fake_ldap = SimpleNamespace(
+        SCOPE_SUBTREE=1,
+        OPT_REFERRALS=2,
+        OPT_NETWORK_TIMEOUT=3,
+    )
+    fake_ldap_config = SimpleNamespace(LDAPSearch=_FakeLDAPSearch)
+    return {
+        'ldap': fake_ldap,
+        'django_auth_ldap': SimpleNamespace(config=fake_ldap_config),
+        'django_auth_ldap.config': fake_ldap_config,
+    }
 
 
 class LdapSettingsTest(SimpleTestCase):
@@ -27,7 +49,10 @@ class LdapSettingsTest(SimpleTestCase):
             'AUTH_LDAP_USER_SEARCH_BASE': 'ou=Users,dc=example,dc=com',
         }
 
-        with patch.dict(os.environ, env, clear=False):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(sys.modules, _ldap_test_modules()),
+        ):
             settings = ldap_settings(mock_ldap=False)
 
         self.assertEqual(settings['AUTH_LDAP_LOGIN_ATTR'], 'sAMAccountName')
@@ -47,7 +72,10 @@ class LdapSettingsTest(SimpleTestCase):
             'AUTH_LDAP_LOGIN_ATTR': 'userPrincipalName',
         }
 
-        with patch.dict(os.environ, env, clear=False):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(sys.modules, _ldap_test_modules()),
+        ):
             settings = ldap_settings(mock_ldap=False)
 
         self.assertEqual(settings['AUTH_LDAP_LOGIN_ATTR'], 'userPrincipalName')
