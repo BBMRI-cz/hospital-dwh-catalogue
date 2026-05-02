@@ -12,6 +12,7 @@ from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
+from frontend.admin import CatalogueFilterDefinitionForm
 from frontend.models import CatalogueFilterDefinition
 from frontend.presentation.filters import (
     FilterState,
@@ -258,6 +259,37 @@ class CatalogueFilterDefinitionModelTest(TestCase):
         definitions = load_enabled_filter_definitions(_mock_schema())
 
         self.assertNotIn('theme', {definition.field_name for definition in definitions})
+
+    @patch(
+        'frontend.admin.get_supported_filter_field_choices',
+        return_value=(
+            ('keywords', 'Keywords (keywords)'),
+            ('source', 'Source (source)'),
+            ('access_rights', 'Access Rights (access_rights)'),
+        ),
+    )
+    def test_admin_add_form_only_shows_unconfigured_fields(self, _mock_choices):
+        form = CatalogueFilterDefinitionForm()
+
+        field_names = {value for value, _label in form.fields['field_name'].choices}
+
+        self.assertEqual(field_names, {'access_rights'})
+
+    @patch(
+        'frontend.admin.get_supported_filter_field_choices',
+        return_value=(
+            ('keywords', 'Keywords (keywords)'),
+            ('source', 'Source (source)'),
+            ('access_rights', 'Access Rights (access_rights)'),
+        ),
+    )
+    def test_admin_change_form_keeps_current_field_visible(self, _mock_choices):
+        definition = CatalogueFilterDefinition.objects.get(field_name='keywords')
+
+        form = CatalogueFilterDefinitionForm(instance=definition)
+
+        field_names = {value for value, _label in form.fields['field_name'].choices}
+        self.assertEqual(field_names, {'keywords', 'access_rights'})
 
 
 class CatalogueIndexViewTest(TestCase):

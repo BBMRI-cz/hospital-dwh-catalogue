@@ -103,6 +103,10 @@ Typical workflow for an already mapped dataset metadata field:
 4. set the sidebar label, order, and enabled flag
 5. reload the catalogue
 
+The field-name dropdown only shows mapped metadata fields that do not already
+have a filter definition. To change a label, order, or enabled flag for an
+existing filter, edit the existing definition instead of adding another one.
+
 The catalogue sidebar and dataset-card preview both use the enabled filter
 definitions. If no preview metadata is available for a dataset, the result card
 does not open.

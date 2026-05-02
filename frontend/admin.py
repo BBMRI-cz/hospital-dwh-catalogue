@@ -15,8 +15,18 @@ class CatalogueFilterDefinitionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        choices = list(get_supported_filter_field_choices())
         current_value = self.instance.field_name if self.instance and self.instance.pk else ''
+        used_field_names = set(
+            CatalogueFilterDefinition.objects.exclude(field_name=current_value).values_list(
+                'field_name',
+                flat=True,
+            )
+        )
+        choices = [
+            (value, label)
+            for value, label in get_supported_filter_field_choices()
+            if value not in used_field_names
+        ]
         if current_value and current_value not in {value for value, _label in choices}:
             choices.append(
                 (current_value, _('%(field)s (currently unavailable)') % {'field': current_value})
