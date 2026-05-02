@@ -5,7 +5,6 @@ Django process instead of spawning manage.py 7+ times.
 Called by docker/entrypoint.sh before the main server command.
 """
 
-import logging
 import os
 import shutil
 import subprocess
@@ -24,8 +23,6 @@ from startup_tasks import (
 import django
 from django.core.management import call_command
 from django.db import connections
-
-logger = logging.getLogger(__name__)
 
 
 def _ensure_env_superuser() -> None:
@@ -148,74 +145,90 @@ def _check_metadata_db() -> None:
         )
 
 
-def main() -> None:
-    django.setup()
+def _migrate_database(database: str) -> None:
+    kwargs = {'interactive': False, 'verbosity': 1}
+    if database != 'default':
+        kwargs['database'] = database
+    call_command('migrate', **kwargs)
 
-    settings_module = os.environ.get('DJANGO_SETTINGS_MODULE', '')
 
-    # ── Migrations ────────────────────────────────────────────────────────────
-    # auth_db: sessions, auth, contenttypes, admin
-    call_command('migrate', database='auth_db', interactive=False, verbosity=1)
+def _migrate_app(database: str, app_label: str, *targets: str, fake: bool = False) -> None:
+    kwargs = {'interactive': False}
+    if fake:
+        kwargs['fake'] = True
+    if database != 'default':
+        kwargs['database'] = database
+    call_command('migrate', app_label, *targets, **kwargs)
 
-    # ── Env-managed superuser ─────────────────────────────────────────────────
-    _ensure_env_superuser()
 
-    # default: ticketing and anything else
-    call_command('migrate', interactive=False, verbosity=1)
+def _repair_missing_app_table(
+    *,
+    database: str,
+    app_label: str,
+    sentinel_table: str,
+) -> None:
+    tables = connections[database].introspection.table_names()
+    if not table_is_missing(tables, sentinel_table):
+        return
 
-    # Repair drifted default migration state where ticketing 0001 is marked applied
-    # but the table is missing (DB was reset/replaced without clearing django_migrations).
-    default_tables = connections['default'].introspection.table_names()
-    if table_is_missing(default_tables, 'ticketing_ticket_request'):
-        print(
-            'default migration drift detected (missing ticketing_ticket_request). '
-            'Repairing migration state...',
-            flush=True,
-        )
-        call_command('migrate', 'ticketing', 'zero', fake=True, interactive=False)
-        call_command('migrate', 'ticketing', interactive=False)
+    print(
+        f'{database} migration drift detected (missing {sentinel_table}). '
+        'Repairing migration state...',
+        flush=True,
+    )
+    _migrate_app(database, app_label, 'zero', fake=True)
+    _migrate_app(database, app_label)
 
-    # fair_genomes_db: fair_genomes app
-    call_command('migrate', database='fair_genomes_db', interactive=False, verbosity=1)
 
-    # Repair drifted fair_genomes_db migration state where 0001 is marked applied
-    # but core tables are missing (legacy schema leftovers, manual DB changes).
-    fg_tables = connections['fair_genomes_db'].introspection.table_names()
-    if table_is_missing(fg_tables, 'fair_genomes_contact_point'):
-        print(
-            'fair_genomes_db migration drift detected (missing fair_genomes_contact_point). '
-            'Repairing migration state...',
-            flush=True,
-        )
-        call_command(
-            'migrate',
-            'fair_genomes',
-            'zero',
-            database='fair_genomes_db',
-            fake=True,
-            interactive=False,
-        )
-        call_command('migrate', 'fair_genomes', database='fair_genomes_db', interactive=False)
+def _seed_mock_data_if_needed() -> None:
+    if not should_seed_mock_fair_genomes(os.environ):
+        return
+    print('MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data...', flush=True)
+    call_command('seed_fair_genomes_mock')
 
-    # metadata_db: warehouse schema is managed externally, so only check reachability.
-    _check_metadata_db()
 
-    # ── Seed mock data ────────────────────────────────────────────────────────
-    if should_seed_mock_fair_genomes(os.environ):
-        print('MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data...', flush=True)
-        call_command('seed_fair_genomes_mock')
-
-    # ── Tailwind CSS ──────────────────────────────────────────────────────────
-    base_dir = Path(__file__).resolve().parent.parent
-    _build_tailwind_css(base_dir)
-
-    # ── Translations ──────────────────────────────────────────────────────────
-    locale_dir = Path(__file__).resolve().parent.parent / 'locale'
+def _compile_translations_if_needed(base_dir: Path) -> None:
+    locale_dir = base_dir / 'locale'
     if translations_need_compile(locale_dir):
         print('Compiling translations...', flush=True)
         call_command('compilemessages', locale=['cs', 'en'], verbosity=0)
     else:
         print('Translations up to date, skipping compilemessages.', flush=True)
+
+
+def main() -> None:
+    django.setup()
+
+    settings_module = os.environ.get('DJANGO_SETTINGS_MODULE', '')
+    base_dir = Path(__file__).resolve().parent.parent
+
+    # ── Migrations ────────────────────────────────────────────────────────────
+    _migrate_database('auth_db')
+    _ensure_env_superuser()
+
+    _migrate_database('default')
+    _repair_missing_app_table(
+        database='default',
+        app_label='ticketing',
+        sentinel_table='ticketing_ticket_request',
+    )
+
+    _migrate_database('fair_genomes_db')
+    _repair_missing_app_table(
+        database='fair_genomes_db',
+        app_label='fair_genomes',
+        sentinel_table='fair_genomes_contact_point',
+    )
+    _check_metadata_db()
+
+    # ── Seed mock data ────────────────────────────────────────────────────────
+    _seed_mock_data_if_needed()
+
+    # ── Tailwind CSS ──────────────────────────────────────────────────────────
+    _build_tailwind_css(base_dir)
+
+    # ── Translations ──────────────────────────────────────────────────────────
+    _compile_translations_if_needed(base_dir)
 
     # ── Static files (skip in dev — runserver serves them directly) ───────────
     if should_collectstatic(settings_module):

@@ -30,7 +30,7 @@ class CatalogueIndexView(LoginRequiredMixin, View):
         context = build_catalogue_index_context(request)
 
         if request.headers.get('HX-Request'):
-            return render(request, 'catalogue/components/_results.html', context)
+            return render(request, 'catalogue/components/_catalogue_htmx.html', context)
 
         return render(request, 'catalogue/index.html', context)
 

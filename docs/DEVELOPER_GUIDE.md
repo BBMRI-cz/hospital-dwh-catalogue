@@ -115,7 +115,7 @@ Code changes are needed only when the metadata field is not yet mapped into the
 unified catalogue model. In that case:
 
 1. add/map the field through the source model, shared DTO, mapper, and frontend view model
-2. make sure the field matches a HealthDCAT-AP schema local name, or add an explicit extractor in [frontend/presentation/filters.py](../frontend/presentation/filters.py)
+2. make sure the field matches a HealthDCAT-AP schema local name, or add an explicit extractor in [frontend/presentation/filter_fields.py](../frontend/presentation/filter_fields.py)
 3. add or update frontend tests
 
 The warehouse distribution-column filter is intentionally separate because it

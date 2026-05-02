@@ -362,6 +362,39 @@ class CatalogueIndexViewTest(TestCase):
         self.assertNotContains(response, 'Beta Dataset')
 
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
+    def test_htmx_filter_response_refreshes_sidebar_options(self, mock_cls):
+        ds1 = _make_test_dataset(
+            name='ds1',
+            title='Keep Dataset',
+            keyword='keep',
+            custodian='AGENT_KEEP',
+        )
+        ds2 = _make_test_dataset(
+            name='ds2',
+            title='Drop Dataset',
+            keyword='drop',
+            custodian='AGENT_DROP',
+        )
+        mock_svc = mock_cls.return_value
+        mock_svc.get_datasets_with_distributions.return_value = [ds1, ds2]
+        mock_svc.get_schema_json.return_value = _mock_schema()
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('frontend:catalogue'),
+            {'keywords': 'keep'},
+            HTTP_HX_REQUEST='true',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'catalogue/components/_catalogue_htmx.html')
+        self.assertContains(response, 'hx-swap-oob="innerHTML"')
+        self.assertContains(response, 'Keep Dataset')
+        self.assertContains(response, 'AGENT_KEEP')
+        self.assertNotContains(response, 'Drop Dataset')
+        self.assertNotContains(response, 'AGENT_DROP')
+
+    @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_text_search_matches_multi_value_metadata(self, mock_cls):
         ds1 = _make_test_dataset(
             name='ds1',

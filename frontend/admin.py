@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from frontend.models import CatalogueFilterDefinition
-from frontend.presentation.filters import get_supported_filter_field_choices
+from frontend.presentation.filter_fields import get_supported_filter_field_choices
 
 
 class CatalogueFilterDefinitionForm(forms.ModelForm):
