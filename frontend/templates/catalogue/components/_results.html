@@ -15,11 +15,11 @@
   {% with dataset=card.dataset %}
   {% with status=dataset.status %}
 
-  <div {% if card.can_expand %}x-data="{ open: false }" :class="open ? 'border-mou-cyan' : 'border-site-border'"{% endif %}
+  <div {% if card.can_expand %}x-data="{ open: false }" :class="open ? 'border-mmci-cyan' : 'border-site-border'"{% endif %}
     class="bg-white border {% if not card.can_expand %}border-site-border{% endif %} rounded-lg overflow-hidden transition-shadow hover:shadow-md">
     <div class="flex items-center gap-3 px-5 py-2 {% if card.can_expand %}cursor-pointer select-none{% endif %}"
       {% if card.can_expand %}@click="open = !open"{% endif %}>
-      <span class="font-serif text-[17px] flex-1 leading-snug text-mou-cyan">{{ dataset.title|default:dataset.name }}</span>
+      <span class="font-serif text-[17px] flex-1 leading-snug text-mmci-cyan">{{ dataset.title|default:dataset.name }}</span>
 
       {% include "includes/_badge.html" with b_value=dataset.distributions|length b_label="dist." only %}
 
@@ -71,6 +71,6 @@
     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
   </svg>
   <p class="font-serif text-xl text-txt-muted mb-1">{% trans "No datasets found" %}</p>
-  <a href="{% url 'frontend:catalogue' %}" class="text-sm underline text-mou-cyan">{% trans "Clear all filters" %}</a>
+  <a href="{% url 'frontend:catalogue' %}" class="text-sm underline text-mmci-cyan">{% trans "Clear all filters" %}</a>
 </div>
 {% endif %}

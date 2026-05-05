@@ -19,7 +19,7 @@ class ExportEntity(StrEnum):
 
 
 class ExportRdfClass(StrEnum):
-    """Named HealthDCAT/DCAT class terms required by generated reference nodes."""
+    """Named HealthDCAT-AP/DCAT class terms required by generated reference nodes."""
 
     CONCEPT = 'Concept'
     LEGAL_RESOURCE = 'LegalResource'
@@ -88,14 +88,14 @@ class ResolvedExportProfile:
         except Exception as exc:
             resolved.warn(
                 'profile_load_failed',
-                f'HealthDCAT export context profile could not be loaded: {exc}',
+                f'HealthDCAT-AP export context profile could not be loaded: {exc}',
             )
             return resolved
 
         if not any(resolved.profile.values()):
             resolved.warn(
                 'profile_empty',
-                'HealthDCAT export context profile is empty; metadata export is incomplete.',
+                'HealthDCAT-AP export context profile is empty; metadata export is incomplete.',
             )
         return resolved
 
@@ -138,7 +138,7 @@ class ResolvedExportProfile:
         if value is None:
             self.warn(
                 'missing_class',
-                f'Missing RDF class "{alias}" in HealthDCAT context profile.',
+                f'Missing RDF class "{alias}" in HealthDCAT-AP context profile.',
                 alias=alias,
             )
             return None
@@ -150,7 +150,7 @@ class ResolvedExportProfile:
         if value is None:
             self.warn(
                 'missing_class',
-                f'Missing RDF class "{class_term}" for {entity.value} in HealthDCAT context profile.',
+                f'Missing RDF class "{class_term}" for {entity.value} in HealthDCAT-AP context profile.',
                 entity=entity.value,
                 alias=class_term,
             )
@@ -165,7 +165,7 @@ class ResolvedExportProfile:
         if value is None:
             self.warn(
                 'missing_property',
-                f'Missing RDF property "{alias}" for {entity.value} in HealthDCAT context profile.',
+                f'Missing RDF property "{alias}" for {entity.value} in HealthDCAT-AP context profile.',
                 entity=entity.value,
                 alias=alias,
             )
@@ -177,7 +177,7 @@ class ResolvedExportProfile:
         if value is None:
             self.warn(
                 'missing_term',
-                f'Missing RDF term "{alias}" in HealthDCAT context profile.',
+                f'Missing RDF term "{alias}" in HealthDCAT-AP context profile.',
                 alias=alias,
             )
             return None
@@ -188,7 +188,7 @@ class ResolvedExportProfile:
             alias = f'{prefix}:{local_name}'
             self.warn(
                 'missing_prefix',
-                f'Missing RDF prefix "{prefix}" in HealthDCAT context profile.',
+                f'Missing RDF prefix "{prefix}" in HealthDCAT-AP context profile.',
                 alias=alias,
             )
             return None
@@ -196,7 +196,7 @@ class ResolvedExportProfile:
 
 
 def export_context_profile() -> SchemaRegistryContextProfile:
-    """Return the active HealthDCAT export context profile."""
+    """Return the active HealthDCAT-AP export context profile."""
     return get_export_context_profile()
 
 

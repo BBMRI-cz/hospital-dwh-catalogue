@@ -1,5 +1,5 @@
 """
-Fair Genomes Models — HealthDCAT-AP Profile
+FAIR Genomes Models — HealthDCAT-AP Profile
 ===========================================
 
 Concrete, managed=True Django models for the FAIR Genomes catalogue.

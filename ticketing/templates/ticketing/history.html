@@ -12,7 +12,7 @@
   {% trans "History of submitted data access requests" as t_history_subtitle %}
   {% include "includes/_breadcrumb.html" with bc_root_url=catalogue_url bc_root_label=t_catalogue bc_current=t_my_tickets %}
 
-  {% with hero_title=t_my_tickets hero_subtitle=t_history_subtitle hero_title_class="text-mou-orange" hero_icon="calendar" hero_icon_class="bg-mou-orange-light border border-mou-orange-border text-mou-orange" %}
+  {% with hero_title=t_my_tickets hero_subtitle=t_history_subtitle hero_title_class="text-mmci-orange" hero_icon="calendar" hero_icon_class="bg-mmci-orange-light border border-mmci-orange-border text-mmci-orange" %}
   {% include "includes/_page_hero.html" %}
   {% endwith %}
 
@@ -21,7 +21,7 @@
     {% trans "Submitted tickets" as t_submitted_tickets %}
     {% with tickets_count=paginator.count|stringformat:"s" %}
     {% with tickets_label=t_submitted_tickets|add:" · "|add:tickets_count %}
-    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-orange" csh_text_class="text-mou-orange" csh_label=tickets_label %}
+    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-orange" csh_text_class="text-mmci-orange" csh_label=tickets_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">
       <thead>
@@ -45,7 +45,7 @@
   {% trans "No tickets yet" as t_no_tickets %}
   {% trans "Your submitted data access requests will appear here." as t_no_tickets_sub %}
   {% trans "Go to catalogue" as t_go_to_catalogue %}
-  {% with es_icon="calendar" es_icon_class="bg-mou-orange-light text-mou-orange" es_heading=t_no_tickets es_subtitle=t_no_tickets_sub es_btn_href=catalogue_url es_btn_label=t_go_to_catalogue %}
+  {% with es_icon="calendar" es_icon_class="bg-mmci-orange-light text-mmci-orange" es_heading=t_no_tickets es_subtitle=t_no_tickets_sub es_btn_href=catalogue_url es_btn_label=t_go_to_catalogue %}
   {% include "includes/_empty_state.html" %}
   {% endwith %}
   {% endif %}

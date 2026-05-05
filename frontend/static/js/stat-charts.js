@@ -24,11 +24,11 @@
   var labelTotal = 'total';
   try { if (i18nEl) labelTotal = JSON.parse(i18nEl.textContent) || labelTotal; } catch (_) {}
 
-  /* ── MOU-inspired colour palette ──────────────────────────────────────── */
+  /* ── MMCI-inspired colour palette ──────────────────────────────────────── */
   var PALETTE = [
-    '#53c0d7',  /* mou-cyan    */
-    '#f04600',  /* mou-orange  */
-    '#007fc8',  /* mou-blue    */
+    '#53c0d7',  /* mmci-cyan    */
+    '#f04600',  /* mmci-orange  */
+    '#007fc8',  /* mmci-blue    */
     '#f59e0b',  /* amber       */
     '#10b981',  /* emerald     */
     '#8b5cf6',  /* violet      */
@@ -68,11 +68,11 @@
       ctx.textBaseline = 'middle';
 
       ctx.font      = 'bold 17px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#374151';  /* mou txt */
+      ctx.fillStyle = '#374151';  /* mmci txt */
       ctx.fillText(total.toLocaleString(), cx, cy - 7);
 
       ctx.font      = '10px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#4b5563';  /* mou txt-muted */
+      ctx.fillStyle = '#4b5563';  /* mmci txt-muted */
       ctx.fillText(labelTotal, cx, cy + 10);
 
       ctx.restore();

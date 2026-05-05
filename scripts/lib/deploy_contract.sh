@@ -79,7 +79,7 @@ maybe_update_health_dcat_release() {
         return 0
     fi
 
-    echo "Updating HealthDCAT release files..."
+    echo "Updating HealthDCAT-AP release files..."
     if ! git -C "$REPO_ROOT" submodule update --init --recursive --remote -- "$submodule_path"; then
         echo "Warning: failed to update $submodule_path from remote; continuing with the local checkout." >&2
     fi

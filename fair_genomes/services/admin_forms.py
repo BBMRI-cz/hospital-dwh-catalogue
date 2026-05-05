@@ -14,8 +14,9 @@ class StatDefinitionForm(forms.ModelForm):
     Dynamic StatDefinition form.
 
     MOLGENIS table/column choices come from schema introspection when available.
-    Distribution choices come from locally synchronised FAIR Genomes metadata,
-    with a read-only RDF source inventory check used only to guide staff.
+    Distribution choices come from locally synchronised FAIR Genomes metadata.
+    The RDF source inventory check prevents new statistic definitions from
+    being saved against stale local metadata.
     """
 
     dataset = forms.ChoiceField(
@@ -189,3 +190,22 @@ class StatDefinitionForm(forms.ModelForm):
             return Distribution.objects.using('fair_genomes_db').get(pk=name)
         except Distribution.DoesNotExist:
             raise forms.ValidationError(_('Select a valid choice. That choice is not available.'))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        rdf_status = get_rdf_inventory_status()
+        if rdf_status['status'] != 'available':
+            return cleaned_data
+
+        if (
+            rdf_status['missing_local_distribution_count']
+            or rdf_status['stale_local_distribution_count']
+        ):
+            raise forms.ValidationError(
+                _(
+                    'FAIR Genomes RDF metadata is not synchronised with the local catalogue. '
+                    'Run "Check and synchronise FAIR Genomes metadata" before configuring statistics.'
+                )
+            )
+
+        return cleaned_data

@@ -47,7 +47,7 @@ class AuthRouter:
 
 class WarehouseRouter:
     """
-    Router for warehouse metadata and Fair Genomes data.
+    Router for warehouse metadata and FAIR Genomes data.
 
     - 'fair_genomes' app models -> fair_genomes_db
     - 'warehouse' app models -> metadata_db

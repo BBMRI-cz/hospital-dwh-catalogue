@@ -1,14 +1,14 @@
 # User Guide
 
-Audience: catalogue users, staff users, and teammates demoing the app.
+Audience: Catalogue users, staff users, and teammates demoing the Catalogue.
 
-Use this page when the app is already running and you want to know what people can do in the browser. If you need to start or deploy the stack, use [OPERATIONS.md](OPERATIONS.md).
+Use this page when the Catalogue is already running and you want to know what people can do in the browser. If you need to start or deploy the stack, use [OPERATIONS.md](OPERATIONS.md).
 
 ## Before you start
 
 You need:
 
-- a running app
+- a running Catalogue
 - a user account that can sign in
 
 Authentication depends on the environment:
@@ -48,7 +48,7 @@ From there they can:
 
 Dataset detail pages show:
 
-- HealthDCAT-style metadata rows
+- HealthDCAT-AP-compatible metadata rows
 - the distributions that belong to the dataset
 - dataset-level export buttons when the dataset has distributions
 
@@ -56,7 +56,7 @@ Dataset detail pages show:
 
 Distribution detail pages show:
 
-- HealthDCAT-style distribution metadata
+- HealthDCAT-AP-compatible distribution metadata
 - physical warehouse tables and columns when available
 - FAIR Genomes charts when stat results exist
 
@@ -78,8 +78,8 @@ The request workflow is:
 1. add datasets to the cart
 2. open `/cart/`
 3. submit a request description
-4. the app stores a local `TicketRequest`
-5. the app sends the request to the configured ticketing service
+4. the Catalogue stores a local `TicketRequest`
+5. the Catalogue sends the request to the configured ticketing service
 
 Request history is available at `/tickets/`.
 

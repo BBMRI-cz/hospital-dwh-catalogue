@@ -2,11 +2,11 @@
 
 Audience: developers, operators, and anyone who wants a mental model of the system.
 
-Use this page to understand how the app is organized before you deploy it, debug it, or extend it.
+Use this page to understand how the Catalogue is organized before you deploy it, debug it, or extend it.
 
-## What this app is
+## What the Catalogue is
 
-The Hospital DWH Catalogue is a Django application that publishes metadata about hospital data sources in a HealthDCAT-AP-compatible catalogue.
+The Hospital Data Warehouse Catalogue is a Django application that publishes metadata about hospital data sources in a HealthDCAT-AP-compatible catalogue.
 
 It combines metadata from multiple source applications:
 
@@ -15,7 +15,7 @@ It combines metadata from multiple source applications:
 - `ticketing` — local ticket requests stored in `default`
 - Django auth/admin/session data in `auth_db`
 
-The app is server-rendered. Users log in, browse datasets and distributions, filter the catalogue, inspect details, export metadata, and request access through the ticketing flow.
+The Catalogue is server-rendered. Users log in, browse datasets and distributions, filter the catalogue, inspect details, export metadata, and request access through the ticketing flow.
 
 ## Main user flows
 
@@ -27,7 +27,7 @@ The app is server-rendered. Users log in, browse datasets and distributions, fil
 - Open `/admin/` for content and user administration
 - Open `/grafana/` as a logged-in staff user for observability
 
-## How the app is structured
+## How the Catalogue is structured
 
 ### Django apps
 
@@ -50,7 +50,7 @@ The important architectural pattern is:
 5. `frontend/presentation/*` turns DTOs into view models, filtering, sidebars, and cache snapshots
 6. `shared/export.py` exposes the export facade, while focused export helper modules build HealthDCAT-AP JSON-LD and Turtle payloads
 
-This separation is what makes the app easy to extend:
+This separation is what makes the Catalogue easy to extend:
 
 - source-specific schema details stay in the source app
 - the frontend reads normalized DTOs
@@ -95,7 +95,7 @@ There is no Node.js build pipeline for the UI.
 
 ## Exports
 
-The app exposes two authenticated aggregate export endpoints:
+The Catalogue exposes two authenticated aggregate export endpoints:
 
 - `/api/jsonld`
 - `/api/rdf`
@@ -117,6 +117,6 @@ The schema terms shown in the UI come from the configured HealthDCAT-AP release 
 
 ## Read this next
 
-- [USER_GUIDE.md](USER_GUIDE.md) — how to use the app
+- [USER_GUIDE.md](USER_GUIDE.md) — how to use the Catalogue
 - [OPERATIONS.md](OPERATIONS.md) — deployment and maintenance
-- [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) — how to change and extend the app
+- [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) — how to change and extend the Catalogue

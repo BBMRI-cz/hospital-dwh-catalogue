@@ -1,5 +1,5 @@
 """
-Fair Genomes Admin Configuration
+FAIR Genomes Admin Configuration
 """
 
 import logging

@@ -7,7 +7,7 @@
     @keydown.enter.prevent="open = !open"
     @keydown.space.prevent="open = !open">
   <td class="px-5 py-3">
-    <div class="font-medium text-sm max-w-xs truncate text-mou-orange">{{ ticket.subject }}</div>
+    <div class="font-medium text-sm max-w-xs truncate text-mmci-orange">{{ ticket.subject }}</div>
     <div class="font-mono text-[10px] font-medium text-txt mt-0.5">{{ ticket.created_at|date:"Y-m-d H:i" }}</div>
   </td>
   <td class="px-5 py-3">
@@ -31,9 +31,9 @@
       <div class="py-1.5 first:pt-0 last:pb-0">
         {% if item.detail_url %}
         <a href="{{ item.detail_url }}" target="_blank" rel="noopener noreferrer"
-           class="group block hover:text-mou-cyan transition-colors">
-          <div class="font-medium text-sm text-mou-cyan group-hover:text-mou-cyan">{{ item.item_name }}</div>
-          {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5 group-hover:text-mou-cyan/70">{{ item.parent_dataset }}</div>{% endif %}
+           class="group block hover:text-mmci-cyan transition-colors">
+          <div class="font-medium text-sm text-mmci-cyan group-hover:text-mmci-cyan">{{ item.item_name }}</div>
+          {% if item.parent_dataset %}<div class="font-mono text-[10px] text-txt-muted mt-0.5 group-hover:text-mmci-cyan/70">{{ item.parent_dataset }}</div>{% endif %}
         </a>
         {% else %}
         <div class="font-medium text-gray-800 text-sm">{{ item.item_name }}</div>

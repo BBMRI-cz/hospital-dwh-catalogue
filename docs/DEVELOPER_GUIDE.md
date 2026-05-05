@@ -1,10 +1,10 @@
 # Developer Guide
 
-Audience: developers changing application behavior or data sources.
+Audience: developers changing Catalogue behavior or data sources.
 
 Use this page when you are making code changes. For runtime setup, use [OPERATIONS.md](OPERATIONS.md). For integration behavior, use [FAIR_GENOMES.md](FAIR_GENOMES.md).
 
-This guide covers the most common ways developers change the app.
+This guide covers the most common ways developers change the Catalogue.
 
 ## Common change paths
 
@@ -282,7 +282,7 @@ Typical changes:
 
 ## Internationalization
 
-The app supports Czech and English.
+The Catalogue supports Czech and English.
 
 When you add or change translatable strings:
 
@@ -305,7 +305,7 @@ In templates:
 
 `docker/startup.py` recompiles translations automatically when needed, but you should still compile and commit them locally so checks pass.
 
-## Add or change HealthDCAT schema behavior
+## Add or change HealthDCAT-AP schema behavior
 
 The schema metadata shown in the UI comes from:
 

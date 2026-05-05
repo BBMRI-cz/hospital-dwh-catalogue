@@ -23,7 +23,7 @@
   <div class="mb-8 pb-7 border-b border-gray-200">
     <div class="flex items-start gap-4 flex-wrap">
       <div class="flex-1 min-w-0">
-        <h1 class="font-serif text-4xl font-normal text-mou-orange leading-tight">
+        <h1 class="font-serif text-4xl font-normal text-mmci-orange leading-tight">
           {{ distribution.title|default:distribution.name }}
         </h1>
         {% if distribution.description %}
@@ -46,7 +46,7 @@
   <div class="bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
     <div class="p-0">
       {% trans "Distribution Metadata" as t_dist_meta %}
-      {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-orange" csh_text_class="text-mou-orange" csh_label=t_dist_meta %}
+      {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-orange" csh_text_class="text-mmci-orange" csh_label=t_dist_meta %}
       <div class="grid grid-cols-1 sm:grid-cols-2">
         {% include "includes/_dcat_row.html" with semantics="dct:title" label="Title" value=distribution.title schema_json=schema_json only %}
         {% for semantics, label, value in dcat_rows %}

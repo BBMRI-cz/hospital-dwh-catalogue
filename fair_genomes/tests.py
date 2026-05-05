@@ -15,6 +15,7 @@ from django.test import RequestFactory, SimpleTestCase, TestCase, override_setti
 from django.utils.translation import override
 
 from fair_genomes.admin import StatDefinitionAdmin
+from fair_genomes.services.admin_forms import StatDefinitionForm
 
 from .models import (
     Agent,
@@ -142,7 +143,7 @@ class DistributionModelTest(TestCase):
 
 
 class SeedFairGenomesMockCommandTest(TestCase):
-    """The mock seed should be useful as a HealthDCAT export fixture."""
+    """The mock seed should be useful as a HealthDCAT-AP export fixture."""
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
@@ -616,6 +617,35 @@ class StatDefinitionAdminSaveTest(TestCase):
         )
         self.assertEqual(state.status, FairGenomesSyncState.Status.SUCCESS)
         self.assertEqual(state.summary['updated'], 1)
+
+    @patch('fair_genomes.services.admin_forms.get_molgenis_schema')
+    @patch('fair_genomes.services.admin_forms.get_rdf_inventory_status')
+    def test_form_rejects_when_rdf_inventory_is_not_synchronised(
+        self,
+        mock_rdf_status,
+        mock_schema,
+    ):
+        mock_schema.return_value = {'sequencing': ['sequencinginstrumentmodel']}
+        mock_rdf_status.return_value = {
+            'status': 'available',
+            'missing_local_distribution_count': 1,
+            'stale_local_distribution_count': 0,
+        }
+
+        with override('en'):
+            form = StatDefinitionForm(
+                data={
+                    'distribution': self.distribution.pk,
+                    'molgenis_table': 'sequencing',
+                    'molgenis_column': 'sequencinginstrumentmodel',
+                    'display_label': '',
+                    'sort_order': '0',
+                    'is_active': 'on',
+                }
+            )
+
+            self.assertFalse(form.is_valid())
+            self.assertIn('not synchronised', str(form.errors))
 
 
 # ---------------------------------------------------------------------------

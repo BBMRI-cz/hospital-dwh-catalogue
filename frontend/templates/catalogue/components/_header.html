@@ -2,7 +2,7 @@
 {% get_current_language as LANGUAGE_CODE %}
 <header class="cat-header sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
   <div class="max-w-screen-2xl mx-auto px-4 h-20 flex items-center gap-4">
-  <a href="{% url 'frontend:catalogue' %}" class="shrink-0 flex items-center py-2" title="{% trans 'Data Catalogue' %}">
+  <a href="{% url 'frontend:catalogue' %}" class="shrink-0 flex items-center py-2" title="{% trans 'Hospital Data Warehouse Catalogue' %}">
     <img src="{% static 'img/mmci_logo.svg' %}" alt="MMCI logo" class="max-h-full w-auto">
   </a>
 
@@ -21,12 +21,12 @@
     <div class="flex items-center rounded-md border border-gray-200 overflow-hidden text-[13px] font-mono">
       <button type="button"
         @click="document.getElementById('lang-input').value='cs';document.getElementById('lang-form').submit()"
-        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'cs' %}text-white bg-mou-cyan{% else %}text-txt-muted hover:bg-gray-100{% endif %}"
+        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'cs' %}text-white bg-mmci-cyan{% else %}text-txt-muted hover:bg-gray-100{% endif %}"
         >CZ</button>
       <span class="w-px h-5 bg-gray-200 shrink-0"></span>
       <button type="button"
         @click="document.getElementById('lang-input').value='en';document.getElementById('lang-form').submit()"
-        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'en' %}text-white bg-mou-cyan{% else %}text-txt-muted hover:bg-gray-100{% endif %}"
+        class="px-3 py-1.5 transition-colors {% if LANGUAGE_CODE == 'en' %}text-white bg-mmci-cyan{% else %}text-txt-muted hover:bg-gray-100{% endif %}"
         >EN</button>
     </div>
 
@@ -40,7 +40,7 @@
           <circle cx="12" cy="7" r="4"/>
         </svg>
         {% if user.is_staff %}
-        <span class="hidden sm:inline font-mono text-[11px] font-semibold text-mou-orange uppercase tracking-wide">{% trans "Staff" %}</span>
+        <span class="hidden sm:inline font-mono text-[11px] font-semibold text-mmci-orange uppercase tracking-wide">{% trans "Staff" %}</span>
         {% endif %}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>

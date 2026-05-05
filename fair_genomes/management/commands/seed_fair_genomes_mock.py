@@ -713,7 +713,7 @@ class Command(BaseCommand):
                 ds_created += 1
         created_counts['Dataset'] = ds_created
 
-        # Fair Genomes distributions have no db_layer (warehouse-only field).
+        # FAIR Genomes distributions have no db_layer (warehouse-only field).
         # Cover format, rights, byte_size, and timestamp combinations.
 
         distribution_specs: list[dict[str, Any]] = [

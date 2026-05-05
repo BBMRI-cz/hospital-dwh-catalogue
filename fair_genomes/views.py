@@ -1,3 +1,3 @@
 """
-Fair Genomes Views
+FAIR Genomes Views
 """

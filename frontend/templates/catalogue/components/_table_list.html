@@ -2,8 +2,8 @@
 <div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mb-8 card"
   x-data="{ q: '' }">
   <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
-    <div class="w-0.5 h-4 rounded shrink-0 bg-mou-blue"></div>
-    <span class="font-mono text-[10px] uppercase tracking-wider shrink-0 text-mou-blue">
+    <div class="w-0.5 h-4 rounded shrink-0 bg-mmci-blue"></div>
+    <span class="font-mono text-[10px] uppercase tracking-wider shrink-0 text-mmci-blue">
       csvw:Table · {{ tables|length }}
     </span>
     {% include "includes/_info_btn.html" with semantics="csvw:Table" %}
@@ -13,7 +13,7 @@
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input type="text" x-model="q" placeholder="{% trans 'Search tables…' %}"
-        class="block h-8 w-full rounded border border-gray-300 pl-8 pr-3 text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-mou-cyan focus:border-mou-cyan w-52 bg-white">
+        class="block h-8 w-full rounded border border-gray-300 pl-8 pr-3 text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-mmci-cyan focus:border-mmci-cyan w-52 bg-white">
     </div>
   </div>
 
@@ -39,7 +39,7 @@
           x-show="!q || '{{ tbl.name|lower }} {{ tbl.title|lower }}'.includes(q.toLowerCase())"
           @click="document.getElementById('tbl-modal-{{ forloop.counter }}').showModal()">
         <td class="px-5 py-3">
-          <div class="font-medium text-sm text-mou-cyan">{{ tbl.title }}</div>
+          <div class="font-medium text-sm text-mmci-cyan">{{ tbl.title }}</div>
           {% if tbl.description %}
           <div class="text-xs text-txt-muted mt-0.5 line-clamp-1">{{ tbl.description }}</div>
           {% endif %}

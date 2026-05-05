@@ -3,14 +3,14 @@
 <div class="bg-white border border-gray-200 shadow-sm mb-8 rounded-lg overflow-hidden">
   <div class="p-0">
     {% trans "Value Distributions" as t_vd %}
-    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mou-blue" csh_text_class="text-mou-blue" csh_label=t_vd %}
+    {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-blue" csh_text_class="text-mmci-blue" csh_label=t_vd %}
 
     <div class="p-5 flex flex-col gap-8">
       {% for group in chart_groups %}
       <div>
         <div class="flex items-center gap-3 mb-4">
-          <span class="font-mono text-xs font-bold text-mou-blue uppercase tracking-widest">{{ group.table_name }}</span>
-          <span class="flex-1 border-t border-mou-blue-border"></span>
+          <span class="font-mono text-xs font-bold text-mmci-blue uppercase tracking-widest">{{ group.table_name }}</span>
+          <span class="flex-1 border-t border-mmci-blue-border"></span>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {% for chart in group.charts %}

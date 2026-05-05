@@ -23,7 +23,7 @@ module.exports = {
         mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
       },
       colors: {
-        mou: {
+        mmci: {
           cyan: '#53c0d7',
           orange: '#f04600',
           blue: '#007fc8',

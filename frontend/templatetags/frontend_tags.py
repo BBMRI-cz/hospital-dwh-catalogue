@@ -10,12 +10,12 @@ from frontend.presentation.types import FrontendFilterChip
 register = template.Library()
 
 _DEFAULT_CHIP_CLASS = (
-    'inline-flex max-w-full items-start gap-1 rounded-md border border-mou-cyan-border '
-    'bg-white px-2.5 py-1 text-xs font-medium text-mou-blue shadow-sm'
+    'inline-flex max-w-full items-start gap-1 rounded-md border border-mmci-cyan-border '
+    'bg-white px-2.5 py-1 text-xs font-medium text-mmci-blue shadow-sm'
 )
 _KEYWORD_CHIP_CLASS = (
-    'inline-flex max-w-full items-center gap-1 rounded-full border border-mou-cyan-border '
-    'bg-mou-cyan-light px-2.5 py-0.5 text-xs font-medium text-mou-blue'
+    'inline-flex max-w-full items-center gap-1 rounded-full border border-mmci-cyan-border '
+    'bg-mmci-cyan-light px-2.5 py-0.5 text-xs font-medium text-mmci-blue'
 )
 
 

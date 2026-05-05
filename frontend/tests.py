@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from django.utils.translation import override
 
 from frontend.admin import CatalogueFilterDefinitionForm
 from frontend.models import CatalogueFilterDefinition
@@ -658,23 +659,26 @@ class DatasetDetailViewTest(TestCase):
             ),
         )
 
-        self.client.force_login(self.user)
-        response = self.client.get(
-            reverse(
-                'frontend:dataset_detail', kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'}
+        with override('en'):
+            self.client.force_login(self.user)
+            response = self.client.get(
+                reverse(
+                    'frontend:dataset_detail',
+                    kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
+                ),
+                HTTP_ACCEPT_LANGUAGE='en',
             )
-        )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Export warnings')
-        self.assertContains(response, 'Missing RDF property')
-        self.assertContains(
-            response,
-            reverse(
-                'frontend:dataset_jsonld_download',
-                kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
-            ),
-        )
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Export warnings')
+            self.assertContains(response, 'Missing RDF property')
+            self.assertContains(
+                response,
+                reverse(
+                    'frontend:dataset_jsonld_download',
+                    kwargs={'app': 'warehouse', 'name': 'warehouse-dataset'},
+                ),
+            )
         self.assertContains(
             response,
             reverse(

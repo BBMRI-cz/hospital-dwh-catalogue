@@ -77,7 +77,7 @@ FAILED=false
 
 echo ""
 echo "========================================"
-echo "Hospital DWH Catalogue - Code Quality"
+echo "Hospital Data Warehouse Catalogue - Code Quality"
 echo "========================================"
 echo ""
 

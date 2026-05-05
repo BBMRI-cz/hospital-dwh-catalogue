@@ -1,6 +1,8 @@
 # Hospital Data Warehouse Catalogue
 
-A Django application that publishes hospital data metadata in a HealthDCAT-AP-style catalogue, combines multiple metadata sources, and supports access-request workflows through a built-in ticketing flow.
+A Django application that publishes hospital data metadata in a HealthDCAT-AP-compatible catalogue, combines multiple metadata sources, and supports access-request workflows through a built-in ticketing flow.
+
+The Catalogue is built for use at [Masaryk Memorial Cancer Institute (MMCI)](https://www.mou.cz/).
 
 ## Quick start
 
@@ -16,12 +18,9 @@ Start the stack:
 ./deploy.sh
 ```
 
-These helper scripts require Bash. Use `./deploy.sh` or `bash ./deploy.sh`, not `sh ./deploy.sh`.
-During deployment, `deploy.sh` attempts to update `health_dcat_ap` from Git automatically when Git metadata is available.
+Open `http://localhost` and sign in with any non-empty username and password.
 
-Open `http://localhost` and sign in with any non-empty username and password. That works in development because `MOCK_LDAP=True`.
-
-## What the app does
+## What the Catalogue does
 
 - shows datasets and distributions from the warehouse and FAIR Genomes sources
 - lets users search and filter the catalogue
@@ -35,7 +34,7 @@ Open `http://localhost` and sign in with any non-empty username and password. Th
 | If you want to... | Read |
 |---|---|
 | understand the system and its data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| use the running app as an end user or staff member | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) |
+| use the running Catalogue as an end user or staff member | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) |
 | run, deploy, or operate the stack | [docs/OPERATIONS.md](docs/OPERATIONS.md) |
 | change the code or extend the product | [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) |
 
@@ -52,7 +51,7 @@ warehouse/          Read-only warehouse metadata models and queries
 fair_genomes/       FAIR Genomes models, sync logic, statistics, admin
 ticketing/          Cart, ticket submission flow, Alvao integration
 shared/             DTOs, mappers, export builders, normalization, source loaders
-schema_registry/    HealthDCAT-AP term metadata for the configured release
+schema_registry/    HealthDCAT-AP term metadata for the configured HealthDCAT-AP release
 docker/             Compose files, nginx config, Dockerfiles, Postgres init
 env-examples/       Canonical example environment files
 scripts/            Compose wrapper, checks, helper scripts
@@ -61,7 +60,7 @@ docs/               Main and focused documentation
 
 ## Key runtime facts
 
-- server-rendered Django app
+- server-rendered Django application
 - HTMX for partial updates
 - Alpine.js for small UI state
 - PostgreSQL multi-database setup

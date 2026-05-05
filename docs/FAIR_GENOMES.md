@@ -6,12 +6,12 @@ Use this page to configure FAIR Genomes, run synchronisation, manage statistics,
 
 ## What the integration does
 
-The app synchronises FAIR Genomes catalogue records and statistics from two technical sources:
+The Catalogue synchronises FAIR Genomes catalogue records and statistics from two technical sources:
 
 - an RDF / FAIR Data Point endpoint for catalog, dataset, distribution, agent, and contact-point metadata
 - a MOLGENIS GraphQL endpoint for aggregated chart data shown on distribution detail pages
 
-The synchronised data is stored in `fair_genomes_db` and then merged into the unified catalogue.
+The synchronised data is stored in `fair_genomes_db` and then merged into the unified Catalogue.
 
 ## Runtime modes
 
@@ -90,13 +90,13 @@ Two models drive the charts:
 - `StatDefinition` — describes which MOLGENIS table and column should be aggregated for a specific FAIR Genomes distribution
 - `StatResult` — stores the latest aggregated counts for that table and column
 
-When the statistics phase runs, the app executes MOLGENIS `_groupBy` queries for active `StatDefinition` rows and saves the output into `StatResult`.
+When the statistics phase runs, the Catalogue executes MOLGENIS `_groupBy` queries for active `StatDefinition` rows and saves the output into `StatResult`.
 
 Distribution detail pages load those results and render charts grouped by MOLGENIS table.
 
 ### Default seeded statistics
 
-A data migration seeds six stat definitions for the `DIST_FG_WES_BAM` distribution:
+When `MOCK_FAIR_GENOMES=True`, the mock seeder creates six sample `StatDefinition` and `StatResult` rows for the `DIST_FG_WES_BAM` distribution:
 
 | Table | Column | Sort order |
 |---|---|---|
@@ -107,7 +107,7 @@ A data migration seeds six stat definitions for the `DIST_FG_WES_BAM` distributi
 | sample | pathologicalstate | 4 |
 | genomicdata | genomebuild | 5 |
 
-On a fresh mock setup, the mock seeder creates equivalent sample definitions and results.
+These rows provide local sample charts without requiring a live MOLGENIS connection.
 
 ### Managing statistics in admin
 

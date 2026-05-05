@@ -13,20 +13,27 @@ Use this page to bootstrap `.env`, deploy or update the containers, understand s
 ./deploy.sh
 ```
 
-### Staging or production
+### Staging
 
 ```bash
 ./init-env.sh staging
+```
+
+### Production
+
+```bash
 ./init-env.sh prod
 ```
 
-Then fill the generated `.env` with real values and run:
+Then fill the generated `.env` with real values for the selected environment and run:
 
 ```bash
 ./deploy.sh
 ```
 
 Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Promtail, and Grafana too. Production always includes the observability stack.
+
+The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`; if launched with `sh`, they re-exec themselves under Bash when available.
 
 ## Environment model
 
@@ -46,6 +53,8 @@ Create `.env` with:
 ./init-env.sh prod
 ```
 
+Run only the command for the environment you want to create. Each command writes the repository-root `.env` file.
+
 What it does:
 
 - copies the matching file from `env-examples/`
@@ -56,7 +65,7 @@ Use `--force` if you intentionally want to overwrite an existing `.env`.
 
 ## Environment values by subsystem
 
-### Core app and databases
+### Core Catalogue and databases
 
 All environments need the core Django settings, env-managed superuser credentials, and all four PostgreSQL aliases:
 
@@ -71,7 +80,7 @@ All environments need the core Django settings, env-managed superuser credential
 - `METADATA_DB_*`
 - `FAIR_GENOMES_DB_*`
 
-Optional app tuning:
+Optional Catalogue tuning:
 
 - `CATALOGUE_PAGE_SIZE` controls how many datasets the main catalogue page shows per page and defaults to `15`
 
@@ -79,7 +88,7 @@ In production, `METADATA_DB_*` should point to the external warehouse-owned data
 
 ### Authentication
 
-The app supports:
+The Catalogue supports:
 
 - mock LDAP for local and isolated testing
 - real LDAP for live authentication
@@ -107,7 +116,7 @@ When `MOCK_LDAP=True`:
 - the username matching `DJANGO_SUPERUSER_USERNAME` becomes staff and superuser
 - other users are created as regular Django users on first login
 
-When `MOCK_LDAP=False`, the app authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django.
+When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django.
 
 ### FAIR Genomes
 
@@ -131,7 +140,7 @@ Relevant variables:
 - `ALVAO_SERVICE_ACCOUNT_PASSWORD`
 - `ALVAO_DEFAULT_SERVICE_ID`
 
-When `MOCK_ALVAO=True`, the app stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
+When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
 
 ### HTTPS certificates for staging and production
 
@@ -146,8 +155,10 @@ If the files live elsewhere, set these optional repo-root relative overrides in 
 - `NGINX_SSL_KEY_PATH`
 
 The nginx container mounts those repo-root relative files directly for TLS termination. The
-internal `MOURootCA` stays a client trust concern on managed PCs; the application does not
+internal `MOURootCA` stays a client trust concern on managed PCs; the Catalogue does not
 need a separate runtime CA file for this setup.
+
+This HTTPS certificate setup is separate from `AUTH_LDAP_CA_CERT_PATH`, which is required in production only when LDAP uses an internal certificate authority.
 
 ### Deployed HTTPS settings
 
@@ -385,9 +396,9 @@ First export a Turtle file from the running catalogue:
 - sign in and download a dataset-specific RDF export from a dataset detail page
 - or open `/api/rdf` for the aggregate RDF export
 
-For strict HealthDCAT validation, use an export that includes distributions. HealthDCAT requires every `dcat:Dataset` to reference at least one `dcat:Distribution`.
+For strict HealthDCAT-AP validation, use an export that includes distributions. HealthDCAT-AP requires every `dcat:Dataset` to reference at least one `dcat:Distribution`.
 
-Start the validator for the configured HealthDCAT release:
+Start the validator for the configured HealthDCAT-AP release:
 
 ```bash
 docker compose -f health_dcat_ap/public/releases/release-6/html/shacl/HealthDCAT-AP_validator/docker-compose.yml up -d
@@ -513,5 +524,5 @@ If you change the release:
 ## Useful references
 
 - [FAIR_GENOMES.md](FAIR_GENOMES.md) — FAIR Genomes sync and stats
-- [USER_GUIDE.md](USER_GUIDE.md) — user-facing app behavior
+- [USER_GUIDE.md](USER_GUIDE.md) — user-facing Catalogue behavior
 - [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) — code changes and development workflow

@@ -16,7 +16,7 @@
 
     {# Page 1 #}
     {% if page_obj.number == 1 %}
-    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">1</span>
+    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mmci-cyan">1</span>
     {% else %}
     <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">1</a>
     {% endif %}
@@ -30,7 +30,7 @@
     {% for p in page_obj.paginator.page_range %}
       {% if p > 1 and p < page_obj.paginator.num_pages %}
         {% if p == page_obj.number %}
-        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">{{ p }}</span>
+        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mmci-cyan">{{ p }}</span>
         {% elif p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
         <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ p }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ p }}</a>
         {% endif %}
@@ -45,7 +45,7 @@
     {# Last page #}
     {% if page_obj.paginator.num_pages > 1 %}
       {% if page_obj.number == page_obj.paginator.num_pages %}
-      <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mou-cyan">{{ page_obj.paginator.num_pages }}</span>
+      <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-mmci-cyan">{{ page_obj.paginator.num_pages }}</span>
       {% else %}
       <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">{{ page_obj.paginator.num_pages }}</a>
       {% endif %}

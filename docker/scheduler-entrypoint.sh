@@ -21,7 +21,7 @@ crontab /etc/cron.d/fair_genomes_sync
 # Run an immediate sync so the data is fresh right after startup, before the
 # first scheduled cron window. Runs in the background so the container starts
 # immediately without waiting for the (potentially slow) network sync to finish.
-echo "Running initial Fair Genomes sync in background..."
+echo "Running initial FAIR Genomes sync in background..."
 python manage.py sync_fair_genomes &
 
 exec cron -f

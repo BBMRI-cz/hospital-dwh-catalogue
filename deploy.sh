@@ -82,7 +82,7 @@ main() {
     enable_environment_defaults
 
     echo "========================================"
-    echo "Hospital DWH Catalogue Deployment"
+    echo "Hospital Data Warehouse Catalogue Deployment"
     echo "========================================"
     echo ""
 
