@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from shared.dtos import UnifiedDataset
+from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService
 
 
@@ -35,6 +37,23 @@ def get_cart_toggle_request(request) -> CartToggleRequest:
     )
 
 
+def resolve_cart_dataset(
+    toggle_request: CartToggleRequest,
+    *,
+    service: UnifiedCatalogService | None = None,
+) -> UnifiedDataset | None:
+    """Return the catalogue dataset referenced by a cart toggle request."""
+    if not toggle_request.app or not toggle_request.name:
+        return None
+
+    catalog_service = service or UnifiedCatalogService()
+    dataset, _distributions = catalog_service.get_single_dataset(
+        toggle_request.app,
+        toggle_request.name,
+    )
+    return dataset
+
+
 def build_cart_toggle_response_context(
     session,
     *,
@@ -52,7 +71,8 @@ def build_cart_toggle_response_context(
         'cart_source': toggle_request.app,
         'cart_name': toggle_request.name,
         'cart_title': toggle_request.title,
-        'cart_dataset_ids': CartService.dataset_ids(session),
+        'cart_item_key': CartService.item_key(toggle_request.app, toggle_request.name),
+        'cart_item_keys': CartService.item_keys(session),
         'cart_count': CartService.count(session),
     }
 

@@ -6,7 +6,10 @@ Covers URL routing, views, and database routers.
 
 import importlib
 import os
+import shlex
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -109,6 +112,51 @@ class SettingsHelpersTest(SimpleTestCase):
         for value in ('0', '-3', 'abc', ''):
             with self.subTest(value=value):
                 self.assertEqual(positive_int_or_default(value, default=15), 15)
+
+
+class CheckRunnerScriptTest(SimpleTestCase):
+    def _write_fake_python(self, path: Path, *, imports_ok: bool) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        import_result = 0 if imports_ok else 1
+        path.write_text(
+            f"""#!/bin/sh
+if [ "$1" = "-V" ]; then
+    echo "Python 3.12.0"
+    exit 0
+fi
+if [ "$1" = "-c" ]; then
+    case "$2" in
+        "import django"|"import ruff"|"import mypy"|"import bandit")
+            exit {import_result}
+            ;;
+    esac
+fi
+exit 1
+""",
+            encoding='utf-8',
+        )
+        path.chmod(0o755)
+
+    def test_check_python_prefers_usable_venv_when_dotvenv_is_incomplete(self):
+        script_path = Path(__file__).resolve().parent.parent / 'scripts' / 'lib' / 'common.sh'
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            self._write_fake_python(repo_root / '.venv' / 'bin' / 'python', imports_ok=False)
+            self._write_fake_python(repo_root / 'venv' / 'bin' / 'python', imports_ok=True)
+
+            command = (
+                f'source {shlex.quote(str(script_path))}; '
+                f'REPO_ROOT={shlex.quote(str(repo_root))}; '
+                'resolve_check_python'
+            )
+            result = subprocess.run(
+                ['bash', '-lc', command],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.stdout.strip(), str(repo_root / 'venv' / 'bin' / 'python'))
 
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):

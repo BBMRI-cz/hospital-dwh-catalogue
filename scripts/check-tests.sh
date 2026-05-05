@@ -27,7 +27,7 @@ if should_use_docker_check_runner; then
     TEST_COMMAND=(run_dev_check_compose run --build --rm -e "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE" check python manage.py test --verbosity 1)
 else
     ensure_project_dependencies
-    PYTHON="$(resolve_python)"
+    PYTHON="$(resolve_check_python)"
     TEST_COMMAND=("$PYTHON" "manage.py" "test" "--verbosity" "1")
 fi
 

@@ -7,15 +7,19 @@ calls are made.
 """
 
 import os
+from io import StringIO
 from unittest.mock import MagicMock, patch
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.cache import cache
+from django.core.management import call_command
 from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.utils.translation import override
 
 from fair_genomes.admin import StatDefinitionAdmin
 from fair_genomes.services.admin_forms import StatDefinitionForm
+from frontend.presentation.cache import CATALOGUE_SNAPSHOT_CACHE_KEY
 
 from .models import (
     Agent,
@@ -646,6 +650,66 @@ class StatDefinitionAdminSaveTest(TestCase):
 
             self.assertFalse(form.is_valid())
             self.assertIn('not synchronised', str(form.errors))
+
+
+class FairGenomesAdminFullSyncCacheTest(TestCase):
+    """Tests for admin-triggered full-sync cache invalidation."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    def setUp(self):
+        self.admin = StatDefinitionAdmin(StatDefinition, AdminSite())
+
+    def _request(self):
+        request = RequestFactory().post('/admin/fair_genomes/statdefinition/full-sync/')
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        request.user = MagicMock(is_staff=True)
+        return request
+
+    @patch('fair_genomes.admin.clear_catalogue_snapshot_cache')
+    @patch('fair_genomes.admin.clear_rdf_source_inventory_cache')
+    @patch('fair_genomes.services.fair_genomes_service.FairGenomesService')
+    def test_full_sync_view_clears_catalogue_snapshot_cache(
+        self,
+        mock_service_class,
+        _mock_clear_inventory_cache,
+        mock_clear_catalogue_cache,
+    ):
+        mock_service_class.return_value.sync.return_value = {
+            'status': 'complete',
+            'duration_seconds': 0,
+            'stats': {'updated': 0, 'failed': 0, 'errors': []},
+        }
+
+        response = self.admin.full_sync_view(self._request())
+
+        self.assertEqual(response.status_code, 302)
+        mock_clear_catalogue_cache.assert_called_once_with()
+
+
+class SyncFairGenomesCommandCacheTest(TestCase):
+    """Tests for command-triggered full-sync cache invalidation."""
+
+    databases = {'default', 'auth_db', 'fair_genomes_db'}
+
+    @patch('fair_genomes.management.commands.sync_fair_genomes.FairGenomesService')
+    def test_sync_command_clears_catalogue_snapshot_cache(self, mock_service_class):
+        service = MagicMock()
+        service.__enter__.return_value = service
+        service.__exit__.return_value = None
+        service.sync.return_value = {
+            'status': 'complete',
+            'rdf_url': 'http://fdp.example.org',
+            'fetched': {},
+            'saved': {},
+        }
+        mock_service_class.return_value = service
+        cache.set(CATALOGUE_SNAPSHOT_CACHE_KEY, 'stale')
+
+        call_command('sync_fair_genomes', stdout=StringIO())
+
+        self.assertIsNone(cache.get(CATALOGUE_SNAPSHOT_CACHE_KEY))
 
 
 # ---------------------------------------------------------------------------

@@ -32,7 +32,7 @@
       </div>
       {% if dataset %}
       <div class="flex flex-col gap-2 shrink-0 w-44">
-        {% include "includes/_cart_add_btn.html" with cart_source=distribution.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
+        {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_item_key=dataset.cart_key cart_next=request.path %}
         <p class="text-[10px] text-txt-muted text-center leading-snug">
           {% trans "Adds the entire dataset" %}<br>
           <span class="font-medium text-txt-muted">{{ dataset.title|default:dataset.name }}</span>

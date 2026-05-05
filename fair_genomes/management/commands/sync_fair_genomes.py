@@ -11,10 +11,10 @@ Run with --verbosity 0 to suppress the detailed report and only see errors.
 
 import logging
 
-from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
 from fair_genomes.services import FairGenomesAPIException, FairGenomesService
+from frontend.presentation.cache import clear_catalogue_snapshot_cache
 
 logger = logging.getLogger(__name__)
 
@@ -101,4 +101,4 @@ class Command(BaseCommand):
                 for err in stats['errors']:
                     self.stdout.write(self.style.WARNING(f'    {err}'))
 
-        cache.delete('catalogue_all_datasets')
+        clear_catalogue_snapshot_cache()

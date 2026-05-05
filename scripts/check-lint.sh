@@ -47,7 +47,7 @@ if should_use_docker_check_runner; then
     CHECK_COMMAND=(run_dev_check_compose run --build --rm check python -m ruff check .)
 else
     ensure_project_dependencies
-    PYTHON="$(resolve_python)"
+    PYTHON="$(resolve_check_python)"
     CHECK_COMMAND=("$PYTHON" -m ruff check .)
 fi
 

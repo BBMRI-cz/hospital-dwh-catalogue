@@ -19,6 +19,16 @@ This guide covers the most common ways developers change the Catalogue.
 
 ## Developer workflow
 
+Native Python installs need the LDAP build headers required by `python-ldap`. On Debian,
+Ubuntu, or WSL, install them before installing Python requirements:
+
+```bash
+sudo apt-get install python3-dev libldap2-dev libsasl2-dev
+```
+
+When Docker is available, the check runner can use the containerized toolchain instead
+of host LDAP build dependencies.
+
 Install development dependencies with:
 
 ```bash
@@ -38,6 +48,8 @@ Run the full local quality suite with:
 ```bash
 ./scripts/check.sh
 ```
+
+The Docker build check is skipped locally when Docker Compose is not usable.
 
 Useful individual commands:
 

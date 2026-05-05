@@ -25,6 +25,7 @@ from fair_genomes.services.sync_state import (
     mark_success,
     stats_report_summary,
 )
+from frontend.presentation.cache import clear_catalogue_snapshot_cache
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +220,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
                 svc = FairGenomesService()
                 report = svc.sync()
                 clear_rdf_source_inventory_cache()
+                clear_catalogue_snapshot_cache()
                 status = report.get('status', 'unknown')
                 stats = report.get('stats')
                 duration = report.get('duration_seconds', '?')

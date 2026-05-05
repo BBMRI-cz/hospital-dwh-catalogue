@@ -53,6 +53,10 @@ class FrontendDataset:
     distributions: list[FrontendDistribution] = field(default_factory=list)
     search_text: str = ''
 
+    @property
+    def cart_key(self) -> str:
+        return f'{self.app}/{self.name}'
+
 
 @dataclass(slots=True)
 class FrontendStatChart:

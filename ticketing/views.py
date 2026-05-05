@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +19,7 @@ from ticketing.view_helpers import (
     get_cart_toggle_request,
     get_safe_redirect_target,
     render_cart_toggle_response,
+    resolve_cart_dataset,
 )
 
 
@@ -40,12 +43,20 @@ class CartAddView(LoginRequiredMixin, View):
     def post(self, request):
         toggle_request = get_cart_toggle_request(request)
         in_cart = False
-        if toggle_request.app and toggle_request.name:
+        dataset = resolve_cart_dataset(toggle_request)
+        if dataset is not None:
+            canonical_title = dataset.title or dataset.name
             in_cart = CartService.toggle(
                 request.session,
-                toggle_request.app,
-                toggle_request.name,
-                toggle_request.title,
+                dataset.app,
+                dataset.name,
+                canonical_title,
+            )
+            toggle_request = replace(
+                toggle_request,
+                app=dataset.app,
+                name=dataset.name,
+                title=canonical_title,
             )
         if request.headers.get('HX-Request'):
             return render_cart_toggle_response(request, toggle_request)

@@ -11,6 +11,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
+if ! docker_check_runner_available; then
+    echo "SKIPPED: Docker compose is unavailable"
+    exit 0
+fi
+
 if run_dev_check_compose build web check > /dev/null 2>&1; then
     echo "PASSED: Runtime and check images build successfully"
 else

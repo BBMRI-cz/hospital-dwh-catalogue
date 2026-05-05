@@ -20,6 +20,11 @@ CATALOGUE_SNAPSHOT_CACHE_KEY = 'catalogue_snapshot'
 CATALOGUE_SCHEMA_CACHE_KEY = 'catalogue_schema_json'
 
 
+def clear_catalogue_snapshot_cache() -> None:
+    """Clear cached catalogue data derived from source apps."""
+    cache.delete(CATALOGUE_SNAPSHOT_CACHE_KEY)
+
+
 def get_cached_catalogue_snapshot(
     *,
     service: UnifiedCatalogService | None = None,

@@ -40,17 +40,35 @@ resolve_host_python() {
 }
 
 resolve_python() {
-    if _python_candidate_works ".venv/bin/python"; then
-        echo ".venv/bin/python"
+    if _python_candidate_works "$REPO_ROOT/.venv/bin/python"; then
+        echo "$REPO_ROOT/.venv/bin/python"
         return 0
     fi
 
-    if _python_candidate_works "venv/bin/python"; then
-        echo "venv/bin/python"
+    if _python_candidate_works "$REPO_ROOT/venv/bin/python"; then
+        echo "$REPO_ROOT/venv/bin/python"
         return 0
     fi
 
     resolve_host_python
+}
+
+resolve_check_python() {
+    local candidate
+    for candidate in "$REPO_ROOT/.venv/bin/python" "$REPO_ROOT/venv/bin/python"; do
+        if _python_candidate_works "$candidate" && python_dev_toolchain_available "$candidate"; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    candidate="$(resolve_host_python 2>/dev/null || true)"
+    if _python_candidate_works "$candidate" && python_dev_toolchain_available "$candidate"; then
+        echo "$candidate"
+        return 0
+    fi
+
+    return 1
 }
 
 ensure_repo_root() {
@@ -145,13 +163,16 @@ run_dev_check_compose() {
 }
 
 docker_check_runner_available() {
-    command -v docker >/dev/null 2>&1 && [ -f "$REPO_ROOT/docker/compose/base.yml" ]
+    command -v docker >/dev/null 2>&1 \
+        && docker compose version >/dev/null 2>&1 \
+        && [ -f "$REPO_ROOT/docker/compose/base.yml" ]
 }
 
 should_use_docker_check_runner() {
     case "${CHECK_RUNNER:-}" in
         docker)
-            return 0
+            docker_check_runner_available
+            return
             ;;
         local)
             return 1
@@ -159,8 +180,8 @@ should_use_docker_check_runner() {
     esac
 
     local python
-    python="$(resolve_python 2>/dev/null || true)"
-    if python_dev_toolchain_available "$python"; then
+    python="$(resolve_check_python 2>/dev/null || true)"
+    if [ -n "$python" ]; then
         return 1
     fi
 
@@ -186,8 +207,8 @@ ensure_project_dependencies() {
     fi
 
     local python
-    python="$(resolve_python 2>/dev/null || true)"
-    if python_dev_toolchain_available "$python"; then
+    python="$(resolve_check_python 2>/dev/null || true)"
+    if [ -n "$python" ]; then
         return 0
     fi
 
@@ -199,8 +220,8 @@ ensure_project_dependencies() {
 
     if [ ! -f "$deps_stamp" ] || [ "requirements.txt" -nt "$deps_stamp" ] || [ "requirements-dev.txt" -nt "$deps_stamp" ]; then
         echo "Installing/updating dependencies..."
-        "$python" -m pip install --upgrade pip > /dev/null 2>&1
-        "$python" -m pip install -r requirements-dev.txt > /dev/null 2>&1
+        "$python" -m pip install --upgrade pip
+        "$python" -m pip install -r requirements-dev.txt
         touch "$deps_stamp"
         echo "Dependencies installed successfully"
         echo ""

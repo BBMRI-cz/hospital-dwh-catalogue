@@ -46,7 +46,7 @@ if should_use_docker_check_runner; then
     FORMAT_COMMAND=(run_dev_check_compose run --build --rm check python -m ruff format .)
 else
     ensure_project_dependencies
-    PYTHON="$(resolve_python)"
+    PYTHON="$(resolve_check_python)"
     CHECK_COMMAND=("$PYTHON" -m ruff format --check .)
     FORMAT_COMMAND=("$PYTHON" -m ruff format .)
 fi

@@ -23,7 +23,7 @@
 
       {% include "includes/_badge.html" with b_value=dataset.distributions|length b_label="dist." only %}
 
-      {% include "includes/_cart_inline_btn.html" with cart_app=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name %}
+      {% include "includes/_cart_inline_btn.html" with cart_app=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_item_key=dataset.cart_key %}
 
       {% trans 'View full detail' as t_view_full_detail %}
       {% url 'frontend:dataset_detail' app=dataset.app name=dataset.name as dataset_detail_url %}

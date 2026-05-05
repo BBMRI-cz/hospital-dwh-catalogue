@@ -7,7 +7,8 @@
     cart_app         – app identifier
     cart_name        – item name
     cart_title       – human-readable title
-    cart_dataset_ids – set of names currently in the session cart
+    cart_item_key    – app/name cart identity
+    cart_item_keys   – set of app/name identities currently in the session cart
 {% endcomment %}
 <button type="button"
   hx-post="{% url 'ticketing:cart_add' %}"
@@ -15,9 +16,9 @@
   hx-swap="outerHTML"
   hx-vals='{"app": "{{ cart_app }}", "name": "{{ cart_name }}", "title": "{{ cart_title|escapejs }}", "btn_style": "inline"}'
   @click.stop
-  title="{% if cart_name in cart_dataset_ids %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
-  class="inline-flex items-center justify-center px-1.5 py-2 rounded transition-colors cursor-pointer {% if cart_name in cart_dataset_ids %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mmci-cyan hover:text-mmci-orange hover:bg-mmci-orange-light{% endif %}">
-  {% if cart_name in cart_dataset_ids %}
+  title="{% if cart_item_key in cart_item_keys %}{% trans 'Remove from cart' %}{% else %}{% trans 'Add to cart' %}{% endif %}"
+  class="inline-flex items-center justify-center px-1.5 py-2 rounded transition-colors cursor-pointer {% if cart_item_key in cart_item_keys %}text-red-400 hover:text-red-600 hover:bg-red-50{% else %}text-mmci-cyan hover:text-mmci-orange hover:bg-mmci-orange-light{% endif %}">
+  {% if cart_item_key in cart_item_keys %}
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>

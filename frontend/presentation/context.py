@@ -34,8 +34,8 @@ from shared.services import UnifiedCatalogService
 from ticketing.cart import CartService
 
 
-def get_cart_dataset_ids(session) -> set[str]:
-    return {item['name'] for item in CartService.get(session)}
+def get_cart_item_keys(session) -> set[str]:
+    return CartService.item_keys(session)
 
 
 def build_catalogue_index_context(request, *, service: UnifiedCatalogService | None = None) -> dict:
@@ -79,7 +79,7 @@ def build_catalogue_index_context(request, *, service: UnifiedCatalogService | N
         'total_count': len(snapshot.datasets),
         'dist_count': snapshot.total_distribution_count,
         'schema_json': schema_json,
-        'cart_dataset_ids': get_cart_dataset_ids(request.session),
+        'cart_item_keys': get_cart_item_keys(request.session),
     }
 
 
@@ -113,7 +113,7 @@ def build_dataset_detail_context(
         'schema_json': schema_json,
         'app': app,
         'dcat_rows': build_dataset_dcat_rows(schema_json, dataset),
-        'cart_dataset_ids': get_cart_dataset_ids(request.session),
+        'cart_item_keys': get_cart_item_keys(request.session),
     }
 
 
@@ -143,5 +143,5 @@ def build_distribution_detail_context(
         'schema_json': schema_json,
         'app': app,
         'dcat_rows': build_distribution_dcat_rows(schema_json, lookup.distribution),
-        'cart_dataset_ids': get_cart_dataset_ids(request.session),
+        'cart_item_keys': get_cart_item_keys(request.session),
     }

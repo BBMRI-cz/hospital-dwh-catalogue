@@ -70,7 +70,7 @@
           </div>
         {% endif %}
         <!-- Add to cart -->
-        {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_next=request.path %}
+        {% include "includes/_cart_add_btn.html" with cart_source=dataset.app cart_name=dataset.name cart_title=dataset.title|default:dataset.name cart_item_key=dataset.cart_key cart_next=request.path %}
       </div>
     </div>
   </div>

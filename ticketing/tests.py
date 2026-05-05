@@ -4,16 +4,26 @@ Tests for the ticketing application.
 Covers models, forms, views, services, and cart functionality.
 """
 
+from unittest import mock
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from shared.dtos import UnifiedDataset
 from ticketing.cart import CART_MAX_ITEMS, CartService
 
 from .models import TicketRequest, TicketRequestItem
 from .services.base import TicketData, TicketResponse
 from .services.factory import get_ticket_service
 from .services.mock_service import MockAlvaoService
+
+
+class StaticTicketBackend:
+    """Deterministic ticket backend for view tests."""
+
+    def create_ticket(self, ticket_data):
+        return TicketResponse(ticket_id='T-100', ticket_number='T-100', status='New')
 
 
 class TicketRequestModelTest(TestCase):
@@ -308,13 +318,26 @@ class CartAddViewTest(TestCase):
         self.client.force_login(self.user)
         self.url = reverse('ticketing:cart_add')
 
+    def _dataset(
+        self,
+        *,
+        app: str = 'warehouse',
+        name: str = 'dataset-1',
+        title: str = 'Canonical Dataset 1',
+    ) -> UnifiedDataset:
+        return UnifiedDataset(app=app, name=name, title=title)
+
     def test_ajax_add_stores_item_and_returns_count(self):
-        """AJAX add stores the cart item and reports in_cart/count."""
-        response = self.client.post(
-            self.url,
-            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
-        )
+        """AJAX add stores the canonical cart item and reports in_cart/count."""
+        with mock.patch(
+            'ticketing.views.resolve_cart_dataset',
+            return_value=self._dataset(title='Canonical Dataset 1'),
+        ):
+            response = self.client.post(
+                self.url,
+                data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Client Title'},
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -326,22 +349,23 @@ class CartAddViewTest(TestCase):
         self.assertEqual(len(cart), 1)
         self.assertEqual(cart[0]['app'], 'warehouse')
         self.assertEqual(cart[0]['name'], 'dataset-1')
-        self.assertEqual(cart[0]['title'], 'Dataset 1')
+        self.assertEqual(cart[0]['title'], 'Canonical Dataset 1')
 
     def test_ajax_toggle_same_item_removes_from_cart(self):
         """Posting the same item twice toggles it out of the cart."""
         data = {'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'}
 
-        first_response = self.client.post(
-            self.url,
-            data=data,
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
-        )
-        second_response = self.client.post(
-            self.url,
-            data=data,
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            first_response = self.client.post(
+                self.url,
+                data=data,
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
+            second_response = self.client.post(
+                self.url,
+                data=data,
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
 
         self.assertTrue(first_response.json()['in_cart'])
 
@@ -353,11 +377,12 @@ class CartAddViewTest(TestCase):
 
     def test_htmx_add_returns_partial_with_oob_badge(self):
         """HTMX add returns the updated button fragment plus an OOB cart badge swap."""
-        response = self.client.post(
-            self.url,
-            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
-            HTTP_HX_REQUEST='true',
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            response = self.client.post(
+                self.url,
+                data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+                HTTP_HX_REQUEST='true',
+            )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="cart-badge"')
@@ -366,16 +391,17 @@ class CartAddViewTest(TestCase):
 
     def test_htmx_inline_add_preserves_inline_button_contract(self):
         """HTMX inline toggle keeps the inline button payload and cart badge fragment."""
-        response = self.client.post(
-            self.url,
-            data={
-                'app': 'warehouse',
-                'name': 'dataset-1',
-                'title': 'Dataset 1',
-                'btn_style': 'inline',
-            },
-            HTTP_HX_REQUEST='true',
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            response = self.client.post(
+                self.url,
+                data={
+                    'app': 'warehouse',
+                    'name': 'dataset-1',
+                    'title': 'Dataset 1',
+                    'btn_style': 'inline',
+                },
+                HTTP_HX_REQUEST='true',
+            )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '"btn_style": "inline"')
@@ -397,6 +423,23 @@ class CartAddViewTest(TestCase):
         self.assertEqual(payload['cart_count'], 0)
         self.assertEqual(self.client.session.get('cart', []), [])
 
+    def test_ajax_invalid_dataset_is_noop_with_json_shape(self):
+        """Invalid app/name keeps cart unchanged and still returns expected JSON keys."""
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=None):
+            response = self.client.post(
+                self.url,
+                data={'app': 'warehouse', 'name': 'missing', 'title': 'Missing'},
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(set(payload.keys()), {'success', 'in_cart', 'cart_count'})
+        self.assertTrue(payload['success'])
+        self.assertFalse(payload['in_cart'])
+        self.assertEqual(payload['cart_count'], 0)
+        self.assertEqual(self.client.session.get('cart', []), [])
+
     def test_ajax_add_when_cart_is_full_keeps_item_out_of_cart(self):
         """Overflow adds report the unchanged state instead of a false in-cart toggle."""
         session = self.client.session
@@ -406,11 +449,12 @@ class CartAddViewTest(TestCase):
         ]
         session.save()
 
-        response = self.client.post(
-            self.url,
-            data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            response = self.client.post(
+                self.url,
+                data={'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -421,31 +465,140 @@ class CartAddViewTest(TestCase):
 
     def test_open_redirect_prevented(self):
         """POST with external next URL redirects to / instead."""
-        response = self.client.post(
-            self.url,
-            data={
-                'app': 'warehouse',
-                'name': 'dataset-1',
-                'title': 'Dataset 1',
-                'next': 'https://evil.com/steal',
-            },
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            response = self.client.post(
+                self.url,
+                data={
+                    'app': 'warehouse',
+                    'name': 'dataset-1',
+                    'title': 'Dataset 1',
+                    'next': 'https://evil.com/steal',
+                },
+            )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
     def test_safe_next_redirect(self):
         """POST with safe next URL redirects to it."""
-        response = self.client.post(
-            self.url,
-            data={
-                'app': 'warehouse',
-                'name': 'dataset-1',
-                'title': 'Dataset 1',
-                'next': '/cart/',
-            },
-        )
+        with mock.patch('ticketing.views.resolve_cart_dataset', return_value=self._dataset()):
+            response = self.client.post(
+                self.url,
+                data={
+                    'app': 'warehouse',
+                    'name': 'dataset-1',
+                    'title': 'Dataset 1',
+                    'next': '/cart/',
+                },
+            )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/cart/')
+
+
+class CartIdentityTest(TestCase):
+    """Regression tests for app-aware cart item identity."""
+
+    databases = {'default', 'auth_db'}
+
+    def test_duplicate_dataset_names_from_different_apps_do_not_collide(self):
+        """Name-only duplicates remain independently selectable by source app."""
+        session = self.client.session
+
+        self.assertTrue(CartService.add(session, 'warehouse', 'shared-name', 'Warehouse Dataset'))
+        self.assertTrue(
+            CartService.add(session, 'fair_genomes', 'shared-name', 'FAIR Genomes Dataset')
+        )
+
+        self.assertEqual(
+            CartService.item_keys(session),
+            {'warehouse/shared-name', 'fair_genomes/shared-name'},
+        )
+        self.assertTrue(CartService.contains(session, 'warehouse', 'shared-name'))
+        self.assertTrue(CartService.contains(session, 'fair_genomes', 'shared-name'))
+
+        self.assertTrue(CartService.remove(session, 'warehouse', 'shared-name'))
+        self.assertFalse(CartService.contains(session, 'warehouse', 'shared-name'))
+        self.assertTrue(CartService.contains(session, 'fair_genomes', 'shared-name'))
+
+
+class CartSubmissionViewTest(TestCase):
+    """Regression tests for creating tickets from empty and non-empty carts."""
+
+    databases = {'default', 'auth_db'}
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='submit-user',
+            email='submit@example.com',
+            password='secret123',
+        )
+        self.client.force_login(self.user)
+        self.cart_url = reverse('ticketing:cart')
+        self.history_url = reverse('ticketing:ticket_history')
+
+    def test_empty_cart_submit_succeeds_with_description(self):
+        """Description-only requests create a ticket without item rows."""
+        with mock.patch(
+            'ticketing.services.ticketing_service.get_ticket_service',
+            return_value=StaticTicketBackend(),
+        ):
+            response = self.client.post(
+                self.cart_url,
+                data={'description': 'Please help me identify the right dataset.'},
+            )
+
+        self.assertRedirects(response, self.history_url, fetch_redirect_response=False)
+        ticket = TicketRequest.objects.get()
+        self.assertEqual(ticket.description, 'Please help me identify the right dataset.')
+        self.assertEqual(ticket.status, TicketRequest.Status.SUBMITTED)
+        self.assertEqual(ticket.item_count, 0)
+        self.assertEqual(TicketRequestItem.objects.count(), 0)
+
+    def test_empty_cart_ticket_history_displays_zero_items_and_no_items(self):
+        """History renders description-only tickets with zero items and empty item text."""
+        TicketRequest.objects.create(
+            requester=self.user,
+            requester_email=self.user.email,
+            requester_name=self.user.username,
+            subject='Data access request',
+            description='Description-only request',
+            status=TicketRequest.Status.SUBMITTED,
+        )
+
+        response = self.client.get(self.history_url, HTTP_ACCEPT_LANGUAGE='en')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['tickets'][0].item_count, 0)
+        self.assertContains(response, 'Data access request')
+        self.assertContains(response, 'Description-only request')
+        self.assertContains(response, 'No items')
+
+    def test_non_empty_cart_submit_creates_item_rows(self):
+        """Submitting selected datasets still persists requested item rows."""
+        session = self.client.session
+        session['cart'] = [
+            {'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'},
+            {'app': 'fair_genomes', 'name': 'dataset-2', 'title': 'Dataset 2'},
+        ]
+        session.save()
+
+        with mock.patch(
+            'ticketing.services.ticketing_service.get_ticket_service',
+            return_value=StaticTicketBackend(),
+        ):
+            response = self.client.post(
+                self.cart_url,
+                data={'description': 'Access to selected datasets.'},
+            )
+
+        self.assertRedirects(response, self.history_url, fetch_redirect_response=False)
+        ticket = TicketRequest.objects.get()
+        self.assertEqual(ticket.item_count, 2)
+        self.assertEqual(
+            set(TicketRequestItem.objects.values_list('item_id', flat=True)),
+            {'warehouse/dataset-1', 'fair_genomes/dataset-2'},
+        )
+        self.assertEqual(self.client.session.get('cart', []), [])
 
 
 class CartOverflowTest(TestCase):

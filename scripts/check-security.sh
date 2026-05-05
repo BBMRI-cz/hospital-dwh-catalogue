@@ -28,7 +28,7 @@ if should_use_docker_check_runner; then
     BANDIT_COMMAND=(run_dev_check_compose run --build --rm check python -m bandit -r "${SCAN_TARGETS[@]}" -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 else
     ensure_project_dependencies
-    PYTHON="$(resolve_python)"
+    PYTHON="$(resolve_check_python)"
     BANDIT_COMMAND=("$PYTHON" -m bandit -r "${SCAN_TARGETS[@]}" -x ./warehouse/static,./venv,./.venv,./node_modules -ll)
 fi
 

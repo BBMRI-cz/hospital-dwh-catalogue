@@ -18,6 +18,11 @@ class CartService:
     """Session-backed cart for dataset access requests."""
 
     @staticmethod
+    def item_key(app: str, name: str) -> str:
+        """Return the stable cart identity for a dataset."""
+        return f'{app}/{name}'
+
+    @staticmethod
     def get(session: SessionBase) -> list[dict]:
         """Return the current cart items list (may be empty)."""
         return list(session.get(CART_SESSION_KEY, []))
@@ -34,7 +39,7 @@ class CartService:
         cart: list[dict] = list(session.get(CART_SESSION_KEY, []))
 
         for item in cart:
-            if item['app'] == app and item['name'] == name:
+            if item.get('app') == app and item.get('name') == name:
                 logger.debug('Cart add no-op: app=%s name=%s already present', app, name)
                 return False
 
@@ -60,7 +65,7 @@ class CartService:
     def contains(session: SessionBase, app: str, name: str) -> bool:
         """Return whether the cart already contains the dataset."""
         return any(
-            item['app'] == app and item['name'] == name
+            item.get('app') == app and item.get('name') == name
             for item in session.get(CART_SESSION_KEY, [])
         )
 
@@ -74,8 +79,17 @@ class CartService:
 
     @staticmethod
     def dataset_ids(session: SessionBase) -> set[str]:
-        """Return the dataset identifiers currently present in the cart."""
-        return {item['name'] for item in session.get(CART_SESSION_KEY, [])}
+        """Return legacy name-only dataset identifiers currently present in the cart."""
+        return {item['name'] for item in session.get(CART_SESSION_KEY, []) if item.get('name')}
+
+    @staticmethod
+    def item_keys(session: SessionBase) -> set[str]:
+        """Return app/name identities currently present in the cart."""
+        return {
+            CartService.item_key(item['app'], item['name'])
+            for item in session.get(CART_SESSION_KEY, [])
+            if item.get('app') and item.get('name')
+        }
 
     @staticmethod
     def remove(session: SessionBase, app: str, name: str) -> bool:
@@ -85,7 +99,7 @@ class CartService:
         Returns True if removed, False if it was not in the cart.
         """
         cart: list[dict] = list(session.get(CART_SESSION_KEY, []))
-        new_cart = [i for i in cart if not (i['app'] == app and i['name'] == name)]
+        new_cart = [i for i in cart if not (i.get('app') == app and i.get('name') == name)]
         if len(new_cart) == len(cart):
             logger.debug('Cart remove no-op: app=%s name=%s not in cart', app, name)
             return False
