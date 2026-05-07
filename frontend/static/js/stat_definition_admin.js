@@ -1,7 +1,7 @@
 /**
  * Cascading dropdowns for StatDefinition admin:
- *   1. dataset → distribution
- *   2. molgenis_table → molgenis_column
+ *   1. dataset -> distribution
+ *   2. molgenis_table -> molgenis_column
  */
 (function () {
   'use strict';
@@ -9,13 +9,13 @@
   document.addEventListener('DOMContentLoaded', function () {
 
     // -------------------------------------------------------------------------
-    // 1. dataset → distribution cascade
+    // 1. dataset -> distribution cascade
     // -------------------------------------------------------------------------
     var datasetField = document.getElementById('id_dataset');
     var distField = document.getElementById('id_distribution');
 
     if (datasetField && distField && distField.options) {
-      // Mapping: distribution pk → dataset pk, embedded by the form as JSON.
+      // Mapping: distribution pk -> dataset pk, embedded by the form as JSON.
       var distMap = {};
       try {
         distMap = JSON.parse(distField.getAttribute('data-dist-map') || '{}');
@@ -51,10 +51,10 @@
           }
           if (distMap[opt.value] === selectedDataset) {
             var cloned = opt.cloneNode(true);
-            // Strip the "Dataset → " prefix; show only the distribution title.
-            var parts = cloned.text.split(' \u2192 ');
+            // Strip the "Dataset -> " prefix; show only the distribution title.
+            var parts = cloned.text.split(' -> ');
             if (parts.length > 1) {
-              cloned.text = parts.slice(1).join(' \u2192 ');
+              cloned.text = parts.slice(1).join(' -> ');
             }
             distField.add(cloned);
           }
@@ -71,7 +71,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // 2. molgenis_table → molgenis_column cascade
+    // 2. molgenis_table -> molgenis_column cascade
     // -------------------------------------------------------------------------
     var tableField = document.getElementById('id_molgenis_table');
     var columnField = document.getElementById('id_molgenis_column');
@@ -91,7 +91,7 @@
         columnField.remove(0);
       }
 
-      // If no table is selected, show only the placeholder — forces the user
+      // If no table is selected, show only the placeholder - forces the user
       // to pick a table before seeing column choices.
       if (!selectedTable) {
         var placeholder = allOptions.find(function (opt) { return !opt.value; });
@@ -106,8 +106,8 @@
           columnField.add(opt.cloneNode(true));
           return;
         }
-        // Options are formatted as "table → column" in the display text.
-        var parts = opt.text.split(' \u2192 ');
+        // Options are formatted as "table -> column" in the display text.
+        var parts = opt.text.split(' -> ');
         var optTable = parts.length > 1 ? parts[0] : '';
         if (optTable === selectedTable) {
           var cloned = opt.cloneNode(true);

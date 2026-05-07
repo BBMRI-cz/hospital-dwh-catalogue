@@ -20,7 +20,7 @@
   <div class="bg-white border border-gray-200 shadow-sm rounded-lg mb-6 overflow-hidden">
     {% trans "Submitted tickets" as t_submitted_tickets %}
     {% with tickets_count=paginator.count|stringformat:"s" %}
-    {% with tickets_label=t_submitted_tickets|add:" · "|add:tickets_count %}
+    {% with tickets_label=t_submitted_tickets|add:" - "|add:tickets_count %}
     {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-orange" csh_text_class="text-mmci-orange" csh_label=tickets_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">

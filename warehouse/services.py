@@ -14,6 +14,15 @@ from shared.dtos import (
     UnifiedTableColumn,
 )
 from shared.normalization import derive_status as derive_catalogue_status
+from warehouse.models import (
+    Column as WarehouseColumn,
+)
+from warehouse.models import (
+    Distribution as WarehouseDistribution,
+)
+from warehouse.models import (
+    Table as WarehouseTable,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +37,8 @@ class WarehouseMetadataService:
         if not table_names:
             return []
 
-        from warehouse.models import Column
-
         return list(
-            Column.objects.using('metadata_db')
+            WarehouseColumn.objects.using('metadata_db')
             .filter(table_id__in=table_names)
             .values_list('table_id', 'name', 'title', 'description', 'datatype', 'property_url')
             .order_by('table_id', 'var_order', 'name')
@@ -65,16 +72,14 @@ class WarehouseMetadataService:
 
     def get_dataset_names_by_columns(self, column_titles: set[str]) -> frozenset[str]:
         """Return dataset names whose distributions contain matching columns."""
-        from warehouse.models import Column, Distribution
-
         wh_dist_names = (
-            Column.objects.using('metadata_db')
+            WarehouseColumn.objects.using('metadata_db')
             .filter(title__in=column_titles)
             .values_list('table__distribution_id', flat=True)
             .distinct()
         )
         dataset_names: set[str] = set(
-            Distribution.objects.using('metadata_db')
+            WarehouseDistribution.objects.using('metadata_db')
             .filter(name__in=wh_dist_names)
             .values_list('dataset_name', flat=True)
             .distinct()
@@ -83,10 +88,8 @@ class WarehouseMetadataService:
 
     def get_column_counts_for_distributions(self, dist_names: list[str]) -> list[tuple[str, str]]:
         """Return distinct ``(column_title, distribution_name)`` pairs."""
-        from warehouse.models import Column
-
         return list(
-            Column.objects.using('metadata_db')
+            WarehouseColumn.objects.using('metadata_db')
             .filter(table__distribution__in=dist_names)
             .exclude(title='')
             .values_list('title', 'table__distribution_id')
@@ -98,10 +101,8 @@ class WarehouseMetadataService:
         distribution_name: str,
     ) -> list[UnifiedTable]:
         """Return table read models for a distribution."""
-        from warehouse.models import Table
-
         table_rows = list(
-            Table.objects.using('metadata_db')
+            WarehouseTable.objects.using('metadata_db')
             .filter(distribution_id=distribution_name)
             .values_list('name', 'title', 'description', 'url')
             .order_by('name')
@@ -128,10 +129,8 @@ class WarehouseMetadataService:
         dist_names: list[str],
     ) -> dict[str, list[ExportTable]]:
         """Return export tables keyed by distribution name."""
-        from warehouse.models import Table
-
         table_rows = list(
-            Table.objects.using('metadata_db')
+            WarehouseTable.objects.using('metadata_db')
             .filter(distribution_id__in=dist_names)
             .values_list('distribution_id', 'name', 'title', 'description', 'url')
             .order_by('distribution_id', 'name')

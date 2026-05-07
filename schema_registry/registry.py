@@ -87,14 +87,14 @@ def _load(release_dir: Path) -> tuple[SchemaRegistryPayload, SchemaRegistryPrefi
 
     if not release_dir.is_dir():
         logger.warning(
-            'HealthDCAT-AP release directory not found: %s — schema registry unavailable.',
+            'HealthDCAT-AP release directory not found: %s - schema registry unavailable.',
             release_dir,
         )
         return {}, {}
 
     if not shacl_ttl.exists():
         logger.warning(
-            'SHACL TTL not found: %s — schema registry unavailable.',
+            'SHACL TTL not found: %s - schema registry unavailable.',
             shacl_ttl,
         )
         return {}, {}
@@ -249,7 +249,7 @@ def _load_jsonld_context(release_dir: Path) -> dict[str, Any]:
     context_json = release_dir / 'context' / 'dcat-ap.jsonld'
     if not context_json.exists():
         logger.warning(
-            'JSON-LD context not found: %s — context term lookup unavailable.',
+            'JSON-LD context not found: %s - context term lookup unavailable.',
             context_json,
         )
         return {}

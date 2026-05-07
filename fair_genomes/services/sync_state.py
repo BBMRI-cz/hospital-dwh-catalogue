@@ -7,13 +7,9 @@ from typing import Any
 
 from django.utils import timezone
 
+from fair_genomes.models import FairGenomesSyncState
+
 DB = 'fair_genomes_db'
-
-
-def _sync_state_model():
-    from fair_genomes.models import FairGenomesSyncState
-
-    return FairGenomesSyncState
 
 
 def _now():
@@ -22,12 +18,11 @@ def _now():
 
 def mark_started(source_type: str, *, source_url: str = '') -> None:
     """Record that a source check/synchronisation has started."""
-    model = _sync_state_model()
-    model.objects.using(DB).update_or_create(
+    FairGenomesSyncState.objects.using(DB).update_or_create(
         source_type=source_type,
         defaults={
             'source_url': source_url or '',
-            'status': model.Status.RUNNING,
+            'status': FairGenomesSyncState.Status.RUNNING,
             'last_checked_at': _now(),
             'duration_seconds': None,
             'summary': {},
@@ -44,13 +39,12 @@ def mark_success(
     summary: Mapping[str, Any] | None = None,
 ) -> None:
     """Record a successful source synchronisation."""
-    model = _sync_state_model()
     now = _now()
-    model.objects.using(DB).update_or_create(
+    FairGenomesSyncState.objects.using(DB).update_or_create(
         source_type=source_type,
         defaults={
             'source_url': source_url or '',
-            'status': model.Status.SUCCESS,
+            'status': FairGenomesSyncState.Status.SUCCESS,
             'last_checked_at': now,
             'last_success_at': now,
             'duration_seconds': duration_seconds,
@@ -69,13 +63,12 @@ def mark_failed(
     error_message: str = '',
 ) -> None:
     """Record a failed source synchronisation."""
-    model = _sync_state_model()
     now = _now()
-    model.objects.using(DB).update_or_create(
+    FairGenomesSyncState.objects.using(DB).update_or_create(
         source_type=source_type,
         defaults={
             'source_url': source_url or '',
-            'status': model.Status.FAILED,
+            'status': FairGenomesSyncState.Status.FAILED,
             'last_checked_at': now,
             'last_failure_at': now,
             'duration_seconds': duration_seconds,
@@ -93,12 +86,11 @@ def mark_skipped(
     reason: str = '',
 ) -> None:
     """Record that a source synchronisation was skipped."""
-    model = _sync_state_model()
-    model.objects.using(DB).update_or_create(
+    FairGenomesSyncState.objects.using(DB).update_or_create(
         source_type=source_type,
         defaults={
             'source_url': source_url or '',
-            'status': model.Status.SKIPPED,
+            'status': FairGenomesSyncState.Status.SKIPPED,
             'last_checked_at': _now(),
             'duration_seconds': None,
             'summary': dict(summary or {}),
@@ -108,8 +100,7 @@ def mark_skipped(
 
 
 def get_state_map() -> dict[str, object]:
-    model = _sync_state_model()
-    return {state.source_type: state for state in model.objects.using(DB).all()}
+    return {state.source_type: state for state in FairGenomesSyncState.objects.using(DB).all()}
 
 
 def rdf_report_summary(report: Mapping[str, Any]) -> dict[str, Any]:

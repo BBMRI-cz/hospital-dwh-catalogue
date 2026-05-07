@@ -20,7 +20,19 @@ from unittest.mock import patch
 from django.conf import settings
 from django.test import TestCase, override_settings
 
-from schema_registry.registry import _load, invalidate_cache
+from schema_registry.registry import (
+    _load,
+    _merge_healthdcat_terms,
+    get_namespace_prefixes,
+    get_registry,
+    invalidate_cache,
+)
+from schema_registry.services import (
+    get_context_prefixes,
+    get_context_profile,
+    get_context_terms,
+    get_schema_dict,
+)
 from schema_registry.types import SchemaRegistryPayload
 from shared.dtos import (
     ExportAgent,
@@ -31,6 +43,8 @@ from shared.dtos import (
     ExportDistribution,
     ExportTable,
 )
+from shared.export import build_complete_jsonld_result, build_jsonld_result, build_turtle_result
+from shared.export_terms import ExportEntity, ResolvedExportProfile
 from shared.export_types import JsonLdDocument, JsonLdNode
 
 # Absolute path to the release-6 directory inside the submodule.
@@ -158,8 +172,6 @@ class RegistryParserTest(TestCase):
         self.assertEqual(entry['requirement'], 'mandatory')
 
     def test_synthesized_extension_uris_use_prefix_map(self) -> None:
-        from schema_registry.registry import _merge_healthdcat_terms
-
         payload = {
             'PUBLIC': {
                 'health category': {
@@ -214,8 +226,6 @@ class RegistryParserTest(TestCase):
         Prefixes declared only in html/shacl/public-shapes.ttl (not in the base
         DCAT-AP SHACL TTL) must be present in the returned prefix map.
         """
-        from schema_registry.registry import get_namespace_prefixes
-
         prefixes = get_namespace_prefixes(_RELEASE_6)
         for expected in ('healthdcatap', 'geodcatap', 'dcatap', 'dpv', 'org', 'csvw'):
             with self.subTest(prefix=expected):
@@ -270,15 +280,11 @@ class RegistryCacheTest(TestCase):
         invalidate_cache()
 
     def test_get_registry_caches_result(self) -> None:
-        from schema_registry.registry import get_registry
-
         first = get_registry(_RELEASE_6)
         second = get_registry(_RELEASE_6)
         self.assertIs(first, second)
 
     def test_invalidate_clears_cache(self) -> None:
-        from schema_registry.registry import get_registry
-
         first = get_registry(_RELEASE_6)
         invalidate_cache()
         second = get_registry(_RELEASE_6)
@@ -287,8 +293,6 @@ class RegistryCacheTest(TestCase):
 
     def test_cache_keyed_by_path(self) -> None:
         """Different release_dir values get independent cache entries."""
-        from schema_registry.registry import get_registry
-
         good = get_registry(_RELEASE_6)
         bad = get_registry(Path('/nonexistent/path/release-99'))
         # The valid path returns data, the missing path returns empty
@@ -308,39 +312,29 @@ class ServiceLayerTest(TestCase):
         invalidate_cache()
 
     def test_get_schema_dict_returns_dict(self) -> None:
-        from schema_registry.services import get_schema_dict
-
         result = get_schema_dict()
         self.assertIsInstance(result, dict)
         self.assertGreater(len(result), 0)
 
     def test_get_schema_dict_uses_settings_version(self) -> None:
-        from schema_registry.services import get_schema_dict
-
         with override_settings(HEALTH_DCAT_VERSION='release-6'):
             invalidate_cache()
             result = get_schema_dict()
         self.assertIn('dct:title', result)
 
     def test_get_schema_dict_returns_empty_for_unknown_version(self) -> None:
-        from schema_registry.services import get_schema_dict
-
         with override_settings(HEALTH_DCAT_VERSION='release-999'):
             invalidate_cache()
             result = get_schema_dict()
         self.assertEqual(result, {})
 
     def test_get_context_prefixes_returns_dict(self) -> None:
-        from schema_registry.services import get_context_prefixes
-
         result = get_context_prefixes()
         self.assertIsInstance(result, dict)
         self.assertIn('dct', result)
         self.assertTrue(result['dct'].startswith('http'))
 
     def test_get_context_terms_returns_class_iris(self) -> None:
-        from schema_registry.services import get_context_terms
-
         result = get_context_terms()
         self.assertEqual(result['Concept'], 'http://www.w3.org/2004/02/skos/core#Concept')
         self.assertEqual(
@@ -349,8 +343,6 @@ class ServiceLayerTest(TestCase):
         self.assertEqual(result['LicenceDocument'], 'http://purl.org/dc/terms/LicenseDocument')
 
     def test_get_context_profile_resolves_export_properties(self) -> None:
-        from schema_registry.services import get_context_profile
-
         result = get_context_profile()
         self.assertEqual(result['properties']['Dataset']['title'], 'dct:title')
         self.assertEqual(result['properties']['Distribution']['licence'], 'dct:license')
@@ -371,8 +363,6 @@ class ServiceLayerTest(TestCase):
         self.assertEqual(result['classes']['TableGroup'], 'http://www.w3.org/ns/csvw#TableGroup')
 
     def test_resolved_export_profile_records_missing_property_warning(self) -> None:
-        from shared.export_terms import ExportEntity, ResolvedExportProfile
-
         empty_profile = {
             'prefixes': {},
             'classes': {},
@@ -488,8 +478,6 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def _build(self, ds: ExportDataset | None = None) -> JsonLdDocument:
-        from shared.export import build_jsonld_result
-
         return build_jsonld_result(ds if ds is not None else self._make_dataset()).document
 
     def test_context_is_first_key(self) -> None:
@@ -560,9 +548,9 @@ class BuildJsonldContextTest(TestCase):
         context = self._build()['@context']
         for prefix, uri in context.items():
             with self.subTest(prefix=prefix):
-                self.assertTrue(uri.startswith('http'), f'{prefix!r} → {uri!r} is not an http URI')
+                self.assertTrue(uri.startswith('http'), f'{prefix!r} -> {uri!r} is not an http URI')
 
-    # ── CSVW table/column export ─────────────────────────────────────────────
+    # -- CSVW table/column export ---------------------------------------------
 
     def _distribution_node(self, result: JsonLdDocument) -> JsonLdNode:
         return next(node for node in result['@graph'] if _is_distribution_node(node))
@@ -659,8 +647,6 @@ class BuildJsonldContextTest(TestCase):
         self.assertNotIn('dct:source', dataset_node)
 
     def test_build_complete_jsonld_includes_catalogs_and_orphan_datasets(self) -> None:
-        from shared.export import build_complete_jsonld_result
-
         catalog_dataset = self._make_dataset()
         catalog_dataset.catalog = None
 
@@ -689,25 +675,18 @@ class BuildJsonldContextTest(TestCase):
         self.assertIn('https://example.com/dataset/test-ds', ids)
         self.assertIn('https://example.com/dataset/orphan-ds', ids)
 
-    # ── RDF Turtle export ────────────────────────────────────────────────────
+    # -- RDF Turtle export ----------------------------------------------------
 
     def test_build_turtle_returns_valid_turtle(self) -> None:
-        from shared.export import build_turtle_result
-
         turtle = build_turtle_result(self._make_dataset()).content
         self.assertIsInstance(turtle, str)
         self.assertIn('dcat:Dataset', turtle)
 
     def test_build_turtle_contains_dataset_title(self) -> None:
-        from shared.export import build_turtle_result
-
         turtle = build_turtle_result(self._make_dataset()).content
         self.assertIn('Test dataset', turtle)
 
     def test_build_jsonld_result_omits_missing_property_and_records_warning(self) -> None:
-        from schema_registry.services import get_context_profile
-        from shared.export import build_jsonld_result
-
         profile = deepcopy(get_context_profile())
         del profile['properties']['Dataset']['title']
 
@@ -726,9 +705,6 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def test_build_jsonld_result_omits_missing_type_and_records_warning(self) -> None:
-        from schema_registry.services import get_context_profile
-        from shared.export import build_jsonld_result
-
         profile = deepcopy(get_context_profile())
         del profile['classes']['Dataset']
 
@@ -750,9 +726,6 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def test_build_turtle_result_returns_content_and_warnings(self) -> None:
-        from schema_registry.services import get_context_profile
-        from shared.export import build_turtle_result
-
         profile = deepcopy(get_context_profile())
         del profile['properties']['Dataset']['title']
 
@@ -763,8 +736,6 @@ class BuildJsonldContextTest(TestCase):
         self.assertTrue(any(warning.code == 'missing_property' for warning in result.warnings))
 
     def test_build_jsonld_result_continues_when_profile_loading_fails(self) -> None:
-        from shared.export import build_jsonld_result
-
         with patch(
             'shared.export_terms.get_export_context_profile',
             side_effect=RuntimeError('profile unavailable'),
@@ -775,7 +746,7 @@ class BuildJsonldContextTest(TestCase):
         self.assertTrue(result.document['@graph'])
         self.assertTrue(any(warning.code == 'profile_load_failed' for warning in result.warnings))
 
-    # ── Multi-value URI field export ────────────────────────────────────────
+    # -- Multi-value URI field export ----------------------------------------
 
     def _dataset_node(self, result: JsonLdDocument) -> JsonLdNode:
         return next(node for node in result['@graph'] if _node_has_type(node, 'dcat:Dataset'))
@@ -903,8 +874,6 @@ class BuildJsonldContextTest(TestCase):
         )
 
     def test_top_level_catalog_multiple_applicable_legislations_exported_as_array(self) -> None:
-        from shared.export import build_complete_jsonld_result
-
         dataset = self._make_dataset()
         dataset.catalog = None
         catalog = ExportCatalog(

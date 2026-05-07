@@ -9,13 +9,14 @@ from typing import Any
 
 from django.db import OperationalError, ProgrammingError
 
-from frontend.models import RESERVED_FILTER_FIELD_NAMES
+from frontend.models import RESERVED_FILTER_FIELD_NAMES, CatalogueFilterDefinition
 from frontend.presentation.mapping import build_dataset_dcat_rows
 from frontend.presentation.types import (
     FrontendDataset,
     FrontendFilterDefinition,
     FrontendMetadataRow,
 )
+from schema_registry.services import get_schema_dict
 from schema_registry.types import SchemaRegistryPayload
 
 _DATASET_FILTER_EXCLUDES = {
@@ -90,8 +91,6 @@ def build_supported_filter_field_registry(
 
 
 def get_supported_filter_field_choices() -> tuple[tuple[str, str], ...]:
-    from schema_registry.services import get_schema_dict
-
     registry = build_supported_filter_field_registry(get_schema_dict())
     return tuple(
         (field.field_name, f'{field.label} ({field.field_name})')
@@ -117,8 +116,6 @@ def load_enabled_filter_definitions(
     """Load enabled filter definitions from DB, skipping unsupported schema fields."""
     supported = build_supported_filter_field_registry(schema_json)
     try:
-        from frontend.models import CatalogueFilterDefinition
-
         definitions = list(
             CatalogueFilterDefinition.objects.filter(is_enabled=True).order_by(
                 'sort_order',

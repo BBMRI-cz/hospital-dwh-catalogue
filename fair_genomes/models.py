@@ -1,5 +1,5 @@
 """
-FAIR Genomes Models — HealthDCAT-AP Profile
+FAIR Genomes Models - HealthDCAT-AP Profile
 ===========================================
 
 Concrete, managed=True Django models for the FAIR Genomes catalogue.
@@ -9,7 +9,7 @@ Design
   All five models (ContactPoint, Agent, Catalog, Dataset, Distribution)
   extend the corresponding shared HealthDCAT-AP abstract base classes from
   shared.abstract_models.  The FAIR Genomes profile requires no schema-specific
-  extensions beyond the shared base — it stays intentionally close to the
+  extensions beyond the shared base - it stays intentionally close to the
   HealthDCAT-AP v6 standard.
 
   If FAIR Genomes-specific fields are needed in the future, add them here
@@ -38,7 +38,7 @@ class ContactPoint(ContactPointBase):
     FAIR Genomes ContactPoint.
 
     Inherits all fields from ContactPointBase (email, contact_page).
-    No FAIR Genomes-specific extensions — stays close to the HealthDCAT-AP base.
+    No FAIR Genomes-specific extensions - stays close to the HealthDCAT-AP base.
     """
 
     class Meta:
@@ -50,7 +50,7 @@ class ContactPoint(ContactPointBase):
 
 class Agent(AgentBase):
     """
-    FAIR Genomes Agent (publisher, rights holder, HDAB …).
+    FAIR Genomes Agent (publisher, rights holder, HDAB ...).
 
     Inherits name (PK) and contact_point FK from AgentBase.
     No FAIR Genomes-specific extensions.
@@ -86,7 +86,7 @@ class Dataset(DatasetBase):
     mandatory HealthDCAT-AP v6 fields:
       access_rights, applicable_legislation, health_category, hdab.
 
-    No FAIR Genomes-specific extensions — this profile intentionally stays close
+    No FAIR Genomes-specific extensions - this profile intentionally stays close
     to the HealthDCAT-AP v6 standard.  If FAIR Genomes-specific fields are
     needed in the future, add them here (not in the shared base).
     """
@@ -170,7 +170,7 @@ class StatDefinition(models.Model):
 
     def __str__(self) -> str:
         label = self.display_label or f'{self.molgenis_table}.{self.molgenis_column}'
-        return f'{label} → {self.distribution_id}'
+        return f'{label} -> {self.distribution_id}'
 
     @property
     def chart_label(self) -> str:

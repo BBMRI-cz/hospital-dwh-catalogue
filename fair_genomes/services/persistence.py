@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
+from fair_genomes.models import Agent, Catalog, ContactPoint, Dataset, Distribution
 from fair_genomes.services.parser import parse_raw_records, resolve_related
 from fair_genomes.services.rdf_schema import RawRecord
 
@@ -34,8 +35,6 @@ def empty_rdf_report() -> dict:
 
 
 def process_graph(graph, *, rdf_url: str) -> dict:
-    from fair_genomes.models import Agent, Catalog, ContactPoint, Dataset, Distribution
-
     raw_records = parse_raw_records(graph)
     report = empty_rdf_report()
     report['rdf_url'] = rdf_url

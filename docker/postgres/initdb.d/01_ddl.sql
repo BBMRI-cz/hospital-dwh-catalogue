@@ -5,13 +5,13 @@
 -- Matches warehouse/models.py (managed=False).
 --
 -- FK naming follows Django defaults:
---   ForeignKey field "foo" without db_column → column "foo_id"
---   ForeignKey field "bar" with db_column='bar' → column "bar"
+--   ForeignKey field "foo" without db_column -> column "foo_id"
+--   ForeignKey field "bar" with db_column='bar' -> column "bar"
 -- ============================================================
 
 CREATE SCHEMA IF NOT EXISTS metadata;
 
--- ── 1. ContactPoint ─────────────────────────────────────────
+-- -- 1. ContactPoint -----------------------------------------
 -- Maps to warehouse.ContactPoint / shared.ContactPointBase
 -- Both fields are nullable: a ContactPoint may carry
 -- email only, page only, both, or neither.
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_contact_point" (
     contact_page VARCHAR(500)            -- vcard:hasURL (nullable)
 );
 
--- ── 2. Agent ─────────────────────────────────────────────────
+-- -- 2. Agent -------------------------------------------------
 -- Maps to warehouse.Agent / shared.AgentBase
 -- name is the natural key / PK throughout the catalogue.
 CREATE TABLE IF NOT EXISTS metadata."lm_agent" (
@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS metadata."lm_agent" (
     description       TEXT                    -- dct:description (optional)
 );
 
--- ── 3. Catalog ───────────────────────────────────────────────
+-- -- 3. Catalog -----------------------------------------------
 -- Maps to warehouse.Catalog / shared.CatalogBase
--- applicable_legislation is mandatory (HealthDCAT-AP v6 §4.2).
+-- applicable_legislation is mandatory (HealthDCAT-AP v6 section 4.2).
 CREATE TABLE IF NOT EXISTS metadata."lm_catalog" (
     name                   VARCHAR(255) PRIMARY KEY,
     title                  VARCHAR(500),
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_catalog" (
     applicable_legislation VARCHAR(500) NOT NULL
 );
 
--- ── 4. Dataset ───────────────────────────────────────────────
+-- -- 4. Dataset -----------------------------------------------
 -- Maps to warehouse.Dataset / shared.DatasetBase
 -- Mandatory HealthDCAT-AP v6 fields:
 --   access_rights, applicable_legislation, health_category, hdab_id.
@@ -61,10 +61,10 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
     issued                 TIMESTAMPTZ,            -- dct:issued
     modified               TIMESTAMPTZ,            -- dct:modified
     keyword                TEXT,                   -- dcat:keyword (comma-sep)
-    source                 VARCHAR(255)            -- dct:source FK → lm_dataset.name
+    source                 VARCHAR(255)            -- dct:source FK -> lm_dataset.name
                                REFERENCES metadata."lm_dataset"(name)
                                ON DELETE SET NULL,
-    creator                VARCHAR(255)            -- dct:creator FK → lm_agent.name
+    creator                VARCHAR(255)            -- dct:creator FK -> lm_agent.name
                                REFERENCES metadata."lm_agent"(name)
                                ON DELETE SET NULL,
     contact_point_id       BIGINT NOT NULL             -- dcat:contactPoint (mandatory)
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_dataset" (
                                ON DELETE SET NULL
 );
 
--- ── 5. Distribution ──────────────────────────────────────────
+-- -- 5. Distribution ------------------------------------------
 -- Maps to warehouse.Distribution / shared.DistributionBase
 -- + db_layer (LM-specific DWH layer: raw / clean / analytical / NULL).
 -- dataset_name uses explicit db_column (to_field='name' in Django model).
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_distribution" (
     db_layer               VARCHAR(100)            -- DWH layer (raw/clean/analytical)
 );
 
--- ── 6. Table ─────────────────────────────────────────────────
+-- -- 6. Table -------------------------------------------------
 -- Maps to warehouse.Table.  Links a Distribution to its physical DB table.
 -- distribution_name uses explicit db_column (to_field='name' in Django model).
 CREATE TABLE IF NOT EXISTS metadata."lm_table" (
@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS metadata."lm_table" (
     description       TEXT                    -- dct:description (optional)
 );
 
--- ── 7. Column ────────────────────────────────────────────────
--- Maps to warehouse.Column (no abstract base — LM-specific only).
+-- -- 7. Column ------------------------------------------------
+-- Maps to warehouse.Column (no abstract base - LM-specific only).
 -- Describes individual columns within a physical DB table.
 -- table_name uses explicit db_column (to_field='name' in Django model).
 CREATE TABLE IF NOT EXISTS metadata."lm_column" (
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS metadata."lm_column" (
     property_url       VARCHAR(500),           -- csvw:propertyUrl (optional)
     var_order          SMALLINT,               -- position in source table
     key_db             VARCHAR(100),           -- PK / FK / UK / NULL
-    type_r             VARCHAR(50),            -- R datatype (character/integer …)
+    type_r             VARCHAR(50),            -- R datatype (character/integer ...)
     definition_ddl     TEXT,                   -- full DDL column definition
     definition_pk_pom1 TEXT,                   -- PK derivation helper 1
     definition_pk_pom2 TEXT,                   -- PK derivation helper 2

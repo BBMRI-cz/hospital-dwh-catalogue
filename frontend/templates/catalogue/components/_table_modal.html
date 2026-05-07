@@ -32,7 +32,7 @@
       {% if tbl.columns %}
       <div class="flex items-center gap-3 px-6 py-2.5 border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
         <span class="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-wider text-txt-muted">
-          csvw:Column · {{ tbl.columns|length }}
+          csvw:Column - {{ tbl.columns|length }}
           {% include "includes/_info_btn.html" with semantics="csvw:Column" %}
         </span>
         <div class="flex-1"></div>
@@ -40,7 +40,7 @@
           <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <input type="text" x-model="q" placeholder="{% trans 'Search columns…' %}"
+          <input type="text" x-model="q" placeholder="{% trans 'Search columns...' %}"
             class="block h-8 w-full rounded border border-gray-300 pl-8 pr-3 text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-mmci-cyan focus:border-mmci-cyan w-48 bg-white">
         </div>
       </div>
@@ -69,10 +69,10 @@
               x-show="!q || '{{ col.name|lower }} {{ col.title|lower }}'.includes(q.toLowerCase())"
               {% if col.description %}@click="openDesc[{{ forloop.counter }}] = !openDesc[{{ forloop.counter }}]"{% endif %}>
             <td class="px-6 py-3">
-              <div class="font-medium text-sm text-mmci-cyan">{{ col.title|default:"—" }}</div>
+              <div class="font-medium text-sm text-mmci-cyan">{{ col.title|default:"-" }}</div>
             </td>
             <td class="px-6 py-3 font-mono text-xs text-txt-muted hidden sm:table-cell">{{ col.name }}</td>
-            <td class="px-6 py-3 font-mono text-xs text-txt-muted hidden md:table-cell">{{ col.datatype|default:"—" }}</td>
+            <td class="px-6 py-3 font-mono text-xs text-txt-muted hidden md:table-cell">{{ col.datatype|default:"-" }}</td>
             <td class="px-6 py-3 hidden lg:table-cell">
               {% if col.property_url %}
               <a href="{{ col.property_url }}" target="_blank" rel="noopener"
@@ -85,7 +85,7 @@
                 {% trans "View" %}
               </a>
               {% else %}
-              <span class="text-txt-muted text-xs">—</span>
+              <span class="text-txt-muted text-xs">-</span>
               {% endif %}
             </td>
             <td class="pr-4 text-right">

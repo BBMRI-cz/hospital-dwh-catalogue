@@ -7,6 +7,7 @@ Covers models, forms, views, services, and cart functionality.
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -14,6 +15,7 @@ from shared.dtos import UnifiedDataset
 from ticketing.cart import CART_MAX_ITEMS, CartService
 
 from .models import TicketRequest, TicketRequestItem
+from .services.alvao_service import AlvaoService
 from .services.base import TicketData, TicketResponse
 from .services.factory import get_ticket_service
 from .services.mock_service import MockAlvaoService
@@ -172,7 +174,6 @@ class TicketRequestItemModelTest(TestCase):
             item_id='ds1',
             item_name='Dataset 1',
         )
-        from django.db import IntegrityError
 
         with self.assertRaises(IntegrityError):
             TicketRequestItem.objects.create(
@@ -297,8 +298,6 @@ class GetTicketServiceTest(TestCase):
     def test_returns_alvao_when_not_mock(self):
         """Factory returns AlvaoService when MOCK_ALVAO is False."""
         with self.settings(MOCK_ALVAO=False):
-            from .services.alvao_service import AlvaoService
-
             service = get_ticket_service()
             self.assertIsInstance(service, AlvaoService)
 

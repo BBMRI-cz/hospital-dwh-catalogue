@@ -2,11 +2,16 @@
 
 import logging
 
+from rdflib import Graph
+
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 
 from fair_genomes.models import Dataset, Distribution, FairGenomesSyncState
+from fair_genomes.services.client import detect_rdf_format, fetch_rdf
+from fair_genomes.services.fair_genomes_service import FairGenomesService
+from fair_genomes.services.parser import parse_raw_records
 from fair_genomes.services.sync_state import get_state_map
 
 logger = logging.getLogger(__name__)
@@ -36,8 +41,6 @@ def get_molgenis_schema() -> dict[str, list[str]]:
         return cached
 
     try:
-        from fair_genomes.services.fair_genomes_service import FairGenomesService
-
         svc = FairGenomesService()
         schema = svc.introspect_molgenis_schema()
     except Exception:
@@ -70,11 +73,6 @@ def get_rdf_source_inventory() -> dict:
         return cached
 
     try:
-        from rdflib import Graph
-
-        from fair_genomes.services.client import detect_rdf_format, fetch_rdf
-        from fair_genomes.services.parser import parse_raw_records
-
         response = fetch_rdf(url, timeout=(5, 20))
         graph = Graph()
         graph.parse(data=response.text, format=detect_rdf_format(response))

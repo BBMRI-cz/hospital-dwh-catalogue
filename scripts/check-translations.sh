@@ -66,7 +66,7 @@ done
 # Check that .mo files exist and are not older than their .po files.
 # Strategy:
 #   - If the .po file has uncommitted local changes (or is untracked), use
-#     filesystem mtime — the developer may have just edited it without committing.
+#     filesystem mtime - the developer may have just edited it without committing.
 #   - Otherwise compare the last git commit timestamps, which is reliable after
 #     a fresh git checkout where all file mtimes are reset to the current time.
 echo "Checking that .mo files are compiled and up to date..."
@@ -89,12 +89,12 @@ for po_file in locale/*/LC_MESSAGES/django.po; do
             mo_commit=$(git log -1 --format="%ct" -- "$mo_file" 2>/dev/null)
 
             if [ -n "$po_dirty" ] || [ -z "$po_commit" ] || [ -z "$mo_commit" ]; then
-                # .po is dirty / untracked, or we're outside a git repo — use filesystem mtime.
+                # .po is dirty / untracked, or we're outside a git repo - use filesystem mtime.
                 if [ "$po_file" -nt "$mo_file" ]; then
                     stale=true
                 fi
             else
-                # Both files are clean in git — compare commit timestamps.
+                # Both files are clean in git - compare commit timestamps.
                 if [ "$po_commit" -gt "$mo_commit" ]; then
                     stale=true
                 fi

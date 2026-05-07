@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 
 import requests
 
+from fair_genomes.models import StatDefinition, StatResult
 from fair_genomes.services.client import build_graphql_headers, post_graphql_json
 
 logger = logging.getLogger(__name__)
@@ -18,8 +19,6 @@ def sync_stats(
     api_token: str | None,
     timeout: tuple[int, int] | int,
 ) -> dict:
-    from fair_genomes.models import StatDefinition
-
     definitions = (
         StatDefinition.objects.using('fair_genomes_db')
         .filter(is_active=True)
@@ -54,8 +53,6 @@ def sync_single_stat(
     table: str,
     column: str,
 ) -> tuple[bool, str]:
-    from fair_genomes.models import StatResult
-
     table_cap = table[0].upper() + table[1:]
     queries = (
         f'{{ {table_cap}_groupBy {{ count {column} {{ value }} }} }}',

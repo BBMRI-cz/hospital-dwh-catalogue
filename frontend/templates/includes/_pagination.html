@@ -9,9 +9,9 @@
     {# Prev #}
     {% if page_obj.has_previous %}
     <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
-      class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">«</a>
+      class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">&laquo;</a>
     {% else %}
-    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">«</span>
+    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">&laquo;</span>
     {% endif %}
 
     {# Page 1 #}
@@ -23,10 +23,10 @@
 
     {# Leading ellipsis #}
     {% if page_obj.number|add:"-3" > 2 %}
-    <span class="w-8 h-8 flex items-center justify-center text-txt-muted text-sm">…</span>
+    <span class="w-8 h-8 flex items-center justify-center text-txt-muted text-sm">...</span>
     {% endif %}
 
-    {# Numbered window: pages 2..num_pages-1 within ±3 of current #}
+    {# Numbered window: pages 2..num_pages-1 within +/-3 of current #}
     {% for p in page_obj.paginator.page_range %}
       {% if p > 1 and p < page_obj.paginator.num_pages %}
         {% if p == page_obj.number %}
@@ -39,7 +39,7 @@
 
     {# Trailing ellipsis #}
     {% if page_obj.number|add:"3" < page_obj.paginator.num_pages|add:"-1" %}
-    <span class="w-8 h-8 flex items-center justify-center text-txt-muted text-sm">…</span>
+    <span class="w-8 h-8 flex items-center justify-center text-txt-muted text-sm">...</span>
     {% endif %}
 
     {# Last page #}
@@ -54,9 +54,9 @@
     {# Next #}
     {% if page_obj.has_next %}
     <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
-      class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">»</a>
+      class="w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-base-200 transition-colors">&raquo;</a>
     {% else %}
-    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">»</span>
+    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm opacity-30 cursor-not-allowed">&raquo;</span>
     {% endif %}
   </div>
 </div>

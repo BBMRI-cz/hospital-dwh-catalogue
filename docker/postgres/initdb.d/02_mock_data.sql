@@ -1,5 +1,5 @@
 -- ============================================================
--- Mock warehouse data — Local Metadata HealthDCAT-AP (lm_* tables)
+-- Mock warehouse data - Local Metadata HealthDCAT-AP (lm_* tables)
 -- ============================================================
 -- Runs once on first Postgres container start via initdb.d/.
 -- The sample is intentionally small and coherent:
@@ -15,7 +15,7 @@
 --   * provide enough variety for the UI to show ready/raw/unavailable states
 -- ============================================================
 
--- ── ContactPoints ────────────────────────────────────────────
+-- -- ContactPoints --------------------------------------------
 INSERT INTO metadata."lm_contact_point" (id, email, contact_page)
 OVERRIDING SYSTEM VALUE VALUES
 (1, 'catalog@hospital.cz', 'https://hospital.cz/data-catalog/contact'),
@@ -24,7 +24,7 @@ OVERRIDING SYSTEM VALUE VALUES
 
 SELECT setval(pg_get_serial_sequence('metadata."lm_contact_point"', 'id'), 3);
 
--- ── Agents ───────────────────────────────────────────────────
+-- -- Agents ---------------------------------------------------
 INSERT INTO metadata."lm_agent" (name, contact_point_id, description) VALUES
 (
     'AGENT_DWH',
@@ -42,7 +42,7 @@ INSERT INTO metadata."lm_agent" (name, contact_point_id, description) VALUES
     'Health Data Access Body coordinating dataset access requests and governance.'
 );
 
--- ── Catalog ──────────────────────────────────────────────────
+-- -- Catalog --------------------------------------------------
 INSERT INTO metadata."lm_catalog" (
     name, title, description, publisher_id, applicable_legislation
 ) VALUES (
@@ -53,7 +53,7 @@ INSERT INTO metadata."lm_catalog" (
     'http://data.europa.eu/eli/reg/2022/868/oj'
 );
 
--- ── Datasets ─────────────────────────────────────────────────
+-- -- Datasets -------------------------------------------------
 -- Each dataset includes the fields required by the warehouse model layer:
 -- title, description, identifier, type, theme, keyword, provenance,
 -- contact_point_id, access_rights, applicable_legislation, health_category, hdab_id.
@@ -174,7 +174,7 @@ INSERT INTO metadata."lm_dataset" (
     'AGENT_HDAB'
 );
 
--- ── Distributions ────────────────────────────────────────────
+-- -- Distributions --------------------------------------------
 INSERT INTO metadata."lm_distribution" (
     name,
     dataset_name,
@@ -271,7 +271,7 @@ INSERT INTO metadata."lm_distribution" (
     'analytical'
 );
 
--- ── Tables ───────────────────────────────────────────────────
+-- -- Tables ---------------------------------------------------
 INSERT INTO metadata."lm_table" (name, distribution_name, url, title, description) VALUES
 (
     'TBL_PAT_RAW',
@@ -302,7 +302,7 @@ INSERT INTO metadata."lm_table" (name, distribution_name, url, title, descriptio
     'Agregovaná tabulka měsíčních provozních ukazatelů bez osobních údajů.'
 );
 
--- ── Columns ──────────────────────────────────────────────────
+-- -- Columns --------------------------------------------------
 INSERT INTO metadata."lm_column" (
     name,
     table_name,

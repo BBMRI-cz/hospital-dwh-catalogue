@@ -3,11 +3,11 @@
   Renders a single bound Django form field in catalogue card style.
 
   Required variables:
-    field        – a bound form field (e.g. form.subject)
+    field        - a bound form field (e.g. form.subject)
 
   Optional:
-    extra_class  – additional CSS classes added to the outer form-control div
-    mb           – bottom margin class (default: mb-4)
+    extra_class  - additional CSS classes added to the outer form-control div
+    mb           - bottom margin class (default: mb-4)
 {% endcomment %}
 <div class="flex flex-col gap-1.5 {{ mb|default:'mb-4' }} {{ extra_class }}">
   <label for="{{ field.id_for_label }}">

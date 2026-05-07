@@ -201,7 +201,7 @@ class AlvaoService:
         """
         Create a new ticket in Alvao Service Desk.
 
-        POST /tickets — requires `requester` and `serviceId` in the payload.
+        POST /tickets - requires `requester` and `serviceId` in the payload.
         Returns 201 Created with the ticket object.
         """
         payload = ticket_data.to_dict()

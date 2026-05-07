@@ -9,7 +9,7 @@ INTERVAL="${FAIR_GENOMES_SYNC_INTERVAL_HOURS:-24}"
 env | grep -Ev '^(HOME|USER|LOGNAME|PATH|SHELL|TERM|HOSTNAME|PWD|SHLVL|_)=' \
     > /etc/environment
 
-# Write the cron job — executes the management command and streams output to
+# Write the cron job - executes the management command and streams output to
 # the container's stdout/stderr so it appears in `docker compose logs`.
 cat > /etc/cron.d/fair_genomes_sync << EOF
 0 */${INTERVAL} * * * root . /etc/environment; cd /app && python manage.py sync_fair_genomes >> /proc/1/fd/1 2>> /proc/1/fd/2

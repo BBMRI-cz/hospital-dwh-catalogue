@@ -1,7 +1,7 @@
 ﻿{% extends "catalogue/base_catalogue.html" %}
 {% load i18n static frontend_tags %}
 
-{% block title %}{{ distribution.title|default:distribution.name }} · {% trans "Distribution" %}{% endblock %}
+{% block title %}{{ distribution.title|default:distribution.name }} - {% trans "Distribution" %}{% endblock %}
 
 {% block extra_head %}
 {% if chart_groups %}
@@ -69,7 +69,7 @@
   {% include 'catalogue/components/_stat_charts.html' with chart_groups=chart_groups charts=charts %}
   {% endif %}
 
-  <!-- Tables and columns — same component for all apps -->
+  <!-- Tables and columns - same component for all apps -->
   {% if tables %}
   {% include 'catalogue/components/_table_list.html' with tables=tables %}
   {% endif %}

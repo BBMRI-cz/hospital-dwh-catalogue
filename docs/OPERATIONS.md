@@ -33,15 +33,7 @@ Then fill the generated `.env` with real values for the selected environment and
 
 Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Promtail, and Grafana too. Production always includes the observability stack.
 
-The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`; if launched with `sh`, they re-exec themselves under Bash when available.
-
-## Environment model
-
-| Environment | Main purpose | Auth mode | FAIR Genomes / Alvao | Runtime shape |
-|---|---|---|---|---|
-| `dev` | local development | mocked LDAP | mocked by default | `runserver`, bind mounts, no Redis |
-| `staging` | pre-production validation | LDAP mocked by default | live-like by default | Gunicorn, Redis, named volumes, internal HTTPS |
-| `prod` | live deployment | real LDAP only | real integrations only | Gunicorn, internal HTTPS, observability always on |
+The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`
 
 ## Environment bootstrap
 
@@ -80,6 +72,11 @@ All environments need the core Django settings, env-managed superuser credential
 - `METADATA_DB_*`
 - `FAIR_GENOMES_DB_*`
 
+On startup, the account named by `DJANGO_SUPERUSER_USERNAME` is created or updated as
+staff and superuser in every environment, including `staging` and `prod`, as long
+as the username does not already belong to an LDAP-only user. `DJANGO_SUPERUSER_PASSWORD`
+is the local password for that env-managed account.
+
 Optional Catalogue tuning:
 
 - `CATALOGUE_PAGE_SIZE` controls how many datasets the main catalogue page shows per page and defaults to `15`
@@ -113,10 +110,9 @@ Relevant variables:
 When `MOCK_LDAP=True`:
 
 - any non-empty username and password are accepted
-- the username matching `DJANGO_SUPERUSER_USERNAME` becomes staff and superuser
 - other users are created as regular Django users on first login
 
-When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django.
+When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django. The env-managed superuser is still applied during startup independently of LDAP mode.
 
 ### FAIR Genomes
 
@@ -220,15 +216,6 @@ Shared requirements for all environments:
 - all four PostgreSQL database aliases
 - `FAIR_GENOMES_SYNC_INTERVAL_HOURS`
 
-Environment-specific requirements:
-
-- `dev` also requires the three `MOCK_*` flags
-- `staging` also requires `DEBUG`, `GUNICORN_WORKERS`, `SERVER_NAME`, valid TLS certificate files, and real credentials only for integrations whose `MOCK_*` flag is `False`
-- `prod` requires `GUNICORN_WORKERS`, `SERVER_NAME`, `ADMIN_EMAIL`, valid TLS certificate files, live LDAP / FAIR Genomes / Alvao credentials, and email settings
-- production LDAP also requires `AUTH_LDAP_LOGIN_ATTR`, `AUTH_LDAP_START_TLS`, and `AUTH_LDAP_CA_CERT_PATH`
-
-This keeps the docs and the real runtime contract aligned.
-
 ## Compose layout
 
 The stack is built from:
@@ -293,44 +280,15 @@ Good practice:
 
 Roles in practice:
 
-- authenticated user — can browse the catalogue and submit requests
-- staff user — can open `/admin/` and `/grafana/`
-- superuser — has full Django admin access
-
-To avoid collisions with real directory users, `DJANGO_SUPERUSER_USERNAME` should be a service-style username that does not exist in Active Directory.
-
-Good examples:
-
-```text
-app-admin
-_dwh-admin
-```
-
-Bad examples:
-
-```text
-john.smith
-admin
-```
+- authenticated user - can browse the catalogue and submit requests
+- staff user - can open `/admin/` and `/grafana/`
+- superuser - has full Django admin access
 
 If you need another superuser outside the env-managed account:
 
 ```bash
 ./scripts/compose.sh exec web python manage.py createsuperuser
 ```
-
-If a manually created user shares the same username as `DJANGO_SUPERUSER_USERNAME`, the startup logic may reclaim it on the next restart if it looks like a local-password superuser.
-
-## What can be managed in admin
-
-From `/admin/` you can:
-
-- manage users and permissions
-- manage FAIR Genomes stat definitions
-- trigger FAIR Genomes sync actions
-- inspect ticket requests
-
-Warehouse metadata is not managed in Django admin. It is read directly from `metadata_db`.
 
 ## User creation and permissions
 
@@ -351,41 +309,6 @@ The observability stack includes:
 - Grafana
 
 Grafana is available at `/grafana/`, but only for logged-in Django staff users. There is no separate Grafana password.
-
-## Maintenance commands
-
-Rebuild containers:
-
-```bash
-./scripts/compose.sh up -d --build
-```
-
-Restart one service:
-
-```bash
-./scripts/compose.sh restart web
-```
-
-Open container logs:
-
-```bash
-./scripts/compose.sh logs web
-./scripts/compose.sh logs scheduler
-./scripts/compose.sh logs nginx
-```
-
-Open a shell inside the web container:
-
-```bash
-./scripts/compose.sh exec web bash
-```
-
-Render the effective stack without starting it:
-
-```bash
-./scripts/compose.sh config
-./scripts/compose.sh --with-observability config
-```
 
 ## Metadata compatibility check
 
@@ -433,96 +356,3 @@ Run all checks:
 ```bash
 ./scripts/check.sh
 ```
-
-Useful individual commands:
-
-```bash
-./scripts/check-lint.sh
-./scripts/check-format.sh
-./scripts/check-types.sh
-./scripts/check-security.sh
-./scripts/check-translations.sh
-./scripts/check-tests.sh
-./scripts/check-docker.sh
-```
-
-## Troubleshooting
-
-### Local login does not work
-
-Check:
-
-- `.env` was created with `./init-env.sh dev`
-- `MOCK_LDAP=True`
-- the `web` container is running
-
-### `deploy.sh` fails before containers start
-
-Check:
-
-- the missing variable reported by the validation step
-- `DEPLOY_ENV` matches the template you used
-- `HEALTH_DCAT_VERSION` points to an existing release directory
-- the TLS certificate and key exist either in `certs/` at the repo root or at the override paths from `.env`
-
-### Users cannot log in with real LDAP
-
-Check:
-
-- `MOCK_LDAP=False`
-- `AUTH_LDAP_SERVER_URI`, `AUTH_LDAP_BIND_DN`, `AUTH_LDAP_BIND_PASSWORD`, `AUTH_LDAP_USER_SEARCH_BASE`, and `AUTH_LDAP_LOGIN_ATTR` are set
-- `AUTH_LDAP_CA_CERT_PATH` points to the internal LDAP CA certificate when your directory uses internal PKI
-- the LDAP server is reachable from the containers
-- the user can actually bind through LDAP with the supplied credentials
-
-### Warehouse data is missing
-
-Check:
-
-- `metadata_db` credentials are correct
-- the warehouse schema exists
-- startup logs do not report `metadata_db unavailable`
-
-### FAIR Genomes data or charts are missing
-
-Check:
-
-- `MOCK_FAIR_GENOMES` matches the environment you want
-- the scheduler or manual synchronisation has run
-- `FAIR_GENOMES_RDF_URL`, `FAIR_GENOMES_API_URL`, and `FAIR_GENOMES_API_TOKEN` are set when mocks are off
-- the FAIR Genomes freshness panel in admin shows recent successful RDF metadata and statistics synchronisations
-
-### Ticket requests are not reaching Alvao
-
-Check:
-
-- `MOCK_ALVAO` matches the environment you want
-- `ALVAO_API_URL`, `ALVAO_SERVICE_ACCOUNT_USERNAME`, `ALVAO_SERVICE_ACCOUNT_PASSWORD`, and `ALVAO_DEFAULT_SERVICE_ID` are set when mocks are off
-- web container logs for outbound request or retry errors
-
-### Grafana is accessible or blocked unexpectedly
-
-Check:
-
-- the user is authenticated in Django
-- the user has `is_staff=True`
-- requests are going through nginx instead of bypassing it
-
-## Release data
-
-The schema and export semantics depend on `HEALTH_DCAT_VERSION`, which points to a checked-out release under:
-
-`health_dcat_ap/public/releases/<version>`
-
-If you change the release:
-
-1. make sure `health_dcat_ap` contains that release, either in the checked-out copy or via Git update during deploy
-2. update `.env`
-3. rerun deploy
-4. verify schema labels and exports
-
-## Useful references
-
-- [FAIR_GENOMES.md](FAIR_GENOMES.md) — FAIR Genomes sync and stats
-- [USER_GUIDE.md](USER_GUIDE.md) — user-facing Catalogue behavior
-- [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) — code changes and development workflow

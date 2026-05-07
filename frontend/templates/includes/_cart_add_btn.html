@@ -1,16 +1,16 @@
 {% load i18n %}
 {% comment %}
-  HTMX cart hero button — no page reload.
+  HTMX cart hero button - no page reload.
   Toggles between "Add to cart" (orange) and "Remove from cart" (red).
   Server returns this partial with updated state on each toggle.
 
   Required variables (via with):
-    cart_source      – dataset source string (app)
-    cart_name        – dataset name
-    cart_title       – human-readable title for the item
-    cart_item_key    – app/name cart identity
+    cart_source      - dataset source string (app)
+    cart_name        - dataset name
+    cart_title       - human-readable title for the item
+    cart_item_key    - app/name cart identity
   Context variables used:
-    cart_item_keys   – set of app/name identities currently in the session cart
+    cart_item_keys   - set of app/name identities currently in the session cart
 {% endcomment %}
 <button type="button"
   hx-post="{% url 'ticketing:cart_add' %}"

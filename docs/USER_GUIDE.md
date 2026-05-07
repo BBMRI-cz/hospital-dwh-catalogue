@@ -1,7 +1,5 @@
 # User Guide
 
-Audience: Catalogue users, staff users, and teammates demoing the Catalogue.
-
 Use this page when the Catalogue is already running and you want to know what people can do in the browser. If you need to start or deploy the stack, use [OPERATIONS.md](OPERATIONS.md).
 
 ## Before you start
@@ -17,48 +15,21 @@ Authentication depends on the environment:
 - `staging` usually keeps LDAP mocked, but can also use real LDAP
 - `prod` uses real LDAP only
 
-The username that matches `DJANGO_SUPERUSER_USERNAME` becomes the mock staff/superuser account in `dev`.
+The account named by `DJANGO_SUPERUSER_USERNAME` is the env-managed staff/superuser
+account in every environment, including `staging` and `prod`, as long as it does
+not collide with an existing LDAP-only user.
 
 ## Main pages
 
 | URL | Purpose |
 |---|---|
 | `/` | Catalogue index with search, filters, and result cards |
-| `/dataset/<app>/<name>/` | Dataset detail page |
-| `/distribution/<app>/<name>/` | Distribution detail page |
 | `/cart/` | Access-request cart and submission form |
 | `/tickets/` | Request history |
 | `/api/jsonld` | Aggregate JSON-LD export for logged-in users |
 | `/api/rdf` | Aggregate RDF export for logged-in users |
 | `/admin/` | Django admin for staff and superusers |
 | `/grafana/` | Observability UI for logged-in staff users |
-
-## Browse the catalogue
-
-Users sign in and land on `/`.
-
-From there they can:
-
-- search datasets by text
-- filter by keyword, custodian, health category, source, theme, and distribution column
-- open dataset and distribution detail pages
-- add datasets to the request cart
-
-## Dataset detail pages
-
-Dataset detail pages show:
-
-- HealthDCAT-AP-compatible metadata rows
-- the distributions that belong to the dataset
-- dataset-level export buttons when the dataset has distributions
-
-## Distribution detail pages
-
-Distribution detail pages show:
-
-- HealthDCAT-AP-compatible distribution metadata
-- physical warehouse tables and columns when available
-- FAIR Genomes charts when stat results exist
 
 ## Export metadata
 
@@ -101,45 +72,3 @@ Staff and superusers can use `/admin/` to:
 - inspect ticket requests
 
 Staff users can also open `/grafana/`. Grafana has no separate password; access is gated by Django login plus the staff check.
-
-## Troubleshooting
-
-### I cannot sign in locally
-
-Check:
-
-- the stack was started with the `dev` environment
-- `MOCK_LDAP=True` in `.env`
-- you are using a non-empty username and password
-- the `web` container is running
-
-### Warehouse datasets do not appear
-
-Check:
-
-- `metadata_db` is reachable
-- the `warehouse` tables exist in the metadata schema
-- startup logs do not report `metadata_db unavailable`
-
-### FAIR Genomes charts are empty
-
-Check:
-
-- `MOCK_FAIR_GENOMES` is set correctly
-- FAIR Genomes synchronisation completed
-- there are active `StatDefinition` rows for the distribution
-- newly added statistic definitions were saved successfully, including the save-time aggregation synchronisation message
-- the FAIR Genomes freshness panel in admin shows a recent successful statistics synchronisation
-
-### Grafana is blocked
-
-Check:
-
-- the user is authenticated
-- the user has `is_staff=True`
-- the request is going through nginx
-
-## Related guides
-
-- [FAIR_GENOMES.md](FAIR_GENOMES.md)
-- [OPERATIONS.md](OPERATIONS.md)

@@ -1,7 +1,5 @@
 # Developer Guide
 
-Audience: developers changing Catalogue behavior or data sources.
-
 Use this page when you are making code changes. For runtime setup, use [OPERATIONS.md](OPERATIONS.md). For integration behavior, use [FAIR_GENOMES.md](FAIR_GENOMES.md).
 
 This guide covers the most common ways developers change the Catalogue.
@@ -19,29 +17,18 @@ This guide covers the most common ways developers change the Catalogue.
 
 ## Developer workflow
 
-Native Python installs need the LDAP build headers required by `python-ldap`. On Debian,
-Ubuntu, or WSL, install them before installing Python requirements:
+For easiest setup and development using Docker is recommended.
 
 ```bash
-sudo apt-get install python3-dev libldap2-dev libsasl2-dev
+./init-env.sh dev
+./deploy.sh
 ```
-
-When Docker is available, the check runner can use the containerized toolchain instead
-of host LDAP build dependencies.
 
 Install development dependencies with:
 
 ```bash
 pip install -r requirements-dev.txt
 ```
-
-Typical workflow:
-
-1. create a branch
-2. make your changes
-3. run the checks
-4. commit and push
-5. open a pull request
 
 Run the full local quality suite with:
 
@@ -50,24 +37,6 @@ Run the full local quality suite with:
 ```
 
 The Docker build check is skipped locally when Docker Compose is not usable.
-
-Useful individual commands:
-
-```bash
-./scripts/check-lint.sh
-./scripts/check-format.sh
-./scripts/check-types.sh
-./scripts/check-security.sh
-./scripts/check-translations.sh
-./scripts/check-tests.sh
-./scripts/check-docker.sh
-```
-
-Optional pre-commit hooks:
-
-```bash
-pre-commit install
-```
 
 The repo uses:
 
@@ -143,15 +112,6 @@ If the source database already contains a new field and you want it in the UI or
 4. if the frontend should display it, map it in `frontend/presentation/mapping.py`
 5. if it should be part of generated DCAT rows, make sure the DTO field name matches the snake_case version of the schema term's `local_name`
 6. update templates and tests
-
-For example, if you add a dataset-level field:
-
-- model field
-- `UnifiedDataset`
-- `map_unified_dataset()`
-- maybe `ExportDataset`
-- maybe `map_export_dataset()`
-- maybe template rendering
 
 ## Add another source database with models
 
@@ -282,15 +242,9 @@ When changing this area, keep RDF metadata freshness and statistic freshness sep
 
 Important files:
 
-- `ticketing/views.py` — cart and submission flow
-- `ticketing/services/factory.py` — mock vs real selection
-- `ticketing/services/alvao_service.py` — real Alvao integration
-
-Typical changes:
-
-- change request form fields in `TicketSubmitForm`
-- change payload-building logic in the ticket service layer
-- add mock behavior first, then the real integration
+- `ticketing/views.py` - cart and submission flow
+- `ticketing/services/factory.py` - mock vs real selection
+- `ticketing/services/alvao_service.py` - real Alvao integration
 
 ## Internationalization
 
@@ -343,28 +297,3 @@ Keep env changes disciplined:
 5. document it in README or the relevant focused doc
 
 Avoid adding env variables that are not read by code.
-
-## Add translations
-Use the internationalization workflow above.
-
-## When to add tests
-
-As a rule:
-
-- new routing logic -> route/view tests
-- new filters -> frontend presentation tests
-- new source integration -> router + loader + mapping tests
-- new auth/admin behavior -> catalogue tests
-- new ticketing behavior -> ticketing tests
-
-The project already has good examples in:
-
-- `catalogue/tests.py`
-- `frontend/tests.py`
-- `ticketing/tests.py`
-- `schema_registry/tests.py`
-
-## Related guides
-
-- [OPERATIONS.md](OPERATIONS.md)
-- [FAIR_GENOMES.md](FAIR_GENOMES.md)

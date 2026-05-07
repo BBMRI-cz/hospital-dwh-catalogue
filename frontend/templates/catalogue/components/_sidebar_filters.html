@@ -11,7 +11,7 @@
   <div class="flex-1 overflow-y-auto min-h-0 flex flex-col gap-5 py-4 pr-1">
     <div>
       <label for="sidebar-search" class="font-mono text-[11px] font-bold uppercase tracking-[1.5px] text-txt-muted mb-1.5 block">{% trans "Search" %}</label>
-      {% trans "Datasets, distributions…" as sidebar_search_placeholder %}
+      {% trans "Datasets, distributions..." as sidebar_search_placeholder %}
       {% include "includes/_search_input.html" with search_id="sidebar-search" search_name="q" search_value=filter_params.q search_placeholder=sidebar_search_placeholder search_input_class="w-full" only %}
     </div>
 

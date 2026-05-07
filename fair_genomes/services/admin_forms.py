@@ -59,7 +59,7 @@ class StatDefinitionForm(forms.ModelForm):
                 distribution.name,
                 (
                     f'{distribution.dataset_name.title or distribution.dataset_name_id} '
-                    f'\u2192 {distribution.title or distribution.name}'
+                    f'-> {distribution.title or distribution.name}'
                 ),
             )
             for distribution in distributions
@@ -115,7 +115,7 @@ class StatDefinitionForm(forms.ModelForm):
         column_choices: list[tuple[str, str]] = [('', '---------')]
         for table_name, columns in sorted(schema.items()):
             for column in columns:
-                column_choices.append((column, f'{table_name} \u2192 {column}'))
+                column_choices.append((column, f'{table_name} -> {column}'))
         self.fields['molgenis_column'] = forms.ChoiceField(
             choices=column_choices,
             label=_('MOLGENIS column'),
@@ -143,7 +143,7 @@ class StatDefinitionForm(forms.ModelForm):
         )
         self.fields['molgenis_column'] = forms.ChoiceField(
             choices=[('', '---------')]
-            + [(column, f'{table} \u2192 {column}') for table, column in existing_pairs],
+            + [(column, f'{table} -> {column}') for table, column in existing_pairs],
             label=_('MOLGENIS column'),
             help_text=_('MOLGENIS is currently unreachable. Showing known values.'),
             required=False,

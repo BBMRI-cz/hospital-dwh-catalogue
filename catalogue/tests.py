@@ -17,7 +17,25 @@ from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.test import SimpleTestCase, TestCase
 
+from fair_genomes.models import Dataset as FairDataset
+from shared.catalogue_assemblers import attach_distributions, build_complete_export_catalogue
+from shared.dtos import UnifiedDataset, UnifiedDistribution
+from shared.source_loaders import (
+    get_apps_with_table_columns,
+    get_source_adapter,
+    get_source_apps,
+    load_export_catalog,
+    load_export_dataset,
+)
+from ticketing.models import TicketRequest, TicketRequestItem
+from warehouse.models import Dataset as WarehouseDataset
+
 from .routers import AuthRouter, WarehouseRouter
+from .settings.helpers import (
+    ldap_settings,
+    positive_int_or_default,
+    reverse_proxy_https_settings,
+)
 
 
 class _FakeLDAPSearch:
@@ -43,8 +61,6 @@ def _ldap_test_modules():
 
 class LdapSettingsTest(SimpleTestCase):
     def test_ldap_settings_default_login_attr_is_samaccountname(self):
-        from .settings.helpers import ldap_settings
-
         env = {
             'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636',
             'AUTH_LDAP_BIND_DN': 'cn=svc,dc=example,dc=com',
@@ -65,8 +81,6 @@ class LdapSettingsTest(SimpleTestCase):
         )
 
     def test_ldap_settings_uses_configured_login_attr_in_ad_filter(self):
-        from .settings.helpers import ldap_settings
-
         env = {
             'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636',
             'AUTH_LDAP_BIND_DN': 'cn=svc,dc=example,dc=com',
@@ -102,13 +116,9 @@ class LdapSettingsTest(SimpleTestCase):
 
 class SettingsHelpersTest(SimpleTestCase):
     def test_positive_int_or_default_returns_positive_values(self):
-        from .settings.helpers import positive_int_or_default
-
         self.assertEqual(positive_int_or_default('25', default=15), 25)
 
     def test_positive_int_or_default_falls_back_to_default_for_invalid_values(self):
-        from .settings.helpers import positive_int_or_default
-
         for value in ('0', '-3', 'abc', ''):
             with self.subTest(value=value):
                 self.assertEqual(positive_int_or_default(value, default=15), 15)
@@ -161,8 +171,6 @@ exit 1
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):
     def test_reverse_proxy_https_settings_sets_secure_proxy_defaults(self):
-        from .settings.helpers import reverse_proxy_https_settings
-
         settings = reverse_proxy_https_settings(
             allowed_hosts=['katalog-dwh-test.int.mou.cz', 'localhost']
         )
@@ -266,14 +274,10 @@ class AuthRouterTest(TestCase):
 
     def test_db_for_read_non_auth_model(self):
         """Non-auth models return None (defer to next router)."""
-        from ticketing.models import TicketRequest
-
         self.assertIsNone(self.router.db_for_read(TicketRequest))
 
     def test_db_for_write_non_auth_model(self):
         """Non-auth models return None."""
-        from ticketing.models import TicketRequest
-
         self.assertIsNone(self.router.db_for_write(TicketRequest))
 
     def test_allow_migrate_auth_to_auth_db(self):
@@ -296,8 +300,6 @@ class AuthRouterTest(TestCase):
 
     def test_allow_relation_auth_and_non_auth(self):
         """Relations between auth and non-auth models are blocked."""
-        from ticketing.models import TicketRequest
-
         user = User(username='test')
         ticket = TicketRequest(requester_email='t@e.com')
         self.assertFalse(self.router.allow_relation(user, ticket))
@@ -313,38 +315,26 @@ class WarehouseRouterTest(TestCase):
 
     def test_db_for_read_warehouse(self):
         """Warehouse models are routed to metadata_db."""
-        from warehouse.models import Dataset
-
-        self.assertEqual(self.router.db_for_read(Dataset), 'metadata_db')
+        self.assertEqual(self.router.db_for_read(WarehouseDataset), 'metadata_db')
 
     def test_db_for_read_fair_genomes(self):
         """Fair genomes models are routed to fair_genomes_db."""
-        from fair_genomes.models import Dataset
-
-        self.assertEqual(self.router.db_for_read(Dataset), 'fair_genomes_db')
+        self.assertEqual(self.router.db_for_read(FairDataset), 'fair_genomes_db')
 
     def test_db_for_read_ticketing(self):
         """Ticketing models are routed to default."""
-        from ticketing.models import TicketRequest
-
         self.assertEqual(self.router.db_for_read(TicketRequest), 'default')
 
     def test_db_for_write_warehouse(self):
         """Warehouse models write to metadata_db."""
-        from warehouse.models import Dataset
-
-        self.assertEqual(self.router.db_for_write(Dataset), 'metadata_db')
+        self.assertEqual(self.router.db_for_write(WarehouseDataset), 'metadata_db')
 
     def test_db_for_write_fair_genomes(self):
         """Fair genomes models write to fair_genomes_db."""
-        from fair_genomes.models import Dataset
-
-        self.assertEqual(self.router.db_for_write(Dataset), 'fair_genomes_db')
+        self.assertEqual(self.router.db_for_write(FairDataset), 'fair_genomes_db')
 
     def test_db_for_write_ticketing(self):
         """Ticketing models write to default."""
-        from ticketing.models import TicketRequest
-
         self.assertEqual(self.router.db_for_write(TicketRequest), 'default')
 
     def test_allow_migrate_fair_genomes(self):
@@ -365,27 +355,19 @@ class WarehouseRouterTest(TestCase):
 
     def test_allow_relation_same_db(self):
         """Relations within same database are allowed."""
-        from ticketing.models import TicketRequest, TicketRequestItem
-
         t = TicketRequest(requester_email='t@e.com')
         item = TicketRequestItem(ticket_request=t)
         self.assertTrue(self.router.allow_relation(t, item))
 
     def test_allow_relation_different_db(self):
         """Relations across databases are blocked."""
-        from fair_genomes.models import Dataset
-        from ticketing.models import TicketRequest
-
-        fg_dataset = Dataset(name='fg-ds1')
+        fg_dataset = FairDataset(name='fg-ds1')
         ticket = TicketRequest(requester_email='t@e.com')
         self.assertFalse(self.router.allow_relation(fg_dataset, ticket))
 
 
 class AttachDistributionsTest(SimpleTestCase):
     def test_attach_distributions_returns_new_dataset_objects(self):
-        from shared.catalogue_assemblers import attach_distributions
-        from shared.dtos import UnifiedDataset, UnifiedDistribution
-
         dataset = UnifiedDataset(app='warehouse', name='ds-1', title='Dataset One')
         distributions = [
             UnifiedDistribution(
@@ -409,25 +391,15 @@ class AttachDistributionsTest(SimpleTestCase):
 
 class SourceLoaderRegistryTest(SimpleTestCase):
     def test_get_source_apps_uses_registered_sources(self):
-        from shared.source_loaders import get_source_apps
-
         self.assertEqual(get_source_apps(), ('warehouse', 'fair_genomes'))
 
     def test_get_apps_with_table_columns_uses_registered_sources(self):
-        from shared.source_loaders import get_apps_with_table_columns
-
         self.assertEqual(get_apps_with_table_columns(), frozenset({'warehouse'}))
 
     def test_get_source_adapter_returns_none_for_unknown_source(self):
-        from shared.source_loaders import get_source_adapter
-
         self.assertIsNone(get_source_adapter('unknown_source'))
 
     def test_get_source_adapter_resolves_registered_source_models(self):
-        from fair_genomes.models import Dataset as FairDataset
-        from shared.source_loaders import get_source_adapter
-        from warehouse.models import Dataset as WarehouseDataset
-
         wh_adapter = get_source_adapter('warehouse')
         fg_adapter = get_source_adapter('fair_genomes')
 
@@ -441,8 +413,6 @@ class SourceLoaderRegistryTest(SimpleTestCase):
         self.assertIs(fg_adapter.dataset_model, FairDataset)
 
     def test_export_loaders_return_none_for_unknown_source(self):
-        from shared.source_loaders import load_export_catalog, load_export_dataset
-
         self.assertIsNone(load_export_dataset('unknown_source', 'dataset-1'))
         self.assertIsNone(load_export_catalog('unknown_source', 'catalog-1'))
 
@@ -461,8 +431,6 @@ class CompleteExportCatalogueAssemblerTest(SimpleTestCase):
         mock_map_dataset,
         mock_map_catalog,
     ):
-        from shared.catalogue_assemblers import build_complete_export_catalogue
-
         class Source:
             def __init__(self, app):
                 self.app = app

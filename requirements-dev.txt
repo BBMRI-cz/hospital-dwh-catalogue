@@ -13,6 +13,3 @@ types-requests>=2.31.0
 
 # Security
 bandit>=1.7.0
-
-# Git hooks
-pre-commit>=3.7.0

@@ -7,6 +7,15 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
+from fair_genomes.models import (
+    Catalog as FairGenomesCatalog,
+)
+from fair_genomes.models import (
+    Dataset as FairGenomesDataset,
+)
+from fair_genomes.models import (
+    Distribution as FairGenomesDistribution,
+)
 from shared.catalogue_assemblers import build_complete_export_catalogue
 from shared.dtos import ExportCatalog, ExportDataset, UnifiedDataset, UnifiedDistribution
 from shared.mappers import (
@@ -14,6 +23,15 @@ from shared.mappers import (
     map_export_dataset,
     map_unified_dataset,
     map_unified_distribution,
+)
+from warehouse.models import (
+    Catalog as WarehouseCatalog,
+)
+from warehouse.models import (
+    Dataset as WarehouseDataset,
+)
+from warehouse.models import (
+    Distribution as WarehouseDistribution,
 )
 
 logger = logging.getLogger(__name__)
@@ -114,15 +132,11 @@ class SourceAdapter:
 
 
 def _load_warehouse_models() -> ModelTriple:
-    from warehouse.models import Catalog, Dataset, Distribution
-
-    return Catalog, Dataset, Distribution
+    return WarehouseCatalog, WarehouseDataset, WarehouseDistribution
 
 
 def _load_fair_genomes_models() -> ModelTriple:
-    from fair_genomes.models import Catalog, Dataset, Distribution
-
-    return Catalog, Dataset, Distribution
+    return FairGenomesCatalog, FairGenomesDataset, FairGenomesDistribution
 
 
 SOURCE_ADAPTERS: tuple[SourceAdapter, ...] = (

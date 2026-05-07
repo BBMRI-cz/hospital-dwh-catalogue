@@ -8,9 +8,7 @@ from ticketing.read_models import TicketHistoryEntry, TicketHistoryItem
 
 def build_ticket_subject(cart: list[dict], default_subject: str) -> str:
     dataset_names = ', '.join(item['title'] for item in cart)
-    return ((default_subject + f' \u2014 {dataset_names}') if dataset_names else default_subject)[
-        :500
-    ]
+    return ((default_subject + f' - {dataset_names}') if dataset_names else default_subject)[:500]
 
 
 def build_ticket_description(description: str, cart: list[dict]) -> str:

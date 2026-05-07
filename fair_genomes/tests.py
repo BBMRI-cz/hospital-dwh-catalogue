@@ -1,5 +1,5 @@
 """
-Tests for the fair_genomes application — HealthDCAT-AP Profile.
+Tests for the fair_genomes application - HealthDCAT-AP Profile.
 
 FAIR Genomes models are managed=True (Django creates tables in fair_genomes_db).
 Model tests do not require DB writes; service tests mock HTTP so no live API
@@ -9,6 +9,9 @@ calls are made.
 import os
 from io import StringIO
 from unittest.mock import MagicMock, patch
+
+import requests as req_lib
+from rdflib import Graph, URIRef
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -20,6 +23,8 @@ from django.utils.translation import override
 from fair_genomes.admin import StatDefinitionAdmin
 from fair_genomes.services.admin_forms import StatDefinitionForm
 from frontend.presentation.cache import CATALOGUE_SNAPSHOT_CACHE_KEY
+from shared.export import build_turtle_result
+from shared.mappers import map_export_dataset
 
 from .models import (
     Agent,
@@ -153,8 +158,6 @@ class SeedFairGenomesMockCommandTest(TestCase):
 
     @override_settings(MOCK_FAIR_GENOMES=True)
     def test_seed_writes_healthdcat_compatible_mock_values(self):
-        from django.core.management import call_command
-
         Catalog.objects.using('fair_genomes_db').create(
             name='CAT_FAIR_GENOMES',
             title='Old title',
@@ -220,9 +223,6 @@ class SeedFairGenomesMockCommandTest(TestCase):
         self.assertIsNone(vcf.format)
         self.assertIsNone(vcf.rights)
 
-        from shared.export import build_turtle_result
-        from shared.mappers import map_export_dataset
-
         turtle = build_turtle_result(map_export_dataset(cohort, 'fair_genomes')).content
         self.assertIn(
             'http://13.81.34.152:1101/resource/authority/healthcategories/HGPD',
@@ -275,8 +275,6 @@ class SchemaDiscoveryTest(SimpleTestCase):
     """Tests for discovering live-style FDP classes and column predicates."""
 
     def test_discovers_entity_types_from_schema_labels_and_domains(self):
-        from rdflib import Graph
-
         graph = Graph()
         graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
 
@@ -286,8 +284,6 @@ class SchemaDiscoveryTest(SimpleTestCase):
         self.assertIn('http://fdp.example.org/api/rdf/Dataset', dataset_type_uris)
 
     def test_discovers_mixed_column_labels_from_live_style_schema(self):
-        from rdflib import Graph
-
         graph = Graph()
         graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
 
@@ -299,8 +295,6 @@ class SchemaDiscoveryTest(SimpleTestCase):
         self.assertIn('modificationDate', schema.column_predicates['Distribution'])
 
     def test_discovers_record_subjects_from_column_usage(self):
-        from rdflib import Graph
-
         graph = Graph()
         graph.parse(data=_load_turtle('test_full_graph.ttl'), format='turtle')
 
@@ -311,13 +305,13 @@ class SchemaDiscoveryTest(SimpleTestCase):
 
 
 class TableModelTest(TestCase):
-    """Table model has been removed — this placeholder prevents test discovery issues."""
+    """Table model has been removed - this placeholder prevents test discovery issues."""
 
     pass
 
 
 class ColumnModelTest(TestCase):
-    """Column model has been removed — this placeholder prevents test discovery issues."""
+    """Column model has been removed - this placeholder prevents test discovery issues."""
 
     pass
 
@@ -371,7 +365,7 @@ class FairGenomesSyncStateModelTest(TestCase):
 
 
 class SyncStatsTest(TestCase):
-    """Tests for FairGenomesService._sync_stats() — HTTP is always mocked."""
+    """Tests for FairGenomesService._sync_stats() - HTTP is always mocked."""
 
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
@@ -382,8 +376,6 @@ class SyncStatsTest(TestCase):
 
     def setUp(self):
         """Create a Distribution and two StatDefinition rows for testing."""
-        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution, StatDefinition
-
         cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
             email='test@example.org',
         )
@@ -483,8 +475,6 @@ class SyncStatsTest(TestCase):
 
     @patch('fair_genomes.services.stats.requests.post')
     def test_sync_stats_http_error(self, mock_post):
-        import requests as req_lib
-
         mock_post.side_effect = req_lib.RequestException('connection refused')
 
         svc = FairGenomesService(api_url='http://mock/graphql', api_token='tok')
@@ -541,7 +531,7 @@ class StatDefinitionModelTest(TestCase):
             display_label='',
             distribution_id='DIST_X',
         )
-        self.assertEqual(str(sd), 'seq.col → DIST_X')
+        self.assertEqual(str(sd), 'seq.col -> DIST_X')
 
 
 class StatDefinitionAdminSaveTest(TestCase):
@@ -713,7 +703,7 @@ class SyncFairGenomesCommandCacheTest(TestCase):
 
 
 # ---------------------------------------------------------------------------
-# _process_graph() integration tests — use Turtle fixtures, no HTTP mocking
+# _process_graph() integration tests - use Turtle fixtures, no HTTP mocking
 # ---------------------------------------------------------------------------
 
 _FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -725,8 +715,6 @@ def _load_turtle(filename: str) -> str:
 
 
 def _load_graph(filename: str):
-    from rdflib import Graph
-
     graph = Graph()
     graph.parse(data=_load_turtle(filename), format='turtle')
     return graph
@@ -762,8 +750,6 @@ class ProcessGraphFullTest(TestCase):
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def test_all_entities_saved(self):
-        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution
-
         g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
@@ -794,8 +780,6 @@ class ProcessGraphFullTest(TestCase):
         )
 
     def test_duplicate_theme_from_multiple_predicates_saved_once(self):
-        from rdflib import URIRef
-
         g = _load_graph('test_full_graph.ttl')
         g.add(
             (
@@ -819,8 +803,6 @@ class ProcessGraphFullTest(TestCase):
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
         svc._process_graph(g)
-
-        from .models import Distribution
 
         dist = Distribution.objects.using('fair_genomes_db').get(name='test-distribution')
         self.assertEqual(dist.dataset_name_id, 'test-dataset')
@@ -914,8 +896,6 @@ class ProcessGraphPartialTest(TestCase):
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def test_good_dataset_saved_bad_dataset_skipped(self):
-        from .models import Dataset
-
         g = _load_graph('test_partial_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
@@ -950,8 +930,6 @@ class ProcessGraphStaleCleanupTest(TestCase):
     databases = {'default', 'auth_db', 'fair_genomes_db'}
 
     def setUp(self):
-        from .models import Agent, Catalog, ContactPoint, Dataset, Distribution
-
         cp, _ = ContactPoint.objects.using('fair_genomes_db').get_or_create(
             email='seed@example.org'
         )
@@ -983,8 +961,6 @@ class ProcessGraphStaleCleanupTest(TestCase):
         )
 
     def test_stale_dataset_and_distribution_deleted(self):
-        from .models import Dataset, Distribution
-
         g = _load_graph('test_full_graph.ttl')
 
         svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')

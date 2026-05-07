@@ -1,7 +1,5 @@
 # FAIR Genomes
 
-Audience: operators, staff users, and developers working with the FAIR Genomes integration.
-
 Use this page to configure FAIR Genomes, run synchronisation, manage statistics, and troubleshoot missing datasets or charts.
 
 ## What the integration does
@@ -53,8 +51,6 @@ A FAIR Genomes synchronisation run has two phases under one configured interval:
 
 The phases are tracked separately in `FairGenomesSyncState`, so staff users can see the last check, last success, last failure, duration, summary, and error message for RDF metadata and statistics independently.
 
-The current implementation always checks the configured RDF endpoint when a synchronisation run starts. It does not currently use ETag, Last-Modified, or payload-hash change detection to skip unchanged RDF parsing.
-
 ### Manual synchronisation
 
 ```bash
@@ -71,24 +67,14 @@ View logs with:
 ./scripts/compose.sh logs scheduler
 ```
 
-## Where the data appears
-
-Once synchronised, FAIR Genomes data appears in the same UI as warehouse metadata:
-
-- dataset detail: `/dataset/fair_genomes/<name>/`
-- distribution detail: `/distribution/fair_genomes/<name>/`
-- aggregate exports: `/api/jsonld` and `/api/rdf`
-
-Dataset detail pages can also expose dataset-specific export buttons for logged-in users.
-
 ## Statistics
 
 ### How statistics work
 
 Two models drive the charts:
 
-- `StatDefinition` — describes which MOLGENIS table and column should be aggregated for a specific FAIR Genomes distribution
-- `StatResult` — stores the latest aggregated counts for that table and column
+- `StatDefinition` - describes which MOLGENIS table and column should be aggregated for a specific FAIR Genomes distribution
+- `StatResult` - stores the latest aggregated counts for that table and column
 
 When the statistics phase runs, the Catalogue executes MOLGENIS `_groupBy` queries for active `StatDefinition` rows and saves the output into `StatResult`.
 
@@ -137,26 +123,3 @@ Check:
 - the scheduler or manual synchronisation has run
 - `FAIR_GENOMES_RDF_URL` points to a real FAIR Data Point / DCAT feed
 - the FAIR Genomes freshness panel in admin shows a recent successful RDF metadata synchronisation
-
-### Charts are missing on a FAIR Genomes distribution
-
-Check:
-
-- there are active `StatDefinition` rows for that distribution
-- the save-time synchronisation, statistics phase, or selected-stat action has created matching `StatResult` rows
-- `FAIR_GENOMES_API_URL` and `FAIR_GENOMES_API_TOKEN` are set when mocks are off
-- the FAIR Genomes freshness panel in admin shows a recent successful statistics synchronisation
-
-### The admin form does not show live MOLGENIS choices
-
-That usually means schema introspection failed. The form should still work with fallback values, but you should check the GraphQL endpoint and token.
-
-### The admin form does not show new RDF distributions
-
-The form saves only locally synchronised `Distribution` rows. If the RDF source warning says new distributions exist, run `Check and Synchronise FAIR Genomes` first. If the RDF source is unavailable, the form keeps using locally synchronised distributions.
-
-## Related guides
-
-- [USER_GUIDE.md](USER_GUIDE.md)
-- [OPERATIONS.md](OPERATIONS.md)
-- [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)

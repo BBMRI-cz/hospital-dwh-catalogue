@@ -1,14 +1,14 @@
 {% load i18n %}
 {% comment %}
-  Primary button — cyan fill, matches sidebar Search button.
+  Primary button - cyan fill, matches sidebar Search button.
 
   Variables (all optional):
-    label        – translatable button text
-    icon_svg     – raw SVG string to render before label
-    href         – if given, renders as <a>; otherwise as <button>
-    btn_type     – type attribute for <button>  (default: "button")
-    extra_class  – additional CSS classes appended to the base class list
-    extra_attrs  – raw extra HTML attributes string
+    label        - translatable button text
+    icon_svg     - raw SVG string to render before label
+    href         - if given, renders as <a>; otherwise as <button>
+    btn_type     - type attribute for <button>  (default: "button")
+    extra_class  - additional CSS classes appended to the base class list
+    extra_attrs  - raw extra HTML attributes string
 {% endcomment %}
 {% if href %}
 <a href="{{ href }}"

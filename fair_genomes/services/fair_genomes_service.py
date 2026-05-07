@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 import time
 
+from rdflib import Graph
+
 from django.conf import settings
 from django.db import transaction
 
@@ -68,7 +70,7 @@ class FairGenomesService:
                 'status': 'skipped',
                 'reason': (
                     'Neither FAIR_GENOMES_RDF_URL nor FAIR_GENOMES_API_URL is configured '
-                    '— set at least one in the environment'
+                    '- set at least one in the environment'
                 ),
             }
 
@@ -86,7 +88,6 @@ class FairGenomesService:
             try:
                 response = fetch_rdf(self.rdf_url, self.timeout)
                 rdf_format = detect_rdf_format(response)
-                from rdflib import Graph
 
                 graph = Graph()
                 graph.parse(data=response.text, format=rdf_format)

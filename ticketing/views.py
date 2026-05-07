@@ -31,7 +31,7 @@ class TicketSubmitForm(forms.Form):
             attrs={
                 'class': 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-[#53c0d7] focus:outline-none focus:ring-2 focus:ring-[#53c0d7]/20 transition resize-none',
                 'rows': 4,
-                'placeholder': _('Describe your request…'),
+                'placeholder': _('Describe your request...'),
             }
         ),
     )
@@ -119,7 +119,7 @@ class CartView(LoginRequiredMixin, View):
             if ticket_id:
                 messages.success(
                     request,
-                    str(_('Your request has been submitted \u2014 ticket #%(ticket_id)s'))
+                    str(_('Your request has been submitted - ticket #%(ticket_id)s'))
                     % {'ticket_id': ticket_id},
                 )
             else:

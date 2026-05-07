@@ -7,6 +7,8 @@ from collections import Counter
 from collections.abc import Callable, Mapping
 from typing import TypeVar
 
+from fair_genomes.services.catalogue import FairGenomesCatalogueService
+from schema_registry.services import get_schema_dict
 from schema_registry.types import SchemaRegistryPayload
 from shared.catalogue_assemblers import attach_distributions
 from shared.dtos import (
@@ -27,6 +29,7 @@ from shared.source_loaders import (
     load_unified_datasets,
     load_unified_distributions,
 )
+from warehouse.services import WarehouseMetadataService
 
 logger = logging.getLogger(__name__)
 
@@ -53,14 +56,10 @@ class UnifiedCatalogService:
 
     @staticmethod
     def _warehouse_service():
-        from warehouse.services import WarehouseMetadataService
-
         return WarehouseMetadataService()
 
     @staticmethod
     def _fair_genomes_service():
-        from fair_genomes.services.catalogue import FairGenomesCatalogueService
-
         return FairGenomesCatalogueService()
 
     def get_apps_with_table_columns(self) -> frozenset[str]:
@@ -105,8 +104,6 @@ class UnifiedCatalogService:
 
     @staticmethod
     def _load_schema_json() -> SchemaRegistryPayload:
-        from schema_registry.services import get_schema_dict
-
         return get_schema_dict()
 
     def get_dataset_names_by_columns(self, column_titles: set[str]) -> frozenset[str]:

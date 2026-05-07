@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
 
-from fair_genomes.models import FairGenomesSyncState, StatDefinition
+from fair_genomes.models import FairGenomesSyncState, StatDefinition, StatResult
 from fair_genomes.services.admin_forms import StatDefinitionForm
 from fair_genomes.services.admin_support import (
     clear_rdf_source_inventory_cache,
@@ -19,6 +19,7 @@ from fair_genomes.services.admin_support import (
     get_sync_state_context,
     sync_report_status_label,
 )
+from fair_genomes.services.fair_genomes_service import FairGenomesService
 from fair_genomes.services.sync_state import (
     mark_failed,
     mark_started,
@@ -66,8 +67,6 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related('distribution__dataset_name')
 
     def _stat_result_exists(self, obj: StatDefinition) -> bool:
-        from fair_genomes.models import StatResult
-
         return (
             StatResult.objects.using('fair_genomes_db')
             .filter(table_name=obj.molgenis_table, column_name=obj.molgenis_column)
@@ -85,9 +84,6 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         return bool(changed_data & sync_relevant_fields) or not self._stat_result_exists(obj)
 
     def _sync_saved_stat_definition(self, request, obj: StatDefinition) -> None:
-        from fair_genomes.models import StatResult
-        from fair_genomes.services.fair_genomes_service import FairGenomesService
-
         api_url = getattr(settings, 'FAIR_GENOMES_API_URL', '')
         if not api_url:
             messages.warning(
@@ -214,8 +210,6 @@ class StatDefinitionAdmin(admin.ModelAdmin):
             return redirect('..')
 
         if request.method == 'POST':
-            from fair_genomes.services.fair_genomes_service import FairGenomesService
-
             try:
                 svc = FairGenomesService()
                 report = svc.sync()
@@ -277,8 +271,6 @@ class StatDefinitionAdmin(admin.ModelAdmin):
     @admin.action(description=_('Synchronise selected statistic aggregations now'))
     def sync_selected_stats(self, request, queryset):
         """Re-run the _groupBy aggregation for selected StatDefinitions."""
-        from fair_genomes.services.fair_genomes_service import FairGenomesService
-
         api_url = getattr(settings, 'FAIR_GENOMES_API_URL', '')
         if not api_url:
             messages.warning(request, _('FAIR_GENOMES_API_URL is not configured.'))

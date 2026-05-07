@@ -1,5 +1,5 @@
 """
-Single-process startup script — runs all one-off setup tasks inside one
+Single-process startup script - runs all one-off setup tasks inside one
 Django process instead of spawning manage.py 7+ times.
 
 Called by docker/entrypoint.sh before the main server command.
@@ -33,15 +33,15 @@ def _ensure_env_superuser() -> None:
     Behaviour on every startup:
     - If either env var is missing/blank, skip silently.
     - Any existing env-managed user (sentinel email) with a *different* username
-      is deleted first — this handles username rotation in .env.
+      is deleted first - this handles username rotation in .env.
     - The target user is then created or claimed:
-        * Newly created  → fully configured as superuser with sentinel email.
-        * Exists, sentinel email present → re-stamp (LDAP may have overwritten
+        * Newly created  -> fully configured as superuser with sentinel email.
+        * Exists, sentinel email present -> re-stamp (LDAP may have overwritten
           it via AUTH_LDAP_ALWAYS_UPDATE_USER=True) and sync password + flags.
         * Exists, no sentinel, but is_superuser=True and has a usable password
-          → treat as a previously env-managed user whose sentinel was lost to an
+          -> treat as a previously env-managed user whose sentinel was lost to an
           LDAP sync; re-claim and sync password + flags.
-        * Exists, no sentinel, not a local-password superuser → genuine AD/LDAP
+        * Exists, no sentinel, not a local-password superuser -> genuine AD/LDAP
           user that happens to share the username; leave untouched and warn.
     """
     from django.contrib.auth import get_user_model
@@ -50,7 +50,7 @@ def _ensure_env_superuser() -> None:
     credentials = env_superuser_credentials(os.environ)
     if credentials is None:
         print(
-            'DJANGO_SUPERUSER_USERNAME/PASSWORD not set — skipping env superuser setup.',
+            'DJANGO_SUPERUSER_USERNAME/PASSWORD not set - skipping env superuser setup.',
             flush=True,
         )
         return
@@ -58,7 +58,7 @@ def _ensure_env_superuser() -> None:
 
     UserModel = get_user_model()
 
-    # ── Remove stale env-managed user (username changed in .env) ─────────────
+    # -- Remove stale env-managed user (username changed in .env) -------------
     deleted_count, _ = (
         UserModel.objects.using('auth_db')
         .filter(email=ENV_SUPERUSER_SENTINEL_EMAIL)
@@ -68,7 +68,7 @@ def _ensure_env_superuser() -> None:
     if deleted_count:
         print(f'Env superuser: deleted {deleted_count} stale env-managed user(s).', flush=True)
 
-    # ── Create or update target user ──────────────────────────────────────────
+    # -- Create or update target user ------------------------------------------
     result = UserModel.objects.using('auth_db').get_or_create(
         username=username,
         defaults={
@@ -86,14 +86,14 @@ def _ensure_env_superuser() -> None:
         print(f"Env superuser: created '{username}'.", flush=True)
         return
 
-    # User already existed — decide whether to claim/re-claim it.
+    # User already existed - decide whether to claim/re-claim it.
     has_sentinel = user.email == ENV_SUPERUSER_SENTINEL_EMAIL
     is_local_superuser = user.is_superuser and user.has_usable_password()
 
     if not has_sentinel and not is_local_superuser:
         # Pure LDAP user (no usable local password, no sentinel): leave alone.
         print(
-            f"Env superuser: '{username}' exists as an LDAP-only user — skipping to avoid conflict. "
+            f"Env superuser: '{username}' exists as an LDAP-only user - skipping to avoid conflict. "
             f'Choose a username that does not exist in Active Directory.',
             flush=True,
         )
@@ -120,7 +120,7 @@ def _build_tailwind_css(base_dir: Path) -> None:
     that execute this script outside the container).
     """
     if not shutil.which('tailwindcss'):
-        print('tailwindcss binary not found — skipping CSS build.', flush=True)
+        print('tailwindcss binary not found - skipping CSS build.', flush=True)
         return
 
     result = subprocess.run(
@@ -140,7 +140,7 @@ def _check_metadata_db() -> None:
         connections['metadata_db'].ensure_connection()
     except Exception:
         print(
-            'metadata_db unavailable — Warehouse data will not appear in the catalogue.',
+            'metadata_db unavailable - Warehouse data will not appear in the catalogue.',
             flush=True,
         )
 
@@ -183,7 +183,7 @@ def _repair_missing_app_table(
 def _seed_mock_data_if_needed() -> None:
     if not should_seed_mock_fair_genomes(os.environ):
         return
-    print('MOCK_FAIR_GENOMES=True — seeding fair_genomes_db with mock data...', flush=True)
+    print('MOCK_FAIR_GENOMES=True - seeding fair_genomes_db with mock data...', flush=True)
     call_command('seed_fair_genomes_mock')
 
 
@@ -202,7 +202,7 @@ def main() -> None:
     settings_module = os.environ.get('DJANGO_SETTINGS_MODULE', '')
     base_dir = Path(__file__).resolve().parent.parent
 
-    # ── Migrations ────────────────────────────────────────────────────────────
+    # -- Migrations ------------------------------------------------------------
     _migrate_database('auth_db')
     _ensure_env_superuser()
 
@@ -221,16 +221,16 @@ def main() -> None:
     )
     _check_metadata_db()
 
-    # ── Seed mock data ────────────────────────────────────────────────────────
+    # -- Seed mock data --------------------------------------------------------
     _seed_mock_data_if_needed()
 
-    # ── Tailwind CSS ──────────────────────────────────────────────────────────
+    # -- Tailwind CSS ----------------------------------------------------------
     _build_tailwind_css(base_dir)
 
-    # ── Translations ──────────────────────────────────────────────────────────
+    # -- Translations ----------------------------------------------------------
     _compile_translations_if_needed(base_dir)
 
-    # ── Static files (skip in dev — runserver serves them directly) ───────────
+    # -- Static files (skip in dev - runserver serves them directly) -----------
     if should_collectstatic(settings_module):
         call_command('collectstatic', interactive=False, verbosity=0)
 

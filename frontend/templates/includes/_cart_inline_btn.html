@@ -4,11 +4,11 @@
   Server returns this partial with updated state on each toggle.
 
   Required variables:
-    cart_app         – app identifier
-    cart_name        – item name
-    cart_title       – human-readable title
-    cart_item_key    – app/name cart identity
-    cart_item_keys   – set of app/name identities currently in the session cart
+    cart_app         - app identifier
+    cart_name        - item name
+    cart_title       - human-readable title
+    cart_item_key    - app/name cart identity
+    cart_item_keys   - set of app/name identities currently in the session cart
 {% endcomment %}
 <button type="button"
   hx-post="{% url 'ticketing:cart_add' %}"

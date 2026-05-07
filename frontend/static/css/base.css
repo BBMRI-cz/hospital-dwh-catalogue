@@ -1,15 +1,15 @@
-/* ── Alpine.js cloak ──────────────────────────────────────── */
+/* -- Alpine.js cloak ---------------------------------------- */
 [x-cloak] { display: none !important; }
 
-/* ── Scrollbar ─────────────────────────────────────────────── */
+/* -- Scrollbar ----------------------------------------------- */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
 
-/* ── Search highlight marks ───────────────────────────────── */
+/* -- Search highlight marks --------------------------------- */
 mark { background: #fbeebc; color: #5a4000; border-radius: 2px; padding: 0 1px; }
 
-/* ── Paper texture overlay ────────────────────────────────── */
+/* -- Paper texture overlay ---------------------------------- */
 body::after {
   content: '';
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -17,20 +17,20 @@ body::after {
   opacity: .4;
 }
 
-/* ── Ensure content is above texture ──────────────────────── */
+/* -- Ensure content is above texture ------------------------ */
 .site-header, .site-content, .site-outer,
 .cat-content  { position: relative; z-index: 1; }
 .cat-header   { position: sticky; top: 0; z-index: 50; }
 
-/* ── Chevron transition ───────────────────────────────────── */
+/* -- Chevron transition ------------------------------------- */
 .chevron-icon { transition: transform .22s ease; }
 .card-open .chevron-icon { transform: rotate(180deg); }
 
-/* ── Slide-in animation ───────────────────────────────────── */
+/* -- Slide-in animation ------------------------------------- */
 @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .slide-in { animation: slideIn .2s ease; }
 
-/* ── Fade-up card animation ───────────────────────────────── */
+/* -- Fade-up card animation --------------------------------- */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { opacity: 0; animation: fadeUp .35s ease forwards; }
 .fade-up:nth-child(1) { animation-delay: .03s; }
@@ -40,13 +40,13 @@ body::after {
 .fade-up:nth-child(5) { animation-delay: .15s; }
 .fade-up:nth-child(n+6) { animation-delay: .18s; }
 
-/* ── Catalogue expand states ──────────────────────────────── */
+/* -- Catalogue expand states -------------------------------- */
 .dataset-card.expanded .expand-icon,
 .dist-tile.expanded .expand-icon { transform: rotate(90deg); }
 .dataset-card.expanded .card-body-content { display: block; }
 .dist-tile.expanded .dist-details { display: block; }
 
-/* ── Modal gradient header (shared by schema modal + table modal) ── */
+/* -- Modal gradient header (shared by schema modal + table modal) -- */
 .modal-gradient-header {
   background: linear-gradient(135deg, #e8f7fb 0%, #f4fbfd 100%);
   border-bottom: 1px solid #9ddcea;

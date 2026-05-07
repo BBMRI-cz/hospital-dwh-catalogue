@@ -1,11 +1,11 @@
 """
-Admin configuration for the catalogue project — user management.
+Admin configuration for the catalogue project - user management.
 
 The admin panel exposes exactly two sections:
-  - Users           — staff can assign the staff role; superusers can also revoke it.
-  - Stat definitions — managed in fair_genomes/admin.py.
+  - Users           - staff can assign the staff role; superusers can also revoke it.
+  - Stat definitions - managed in fair_genomes/admin.py.
 
-Everything else (groups, tickets, distributions, stat results …) is deliberately
+Everything else (groups, tickets, distributions, stat results ...) is deliberately
 kept out of the admin interface.
 """
 
@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
-# Remove the built-in Group admin — groups are not managed through this panel.
+# Remove the built-in Group admin - groups are not managed through this panel.
 admin.site.unregister(Group)
 
 # Re-register User with the custom admin below.
@@ -31,8 +31,8 @@ class CatalogueUserAdmin(BaseUserAdmin):
 
     Permission model
     ----------------
-    Superuser  — can assign *and* revoke the staff role (is_staff) for any user.
-    Staff user — can only assign the staff role; once a user already has staff status they
+    Superuser  - can assign *and* revoke the staff role (is_staff) for any user.
+    Staff user - can only assign the staff role; once a user already has staff status they
                  cannot be changed by a regular staff member.
 
     Users are created automatically on first LDAP login; the add flow is therefore
@@ -53,7 +53,7 @@ class CatalogueUserAdmin(BaseUserAdmin):
     )
 
     # All staff can view and change users (to grant is_staff).
-    # No explicit model permission needed — access is governed by is_staff alone.
+    # No explicit model permission needed - access is governed by is_staff alone.
     def has_module_permission(self, request):  # type: ignore[override]
         return request.user.is_staff
 
@@ -63,7 +63,7 @@ class CatalogueUserAdmin(BaseUserAdmin):
     def has_change_permission(self, request, obj=None):  # type: ignore[override]
         return request.user.is_staff
 
-    # Disable the "add user" form — users are created via LDAP/dev auth.
+    # Disable the "add user" form - users are created via LDAP/dev auth.
     def has_add_permission(self, request):  # type: ignore[override]
         return False
 
@@ -74,7 +74,7 @@ class CatalogueUserAdmin(BaseUserAdmin):
         """
         Lock down editable fields based on the caller's privilege level.
 
-        All non-staff fields (username, name, email) are always readonly —
+        All non-staff fields (username, name, email) are always readonly -
         they come from Active Directory and should not be edited here.
 
         is_staff is readonly for regular staff members when the target user

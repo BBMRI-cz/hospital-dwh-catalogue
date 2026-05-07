@@ -5,6 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
+from rdflib import Literal as RdfLiteral
+from rdflib import URIRef
+
 from fair_genomes.services.rdf_schema import (
     ENTITY_SPECS,
     FieldSpec,
@@ -39,9 +42,6 @@ def parse_int(value: str | None) -> int | None:
 
 
 def _extract_scalar_values(graph, subject, predicates) -> tuple[list[str], list[str]]:
-    from rdflib import Literal as RdfLiteral
-    from rdflib import URIRef
-
     literal_values: list[str] = []
     uri_values: list[str] = []
 

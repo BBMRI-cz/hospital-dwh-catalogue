@@ -645,8 +645,8 @@ msgid "Search"
 msgstr "Vyhledávání"
 
 #: frontend/templates/catalogue/components/_sidebar_filters.html:14
-msgid "Datasets, distributions…"
-msgstr "Datové sady, distribuce…"
+msgid "Datasets, distributions..."
+msgstr "Datové sady, distribuce..."
 
 #: frontend/templates/catalogue/components/_sidebar_filters.html:22
 msgid "Distribution Columns"
@@ -669,8 +669,8 @@ msgid "total"
 msgstr "celkem"
 
 #: frontend/templates/catalogue/components/_table_list.html:15
-msgid "Search tables…"
-msgstr "Hledat ve sloupcích…"
+msgid "Search tables..."
+msgstr "Hledat ve sloupcích..."
 
 #: frontend/templates/catalogue/components/_table_list.html:30
 #: warehouse/models.py:214
@@ -682,8 +682,8 @@ msgid "No tables available."
 msgstr "Žádné sloupce k dispozici."
 
 #: frontend/templates/catalogue/components/_table_modal.html:43
-msgid "Search columns…"
-msgstr "Hledat ve sloupcích…"
+msgid "Search columns..."
+msgstr "Hledat ve sloupcích..."
 
 #: frontend/templates/catalogue/components/_table_modal.html:85
 msgid "View"
@@ -734,10 +734,10 @@ msgstr "Metadata distribuce"
 msgid ""
 "Evidence and description of data sources of Masaryk Memorial Cancer "
 "Institute (MMCI) for secondary use. Each record is based on the HealthDCAT-"
-"AP schema — click"
+"AP schema - click"
 msgstr ""
 "Přehled a popis datových zdrojů Masarykova onkologického ústavu pro "
-"sekundární využití. Každý záznam vychází ze schématu HealthDCAT-AP — klikněte"
+"sekundární využití. Každý záznam vychází ze schématu HealthDCAT-AP - klikněte"
 
 #: frontend/templates/catalogue/index.html:26
 msgid "to display the field definition and ontology link."
@@ -772,8 +772,8 @@ msgid "Add to cart"
 msgstr "Přidat do košíku"
 
 #: frontend/templates/includes/_filter_group.html:6
-msgid "Filter…"
-msgstr "Filtrovat…"
+msgid "Filter..."
+msgstr "Filtrovat..."
 
 #: frontend/templates/includes/_filter_group.html:26
 msgid "No options"
@@ -865,8 +865,8 @@ msgid "Unique identifier / name for this agent"
 msgstr "Jedinečný identifikátor / jméno tohoto agenta"
 
 #: shared/abstract_models.py:107
-msgid "dct:description — description of the agent's activities (0..*)"
-msgstr "dct:description — popis činností agenta (0..*)"
+msgid "dct:description - description of the agent's activities (0..*)"
+msgstr "dct:description - popis činností agenta (0..*)"
 
 #: shared/abstract_models.py:117
 msgid "Contact information for this agent"
@@ -883,12 +883,12 @@ msgid "Title"
 msgstr "Název"
 
 #: shared/abstract_models.py:148 shared/abstract_models.py:214
-msgid "dct:title — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dct:title — povinné dle HealthDCAT-AP v6 (1..*)"
+msgid "dct:title - mandatory per HealthDCAT-AP v6 (1..*)"
+msgstr "dct:title - povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:154 shared/abstract_models.py:226
-msgid "dct:description — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dct:description — povinné dle HealthDCAT-AP v6 (1..*)"
+msgid "dct:description - mandatory per HealthDCAT-AP v6 (1..*)"
+msgstr "dct:description - povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:163 shared/abstract_models.py:263
 msgid "Publisher"
@@ -905,7 +905,7 @@ msgstr "Příslušné právní předpisy"
 
 #: shared/abstract_models.py:171
 msgid ""
-"Legal basis under which this catalog is published — must be a URI/IRI "
+"Legal basis under which this catalog is published - must be a URI/IRI "
 "(mandatory per HealthDCAT-AP v6, e.g. http://data.europa.eu/eli/reg/2022/868/"
 "oj)"
 msgstr "Právní základ pro zveřejnění katalogu (povinné dle HealthDCAT-AP v6)"
@@ -924,7 +924,7 @@ msgstr "Identifikátor"
 
 #: shared/abstract_models.py:232
 msgid ""
-"dct:identifier — canonical URI of this dataset from the origin system "
+"dct:identifier - canonical URI of this dataset from the origin system "
 "(mandatory per HealthDCAT-AP v6, 1..*)"
 msgstr ""
 
@@ -934,7 +934,7 @@ msgstr "Typ"
 
 #: shared/abstract_models.py:240
 msgid ""
-"dct:type — dataset type URI from EU Dataset-type vocabulary; comma-separated "
+"dct:type - dataset type URI from EU Dataset-type vocabulary; comma-separated "
 "when multiple, e.g. http://publications.europa.eu/resource/authority/dataset-"
 "type/STATISTICAL (mandatory per HealthDCAT-AP v6, 1..*)"
 msgstr ""
@@ -945,7 +945,7 @@ msgstr "Téma"
 
 #: shared/abstract_models.py:252
 msgid ""
-"dcat:theme — must be a URI/IRI from the EU data-theme vocabulary; mandatory "
+"dcat:theme - must be a URI/IRI from the EU data-theme vocabulary; mandatory "
 "per HealthDCAT-AP v6 (1..*), e.g. http://publications.europa.eu/resource/"
 "authority/data-theme/HEAL"
 msgstr ""
@@ -955,24 +955,24 @@ msgid "Conforms To"
 msgstr "Vyhovuje specifikaci"
 
 #: shared/abstract_models.py:270
-msgid "dct:conformsTo — standard / specification URI"
-msgstr "dct:conformsTo — URI standardu / specifikace"
+msgid "dct:conformsTo - standard / specification URI"
+msgstr "dct:conformsTo - URI standardu / specifikace"
 
 #: shared/abstract_models.py:275
 msgid "Issued"
 msgstr "Vydáno"
 
 #: shared/abstract_models.py:276
-msgid "dct:issued — date of first publication"
-msgstr "dct:issued — datum prvního zveřejnění"
+msgid "dct:issued - date of first publication"
+msgstr "dct:issued - datum prvního zveřejnění"
 
 #: shared/abstract_models.py:281
 msgid "Modified"
 msgstr "Upraveno"
 
 #: shared/abstract_models.py:282
-msgid "dct:modified — date of last modification"
-msgstr "dct:modified — datum poslední úpravy"
+msgid "dct:modified - date of last modification"
+msgstr "dct:modified - datum poslední úpravy"
 
 #: shared/abstract_models.py:287
 msgid "Keywords"
@@ -980,33 +980,33 @@ msgstr "Klíčová slova"
 
 #: shared/abstract_models.py:289
 msgid ""
-"dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1.."
+"dcat:keyword - comma-separated keywords (mandatory per HealthDCAT-AP v6, 1.."
 "*)"
-msgstr "dcat:keyword — klíčová slova oddělená čárkou"
+msgstr "dcat:keyword - klíčová slova oddělená čárkou"
 
 #: shared/abstract_models.py:301
-msgid "dct:source — source dataset this one is derived from"
-msgstr "dct:source — zdrojový soubor dat, ze kterého je tento odvozen"
+msgid "dct:source - source dataset this one is derived from"
+msgstr "dct:source - zdrojový soubor dat, ze kterého je tento odvozen"
 
 #: shared/abstract_models.py:310
 msgid "Creator"
 msgstr "Autor"
 
 #: shared/abstract_models.py:311
-msgid "dct:creator — agent who created this dataset"
-msgstr "dct:creator — agent, který vytvořil tento soubor dat"
+msgid "dct:creator - agent who created this dataset"
+msgstr "dct:creator - agent, který vytvořil tento soubor dat"
 
 #: shared/abstract_models.py:320
-msgid "dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dcat:contactPoint — povinné dle HealthDCAT-AP v6 (1..*)"
+msgid "dcat:contactPoint - mandatory per HealthDCAT-AP v6 (1..*)"
+msgstr "dcat:contactPoint - povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:325
 msgid "Provenance"
 msgstr "Původ"
 
 #: shared/abstract_models.py:326
-msgid "dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)"
-msgstr "dct:provenance — povinné dle HealthDCAT-AP v6 (1..*)"
+msgid "dct:provenance - mandatory per HealthDCAT-AP v6 (1..*)"
+msgstr "dct:provenance - povinné dle HealthDCAT-AP v6 (1..*)"
 
 #: shared/abstract_models.py:342
 msgid "Access Rights"
@@ -1014,13 +1014,13 @@ msgstr "Přístupová práva"
 
 #: shared/abstract_models.py:344
 msgid ""
-"dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
+"dct:accessRights - controlled vocabulary URI (mandatory per HealthDCAT-AP v6)"
 msgstr ""
-"dct:accessRights — URI řízeného slovníku (povinné dle HealthDCAT-AP v6)"
+"dct:accessRights - URI řízeného slovníku (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:351 shared/abstract_models.py:529
 msgid ""
-"dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP "
+"dct:applicableLegislation - must be a URI/IRI (mandatory per HealthDCAT-AP "
 "v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)"
 msgstr "dct:applicableLegislation (povinné dle HealthDCAT-AP v6)"
 
@@ -1030,7 +1030,7 @@ msgstr "Zdravotní kategorie"
 
 #: shared/abstract_models.py:359
 msgid ""
-"healthdcat:healthCategory — must be a URI/IRI (mandatory per HealthDCAT-AP "
+"healthdcat:healthCategory - must be a URI/IRI (mandatory per HealthDCAT-AP "
 "v6, e.g. https://healthdataportal.eu/categorisation/Health-care-delivery)"
 msgstr ""
 
@@ -1040,10 +1040,10 @@ msgstr "HDAB"
 
 #: shared/abstract_models.py:369
 msgid ""
-"healthdcat:hdab — Health Data Access Body responsible for this dataset "
+"healthdcat:hdab - Health Data Access Body responsible for this dataset "
 "(mandatory per HealthDCAT-AP v6)"
 msgstr ""
-"healthdcat:hdab — Orgán pro přístup ke zdravotním datům zodpovědný za tento "
+"healthdcat:hdab - Orgán pro přístup ke zdravotním datům zodpovědný za tento "
 "soubor dat (povinné dle HealthDCAT-AP v6)"
 
 #: shared/abstract_models.py:379
@@ -1052,7 +1052,7 @@ msgstr "Správce"
 
 #: shared/abstract_models.py:381
 msgid ""
-"geodcatap:custodian — agent responsible for maintaining this dataset "
+"geodcatap:custodian - agent responsible for maintaining this dataset "
 "(HealthDCAT-AP Release 6, optional)"
 msgstr ""
 
@@ -1089,8 +1089,8 @@ msgid "Format"
 msgstr "Formát"
 
 #: shared/abstract_models.py:486
-msgid "dct:format — media type or format URI"
-msgstr "dct:format — typ média nebo URI formátu"
+msgid "dct:format - media type or format URI"
+msgstr "dct:format - typ média nebo URI formátu"
 
 #: shared/abstract_models.py:497
 msgid "Byte Size"
@@ -1129,12 +1129,12 @@ msgid "Licence"
 msgstr "Licence"
 
 #: shared/abstract_models.py:538
-msgid "dct:license — licence under which this distribution is made available"
-msgstr "dct:license — licence, pod níž je tato distribuce zpřístupněna"
+msgid "dct:license - licence under which this distribution is made available"
+msgstr "dct:license - licence, pod níž je tato distribuce zpřístupněna"
 
 #: shared/abstract_models.py:570
-msgid "csvw:name — unique identifier for this table"
-msgstr "csvw:name — jedinečný identifikátor této tabulky"
+msgid "csvw:name - unique identifier for this table"
+msgstr "csvw:name - jedinečný identifikátor této tabulky"
 
 #: shared/abstract_models.py:579
 msgid "Distribution this table belongs to"
@@ -1145,20 +1145,20 @@ msgid "URL"
 msgstr "URL"
 
 #: shared/abstract_models.py:584
-msgid "csvw:url — physical location / connection string for this table"
-msgstr "csvw:url — fyzické umístění / připojovací řetězec pro tuto tabulku"
+msgid "csvw:url - physical location / connection string for this table"
+msgstr "csvw:url - fyzické umístění / připojovací řetězec pro tuto tabulku"
 
 #: shared/abstract_models.py:591
-msgid "csvw:title — human-readable table name"
-msgstr "csvw:title — lidsky čitelný název tabulky"
+msgid "csvw:title - human-readable table name"
+msgstr "csvw:title - lidsky čitelný název tabulky"
 
 #: shared/abstract_models.py:597 shared/abstract_models.py:644
 msgid "dct:description"
 msgstr "dct:description"
 
 #: shared/abstract_models.py:626
-msgid "csvw:name — unique column identifier"
-msgstr "csvw:name — jedinečný identifikátor sloupce"
+msgid "csvw:name - unique column identifier"
+msgstr "csvw:name - jedinečný identifikátor sloupce"
 
 #: shared/abstract_models.py:634 warehouse/models.py:152
 msgid "Table"
@@ -1169,24 +1169,24 @@ msgid "Table this column belongs to"
 msgstr "Tabulka, ke které tento sloupec patří"
 
 #: shared/abstract_models.py:640
-msgid "csvw:title — human-readable column name"
-msgstr "csvw:title — lidsky čitelný název sloupce"
+msgid "csvw:title - human-readable column name"
+msgstr "csvw:title - lidsky čitelný název sloupce"
 
 #: shared/abstract_models.py:648
 msgid "Datatype"
 msgstr "Datový typ"
 
 #: shared/abstract_models.py:649
-msgid "csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)"
-msgstr "csvw:datatype — datový typ sloupce (např. VARCHAR, INTEGER, DATE)"
+msgid "csvw:datatype - column datatype (e.g. VARCHAR, INTEGER, DATE)"
+msgstr "csvw:datatype - datový typ sloupce (např. VARCHAR, INTEGER, DATE)"
 
 #: shared/abstract_models.py:655
 msgid "Property URL"
 msgstr "URL vlastnosti"
 
 #: shared/abstract_models.py:656
-msgid "csvw:propertyUrl — semantic property URI"
-msgstr "csvw:propertyUrl — URI sémantické vlastnosti"
+msgid "csvw:propertyUrl - semantic property URI"
+msgstr "csvw:propertyUrl - URI sémantické vlastnosti"
 
 #: shared/validators.py:14
 #, python-format
@@ -1416,13 +1416,13 @@ msgid "Request description"
 msgstr "Popis žádosti"
 
 #: ticketing/views.py:31
-msgid "Describe your request…"
-msgstr "Popište vaši žádost…"
+msgid "Describe your request..."
+msgstr "Popište vaši žádost..."
 
 #: ticketing/views.py:111
 #, python-format
-msgid "Your request has been submitted \\u2014 ticket #%(ticket_id)s"
-msgstr "Váš požadavek byl odeslán — ticket #%(ticket_id)s"
+msgid "Your request has been submitted - ticket #%(ticket_id)s"
+msgstr "Váš požadavek byl odeslán - ticket #%(ticket_id)s"
 
 #: ticketing/views.py:115
 msgid "Your request has been submitted."

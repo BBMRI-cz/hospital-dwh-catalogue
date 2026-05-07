@@ -2,16 +2,16 @@
   Reusable search/filter input with leading icon.
 
   Optional variables:
-    search_id            – input id
-    search_name          – input name attribute
-    search_value         – input value (defaults to empty string)
-    search_placeholder   – placeholder text
-    search_wrapper_class – classes for the outer relative wrapper
-    search_input_class   – extra classes for width/layout
-    search_icon_size     – icon width/height (default: 13)
-    filter_list_id       – adds data-filter-list + data-list-id
-    table_filter         – adds data-table-filter when truthy
-    table_modal_id       – adds data-table-modal-filter + data-modal-id="tbl-modal-<id>"
+    search_id            - input id
+    search_name          - input name attribute
+    search_value         - input value (defaults to empty string)
+    search_placeholder   - placeholder text
+    search_wrapper_class - classes for the outer relative wrapper
+    search_input_class   - extra classes for width/layout
+    search_icon_size     - icon width/height (default: 13)
+    filter_list_id       - adds data-filter-list + data-list-id
+    table_filter         - adds data-table-filter when truthy
+    table_modal_id       - adds data-table-modal-filter + data-modal-id="tbl-modal-<id>"
 {% endcomment %}
 <div class="relative {{ search_wrapper_class }}">
   <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" width="{{ search_icon_size|default:'13' }}" height="{{ search_icon_size|default:'13' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

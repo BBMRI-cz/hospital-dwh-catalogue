@@ -6,6 +6,7 @@ Stores ticket requests and cart items locally before sending to Alvao.
 
 from typing import TYPE_CHECKING
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -181,7 +182,6 @@ class TicketRequestItem(models.Model):
         """Return URL to the dataset detail page, or None if not applicable or dataset no longer exists."""
         if self.item_type == self.ItemType.DATASET and '/' in self.item_id:
             app, name = self.item_id.split('/', 1)
-            from django.apps import apps as django_apps
 
             try:
                 model = django_apps.get_model(app, 'Dataset')

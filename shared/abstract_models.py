@@ -22,7 +22,7 @@ FK strategy
 All FKs inside abstract models reference the concrete sibling model by
 string (e.g. 'ContactPoint') so that each derived app resolves relative
 to its own label.  Cross-app FK references (e.g. to 'warehouse.Agent')
-are NOT used here — that would couple apps and break the multi-DB routing.
+are NOT used here - that would couple apps and break the multi-DB routing.
 """
 
 from django.core.exceptions import ValidationError
@@ -36,8 +36,8 @@ class ContactPointBase(models.Model):
     """
     HealthDCAT-AP ContactPoint.
 
-    A means to contact an agent (publisher, rights holder, HDAB …).
-    Both fields are optional at the DB level — a ContactPoint may carry
+    A means to contact an agent (publisher, rights holder, HDAB ...).
+    Both fields are optional at the DB level - a ContactPoint may carry
     only an email or only a page URL.
 
     Maps to:  dcat:contactPoint / vcard:Kind
@@ -85,7 +85,7 @@ class ContactPointBase(models.Model):
 
 class AgentBase(models.Model):
     """
-    HealthDCAT-AP Agent (publisher, creator, rights holder, HDAB …).
+    HealthDCAT-AP Agent (publisher, creator, rights holder, HDAB ...).
 
     name is used as the natural-key / identifier throughout the catalogue.
     The optional FK to ContactPoint is nullable because agents may be
@@ -104,7 +104,7 @@ class AgentBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Description'),
-        help_text=_("dct:description — description of the agent's activities (0..*)"),
+        help_text=_("dct:description - description of the agent's activities (0..*)"),
     )
     # FK resolved at concrete-model level; string reference keeps base portable.
     contact_point = models.ForeignKey(
@@ -126,7 +126,7 @@ class AgentBase(models.Model):
 
 class CatalogBase(models.Model):
     """
-    HealthDCAT-AP Catalog — the top-level container for datasets.
+    HealthDCAT-AP Catalog - the top-level container for datasets.
 
     applicable_legislation is mandatory in HealthDCAT-AP v6 (e.g. the EU
     health data space regulation reference).
@@ -145,13 +145,13 @@ class CatalogBase(models.Model):
         null=True,
         blank=False,
         verbose_name=_('Title'),
-        help_text=_('dct:title — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dct:title - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     description = models.TextField(
         null=True,
         blank=False,
         verbose_name=_('Description'),
-        help_text=_('dct:description — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dct:description - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     # Nullable FK: a catalog can temporarily lack a publisher record.
     publisher = models.ForeignKey(
@@ -163,12 +163,12 @@ class CatalogBase(models.Model):
         verbose_name=_('Publisher'),
         help_text=_('Agent responsible for making this catalog available'),
     )
-    # MANDATORY — HealthDCAT-AP v6 §4.2
+    # MANDATORY - HealthDCAT-AP v6 section 4.2
     applicable_legislation = models.CharField(
         max_length=500,
         verbose_name=_('Applicable Legislation'),
         help_text=_(
-            'Legal basis under which this catalog is published — must be a URI/IRI '
+            'Legal basis under which this catalog is published - must be a URI/IRI '
             '(mandatory per HealthDCAT-AP v6, e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
         ),
     )
@@ -189,10 +189,10 @@ class DatasetBase(models.Model):
     HealthDCAT-AP Dataset.
 
     Mandatory HealthDCAT-AP v6 fields (blank=False + validated in clean()):
-      * access_rights         — dct:accessRights
-      * applicable_legislation — dct:applicableLegislation
-      * health_category       — healthdcat:healthCategory
-      * hdab                  — healthdcat:hdab (FK to Agent)
+      * access_rights         - dct:accessRights
+      * applicable_legislation - dct:applicableLegislation
+      * health_category       - healthdcat:healthCategory
+      * hdab                  - healthdcat:hdab (FK to Agent)
 
     All other fields are optional at the DB level; fill-rate rules may
     be enforced at the application / serialiser layer.
@@ -211,7 +211,7 @@ class DatasetBase(models.Model):
         null=True,
         blank=False,
         verbose_name=_('Title'),
-        help_text=_('dct:title — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dct:title - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     version = models.CharField(
         max_length=100,
@@ -223,13 +223,13 @@ class DatasetBase(models.Model):
         null=True,
         blank=False,
         verbose_name=_('Description'),
-        help_text=_('dct:description — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dct:description - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     identifier = models.CharField(
         max_length=500,
         verbose_name=_('Identifier'),
         help_text=_(
-            'dct:identifier — canonical URI of this dataset from the origin system '
+            'dct:identifier - canonical URI of this dataset from the origin system '
             '(mandatory per HealthDCAT-AP v6, 1..*)'
         ),
     )
@@ -237,7 +237,7 @@ class DatasetBase(models.Model):
         max_length=500,
         verbose_name=_('Type'),
         help_text=_(
-            'dct:type — dataset type URI from EU Dataset-type vocabulary; '
+            'dct:type - dataset type URI from EU Dataset-type vocabulary; '
             'comma-separated when multiple, e.g. '
             'http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL '
             '(mandatory per HealthDCAT-AP v6, 1..*)'
@@ -249,7 +249,7 @@ class DatasetBase(models.Model):
         blank=False,
         verbose_name=_('Theme'),
         help_text=_(
-            'dcat:theme — must be a URI/IRI from the EU data-theme vocabulary; '
+            'dcat:theme - must be a URI/IRI from the EU data-theme vocabulary; '
             'mandatory per HealthDCAT-AP v6 (1..*), '
             'e.g. http://publications.europa.eu/resource/authority/data-theme/HEAL'
         ),
@@ -267,26 +267,26 @@ class DatasetBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Conforms To'),
-        help_text=_('dct:conformsTo — standard / specification URI'),
+        help_text=_('dct:conformsTo - standard / specification URI'),
     )
     issued = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name=_('Issued'),
-        help_text=_('dct:issued — date of first publication'),
+        help_text=_('dct:issued - date of first publication'),
     )
     modified = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name=_('Modified'),
-        help_text=_('dct:modified — date of last modification'),
+        help_text=_('dct:modified - date of last modification'),
     )
     keyword = models.TextField(
         null=True,
         blank=False,
         verbose_name=_('Keywords'),
         help_text=_(
-            'dcat:keyword — comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'
+            'dcat:keyword - comma-separated keywords (mandatory per HealthDCAT-AP v6, 1..*)'
         ),
     )
     source = models.ForeignKey(
@@ -298,7 +298,7 @@ class DatasetBase(models.Model):
         blank=True,
         related_name='derived_datasets',
         verbose_name=_('Source'),
-        help_text=_('dct:source — source dataset this one is derived from'),
+        help_text=_('dct:source - source dataset this one is derived from'),
     )
     creator = models.ForeignKey(
         'Agent',
@@ -308,7 +308,7 @@ class DatasetBase(models.Model):
         db_column='creator',
         related_name='creator_datasets',
         verbose_name=_('Creator'),
-        help_text=_('dct:creator — agent who created this dataset'),
+        help_text=_('dct:creator - agent who created this dataset'),
     )
     contact_point = models.ForeignKey(
         'ContactPoint',
@@ -317,13 +317,13 @@ class DatasetBase(models.Model):
         blank=False,
         related_name='datasets',
         verbose_name=_('Contact Point'),
-        help_text=_('dcat:contactPoint — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dcat:contactPoint - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     provenance = models.TextField(
         null=True,
         blank=False,
         verbose_name=_('Provenance'),
-        help_text=_('dct:provenance — mandatory per HealthDCAT-AP v6 (1..*)'),
+        help_text=_('dct:provenance - mandatory per HealthDCAT-AP v6 (1..*)'),
     )
     catalog = models.ForeignKey(
         'Catalog',
@@ -334,21 +334,21 @@ class DatasetBase(models.Model):
         verbose_name=_('Catalog'),
     )
 
-    # ── Mandatory HealthDCAT-AP v6 fields ──────────────────────────────────
+    # -- Mandatory HealthDCAT-AP v6 fields ----------------------------------
     # blank=False prevents empty strings; clean() checks non-null FKs too.
 
     access_rights = models.CharField(
         max_length=500,
         verbose_name=_('Access Rights'),
         help_text=_(
-            'dct:accessRights — controlled vocabulary URI (mandatory per HealthDCAT-AP v6)'
+            'dct:accessRights - controlled vocabulary URI (mandatory per HealthDCAT-AP v6)'
         ),
     )
     applicable_legislation = models.CharField(
         max_length=500,
         verbose_name=_('Applicable Legislation'),
         help_text=_(
-            'dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'dct:applicableLegislation - must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
             'e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
         ),
     )
@@ -356,7 +356,7 @@ class DatasetBase(models.Model):
         max_length=500,
         verbose_name=_('Health Category'),
         help_text=_(
-            'healthdcat:healthCategory — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'healthdcat:healthCategory - must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
             'e.g. https://healthdataportal.eu/categorisation/Health-care-delivery)'
         ),
     )
@@ -366,7 +366,7 @@ class DatasetBase(models.Model):
         related_name='hdab_datasets',
         verbose_name=_('HDAB'),
         help_text=_(
-            'healthdcat:hdab — Health Data Access Body responsible for '
+            'healthdcat:hdab - Health Data Access Body responsible for '
             'this dataset (mandatory per HealthDCAT-AP v6)'
         ),
     )
@@ -378,7 +378,7 @@ class DatasetBase(models.Model):
         related_name='custodian_datasets',
         verbose_name=_('Custodian'),
         help_text=_(
-            'geodcatap:custodian — agent responsible for maintaining this dataset '
+            'geodcatap:custodian - agent responsible for maintaining this dataset '
             '(HealthDCAT-AP Release 6, optional)'
         ),
     )
@@ -439,11 +439,11 @@ class DatasetBase(models.Model):
 
 class DistributionBase(models.Model):
     """
-    HealthDCAT-AP Distribution — a specific representation of a dataset.
+    HealthDCAT-AP Distribution - a specific representation of a dataset.
 
     Mandatory HealthDCAT-AP v6 fields:
-      * access_url            — dcat:accessURL
-      * applicable_legislation — dct:applicableLegislation
+      * access_url            - dcat:accessURL
+      * applicable_legislation - dct:applicableLegislation
 
     dataset_name is a FK to Dataset.name (the natural key) rather than
     the auto-increment PK, so that the identifier stays human-readable
@@ -483,7 +483,7 @@ class DistributionBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Format'),
-        help_text=_('dct:format — media type or format URI'),
+        help_text=_('dct:format - media type or format URI'),
     )
     conforms_to = models.CharField(
         max_length=500,
@@ -515,7 +515,7 @@ class DistributionBase(models.Model):
         verbose_name=_('Modification Date'),
     )
 
-    # ── Mandatory HealthDCAT-AP v6 fields ──────────────────────────────────
+    # -- Mandatory HealthDCAT-AP v6 fields ----------------------------------
 
     access_url = models.CharField(
         max_length=500,
@@ -526,7 +526,7 @@ class DistributionBase(models.Model):
         max_length=500,
         verbose_name=_('Applicable Legislation'),
         help_text=_(
-            'dct:applicableLegislation — must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
+            'dct:applicableLegislation - must be a URI/IRI (mandatory per HealthDCAT-AP v6, '
             'e.g. http://data.europa.eu/eli/reg/2022/868/oj)'
         ),
     )
@@ -535,7 +535,7 @@ class DistributionBase(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Licence'),
-        help_text=_('dct:license — licence under which this distribution is made available'),
+        help_text=_('dct:license - licence under which this distribution is made available'),
     )
 
     class Meta:
@@ -554,11 +554,11 @@ class TableBase(models.Model):
     Physical DB table metadata linked to a Distribution (csvw:Table).
 
     Fields common to every catalogue profile:
-      name         — csvw:name (natural PK)
-      distribution — FK → Distribution (implementation link)
-      url          — csvw:url (mandatory)
-      title        — csvw:title (optional)
-      description  — dct:description (optional)
+      name         - csvw:name (natural PK)
+      distribution - FK -> Distribution (implementation link)
+      url          - csvw:url (mandatory)
+      title        - csvw:title (optional)
+      description  - dct:description (optional)
 
     Maps to:  csvw:Table
     """
@@ -567,7 +567,7 @@ class TableBase(models.Model):
         max_length=255,
         primary_key=True,
         verbose_name=_('Name'),
-        help_text=_('csvw:name — unique identifier for this table'),
+        help_text=_('csvw:name - unique identifier for this table'),
     )
     distribution = models.ForeignKey(
         'Distribution',
@@ -581,14 +581,14 @@ class TableBase(models.Model):
     url = models.CharField(
         max_length=500,
         verbose_name=_('URL'),
-        help_text=_('csvw:url — physical location / connection string for this table'),
+        help_text=_('csvw:url - physical location / connection string for this table'),
     )
     title = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Title'),
-        help_text=_('csvw:title — human-readable table name'),
+        help_text=_('csvw:title - human-readable table name'),
     )
     description = models.TextField(
         null=True,
@@ -609,12 +609,12 @@ class ColumnBase(models.Model):
     Physical column metadata within a Table (csvw:Column).
 
     Fields common to every catalogue profile:
-      name         — csvw:name (natural PK)
-      table        — FK → Table (belongs to table)
-      title        — csvw:title (mandatory)
-      description  — dct:description (mandatory)
-      datatype     — csvw:datatype (mandatory)
-      property_url — csvw:propertyUrl (optional)
+      name         - csvw:name (natural PK)
+      table        - FK -> Table (belongs to table)
+      title        - csvw:title (mandatory)
+      description  - dct:description (mandatory)
+      datatype     - csvw:datatype (mandatory)
+      property_url - csvw:propertyUrl (optional)
 
     Maps to:  csvw:Column
     """
@@ -623,7 +623,7 @@ class ColumnBase(models.Model):
         max_length=255,
         primary_key=True,
         verbose_name=_('Name'),
-        help_text=_('csvw:name — unique column identifier'),
+        help_text=_('csvw:name - unique column identifier'),
     )
     table = models.ForeignKey(
         'Table',
@@ -637,7 +637,7 @@ class ColumnBase(models.Model):
     title = models.CharField(
         max_length=500,
         verbose_name=_('Title'),
-        help_text=_('csvw:title — human-readable column name'),
+        help_text=_('csvw:title - human-readable column name'),
     )
     description = models.TextField(
         verbose_name=_('Description'),
@@ -646,14 +646,14 @@ class ColumnBase(models.Model):
     datatype = models.CharField(
         max_length=100,
         verbose_name=_('Datatype'),
-        help_text=_('csvw:datatype — column datatype (e.g. VARCHAR, INTEGER, DATE)'),
+        help_text=_('csvw:datatype - column datatype (e.g. VARCHAR, INTEGER, DATE)'),
     )
     property_url = models.CharField(
         max_length=500,
         null=True,
         blank=True,
         verbose_name=_('Property URL'),
-        help_text=_('csvw:propertyUrl — semantic property URI'),
+        help_text=_('csvw:propertyUrl - semantic property URI'),
     )
 
     class Meta:

@@ -11,10 +11,10 @@ Coverage:
   ContactPoint : email+page | email only | page only
   Agent        : publisher / HDAB / custodian examples with contact_point
   Catalog      : production + staging catalogues with required metadata
-  Dataset      : 20 rows — varying optionals + all access_rights /
+  Dataset      : 20 rows - varying optionals + all access_rights /
                  applicable_legislation / health_category combinations
-  Distribution : 21 rows — varying format / rights / byte_size combos
-                 (no db_layer — that field is warehouse-only)
+  Distribution : 21 rows - varying format / rights / byte_size combos
+                 (no db_layer - that field is warehouse-only)
   StatResult   : 6 mock value distributions (instrument model, library prep kit,
                  sequencing type, sample material type, pathological state, genome build)
 """
@@ -187,12 +187,12 @@ class Command(BaseCommand):
         if not getattr(settings, 'MOCK_FAIR_GENOMES', False):
             self.stdout.write(
                 self.style.WARNING(
-                    'MOCK_FAIR_GENOMES is not True — skipping fair_genomes mock seed.'
+                    'MOCK_FAIR_GENOMES is not True - skipping fair_genomes mock seed.'
                 )
             )
             return
 
-        self.stdout.write('Seeding fair_genomes_db with mock data …')
+        self.stdout.write('Seeding fair_genomes_db with mock data ...')
         created_counts: dict[str, int] = {}
 
         contact_points = [
@@ -234,7 +234,7 @@ class Command(BaseCommand):
                 'contact_point': cp_email_only,
                 'description': 'MOLGENIS platform operator providing FAIR Genomes API access.',
             },
-            # with page-only contact — used as HDAB; has description
+            # with page-only contact - used as HDAB; has description
             {
                 'name': 'FG_AGENT_HDAB',
                 'contact_point': cp_page_only,
@@ -856,7 +856,7 @@ class Command(BaseCommand):
                 'name': 'DIST_FG_WES_BAM',
                 'defaults': {
                     'dataset_name': dataset_objects['DS_FG_WES'],
-                    'title': 'WES sekvenace — zarovnané BAM soubory',
+                    'title': 'WES sekvenace - zarovnané BAM soubory',
                     'format': 'BAM',
                     'conforms_to': 'https://samtools.github.io/hts-specs/SAMv1.pdf',
                     'byte_size': 107374182400,
@@ -1021,8 +1021,6 @@ class Command(BaseCommand):
         # Seed a mock value distribution that _sync_stats() would write after
         # a real sync.  Uses plausible mock values so the application can be
         # evaluated without a live MOLGENIS connection.
-        from django.utils import timezone as tz
-
         stat_specs: list[dict] = [
             {
                 'table_name': 'sequencing',
@@ -1034,7 +1032,7 @@ class Command(BaseCommand):
                         'HiSeq X': 15,
                         'NextSeq 550': 8,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
             {
@@ -1048,7 +1046,7 @@ class Command(BaseCommand):
                         'KAPA HyperPrep': 14,
                         'NEBNext Ultra II': 10,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
             {
@@ -1061,7 +1059,7 @@ class Command(BaseCommand):
                         'RNA-seq': 15,
                         'Panel': 1,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
             {
@@ -1074,7 +1072,7 @@ class Command(BaseCommand):
                         'Fresh frozen tissue': 18,
                         'Saliva': 7,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
             {
@@ -1086,7 +1084,7 @@ class Command(BaseCommand):
                         'Normal': 63,
                         'Germline': 18,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
             {
@@ -1097,7 +1095,7 @@ class Command(BaseCommand):
                         'GRCh38': 118,
                         'GRCh37': 34,
                     },
-                    'last_synced': tz.now(),
+                    'last_synced': timezone.now(),
                 },
             },
         ]
@@ -1137,9 +1135,9 @@ class Command(BaseCommand):
         summary = ', '.join(f'{k}: {v}' for k, v in created_counts.items())
         if total:
             self.stdout.write(
-                self.style.SUCCESS(f'fair_genomes mock seed complete — created: {summary}')
+                self.style.SUCCESS(f'fair_genomes mock seed complete - created: {summary}')
             )
         else:
             self.stdout.write(
-                self.style.SUCCESS('fair_genomes mock seed complete — all records already exist.')
+                self.style.SUCCESS('fair_genomes mock seed complete - all records already exist.')
             )

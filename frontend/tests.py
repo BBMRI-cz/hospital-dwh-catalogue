@@ -8,12 +8,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ValidationError
-from django.http import QueryDict
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.http import Http404, QueryDict
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import override
 
 from frontend.admin import CatalogueFilterDefinitionForm
+from frontend.api_views import _require_auth
 from frontend.models import CatalogueFilterDefinition
 from frontend.presentation.filters import (
     FilterState,
@@ -31,6 +32,7 @@ from frontend.presentation.mapping import (
 )
 from frontend.presentation.types import CatalogueDistributionLookup
 from frontend.templatetags.frontend_tags import active_filter_chips
+from frontend.views import DatasetDetailView
 from schema_registry.types import SchemaRegistryPayload
 from shared.dtos import (
     ExportAgent,
@@ -47,6 +49,7 @@ from shared.dtos import (
     UnifiedTableColumn,
 )
 from shared.export_types import ExportWarning, JsonLdExportResult, TurtleExportResult
+from shared.services import parse_multi_values
 
 
 def _make_test_dataset(**overrides):
@@ -812,11 +815,6 @@ class DatasetDetailViewTest(TestCase):
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_missing_dataset_raises_404(self, mock_cls, mock_dataset_lookup):
         """A non-existent dataset triggers Http404 in the view."""
-        from django.http import Http404
-        from django.test import RequestFactory
-
-        from frontend.views import DatasetDetailView
-
         mock_cls.return_value.get_export_dataset.return_value = None
         mock_dataset_lookup.return_value = None
 
@@ -984,11 +982,6 @@ class DatasetDetailViewTest(TestCase):
     @patch(_DATASET_LOOKUP_PATH)
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_dataset_without_distributions_raises_404(self, mock_cls, mock_dataset_lookup):
-        from django.http import Http404
-        from django.test import RequestFactory
-
-        from frontend.views import DatasetDetailView
-
         dataset = _make_test_dataset()
         dataset.distributions = []
         export_dataset = _make_test_export_dataset(distributions=[])
@@ -1472,10 +1465,6 @@ class ActiveFilterChipHelperTest(SimpleTestCase):
 
 class AuthGuardHelperTest(SimpleTestCase):
     def test_require_auth_rejects_anonymous_requests(self):
-        from django.test import RequestFactory
-
-        from frontend.api_views import _require_auth
-
         request = RequestFactory().get('/api/jsonld')
         request.user = AnonymousUser()
 
@@ -1485,10 +1474,6 @@ class AuthGuardHelperTest(SimpleTestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_require_auth_allows_authenticated_requests(self):
-        from django.test import RequestFactory
-
-        from frontend.api_views import _require_auth
-
         request = RequestFactory().get('/api/jsonld')
         request.user = type('UserStub', (), {'is_authenticated': True})()
 
@@ -1629,39 +1614,27 @@ class ParseMultiValuesTest(SimpleTestCase):
     """Tests for the semicolon-separated multi-value parser."""
 
     def test_splits_semicolons(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(
             parse_multi_values('http://a;http://b;http://c'),
             ['http://a', 'http://b', 'http://c'],
         )
 
     def test_strips_whitespace(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(
             parse_multi_values(' http://a ; http://b '),
             ['http://a', 'http://b'],
         )
 
     def test_empty_string_returns_empty_list(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(parse_multi_values(''), [])
 
     def test_none_returns_empty_list(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(parse_multi_values(None), [])
 
     def test_single_value(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(parse_multi_values('http://only'), ['http://only'])
 
     def test_deduplicates_repeated_values(self):
-        from shared.services import parse_multi_values
-
         self.assertEqual(
             parse_multi_values('http://a; http://b; http://a; http://b'),
             ['http://a', 'http://b'],

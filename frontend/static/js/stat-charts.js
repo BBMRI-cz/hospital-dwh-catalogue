@@ -1,5 +1,5 @@
 /**
- * stat-charts.js — Render doughnut charts from StatResult distribution data.
+ * stat-charts.js - Render doughnut charts from StatResult distribution data.
  *
  * Reads chart definitions from a <script type="application/json" id="stat-charts-data">
  * data island.  Each entry produces a Chart.js doughnut on a matching <canvas>,
@@ -7,8 +7,8 @@
  * are always the same size regardless of label length.
  *
  * Expected JSON structure:
- *   [ { "label": "…", "table_name": "…", "column_name": "…",
- *       "data": { "value1": count, "value2": count, … } }, … ]
+ *   [ { "label": "...", "table_name": "...", "column_name": "...",
+ *       "data": { "value1": count, "value2": count, ... } }, ... ]
  */
 (function () {
   'use strict';
@@ -24,7 +24,7 @@
   var labelTotal = 'total';
   try { if (i18nEl) labelTotal = JSON.parse(i18nEl.textContent) || labelTotal; } catch (_) {}
 
-  /* ── MMCI-inspired colour palette ──────────────────────────────────────── */
+  /* -- MMCI-inspired colour palette ---------------------------------------- */
   var PALETTE = [
     '#53c0d7',  /* mmci-cyan    */
     '#f04600',  /* mmci-orange  */
@@ -52,7 +52,7 @@
     return out;
   }
 
-  /* ── Plugin: total count in the doughnut centre ───────────────────────── */
+  /* -- Plugin: total count in the doughnut centre ------------------------- */
   var centerTotalPlugin = {
     id: 'centerTotal',
     afterDraw: function (chart) {
@@ -79,7 +79,7 @@
     },
   };
 
-  /* ── Build a custom HTML legend under each canvas ─────────────────────── */
+  /* -- Build a custom HTML legend under each canvas ----------------------- */
   function buildLegend(legendEl, labels, values, colors, total) {
     var fragment = document.createDocumentFragment();
 
@@ -122,7 +122,7 @@
     legendEl.appendChild(fragment);
   }
 
-  /* ── Render each chart ────────────────────────────────────────────────── */
+  /* -- Render each chart -------------------------------------------------- */
   charts.forEach(function (entry, idx) {
     var n      = idx + 1;
     var canvas = document.getElementById('stat-chart-' + n);

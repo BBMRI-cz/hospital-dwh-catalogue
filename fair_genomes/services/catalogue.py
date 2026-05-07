@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
+from fair_genomes.models import StatDefinition, StatResult
 from shared.dtos import UnifiedStatChart
 
 
@@ -12,8 +13,6 @@ class FairGenomesCatalogueService:
 
     @staticmethod
     def _get_stat_result_map(stat_defs) -> dict[tuple[str, str], dict[str, int]]:
-        from fair_genomes.models import StatResult
-
         stat_keys = {(stat_def.molgenis_table, stat_def.molgenis_column) for stat_def in stat_defs}
         if not stat_keys:
             return {}
@@ -30,8 +29,6 @@ class FairGenomesCatalogueService:
         }
 
     def get_stat_charts(self, distribution_name: str) -> list[UnifiedStatChart]:
-        from fair_genomes.models import StatDefinition
-
         stat_defs = list(
             StatDefinition.objects.using('fair_genomes_db')
             .filter(distribution__name=distribution_name, is_active=True)

@@ -1,6 +1,8 @@
 """Mock Alvao service used in non-production environments."""
 
 import logging
+import random
+import time
 import uuid
 from datetime import datetime
 
@@ -21,9 +23,6 @@ class MockAlvaoService:
 
     def _simulate_delay(self) -> None:
         """Simulate network delay."""
-        import random
-        import time
-
         delay = random.uniform(0.1, 0.5)
         time.sleep(delay)
 

@@ -1,5 +1,5 @@
 """
-Warehouse Models â€” Local Metadata HealthDCAT-AP Profile
+Warehouse Models - Local Metadata HealthDCAT-AP Profile
 =======================================================
 
 Concrete, managed=False Django models for the Local Metadata catalogue.
@@ -12,7 +12,7 @@ Why managed=False?
   drops these tables.
 
 Extension points vs the shared base
-  * Distribution adds db_layer â€” the physical DWH layer identifier.  This
+  * Distribution adds db_layer - the physical DWH layer identifier.  This
     concept is absent from FAIR Genomes which has no DWH layer notion.
   * Table/Column are entirely Local Metadata-specific.  Physical table/column metadata
     has no DCAT-AP equivalent; it is added here because the Local Metadata
@@ -54,7 +54,7 @@ class ContactPoint(ContactPointBase):
 
 class Agent(AgentBase):
     """
-    Local Metadata Agent (publisher, rights holder, HDAB â€¦).
+    Local Metadata Agent (publisher, rights holder, HDAB ...).
 
     Inherits name (PK) and contact_point FK from AgentBase.
     No Local Metadata-specific extensions.
@@ -107,7 +107,7 @@ class Distribution(DistributionBase):
     """
     Local Metadata Distribution.
 
-    Extends DistributionBase with db_layer â€” the physical DWH layer that
+    Extends DistributionBase with db_layer - the physical DWH layer that
     this distribution resides in (e.g. 'raw', 'clean', 'analytical').
 
     Why db_layer lives here and not in the shared base:

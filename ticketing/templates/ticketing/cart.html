@@ -21,7 +21,7 @@
   <div class="bg-white border border-gray-200 shadow-sm rounded-lg mb-6 overflow-hidden">
     {% trans "Selected datasets" as t_selected_datasets %}
     {% with cart_count_str=cart|length|stringformat:"s" %}
-    {% with cart_label=t_selected_datasets|add:" · "|add:cart_count_str %}
+    {% with cart_label=t_selected_datasets|add:" - "|add:cart_count_str %}
     {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-cyan" csh_text_class="text-mmci-cyan" csh_label=cart_label %}
     {% endwith %}{% endwith %}
     <table class="w-full">
@@ -55,7 +55,7 @@
   </div>
   {% endif %}
 
-  <!-- Submit form — always visible -->
+  <!-- Submit form - always visible -->
   <div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden mt-6">
     {% trans "Submit request" as t_submit_request %}
     {% include "includes/_card_section_header.html" with csh_bar_class="bg-mmci-orange" csh_text_class="text-mmci-orange" csh_label=t_submit_request %}
