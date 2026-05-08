@@ -90,7 +90,7 @@ The schema terms shown in the UI come from the configured HealthDCAT-AP release 
 - Authentication: mock LDAP in dev/staging or real LDAP in prod
 - FAIR Genomes: RDF metadata + MOLGENIS GraphQL statistics sync
 - Ticketing: mock service or real Alvao REST API
-- Observability: Loki, Promtail, Grafana behind Django staff auth
+- Observability: Loki, Grafana Alloy, Grafana behind Django staff auth
 
 ## Read this next
 

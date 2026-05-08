@@ -31,7 +31,7 @@ Then fill the generated `.env` with real values for the selected environment and
 ./deploy.sh
 ```
 
-Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Promtail, and Grafana too. Production always includes the observability stack.
+Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Grafana Alloy, and Grafana too. Production always includes the observability stack.
 
 The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`
 
@@ -305,7 +305,7 @@ New users have no special permissions by default. Grant access through the Djang
 The observability stack includes:
 
 - Loki
-- Promtail
+- Grafana Alloy
 - Grafana
 
 Grafana is available at `/grafana/`, but only for logged-in Django staff users. There is no separate Grafana password.

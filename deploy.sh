@@ -19,7 +19,7 @@ Usage: ./deploy.sh [--with-observability]
 Reads DEPLOY_ENV from .env, validates the environment contract,
 and starts the matching Docker Compose stack.
 
-Use --with-observability to include Loki, Promtail, and Grafana for
+Use --with-observability to include Loki, Grafana Alloy, and Grafana for
 dev or staging. Production always includes the observability stack.
 EOF
 }

@@ -1,0 +1,66 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+loki.source.file "django_application" {
+  targets = [
+    {
+      __path__    = "/app/logs/app.log",
+      job         = "django",
+      app         = "hospital-dwh-catalogue",
+      environment = sys.env("ALLOY_ENV"),
+      log_type    = "application",
+    },
+  ]
+  forward_to = [loki.process.django.receiver]
+}
+
+loki.source.file "django_errors" {
+  targets = [
+    {
+      __path__    = "/app/logs/error.log",
+      job         = "django",
+      app         = "hospital-dwh-catalogue",
+      environment = sys.env("ALLOY_ENV"),
+      log_type    = "error",
+    },
+  ]
+  forward_to = [loki.process.django.receiver]
+}
+
+loki.process "django" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.json {
+    expressions = {
+      levelname   = "",
+      name        = "",
+      request_id  = "",
+      message     = "",
+      http_method = "",
+      http_path   = "",
+      http_status = "",
+      duration_ms = "",
+    }
+  }
+
+  stage.labels {
+    values = {
+      levelname = "",
+      name      = "",
+    }
+  }
+
+  stage.structured_metadata {
+    values = {
+      request_id = "",
+    }
+  }
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
