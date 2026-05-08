@@ -1,4 +1,4 @@
-# Copilot Instructions
+# Agent Instructions
 
 - For every new or modified shell script committed to this repo, use the server-safe wrapper header instead of a plain `#!/bin/bash` shebang so the script can be invoked reliably on the server:
   ```sh
