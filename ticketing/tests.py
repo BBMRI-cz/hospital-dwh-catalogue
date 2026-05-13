@@ -923,6 +923,7 @@ class TicketingServiceSubmitTest(TestCase):
             self.settings(
                 MOCK_LDAP=True,
                 ALVAO_SERVICE_ACCOUNT_USERNAME='SR_Alvao_Servicedesk_DWH',
+                ALVAO_TEST_REQUESTER_EMAIL='',
             ),
             mock.patch(
                 'ticketing.services.ticketing_service.get_ticket_service',
@@ -936,12 +937,40 @@ class TicketingServiceSubmitTest(TestCase):
         self.assertEqual(backend.ticket_data.requester_username, 'SR_Alvao_Servicedesk_DWH')
         self.assertNotIn('requester', backend.ticket_data.to_dict())
 
+    def test_submit_ticket_uses_test_requester_email_when_ldap_is_mocked(self):
+        """Mock LDAP can exercise real Alvao requester lookup by configured email."""
+        backend = CapturingTicketBackend()
+
+        with (
+            self.settings(
+                MOCK_LDAP=True,
+                ALVAO_SERVICE_ACCOUNT_USERNAME='SR_Alvao_Servicedesk_DWH',
+                ALVAO_TEST_REQUESTER_EMAIL='real.alvao.user@example.com',
+            ),
+            mock.patch(
+                'ticketing.services.ticketing_service.get_ticket_service',
+                return_value=backend,
+            ),
+        ):
+            TicketingService.submit_ticket(self.ticket, [])
+
+        self.assertEqual(backend.ticket_data.requester_email, 'real.alvao.user@example.com')
+        self.assertEqual(backend.ticket_data.requester_name, '')
+        self.assertEqual(backend.ticket_data.requester_username, '')
+        self.assertEqual(
+            backend.ticket_data.to_dict()['requester']['email'],
+            'real.alvao.user@example.com',
+        )
+
     def test_submit_ticket_keeps_requester_when_ldap_is_real(self):
         """Real LDAP users are still sent as Alvao requesters."""
         backend = CapturingTicketBackend()
 
         with (
-            self.settings(MOCK_LDAP=False),
+            self.settings(
+                MOCK_LDAP=False,
+                ALVAO_TEST_REQUESTER_EMAIL='ignored@example.com',
+            ),
             mock.patch(
                 'ticketing.services.ticketing_service.get_ticket_service',
                 return_value=backend,

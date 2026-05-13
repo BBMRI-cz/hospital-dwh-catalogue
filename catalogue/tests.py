@@ -129,6 +129,7 @@ class SettingsHelpersTest(SimpleTestCase):
             'ALVAO_API_URL': 'https://alvao.example/AlvaoRestApi/v1',
             'ALVAO_SERVICE_ACCOUNT_USERNAME': 'svc',
             'ALVAO_SERVICE_ACCOUNT_PASSWORD': 'secret',
+            'ALVAO_TEST_REQUESTER_EMAIL': 'alvao-user@example.com',
             'ALVAO_DEFAULT_SERVICE_ID': '109',
         }
 
@@ -136,6 +137,7 @@ class SettingsHelpersTest(SimpleTestCase):
             settings = alvao_settings(mock_alvao=False)
 
         self.assertEqual(settings['ALVAO_DEFAULT_SERVICE_ID'], 109)
+        self.assertEqual(settings['ALVAO_TEST_REQUESTER_EMAIL'], 'alvao-user@example.com')
 
     def test_positive_int_or_default_returns_positive_values(self):
         self.assertEqual(positive_int_or_default('25', default=15), 25)

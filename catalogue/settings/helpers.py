@@ -139,6 +139,7 @@ def alvao_settings(*, mock_alvao: bool) -> dict[str, Any]:
             'ALVAO_API_URL': config('ALVAO_API_URL', default=''),
             'ALVAO_SERVICE_ACCOUNT_USERNAME': config('ALVAO_SERVICE_ACCOUNT_USERNAME', default=''),
             'ALVAO_SERVICE_ACCOUNT_PASSWORD': config('ALVAO_SERVICE_ACCOUNT_PASSWORD', default=''),
+            'ALVAO_TEST_REQUESTER_EMAIL': config('ALVAO_TEST_REQUESTER_EMAIL', default=''),
             'ALVAO_DEFAULT_SERVICE_ID': config(
                 'ALVAO_DEFAULT_SERVICE_ID',
                 default=None,
@@ -150,6 +151,7 @@ def alvao_settings(*, mock_alvao: bool) -> dict[str, Any]:
         'ALVAO_API_URL': config('ALVAO_API_URL'),
         'ALVAO_SERVICE_ACCOUNT_USERNAME': config('ALVAO_SERVICE_ACCOUNT_USERNAME'),
         'ALVAO_SERVICE_ACCOUNT_PASSWORD': config('ALVAO_SERVICE_ACCOUNT_PASSWORD'),
+        'ALVAO_TEST_REQUESTER_EMAIL': config('ALVAO_TEST_REQUESTER_EMAIL', default=''),
         'ALVAO_DEFAULT_SERVICE_ID': config('ALVAO_DEFAULT_SERVICE_ID', cast=int),
     }
 
