@@ -149,6 +149,9 @@ Ticket creation sends an explicit Alvao requester ID. Before `POST /tickets`, th
 - `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is set: by `ALVAO_TEST_REQUESTER_EMAIL`, with `ALVAO_TEST_REQUESTER_NAME` as a secondary lookup value.
 - `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: by `ALVAO_SERVICE_ACCOUNT_USERNAME`, so staging creates the ticket as the configured service account requester.
 
+Requester lookup uses Alvao `GET /users` search and expects one matching user
+with an `id`.
+
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
 For real Alvao integration, the MOU root CA certificate configured by `MOU_ROOT_CA_CERT_PATH` must be present. Staging and production mount this file into the Python containers and use it for outbound HTTPS verification.

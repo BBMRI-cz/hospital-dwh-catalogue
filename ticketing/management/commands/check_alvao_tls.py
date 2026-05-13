@@ -98,15 +98,12 @@ class Command(BaseCommand):
                     requester_name=str(
                         getattr(settings, 'ALVAO_TEST_REQUESTER_NAME', '') or ''
                     ).strip(),
-                    requester_lookup_source='ALVAO_TEST_REQUESTER_EMAIL',
                 )
                 requester_source = 'ALVAO_TEST_REQUESTER_EMAIL'
             else:
                 ticket_data = TicketData(
                     subject='ALVAO requester check',
                     description='Non-mutating requester lookup check.',
-                    requester_username=getattr(settings, 'ALVAO_SERVICE_ACCOUNT_USERNAME', ''),
-                    requester_lookup_source='ALVAO_SERVICE_ACCOUNT_USERNAME',
                 )
                 requester_source = 'ALVAO_SERVICE_ACCOUNT_USERNAME'
 
