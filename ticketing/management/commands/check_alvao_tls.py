@@ -12,6 +12,9 @@ import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from ticketing.services.alvao_service import AlvaoService, AlvaoServiceException
+from ticketing.services.base import TicketData
+
 
 def _configured_cafile() -> str:
     return (
@@ -88,8 +91,34 @@ class Command(BaseCommand):
                 getattr(settings, 'ALVAO_TEST_REQUESTER_EMAIL', '') or ''
             ).strip()
             if test_requester_email:
-                self.stdout.write('ALVAO requester payload source: ALVAO_TEST_REQUESTER_EMAIL')
+                ticket_data = TicketData(
+                    subject='ALVAO requester check',
+                    description='Non-mutating requester lookup check.',
+                    requester_email=test_requester_email,
+                    requester_name=str(
+                        getattr(settings, 'ALVAO_TEST_REQUESTER_NAME', '') or ''
+                    ).strip(),
+                    requester_lookup_source='ALVAO_TEST_REQUESTER_EMAIL',
+                )
+                requester_source = 'ALVAO_TEST_REQUESTER_EMAIL'
             else:
-                self.stdout.write('ALVAO requester payload source: authenticated service account')
+                ticket_data = TicketData(
+                    subject='ALVAO requester check',
+                    description='Non-mutating requester lookup check.',
+                    requester_username=getattr(settings, 'ALVAO_SERVICE_ACCOUNT_USERNAME', ''),
+                    requester_lookup_source='ALVAO_SERVICE_ACCOUNT_USERNAME',
+                )
+                requester_source = 'ALVAO_SERVICE_ACCOUNT_USERNAME'
+
+            try:
+                requester_id = AlvaoService(timeout=options['timeout'])._resolve_requester_id(
+                    ticket_data
+                )
+            except AlvaoServiceException as exc:
+                raise CommandError(f'ALVAO requester lookup failed: {exc}') from exc
+
+            self.stdout.write(
+                f'ALVAO requester lookup source: {requester_source}; id: {requester_id}'
+            )
 
         self.stdout.write(self.style.SUCCESS('ALVAO TLS/reachability check passed.'))

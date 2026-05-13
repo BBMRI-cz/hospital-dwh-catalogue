@@ -143,11 +143,11 @@ Relevant variables:
 
 When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to call Alvao.
 
-Ticket creation sends requester email and name in the `POST /tickets` payload. It does not perform an Alvao user lookup and does not send requester IDs.
+Ticket creation sends an explicit Alvao requester ID. Before `POST /tickets`, the Catalogue calls `GET /users` and resolves the requester ID.
 
-- `MOCK_LDAP=False`: uses the logged-in user's email and display name from LDAP.
-- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is set: uses `ALVAO_TEST_REQUESTER_EMAIL` and `ALVAO_TEST_REQUESTER_NAME`, which lets staging test the same name/email payload used with real LDAP.
-- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: omits the requester object and lets Alvao use the authenticated service account context.
+- `MOCK_LDAP=False`: first by the logged-in user's email, then username, then display name.
+- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is set: by `ALVAO_TEST_REQUESTER_EMAIL`, with `ALVAO_TEST_REQUESTER_NAME` as a secondary lookup value.
+- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: by `ALVAO_SERVICE_ACCOUNT_USERNAME`, so staging creates the ticket as the configured service account requester.
 
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
@@ -164,7 +164,13 @@ python manage.py check_alvao_tls
 ```
 
 The check prints the ALVAO host, CA bundle path, TLS protocol, and the
-non-mutating `GET /tickets` HTTP status. It does not print credentials.
+non-mutating `GET /tickets` HTTP status. In mock LDAP mode it also verifies
+the configured requester lookup. It does not print credentials.
+
+If the Catalogue returns `Could not resolve Alvao requester ID`, check that the
+requester exists in Alvao and is searchable by email or username. In mock LDAP
+mode, check `ALVAO_TEST_REQUESTER_EMAIL` first; if it is empty, check
+`ALVAO_SERVICE_ACCOUNT_USERNAME`.
 
 If ALVAO returns `The requester ... has no SLA for the service ...`, check that
 the requester named in the ALVAO error has an SLA for the exact service
