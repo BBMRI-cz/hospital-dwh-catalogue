@@ -109,6 +109,18 @@ class LdapSettingsTest(SimpleTestCase):
         self.assertNotIn('AUTH_LDAP_CA_CERT_PATH=', prod_example)
         self.assertIn('MOU_ROOT_CA_CERT_PATH=certs/MOURootCA.crt', prod_example)
 
+    def test_staging_and_prod_compose_use_shared_ca_bundle_for_python_tls(self):
+        repo_root = Path(__file__).resolve().parent.parent
+
+        for compose_file in ('staging.yml', 'prod.yml'):
+            with self.subTest(compose_file=compose_file):
+                compose = (repo_root / 'docker' / 'compose' / compose_file).read_text(
+                    encoding='utf-8'
+                )
+
+                self.assertIn('REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt', compose)
+                self.assertIn('SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt', compose)
+
 
 class SettingsHelpersTest(SimpleTestCase):
     def test_positive_int_or_default_returns_positive_values(self):
@@ -163,6 +175,19 @@ exit 1
             )
 
         self.assertEqual(result.stdout.strip(), str(repo_root / 'venv' / 'bin' / 'python'))
+
+
+class DeployScriptResetOptionsTest(SimpleTestCase):
+    def test_deploy_script_exposes_volume_reset_modes(self):
+        deploy_script = (Path(__file__).resolve().parent.parent / 'deploy.sh').read_text(
+            encoding='utf-8'
+        )
+
+        self.assertIn('--reset-volumes', deploy_script)
+        self.assertIn('--reset-volumes-keep-users', deploy_script)
+        self.assertIn('down --volumes --remove-orphans', deploy_script)
+        self.assertIn('pg_dump', deploy_script)
+        self.assertIn('pg_restore', deploy_script)
 
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):

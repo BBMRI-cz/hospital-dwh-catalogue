@@ -17,8 +17,8 @@
   {% block extra_head %}{% endblock %}
 
   <script src="{% static 'js/htmx.min.js' %}"></script>
-  <script defer src="{% static 'js/alpine.min.js' %}"></script>
   <script defer src="{% static 'js/site-ui.js' %}"></script>
+  <script defer src="{% static 'js/alpine.min.js' %}"></script>
   {% trans "Error" as t_error_title %}{{ t_error_title|json_script:"site-ui-error-title" }}
 </head>
 <body class="bg-page-bg text-txt font-sans min-h-screen"

@@ -1,7 +1,19 @@
 #!/bin/sh
 set -e
 
-if [ -f /usr/local/share/ca-certificates/MOURootCA.crt ]; then
+MOU_CA_CERT="/usr/local/share/ca-certificates/MOURootCA.crt"
+
+case "${DJANGO_SETTINGS_MODULE:-}" in
+    catalogue.settings.staging|catalogue.settings.prod)
+        if [ ! -f "$MOU_CA_CERT" ]; then
+            echo "Missing mounted MOU root CA certificate at $MOU_CA_CERT." >&2
+            echo "Check MOU_ROOT_CA_CERT_PATH in .env and redeploy with ./deploy.sh." >&2
+            exit 1
+        fi
+        ;;
+esac
+
+if [ -f "$MOU_CA_CERT" ]; then
     echo "Installing custom CA certificates into container trust store..."
     update-ca-certificates > /dev/null
 fi

@@ -196,6 +196,23 @@ For dev with observability:
 ./deploy.sh --with-observability
 ```
 
+To rebuild an environment from empty Docker volumes:
+
+```bash
+./deploy.sh --reset-volumes
+```
+
+To wipe all volumes but keep Django users, groups, and permissions:
+
+```bash
+./deploy.sh --reset-volumes-keep-users
+```
+
+The reset commands prompt for confirmation. Add `--yes` only for intentional
+automation. `--reset-volumes-keep-users` exports `auth_db`, deletes all Compose
+volumes, restores the auth database into the fresh Postgres volume, and clears
+sessions plus admin log entries.
+
 `deploy.sh`:
 
 1. loads `.env`
@@ -203,7 +220,8 @@ For dev with observability:
 3. attempts to update `health_dcat_ap` from Git when Git metadata is available
 4. checks the configured `HEALTH_DCAT_VERSION`
 5. renders the compose stack
-6. starts or updates the services
+6. optionally resets persistent Docker volumes
+7. starts or updates the services
 
 Before deploying `staging` or `prod`, place the provided certificate and private key into the
 repo-root `certs/` directory as `server.crt` and `server.key`. The generated `.env` already

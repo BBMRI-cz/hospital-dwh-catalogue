@@ -2,6 +2,7 @@
 
 import json
 from collections import Counter
+from pathlib import Path
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -1331,6 +1332,16 @@ class MetadataApiViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'orphan-dataset')
+
+
+class SiteAssetOrderTest(SimpleTestCase):
+    def test_site_ui_loads_before_alpine(self):
+        """site-ui registers Alpine components during alpine:init."""
+        template = (Path(__file__).resolve().parent / 'templates' / 'base.html').read_text(
+            encoding='utf-8'
+        )
+
+        self.assertLess(template.index('js/site-ui.js'), template.index('js/alpine.min.js'))
 
 
 class SidebarContextHelperTest(SimpleTestCase):

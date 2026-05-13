@@ -5,7 +5,19 @@
 set -euo pipefail
 
 install_ca_certificates() {
+    local mou_ca_cert="/usr/local/share/ca-certificates/MOURootCA.crt"
     local ca_cert
+
+    case "${DJANGO_SETTINGS_MODULE:-}" in
+        catalogue.settings.staging|catalogue.settings.prod)
+            if [ ! -f "$mou_ca_cert" ]; then
+                echo "Missing mounted MOU root CA certificate at $mou_ca_cert." >&2
+                echo "Check MOU_ROOT_CA_CERT_PATH in .env and redeploy with ./deploy.sh." >&2
+                exit 1
+            fi
+            ;;
+    esac
+
     for ca_cert in /usr/local/share/ca-certificates/*.crt; do
         [ -f "$ca_cert" ] || continue
         echo "Installing custom CA certificates into container trust store..."
