@@ -6,6 +6,7 @@ set -euo pipefail
 
 install_ca_certificates() {
     local mou_ca_cert="/usr/local/share/ca-certificates/MOURootCA.crt"
+    local combined_ca_bundle="/tmp/mou-ca-bundle.crt"
     local ca_cert
 
     case "${DJANGO_SETTINGS_MODULE:-}" in
@@ -15,6 +16,12 @@ install_ca_certificates() {
                 echo "Check MOU_ROOT_CA_CERT_PATH in .env and redeploy with ./deploy.sh." >&2
                 exit 1
             fi
+
+            cat /etc/ssl/certs/ca-certificates.crt "$mou_ca_cert" > "$combined_ca_bundle"
+            export REQUESTS_CA_BUNDLE="$combined_ca_bundle"
+            export SSL_CERT_FILE="$combined_ca_bundle"
+            export CURL_CA_BUNDLE="$combined_ca_bundle"
+            export LDAPTLS_CACERT="$combined_ca_bundle"
             ;;
     esac
 

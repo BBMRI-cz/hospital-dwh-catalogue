@@ -30,6 +30,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ../../docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../../docker/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
     environment:
       # Grafana is only exposed through Nginx after a Django staff check,
       # so there is no separate user-managed Grafana password in .env.

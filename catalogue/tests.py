@@ -118,8 +118,8 @@ class LdapSettingsTest(SimpleTestCase):
                     encoding='utf-8'
                 )
 
-                self.assertIn('REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt', compose)
-                self.assertIn('SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt', compose)
+                self.assertIn('REQUESTS_CA_BUNDLE: /tmp/mou-ca-bundle.crt', compose)
+                self.assertIn('SSL_CERT_FILE: /tmp/mou-ca-bundle.crt', compose)
 
 
 class SettingsHelpersTest(SimpleTestCase):
@@ -188,6 +188,20 @@ class DeployScriptResetOptionsTest(SimpleTestCase):
         self.assertIn('down --volumes --remove-orphans', deploy_script)
         self.assertIn('pg_dump', deploy_script)
         self.assertIn('pg_restore', deploy_script)
+
+
+class ObservabilityConfigTest(SimpleTestCase):
+    def test_grafana_dashboards_are_mounted_at_provider_path(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        compose = (repo_root / 'docker' / 'compose' / 'observability.yml').read_text(
+            encoding='utf-8'
+        )
+        provider = (
+            repo_root / 'docker' / 'grafana' / 'provisioning' / 'dashboards' / 'provider.yaml'
+        ).read_text(encoding='utf-8')
+
+        self.assertIn('/var/lib/grafana/dashboards:ro', compose)
+        self.assertIn('path: /var/lib/grafana/dashboards', provider)
 
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):

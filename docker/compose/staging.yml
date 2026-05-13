@@ -21,9 +21,10 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1
-      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
-      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
-      LDAPTLS_CACERT: /etc/ssl/certs/ca-certificates.crt
+      REQUESTS_CA_BUNDLE: /tmp/mou-ca-bundle.crt
+      SSL_CERT_FILE: /tmp/mou-ca-bundle.crt
+      CURL_CA_BUNDLE: /tmp/mou-ca-bundle.crt
+      LDAPTLS_CACERT: /tmp/mou-ca-bundle.crt
       MOU_ROOT_CA_SHA256: ${MOU_ROOT_CA_SHA256:-}
     depends_on:
       redis:
@@ -37,8 +38,9 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1
-      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
-      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+      REQUESTS_CA_BUNDLE: /tmp/mou-ca-bundle.crt
+      SSL_CERT_FILE: /tmp/mou-ca-bundle.crt
+      CURL_CA_BUNDLE: /tmp/mou-ca-bundle.crt
       MOU_ROOT_CA_SHA256: ${MOU_ROOT_CA_SHA256:-}
 
   nginx:

@@ -1,6 +1,12 @@
 /* -- Alpine.js cloak ---------------------------------------- */
 [x-cloak] { display: none !important; }
 
+/* -- Critical button fallbacks ------------------------------ */
+.bg-mmci-cyan { background-color: #53c0d7; }
+.bg-mmci-orange { background-color: #f04600; }
+.text-white { color: #fff; }
+.hover\:brightness-105:hover { filter: brightness(1.05); }
+
 /* -- Scrollbar ----------------------------------------------- */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

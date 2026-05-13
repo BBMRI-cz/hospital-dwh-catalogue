@@ -2,6 +2,7 @@
 set -e
 
 MOU_CA_CERT="/usr/local/share/ca-certificates/MOURootCA.crt"
+COMBINED_CA_BUNDLE="/tmp/mou-ca-bundle.crt"
 
 case "${DJANGO_SETTINGS_MODULE:-}" in
     catalogue.settings.staging|catalogue.settings.prod)
@@ -10,6 +11,11 @@ case "${DJANGO_SETTINGS_MODULE:-}" in
             echo "Check MOU_ROOT_CA_CERT_PATH in .env and redeploy with ./deploy.sh." >&2
             exit 1
         fi
+
+        cat /etc/ssl/certs/ca-certificates.crt "$MOU_CA_CERT" > "$COMBINED_CA_BUNDLE"
+        export REQUESTS_CA_BUNDLE="$COMBINED_CA_BUNDLE"
+        export SSL_CERT_FILE="$COMBINED_CA_BUNDLE"
+        export CURL_CA_BUNDLE="$COMBINED_CA_BUNDLE"
         ;;
 esac
 

@@ -143,6 +143,9 @@ When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
 For real Alvao integration, the MOU root CA certificate configured by `MOU_ROOT_CA_CERT_PATH` must be present. Staging and production mount this file into the Python containers and use it for outbound HTTPS verification.
+At container startup the Debian CA bundle and the mounted MOU CA are combined into
+`/tmp/mou-ca-bundle.crt`; Python `requests`, curl, and OpenLDAP are pointed at
+that combined bundle.
 
 ### HTTPS certificates for staging and production
 
@@ -335,6 +338,9 @@ The observability stack includes:
 - Grafana
 
 Grafana is available at `/grafana/`, but only for logged-in Django staff users. There is no separate Grafana password.
+Dashboards are provisioned from `docker/grafana/provisioning/dashboards` on every
+Grafana startup. If you reset volumes, historical Loki log data is deleted, so
+the dashboard can be empty until the application writes new log lines.
 
 ## Metadata compatibility check
 
