@@ -19,8 +19,8 @@ Usage: ./deploy.sh [--with-observability]
 Reads DEPLOY_ENV from .env, validates the environment contract,
 and starts the matching Docker Compose stack.
 
-Use --with-observability to include Loki, Grafana Alloy, and Grafana for
-dev or staging. Production always includes the observability stack.
+Use --with-observability to include Loki, Grafana Alloy, and Grafana for dev.
+Staging and production always include the observability stack.
 EOF
 }
 
@@ -45,7 +45,7 @@ parse_args() {
 }
 
 enable_environment_defaults() {
-    if [ "$DEPLOY_ENV" = "prod" ]; then
+    if [ "$DEPLOY_ENV" = "prod" ] || [ "$DEPLOY_ENV" = "staging" ]; then
         WITH_OBSERVABILITY=true
     fi
 }
@@ -63,8 +63,8 @@ run_compose() {
 print_deploy_summary() {
     echo "Target environment: $DEPLOY_ENV"
 
-    if [ "$DEPLOY_ENV" = "prod" ]; then
-        echo "Observability: always-on in prod"
+    if [ "$DEPLOY_ENV" = "prod" ] || [ "$DEPLOY_ENV" = "staging" ]; then
+        echo "Observability: always-on in $DEPLOY_ENV"
     elif [ "$WITH_OBSERVABILITY" = true ]; then
         echo "Observability: enabled"
     else

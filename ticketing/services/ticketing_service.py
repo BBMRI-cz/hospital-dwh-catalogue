@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 
 from django.db import models, transaction
@@ -69,8 +70,8 @@ class TicketingService:
         """Submit *ticket* to the external ticketing system (Alvao).
 
         On success, updates the ticket status to ``SUBMITTED`` and returns the
-        external ticket ID.  On failure, marks the ticket as ``FAILED`` and
-        re-raises the exception.
+        external ticket ID. On failure, deletes the local draft and re-raises
+        the exception so history only contains tickets that exist externally.
         """
         service = get_ticket_service()
         ticket_data = TicketData(
@@ -93,13 +94,18 @@ class TicketingService:
             )
             return response.ticket_id
         except Exception:
+            ticket_pk = ticket.pk
             logger.exception(
                 'Ticket submission failed for ticket pk=%s user=%s',
-                ticket.pk,
+                ticket_pk,
                 ticket.requester,
             )
-            ticket.status = TicketRequest.Status.FAILED
-            ticket.save()
+            with contextlib.suppress(Exception):
+                ticket.delete()
+                logger.info(
+                    'Deleted failed local TicketRequest after Alvao submission failure: pk=%s',
+                    ticket_pk,
+                )
             raise
 
     @staticmethod
@@ -110,6 +116,7 @@ class TicketingService:
                 models.Q(requester=user)
                 | models.Q(requester__isnull=True, requester_email=user.email)
             )
+            .filter(status__in=[TicketRequest.Status.SUBMITTED, TicketRequest.Status.CONFIRMED])
             .prefetch_related('items')
             .order_by('-created_at')
         )

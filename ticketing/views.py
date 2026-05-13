@@ -128,9 +128,10 @@ class CartView(LoginRequiredMixin, View):
             messages.error(
                 request,
                 _(
-                    'Submission to the ticketing system failed. Your request has been saved and our team will follow up.'
+                    'Submission to the ticketing system failed. Please contact the DWH team directly.'
                 ),
             )
+            return redirect('ticketing:cart')
 
         return redirect('ticketing:ticket_history')
 

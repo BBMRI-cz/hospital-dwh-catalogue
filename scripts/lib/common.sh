@@ -127,7 +127,7 @@ build_compose_args() {
         COMPOSE_ARGS+=(-f docker/compose/check.yml)
     fi
 
-    if [ "$deploy_env" = "prod" ] || [ "$include_observability" = true ]; then
+    if [ "$deploy_env" = "prod" ] || [ "$deploy_env" = "staging" ] || [ "$include_observability" = true ]; then
         COMPOSE_ARGS+=(-f docker/compose/observability.yml)
     fi
 }

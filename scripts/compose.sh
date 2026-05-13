@@ -25,6 +25,9 @@ while [ $# -gt 0 ]; do
             cat <<'EOF'
 Usage: ./scripts/compose.sh [--with-check] [--with-observability] <docker-compose-args...>
 
+Staging and production include observability automatically. Use
+--with-observability to add it to dev.
+
 Examples:
   ./scripts/compose.sh up -d --build
   ./scripts/compose.sh exec web python manage.py migrate

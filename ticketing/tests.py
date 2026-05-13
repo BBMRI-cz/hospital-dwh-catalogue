@@ -7,6 +7,7 @@ Covers models, forms, views, services, and cart functionality.
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
@@ -26,6 +27,13 @@ class StaticTicketBackend:
 
     def create_ticket(self, ticket_data):
         return TicketResponse(ticket_id='T-100', ticket_number='T-100', status='New')
+
+
+class FailingTicketBackend:
+    """Ticket backend that simulates an external submission failure."""
+
+    def create_ticket(self, ticket_data):
+        raise RuntimeError('ALVAO is unavailable')
 
 
 class TicketRequestModelTest(TestCase):
@@ -572,6 +580,31 @@ class CartSubmissionViewTest(TestCase):
         self.assertContains(response, 'Description-only request')
         self.assertContains(response, 'No items')
 
+    def test_history_excludes_failed_local_requests(self):
+        """History only lists requests that were submitted to the external ticketing system."""
+        TicketRequest.objects.create(
+            requester=self.user,
+            requester_email=self.user.email,
+            requester_name=self.user.username,
+            subject='Failed request',
+            description='This was not created in ALVAO.',
+            status=TicketRequest.Status.FAILED,
+        )
+        TicketRequest.objects.create(
+            requester=self.user,
+            requester_email=self.user.email,
+            requester_name=self.user.username,
+            subject='Submitted request',
+            description='This exists in ALVAO.',
+            status=TicketRequest.Status.SUBMITTED,
+        )
+
+        response = self.client.get(self.history_url, HTTP_ACCEPT_LANGUAGE='en')
+
+        self.assertEqual(len(response.context['tickets']), 1)
+        self.assertContains(response, 'Submitted request')
+        self.assertNotContains(response, 'Failed request')
+
     def test_non_empty_cart_submit_creates_item_rows(self):
         """Submitting selected datasets still persists requested item rows."""
         session = self.client.session
@@ -598,6 +631,29 @@ class CartSubmissionViewTest(TestCase):
             {'warehouse/dataset-1', 'fair_genomes/dataset-2'},
         )
         self.assertEqual(self.client.session.get('cart', []), [])
+
+    def test_failed_submit_deletes_local_draft_and_keeps_cart(self):
+        """Failed external submission leaves no local history row and keeps selected items."""
+        session = self.client.session
+        session['cart'] = [{'app': 'warehouse', 'name': 'dataset-1', 'title': 'Dataset 1'}]
+        session.save()
+
+        with mock.patch(
+            'ticketing.services.ticketing_service.get_ticket_service',
+            return_value=FailingTicketBackend(),
+        ):
+            response = self.client.post(
+                self.cart_url,
+                data={'description': 'Access to selected datasets.'},
+                follow=True,
+            )
+
+        self.assertRedirects(response, self.cart_url)
+        self.assertEqual(TicketRequest.objects.count(), 0)
+        self.assertEqual(TicketRequestItem.objects.count(), 0)
+        self.assertEqual(self.client.session.get('cart', []), session['cart'])
+        response_messages = [str(message) for message in get_messages(response.wsgi_request)]
+        self.assertTrue(any('Please contact the DWH team directly.' in m for m in response_messages))
 
 
 class CartOverflowTest(TestCase):

@@ -31,7 +31,7 @@ Then fill the generated `.env` with real values for the selected environment and
 ./deploy.sh
 ```
 
-Use `./deploy.sh --with-observability` in dev or staging when you want Loki, Grafana Alloy, and Grafana too. Production always includes the observability stack.
+Staging and production always include Loki, Grafana Alloy, and Grafana. Use `./deploy.sh --with-observability` only when you also want observability in dev.
 
 The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`
 
@@ -138,6 +138,8 @@ Relevant variables:
 
 When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
 
+Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
+
 ### HTTPS certificates for staging and production
 
 By default, both deployed environments expect these repository-root relative paths in `.env`:
@@ -182,7 +184,7 @@ The canonical deploy command is:
 ./deploy.sh
 ```
 
-For dev or staging with observability:
+For dev with observability:
 
 ```bash
 ./deploy.sh --with-observability
