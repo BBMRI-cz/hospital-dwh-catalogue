@@ -101,17 +101,12 @@ class LdapSettingsTest(SimpleTestCase):
             '(&(objectClass=user)(!(objectClass=computer))(userPrincipalName=%(user)s))',
         )
 
-    def test_prod_env_example_uses_repo_relative_ldap_ca_path(self):
+    def test_prod_env_example_uses_shared_mou_root_ca_for_ldap(self):
         prod_example = (
             Path(__file__).resolve().parent.parent / 'env-examples' / 'prod.env.example'
         ).read_text(encoding='utf-8')
 
-        line = next(
-            current_line
-            for current_line in prod_example.splitlines()
-            if current_line.startswith('AUTH_LDAP_CA_CERT_PATH=')
-        )
-        self.assertEqual(line, 'AUTH_LDAP_CA_CERT_PATH=certs/ldap-ca.crt')
+        self.assertNotIn('AUTH_LDAP_CA_CERT_PATH=', prod_example)
 
 
 class SettingsHelpersTest(SimpleTestCase):

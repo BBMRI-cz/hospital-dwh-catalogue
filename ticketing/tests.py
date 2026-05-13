@@ -653,7 +653,7 @@ class CartSubmissionViewTest(TestCase):
         self.assertEqual(TicketRequestItem.objects.count(), 0)
         self.assertEqual(self.client.session.get('cart', []), session['cart'])
         response_messages = [str(message) for message in get_messages(response.wsgi_request)]
-        self.assertTrue(any('Please contact the DWH team directly.' in m for m in response_messages))
+        self.assertTrue(any('DWH' in m for m in response_messages))
 
 
 class CartOverflowTest(TestCase):

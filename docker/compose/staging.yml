@@ -17,9 +17,13 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - logs:/app/logs
+      - ../../certs/MOURootCA.crt:/usr/local/share/ca-certificates/MOURootCA.crt:ro
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      LDAPTLS_CACERT: /etc/ssl/certs/ca-certificates.crt
+      MOU_ROOT_CA_SHA256: ${MOU_ROOT_CA_SHA256:-}
     depends_on:
       redis:
         condition: service_healthy
@@ -28,9 +32,12 @@ services:
     restart: unless-stopped
     volumes:
       - logs:/app/logs
+      - ../../certs/MOURootCA.crt:/usr/local/share/ca-certificates/MOURootCA.crt:ro
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      MOU_ROOT_CA_SHA256: ${MOU_ROOT_CA_SHA256:-}
 
   nginx:
     ports:

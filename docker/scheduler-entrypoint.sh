@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+if [ -f /usr/local/share/ca-certificates/MOURootCA.crt ]; then
+    echo "Installing custom CA certificates into container trust store..."
+    update-ca-certificates > /dev/null
+fi
+
 INTERVAL="${FAIR_GENOMES_SYNC_INTERVAL_HOURS:-24}"
 
 # Persist the container's environment variables so the cron job can access them

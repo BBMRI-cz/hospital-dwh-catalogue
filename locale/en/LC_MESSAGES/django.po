@@ -1432,11 +1432,9 @@ msgstr "Your request has been submitted."
 
 #: ticketing/views.py:120
 msgid ""
-"Submission to the ticketing system failed. Your request has been saved and "
-"our team will follow up."
+"Submission to the ticketing system failed. Please contact the DWH team directly."
 msgstr ""
-"Submission to the ticketing system failed. Your request has been saved and "
-"our team will follow up."
+"Submission to the ticketing system failed. Please contact the DWH team directly."
 
 #: warehouse/admin.py:51
 msgid "Personal info"

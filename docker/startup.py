@@ -232,7 +232,7 @@ def main() -> None:
 
     # -- Static files (skip in dev - runserver serves them directly) -----------
     if should_collectstatic(settings_module):
-        call_command('collectstatic', interactive=False, verbosity=0)
+        call_command('collectstatic', clear=True, interactive=False, verbosity=0)
 
 
 if __name__ == '__main__':
