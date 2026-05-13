@@ -141,7 +141,7 @@ Relevant variables:
 
 When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to call Alvao.
 
-Ticket creation always sends an explicit Alvao requester ID. Before `POST /tickets`, the Catalogue searches `GET /users` and resolves the requester:
+Ticket creation always sends an explicit Alvao requester ID. Before `POST /tickets`, the Catalogue calls `GET /users` and resolves the requester. For email lookups it first uses the documented OData filter form, for example `Email eq 'user@example.com'`, then falls back to full-text `$search`.
 
 - `MOCK_LDAP=False`: first by the logged-in user's email, then username, then display name.
 - `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: by `ALVAO_SERVICE_ACCOUNT_USERNAME`, because mock LDAP users do not exist in Alvao.
@@ -162,7 +162,8 @@ python manage.py check_alvao_tls
 ```
 
 The check prints the ALVAO host, CA bundle path, TLS protocol, and the
-non-mutating `GET /tickets` HTTP status. It does not print credentials.
+non-mutating `GET /tickets` HTTP status. In mock LDAP mode it also verifies
+the configured requester lookup. It does not print credentials.
 
 If the Catalogue returns `Could not resolve Alvao requester ID`, check that the
 user exists in Alvao and can be found by email or username. In mock LDAP mode,

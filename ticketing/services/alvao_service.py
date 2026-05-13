@@ -27,22 +27,49 @@ _RETRY_BACKOFF_BASE = 2
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 _MAX_ERROR_BODY_CHARS = 4000
 _USER_LIST_KEYS = ('value', 'items', 'data', 'users')
-_USER_ID_KEYS = ('id', 'personId', 'requesterId')
+_USER_ID_KEYS = (
+    'id',
+    'Id',
+    'ID',
+    'personId',
+    'PersonId',
+    'PersonID',
+    'personID',
+    'requesterId',
+    'RequesterId',
+    'RequesterID',
+    'requesterID',
+)
 _USER_MATCH_KEYS = (
     'userName',
+    'UserName',
     'username',
+    'Username',
     'accountName',
+    'AccountName',
     'login',
+    'Login',
     'loginName',
+    'LoginName',
     'samAccountName',
+    'SamAccountName',
     'sAMAccountName',
     'userPrincipalName',
+    'UserPrincipalName',
     'upn',
+    'UPN',
     'name',
+    'Name',
     'displayName',
+    'DisplayName',
     'email',
+    'Email',
+    'email2',
+    'Email2',
     'mail',
+    'Mail',
     'emailAddress',
+    'EmailAddress',
 )
 
 
@@ -125,6 +152,21 @@ def _extract_user_id(user: dict[str, Any]) -> int | None:
 def _user_matches(user: dict[str, Any], lookup: str) -> bool:
     expected = _normalized(lookup)
     return any(_normalized(user.get(key)) == expected for key in _USER_MATCH_KEYS)
+
+
+def _odata_string(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _masked_lookup(value: str) -> str:
+    value = value.strip()
+    if '@' in value:
+        local, domain = value.split('@', 1)
+        prefix = local[:1] if local else '*'
+        return f'{prefix}***@{domain}'
+    if len(value) <= 2:
+        return '*' * len(value)
+    return f'{value[:2]}***'
 
 
 class AlvaoServiceException(Exception):
@@ -313,14 +355,28 @@ class AlvaoService:
             logger.error('Alvao API request error: %s', e)
             raise AlvaoServiceException(f'API request failed: {e}')
 
-    def _search_users(self, lookup: str) -> list[dict[str, Any]]:
-        params_variants = (
+    def _user_query_params(self, lookup: str) -> tuple[dict[str, Any], ...]:
+        escaped_lookup = _odata_string(lookup)
+        if '@' in lookup:
+            exact_filters = (
+                {'$filter': f'Email eq {escaped_lookup}', '$top': 20},
+                {'$filter': f'Email2 eq {escaped_lookup}', '$top': 20},
+            )
+        else:
+            exact_filters = (
+                {'$filter': f'UserName eq {escaped_lookup}', '$top': 20},
+                {'$filter': f'Login eq {escaped_lookup}', '$top': 20},
+                {'$filter': f'Name eq {escaped_lookup}', '$top': 20},
+            )
+        return (
+            *exact_filters,
             {'$search': lookup, '$top': 20},
-            {'search': lookup, 'top': 20},
         )
+
+    def _search_users(self, lookup: str) -> list[dict[str, Any]]:
         users: list[dict[str, Any]] = []
         seen_users: set[str] = set()
-        for params in params_variants:
+        for params in self._user_query_params(lookup):
             try:
                 response_data = self._make_request('GET', '/users', params=params)
             except AlvaoServiceException as exc:
@@ -341,12 +397,18 @@ class AlvaoService:
                 return users
         return users
 
-    def _find_user_id(self, lookup: str) -> int | None:
+    def _find_user_id(self, lookup: str, *, source: str) -> int | None:
         lookup = lookup.strip()
         if not lookup:
             return None
 
         users = self._search_users(lookup)
+        logger.info(
+            'Alvao requester lookup source=%s lookup=%s candidates=%d',
+            source,
+            _masked_lookup(lookup),
+            len(users),
+        )
         exact_matches = [user for user in users if _user_matches(user, lookup)]
         candidates = exact_matches
         if not candidates and len(users) == 1:
@@ -354,36 +416,55 @@ class AlvaoService:
 
         if len(candidates) == 1:
             return _extract_user_id(candidates[0])
+        if len(candidates) > 1:
+            logger.warning(
+                'Alvao requester lookup source=%s lookup=%s returned %d matches; refusing ambiguous requester',
+                source,
+                _masked_lookup(lookup),
+                len(candidates),
+            )
         return None
 
     def _resolve_requester_id(self, ticket_data: TicketData) -> int:
         if ticket_data.requester_id:
             return ticket_data.requester_id
 
-        lookups: list[str] = []
-        for value in (
-            ticket_data.requester_email,
-            ticket_data.requester_username,
-            ticket_data.requester_name,
+        lookups: list[tuple[str, str]] = []
+        for source, value in (
+            (
+                ticket_data.requester_lookup_source or 'requester_email',
+                ticket_data.requester_email,
+            ),
+            ('requester_username', ticket_data.requester_username),
+            ('requester_name', ticket_data.requester_name),
         ):
             value = str(value or '').strip()
-            if value and value not in lookups:
-                lookups.append(value)
+            if value and value not in [lookup_value for _, lookup_value in lookups]:
+                lookups.append((source, value))
 
         if not lookups:
             service_account_username = str(self.service_account_username or '').strip()
             if service_account_username:
-                lookups.append(service_account_username)
+                lookups.append(('ALVAO_SERVICE_ACCOUNT_USERNAME', service_account_username))
 
-        for lookup in lookups:
-            user_id = self._find_user_id(lookup)
+        for source, lookup in lookups:
+            user_id = self._find_user_id(lookup, source=source)
             if user_id:
+                logger.info(
+                    'Resolved Alvao requester source=%s lookup=%s id=%s',
+                    source,
+                    _masked_lookup(lookup),
+                    user_id,
+                )
                 return user_id
 
+        attempted = ', '.join(f'{source}={_masked_lookup(lookup)}' for source, lookup in lookups)
         raise AlvaoServiceException(
             'Could not resolve Alvao requester ID for ticket creation. '
+            f'Tried: {attempted or "<none>"}. '
             'Check that the requester exists in Alvao and is searchable by email or username. '
-            'When MOCK_LDAP=True, check ALVAO_SERVICE_ACCOUNT_USERNAME.'
+            'When MOCK_LDAP=True, check ALVAO_TEST_REQUESTER_EMAIL first; if it is empty, '
+            'check ALVAO_SERVICE_ACCOUNT_USERNAME.'
         )
 
     def create_ticket(self, ticket_data: TicketData) -> TicketResponse:

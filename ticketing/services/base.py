@@ -52,6 +52,7 @@ class TicketData:
     requester_name: str = ''
     requester_username: str = ''
     requester_id: int | None = None
+    requester_lookup_source: str = ''
     service_id: int | None = None
     priority: AlvaoPriority | None = None
     impact: AlvaoImpact | None = None

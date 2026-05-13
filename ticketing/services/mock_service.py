@@ -60,6 +60,7 @@ class MockAlvaoService:
             'descriptionHtml': ticket_data.description,
             'requester': {
                 'id': ticket_data.requester_id,
+                'lookupSource': ticket_data.requester_lookup_source,
                 'username': ticket_data.requester_username,
                 'email': ticket_data.requester_email,
                 'name': ticket_data.requester_name,
