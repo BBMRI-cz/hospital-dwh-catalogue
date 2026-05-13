@@ -144,6 +144,11 @@ def alvao_settings(*, mock_alvao: bool) -> dict[str, Any]:
                 default=None,
                 cast=lambda value: int(value) if value else None,
             ),
+            'ALVAO_DEFAULT_SLA_ID': config(
+                'ALVAO_DEFAULT_SLA_ID',
+                default=None,
+                cast=lambda value: int(value) if value else None,
+            ),
         }
 
     return {
@@ -151,6 +156,11 @@ def alvao_settings(*, mock_alvao: bool) -> dict[str, Any]:
         'ALVAO_SERVICE_ACCOUNT_USERNAME': config('ALVAO_SERVICE_ACCOUNT_USERNAME'),
         'ALVAO_SERVICE_ACCOUNT_PASSWORD': config('ALVAO_SERVICE_ACCOUNT_PASSWORD'),
         'ALVAO_DEFAULT_SERVICE_ID': config('ALVAO_DEFAULT_SERVICE_ID', cast=int),
+        'ALVAO_DEFAULT_SLA_ID': config(
+            'ALVAO_DEFAULT_SLA_ID',
+            default=None,
+            cast=lambda value: int(value) if value else None,
+        ),
     }
 
 

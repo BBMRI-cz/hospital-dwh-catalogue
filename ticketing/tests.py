@@ -51,8 +51,10 @@ class FakeAlvaoResponse:
 class FakeAlvaoSession:
     def __init__(self, response):
         self.response = response
+        self.requests = []
 
     def request(self, **kwargs):
+        self.requests.append(kwargs)
         return self.response
 
 
@@ -344,6 +346,27 @@ class GetTicketServiceTest(TestCase):
 
 
 class AlvaoServiceTest(TestCase):
+    def test_create_ticket_injects_default_service_and_sla(self):
+        response = FakeAlvaoResponse(
+            status_code=201,
+            json_data={'id': 123, 'messageTag': 'T123SD', 'stateName': 'New'},
+        )
+        session = FakeAlvaoSession(response)
+        service = AlvaoService(
+            api_url='https://alvao.example/AlvaoRestApi/v1',
+            default_service_id=109,
+            default_sla_id=25,
+        )
+        service._session = session
+
+        result = service.create_ticket(
+            TicketData(subject='Test', description='Desc', requester_email='test@example.com')
+        )
+
+        self.assertEqual(result.ticket_id, '123')
+        self.assertEqual(session.requests[0]['json']['serviceId'], 109)
+        self.assertEqual(session.requests[0]['json']['slaId'], 25)
+
     def test_400_error_logs_response_body_and_extracts_validation_message(self):
         service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
         service._session = FakeAlvaoSession(
