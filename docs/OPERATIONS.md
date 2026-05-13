@@ -140,6 +140,10 @@ Relevant variables:
 
 When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
 
+When `MOCK_LDAP=True` and `MOCK_ALVAO=False`, the Catalogue does not send an
+explicit requester in the ticket payload. ALVAO creates the ticket under the
+authenticated service account from `ALVAO_SERVICE_ACCOUNT_USERNAME`.
+
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
 For real Alvao integration, the MOU root CA certificate configured by `MOU_ROOT_CA_CERT_PATH` must be present. Staging and production mount this file into the Python containers and use it for outbound HTTPS verification.
@@ -157,9 +161,9 @@ python manage.py check_alvao_tls
 The check prints the ALVAO host, CA bundle path, TLS protocol, and the
 non-mutating `GET /tickets` HTTP status. It does not print credentials.
 
-If ALVAO returns `The requester ... has no SLA for the service ...`, add the
-requester/service SLA in ALVAO. When `MOCK_LDAP=True`, requests are submitted
-without an explicit requester so ALVAO uses the configured service account.
+If ALVAO returns `The requester ... has no SLA for the service ...`, check that
+the service account has an SLA for the exact service configured by
+`ALVAO_DEFAULT_SERVICE_ID`.
 
 ### HTTPS certificates for staging and production
 

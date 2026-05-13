@@ -407,6 +407,37 @@ class AlvaoServiceTest(TestCase):
         self.assertIn('One or more validation errors occurred.', str(context.exception))
         self.assertIn('"priority": ["The value Medium is invalid."]', logs.output[0])
 
+    def test_sla_error_logs_service_account_requester_mode(self):
+        service = AlvaoService(
+            api_url='https://alvao.example/AlvaoRestApi/v1',
+            service_account_username='Host',
+        )
+        service._session = FakeAlvaoSession(
+            FakeAlvaoResponse(
+                status_code=400,
+                json_data={
+                    'error': {
+                        'code': '400',
+                        'message': (
+                            'The requester Host has no SLA for the service '
+                            'Machala Testovací služba.'
+                        ),
+                    },
+                },
+            )
+        )
+
+        with (
+            self.assertLogs('ticketing.services.alvao_service', level='ERROR') as logs,
+            self.assertRaises(AlvaoServiceException),
+        ):
+            service._make_request('POST', '/tickets', data={'name': 'Test', 'serviceId': 109})
+
+        output = '\n'.join(logs.output)
+        self.assertIn('requester_mode=service_account', output)
+        self.assertIn('requester=<omitted>', output)
+        self.assertIn('service_id=109', output)
+
 
 class CartAddViewTest(TestCase):
     """Regression tests for cart add/toggle AJAX behavior."""

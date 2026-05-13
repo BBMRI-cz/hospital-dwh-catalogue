@@ -74,20 +74,20 @@ class TicketingService:
         external ticket ID. On failure, deletes the local draft and re-raises
         the exception so history only contains tickets that exist externally.
         """
-        service = get_ticket_service()
-        requester_email = ticket.requester_email
-        requester_name = ticket.requester_name
-        if getattr(settings, 'MOCK_LDAP', False):
-            requester_email = ''
-            requester_name = ''
-
-        ticket_data = TicketData(
-            subject=ticket.subject,
-            description=build_ticket_description(ticket.description, cart),
-            requester_email=requester_email,
-            requester_name=requester_name,
-        )
         try:
+            requester_email = ticket.requester_email
+            requester_name = ticket.requester_name
+            if getattr(settings, 'MOCK_LDAP', False):
+                requester_email = ''
+                requester_name = ''
+
+            service = get_ticket_service()
+            ticket_data = TicketData(
+                subject=ticket.subject,
+                description=build_ticket_description(ticket.description, cart),
+                requester_email=requester_email,
+                requester_name=requester_name,
+            )
             response = service.create_ticket(ticket_data)
             ticket.alvao_ticket_id = response.ticket_id
             ticket.status = TicketRequest.Status.SUBMITTED

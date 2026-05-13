@@ -66,6 +66,13 @@ def _response_body_for_log(response: requests.Response) -> str:
     return body[:_MAX_ERROR_BODY_CHARS]
 
 
+def _ticket_requester_mode(payload: dict | None) -> tuple[str, str]:
+    requester = payload.get('requester') if isinstance(payload, dict) else None
+    if isinstance(requester, dict):
+        return 'explicit', str(requester.get('email') or requester.get('name') or '<unknown>')
+    return 'service_account', '<omitted>'
+
+
 class AlvaoServiceException(Exception):
     """Custom exception for Alvao API errors."""
 
@@ -213,6 +220,15 @@ class AlvaoService:
                     error_message,
                     error_body,
                 )
+                if 'has no SLA' in error_message:
+                    requester_mode, requester = _ticket_requester_mode(data)
+                    service_id = data.get('serviceId') if isinstance(data, dict) else None
+                    logger.error(
+                        'Alvao SLA rejection details: requester_mode=%s requester=%s service_id=%s',
+                        requester_mode,
+                        requester,
+                        service_id,
+                    )
                 raise AlvaoServiceException(
                     error_message,
                     status_code=response.status_code,
@@ -257,9 +273,11 @@ class AlvaoService:
         if not payload.get('serviceId') and self.default_service_id:
             payload['serviceId'] = self.default_service_id
 
+        requester_mode, requester = _ticket_requester_mode(payload)
         logger.info(
-            'Creating Alvao ticket for %s (service=%s)',
-            ticket_data.requester_email,
+            'Creating Alvao ticket (requester_mode=%s requester=%s service=%s)',
+            requester_mode,
+            requester,
             payload.get('serviceId'),
         )
 
