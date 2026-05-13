@@ -124,34 +124,18 @@ class LdapSettingsTest(SimpleTestCase):
 
 
 class SettingsHelpersTest(SimpleTestCase):
-    def test_alvao_settings_reads_optional_default_sla_id(self):
+    def test_alvao_settings_reads_default_service_id(self):
         env = {
             'ALVAO_API_URL': 'https://alvao.example/AlvaoRestApi/v1',
             'ALVAO_SERVICE_ACCOUNT_USERNAME': 'svc',
             'ALVAO_SERVICE_ACCOUNT_PASSWORD': 'secret',
             'ALVAO_DEFAULT_SERVICE_ID': '109',
-            'ALVAO_DEFAULT_SLA_ID': '25',
         }
 
         with patch.dict(os.environ, env, clear=False):
             settings = alvao_settings(mock_alvao=False)
 
         self.assertEqual(settings['ALVAO_DEFAULT_SERVICE_ID'], 109)
-        self.assertEqual(settings['ALVAO_DEFAULT_SLA_ID'], 25)
-
-    def test_alvao_settings_allows_empty_default_sla_id(self):
-        env = {
-            'ALVAO_API_URL': 'https://alvao.example/AlvaoRestApi/v1',
-            'ALVAO_SERVICE_ACCOUNT_USERNAME': 'svc',
-            'ALVAO_SERVICE_ACCOUNT_PASSWORD': 'secret',
-            'ALVAO_DEFAULT_SERVICE_ID': '109',
-            'ALVAO_DEFAULT_SLA_ID': '',
-        }
-
-        with patch.dict(os.environ, env, clear=False):
-            settings = alvao_settings(mock_alvao=False)
-
-        self.assertIsNone(settings['ALVAO_DEFAULT_SLA_ID'])
 
     def test_positive_int_or_default_returns_positive_values(self):
         self.assertEqual(positive_int_or_default('25', default=15), 25)

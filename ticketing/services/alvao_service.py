@@ -108,7 +108,6 @@ class AlvaoService:
         service_account_username: str | None = None,
         service_account_password: str | None = None,
         default_service_id: int | None = None,
-        default_sla_id: int | None = None,
         timeout: int = 30,
     ):
         self.api_url = (api_url or getattr(settings, 'ALVAO_API_URL', '')).rstrip('/')
@@ -121,7 +120,6 @@ class AlvaoService:
         self.default_service_id = default_service_id or getattr(
             settings, 'ALVAO_DEFAULT_SERVICE_ID', None
         )
-        self.default_sla_id = default_sla_id or getattr(settings, 'ALVAO_DEFAULT_SLA_ID', None)
         self.timeout = timeout
         self._session: requests.Session | None = None
 
@@ -249,7 +247,8 @@ class AlvaoService:
         """
         Create a new ticket in Alvao Service Desk.
 
-        POST /tickets - requires `requester` and `serviceId` in the payload.
+        POST /tickets - requires `serviceId` in the payload. When requester is
+        omitted, Alvao uses the authenticated service account.
         Returns 201 Created with the ticket object.
         """
         payload = ticket_data.to_dict()
@@ -257,14 +256,11 @@ class AlvaoService:
         # serviceId is required by Alvao; inject default if not already set
         if not payload.get('serviceId') and self.default_service_id:
             payload['serviceId'] = self.default_service_id
-        if not payload.get('slaId') and self.default_sla_id:
-            payload['slaId'] = self.default_sla_id
 
         logger.info(
-            'Creating Alvao ticket for %s (service=%s sla=%s)',
+            'Creating Alvao ticket for %s (service=%s)',
             ticket_data.requester_email,
             payload.get('serviceId'),
-            payload.get('slaId'),
         )
 
         response_data = self._make_request('POST', '/tickets', data=payload)

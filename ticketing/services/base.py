@@ -48,10 +48,9 @@ class TicketData:
 
     subject: str
     description: str
-    requester_email: str
+    requester_email: str = ''
     requester_name: str = ''
     service_id: int | None = None
-    sla_id: int | None = None
     priority: AlvaoPriority | None = None
     impact: AlvaoImpact | None = None
     urgency: AlvaoUrgency | None = None
@@ -59,21 +58,19 @@ class TicketData:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to Alvao REST API v1.3 payload for SD.CreateTicketRequest."""
-        requester: dict[str, Any] = {'email': self.requester_email}
-        if self.requester_name:
-            requester['name'] = self.requester_name
-
         data: dict[str, Any] = {
             'name': self.subject,
             'descriptionHtml': _plain_to_html(self.description),
-            'requester': requester,
         }
+        if self.requester_email:
+            requester: dict[str, Any] = {'email': self.requester_email}
+            if self.requester_name:
+                requester['name'] = self.requester_name
+            data['requester'] = requester
         if self.priority:
             data['priority'] = str(self.priority)
         if self.service_id:
             data['serviceId'] = self.service_id
-        if self.sla_id:
-            data['slaId'] = self.sla_id
         if self.impact:
             data['impact'] = str(self.impact)
         if self.urgency:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import logging
 
+from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -74,11 +75,17 @@ class TicketingService:
         the exception so history only contains tickets that exist externally.
         """
         service = get_ticket_service()
+        requester_email = ticket.requester_email
+        requester_name = ticket.requester_name
+        if getattr(settings, 'MOCK_LDAP', False):
+            requester_email = ''
+            requester_name = ''
+
         ticket_data = TicketData(
             subject=ticket.subject,
             description=build_ticket_description(ticket.description, cart),
-            requester_email=ticket.requester_email,
-            requester_name=ticket.requester_name,
+            requester_email=requester_email,
+            requester_name=requester_name,
         )
         try:
             response = service.create_ticket(ticket_data)

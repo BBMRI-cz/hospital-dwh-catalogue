@@ -49,7 +49,6 @@ class Command(BaseCommand):
         self.stdout.write(f'ALVAO host: {parsed.hostname}:{port}')
         self.stdout.write(f'CA bundle: {cafile}')
         self.stdout.write(f'Service ID: {getattr(settings, "ALVAO_DEFAULT_SERVICE_ID", None)}')
-        self.stdout.write(f'SLA ID: {getattr(settings, "ALVAO_DEFAULT_SLA_ID", None)}')
 
         try:
             context = ssl.create_default_context(cafile=cafile)

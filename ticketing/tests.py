@@ -20,6 +20,7 @@ from .services.alvao_service import AlvaoService, AlvaoServiceException
 from .services.base import AlvaoPriority, TicketData, TicketResponse
 from .services.factory import get_ticket_service
 from .services.mock_service import MockAlvaoService
+from .services.ticketing_service import TicketingService
 
 
 class StaticTicketBackend:
@@ -27,6 +28,17 @@ class StaticTicketBackend:
 
     def create_ticket(self, ticket_data):
         return TicketResponse(ticket_id='T-100', ticket_number='T-100', status='New')
+
+
+class CapturingTicketBackend(StaticTicketBackend):
+    """Ticket backend that stores the submitted payload for assertions."""
+
+    def __init__(self):
+        self.ticket_data = None
+
+    def create_ticket(self, ticket_data):
+        self.ticket_data = ticket_data
+        return super().create_ticket(ticket_data)
 
 
 class FailingTicketBackend:
@@ -257,7 +269,15 @@ class TicketDataTest(TestCase):
         self.assertIn('requester', result)
         self.assertNotIn('priority', result)
         self.assertNotIn('serviceId', result)
-        self.assertNotIn('slaId', result)
+
+    def test_to_dict_omits_requester_without_email(self):
+        """Requester is optional so Alvao can use the authenticated service account."""
+        data = TicketData(subject='Test', description='Desc')
+
+        result = data.to_dict()
+
+        self.assertEqual(result['name'], 'Test')
+        self.assertNotIn('requester', result)
 
     def test_to_dict_with_service_id(self):
         """to_dict includes service_id when set."""
@@ -346,7 +366,7 @@ class GetTicketServiceTest(TestCase):
 
 
 class AlvaoServiceTest(TestCase):
-    def test_create_ticket_injects_default_service_and_sla(self):
+    def test_create_ticket_injects_default_service(self):
         response = FakeAlvaoResponse(
             status_code=201,
             json_data={'id': 123, 'messageTag': 'T123SD', 'stateName': 'New'},
@@ -355,7 +375,6 @@ class AlvaoServiceTest(TestCase):
         service = AlvaoService(
             api_url='https://alvao.example/AlvaoRestApi/v1',
             default_service_id=109,
-            default_sla_id=25,
         )
         service._session = session
 
@@ -365,7 +384,6 @@ class AlvaoServiceTest(TestCase):
 
         self.assertEqual(result.ticket_id, '123')
         self.assertEqual(session.requests[0]['json']['serviceId'], 109)
-        self.assertEqual(session.requests[0]['json']['slaId'], 25)
 
     def test_400_error_logs_response_body_and_extracts_validation_message(self):
         service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
@@ -734,6 +752,63 @@ class CartSubmissionViewTest(TestCase):
         self.assertEqual(self.client.session.get('cart', []), session['cart'])
         response_messages = [str(message) for message in get_messages(response.wsgi_request)]
         self.assertTrue(any('DWH' in m for m in response_messages))
+
+
+class TicketingServiceSubmitTest(TestCase):
+    """Regression tests for TicketingService requester mapping."""
+
+    databases = {'default', 'auth_db'}
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='mock-user',
+            email='mock-user@example.com',
+            password='secret123',
+            first_name='Mock',
+            last_name='User',
+        )
+        self.ticket = TicketRequest.objects.create(
+            requester=self.user,
+            requester_email=self.user.email,
+            requester_name=self.user.get_full_name(),
+            subject='Data access request',
+            description='Need access.',
+        )
+
+    def test_submit_ticket_omits_requester_when_ldap_is_mocked(self):
+        """Mock LDAP users are not sent as Alvao requesters."""
+        backend = CapturingTicketBackend()
+
+        with (
+            self.settings(MOCK_LDAP=True),
+            mock.patch(
+                'ticketing.services.ticketing_service.get_ticket_service',
+                return_value=backend,
+            ),
+        ):
+            TicketingService.submit_ticket(self.ticket, [])
+
+        self.assertEqual(backend.ticket_data.requester_email, '')
+        self.assertEqual(backend.ticket_data.requester_name, '')
+        self.assertNotIn('requester', backend.ticket_data.to_dict())
+
+    def test_submit_ticket_keeps_requester_when_ldap_is_real(self):
+        """Real LDAP users are still sent as Alvao requesters."""
+        backend = CapturingTicketBackend()
+
+        with (
+            self.settings(MOCK_LDAP=False),
+            mock.patch(
+                'ticketing.services.ticketing_service.get_ticket_service',
+                return_value=backend,
+            ),
+        ):
+            TicketingService.submit_ticket(self.ticket, [])
+
+        self.assertEqual(backend.ticket_data.requester_email, self.user.email)
+        self.assertEqual(backend.ticket_data.requester_name, 'Mock User')
+        self.assertEqual(backend.ticket_data.to_dict()['requester']['email'], self.user.email)
 
 
 class CartOverflowTest(TestCase):
