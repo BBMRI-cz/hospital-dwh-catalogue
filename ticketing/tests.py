@@ -16,8 +16,8 @@ from shared.dtos import UnifiedDataset
 from ticketing.cart import CART_MAX_ITEMS, CartService
 
 from .models import TicketRequest, TicketRequestItem
-from .services.alvao_service import AlvaoService
-from .services.base import TicketData, TicketResponse
+from .services.alvao_service import AlvaoService, AlvaoServiceException
+from .services.base import AlvaoPriority, TicketData, TicketResponse
 from .services.factory import get_ticket_service
 from .services.mock_service import MockAlvaoService
 
@@ -34,6 +34,26 @@ class FailingTicketBackend:
 
     def create_ticket(self, ticket_data):
         raise RuntimeError('ALVAO is unavailable')
+
+
+class FakeAlvaoResponse:
+    def __init__(self, *, status_code, json_data=None, text=''):
+        self.status_code = status_code
+        self._json_data = json_data
+        self.text = text
+
+    def json(self):
+        if self._json_data is None:
+            raise ValueError('No JSON body')
+        return self._json_data
+
+
+class FakeAlvaoSession:
+    def __init__(self, response):
+        self.response = response
+
+    def request(self, **kwargs):
+        return self.response
 
 
 class TicketRequestModelTest(TestCase):
@@ -208,6 +228,19 @@ class TicketDataTest(TestCase):
         self.assertEqual(result['descriptionHtml'], 'Desc')
         self.assertEqual(result['requester']['email'], 'test@example.com')
         self.assertEqual(result['requester']['name'], 'Test User')
+        self.assertNotIn('priority', result)
+
+    def test_to_dict_includes_priority_only_when_explicit(self):
+        """Priority is optional because Alvao instances can have custom values."""
+        data = TicketData(
+            subject='Test',
+            description='Desc',
+            requester_email='test@example.com',
+            priority=AlvaoPriority.MEDIUM,
+        )
+
+        result = data.to_dict()
+
         self.assertEqual(result['priority'], 'Medium')
 
     def test_to_dict_minimal(self):
@@ -220,7 +253,7 @@ class TicketDataTest(TestCase):
         result = data.to_dict()
         self.assertIn('name', result)
         self.assertIn('requester', result)
-        self.assertIn('priority', result)
+        self.assertNotIn('priority', result)
         self.assertNotIn('serviceId', result)
         self.assertNotIn('slaId', result)
 
@@ -308,6 +341,30 @@ class GetTicketServiceTest(TestCase):
         with self.settings(MOCK_ALVAO=False):
             service = get_ticket_service()
             self.assertIsInstance(service, AlvaoService)
+
+
+class AlvaoServiceTest(TestCase):
+    def test_400_error_logs_response_body_and_extracts_validation_message(self):
+        service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
+        service._session = FakeAlvaoSession(
+            FakeAlvaoResponse(
+                status_code=400,
+                json_data={
+                    'title': 'One or more validation errors occurred.',
+                    'errors': {'priority': ['The value Medium is invalid.']},
+                },
+            )
+        )
+
+        with (
+            self.assertLogs('ticketing.services.alvao_service', level='ERROR') as logs,
+            self.assertRaises(AlvaoServiceException) as context,
+        ):
+            service._make_request('POST', '/tickets', data={'name': 'Test'})
+
+        self.assertEqual(context.exception.status_code, 400)
+        self.assertIn('One or more validation errors occurred.', str(context.exception))
+        self.assertIn('"priority": ["The value Medium is invalid."]', logs.output[0])
 
 
 class CartAddViewTest(TestCase):

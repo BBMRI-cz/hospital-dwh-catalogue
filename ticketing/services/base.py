@@ -52,7 +52,7 @@ class TicketData:
     requester_name: str = ''
     service_id: int | None = None
     sla_id: int | None = None
-    priority: AlvaoPriority = AlvaoPriority.MEDIUM
+    priority: AlvaoPriority | None = None
     impact: AlvaoImpact | None = None
     urgency: AlvaoUrgency | None = None
     custom_items: dict[str, Any] | None = None
@@ -67,8 +67,9 @@ class TicketData:
             'name': self.subject,
             'descriptionHtml': _plain_to_html(self.description),
             'requester': requester,
-            'priority': str(self.priority),
         }
+        if self.priority:
+            data['priority'] = str(self.priority)
         if self.service_id:
             data['serviceId'] = self.service_id
         if self.sla_id:

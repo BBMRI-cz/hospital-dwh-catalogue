@@ -9,8 +9,10 @@ Base URL pattern: https://{server}/AlvaoRestApi/v1/
 """
 
 import contextlib
+import json
 import logging
 import time
+from typing import Any
 
 import requests
 
@@ -23,6 +25,45 @@ logger = logging.getLogger(__name__)
 _MAX_RETRIES = 3
 _RETRY_BACKOFF_BASE = 2
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+_MAX_ERROR_BODY_CHARS = 4000
+
+
+def _format_error_detail(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        return '; '.join(_format_error_detail(item) for item in value)
+    if isinstance(value, dict):
+        return '; '.join(f'{key}: {_format_error_detail(item)}' for key, item in value.items())
+    return str(value)
+
+
+def _extract_error_message(error_data: Any, fallback: str) -> str:
+    if not isinstance(error_data, dict):
+        return fallback
+
+    for key in ('message', 'title', 'detail', 'error'):
+        value = error_data.get(key)
+        if value:
+            return _format_error_detail(value)
+
+    errors = error_data.get('errors')
+    if errors:
+        return _format_error_detail(errors)
+
+    return fallback
+
+
+def _response_body_for_log(response: requests.Response) -> str:
+    with contextlib.suppress(Exception):
+        return json.dumps(response.json(), ensure_ascii=False, sort_keys=True)[
+            :_MAX_ERROR_BODY_CHARS
+        ]
+
+    body = response.text.strip()
+    if not body:
+        return '<empty>'
+    return body[:_MAX_ERROR_BODY_CHARS]
 
 
 class AlvaoServiceException(Exception):
@@ -163,14 +204,19 @@ class AlvaoService:
                     error_data = response.json()
 
                 error_message = f'Alvao API error: {response.status_code}'
-                if error_data and isinstance(error_data, dict):
-                    error_message = error_data.get('message', error_message)
+                error_message = _extract_error_message(error_data, error_message)
+                error_body = _response_body_for_log(response)
 
-                logger.error('Alvao API error: %s - %s', response.status_code, error_message)
+                logger.error(
+                    'Alvao API error: %s - %s; response_body=%s',
+                    response.status_code,
+                    error_message,
+                    error_body,
+                )
                 raise AlvaoServiceException(
                     error_message,
                     status_code=response.status_code,
-                    response=error_data,
+                    response=error_data if isinstance(error_data, dict) else None,
                     retryable=response.status_code in _RETRYABLE_STATUS_CODES,
                 )
 
