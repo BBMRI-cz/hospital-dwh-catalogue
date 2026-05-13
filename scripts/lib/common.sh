@@ -114,8 +114,19 @@ require_valid_deploy_env() {
 }
 
 export_mou_root_ca_fingerprint() {
-    local cert_file="$REPO_ROOT/certs/MOURootCA.crt"
+    local cert_path="${MOU_ROOT_CA_CERT_PATH:-}"
+    local cert_file
     local hash_line
+
+    if [ -z "$cert_path" ]; then
+        export MOU_ROOT_CA_SHA256=""
+        return 0
+    fi
+
+    case "$cert_path" in
+        /*) cert_file="$cert_path" ;;
+        *) cert_file="$REPO_ROOT/$cert_path" ;;
+    esac
 
     if [ -f "$cert_file" ] && command -v sha256sum >/dev/null 2>&1; then
         hash_line="$(sha256sum "$cert_file")"
@@ -165,6 +176,7 @@ run_compose() {
     shift 3
 
     ensure_repo_root
+    load_dotenv >/dev/null
     export_mou_root_ca_fingerprint
     build_compose_args "$deploy_env" "$include_check" "$include_observability"
     DEPLOY_ENV="$deploy_env" docker compose --env-file "$DOTENV_FILE" "${COMPOSE_ARGS[@]}" "$@"

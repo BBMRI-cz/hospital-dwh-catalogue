@@ -17,7 +17,7 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - logs:/app/logs
-      - ../../certs/MOURootCA.crt:/usr/local/share/ca-certificates/MOURootCA.crt:ro
+      - ../../${MOU_ROOT_CA_CERT_PATH}:/usr/local/share/ca-certificates/MOURootCA.crt:ro
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1
@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
     volumes:
       - logs:/app/logs
-      - ../../certs/MOURootCA.crt:/usr/local/share/ca-certificates/MOURootCA.crt:ro
+      - ../../${MOU_ROOT_CA_CERT_PATH}:/usr/local/share/ca-certificates/MOURootCA.crt:ro
     environment:
       DJANGO_SETTINGS_MODULE: catalogue.settings.staging
       REDIS_URL: redis://redis:6379/1

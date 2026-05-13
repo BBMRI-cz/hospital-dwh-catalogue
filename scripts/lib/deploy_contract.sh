@@ -3,8 +3,6 @@
 # Deployment validation is intentionally kept outside deploy.sh so the deploy
 # script can stay as a readable flow. This file owns the environment contract.
 
-MOU_ROOT_CA_CERT_PATH="certs/MOURootCA.crt"
-
 validate_boolean_literal() {
     local key="$1"
     local value="${!key:-}"
@@ -65,21 +63,10 @@ require_existing_file() {
     fi
 }
 
-require_existing_repo_file() {
-    local label="$1"
-    local relative_path="$2"
-    local effective_path
-
-    effective_path="$(resolve_path_from_repo_root "$relative_path")"
-
-    if [ ! -f "$effective_path" ]; then
-        echo "Validation error: missing $label file: $effective_path" >&2
-        return 1
-    fi
-}
-
 require_mou_root_ca_cert() {
-    require_existing_repo_file "MOU root CA certificate" "$MOU_ROOT_CA_CERT_PATH"
+    require_non_empty MOU_ROOT_CA_CERT_PATH
+    require_relative_path MOU_ROOT_CA_CERT_PATH
+    require_existing_file MOU_ROOT_CA_CERT_PATH
 }
 
 maybe_update_health_dcat_release() {
@@ -193,6 +180,7 @@ validate_staging_contract() {
     validate_boolean_literal DEBUG
     validate_mock_contract
     validate_tls_contract
+    require_mou_root_ca_cert
 
     if [ "${MOCK_LDAP}" = "False" ]; then
         require_non_empty \
@@ -200,7 +188,6 @@ validate_staging_contract() {
             AUTH_LDAP_BIND_DN \
             AUTH_LDAP_BIND_PASSWORD \
             AUTH_LDAP_USER_SEARCH_BASE
-        require_mou_root_ca_cert
     fi
 
     if [ "${MOCK_FAIR_GENOMES}" = "False" ]; then
@@ -216,7 +203,6 @@ validate_staging_contract() {
             ALVAO_SERVICE_ACCOUNT_USERNAME \
             ALVAO_SERVICE_ACCOUNT_PASSWORD \
             ALVAO_DEFAULT_SERVICE_ID
-        require_mou_root_ca_cert
     fi
 }
 

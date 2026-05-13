@@ -105,6 +105,7 @@ Relevant variables:
 - `AUTH_LDAP_USER_SEARCH_BASE`
 - `AUTH_LDAP_LOGIN_ATTR` defaults to `sAMAccountName` and can be changed to `userPrincipalName` if your directory uses that login format
 - `AUTH_LDAP_START_TLS` when your directory uses StartTLS instead of `ldaps://`
+- `MOU_ROOT_CA_CERT_PATH` for the shared MOU root CA certificate
 
 When `MOCK_LDAP=True`:
 
@@ -113,7 +114,7 @@ When `MOCK_LDAP=True`:
 
 When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory through a service account search + bind flow. Successful LDAP users get a local Django account on first login, but staff and superuser rights remain managed locally in Django. The env-managed superuser is still applied during startup independently of LDAP mode.
 
-Real LDAP deployments use the shared MOU root CA at `certs/MOURootCA.crt`. The web container installs it into the system trust store and points OpenLDAP at the resulting system CA bundle.
+Real LDAP deployments use the shared MOU root CA from `MOU_ROOT_CA_CERT_PATH`. The web container installs it into the system trust store and points OpenLDAP at the resulting system CA bundle.
 
 ### FAIR Genomes
 
@@ -141,7 +142,7 @@ When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does
 
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
-For real Alvao integration, the MOU root CA certificate must be present at `certs/MOURootCA.crt`. Staging and production mount this file into the Python containers and use it for outbound HTTPS verification.
+For real Alvao integration, the MOU root CA certificate configured by `MOU_ROOT_CA_CERT_PATH` must be present. Staging and production mount this file into the Python containers and use it for outbound HTTPS verification.
 
 ### HTTPS certificates for staging and production
 
@@ -149,17 +150,19 @@ By default, both deployed environments expect these repository-root relative pat
 
 - `certs/server.crt`
 - `certs/server.key`
+- `certs/MOURootCA.crt`
 
 If the files live elsewhere, set these optional repo-root relative overrides in `.env`:
 
 - `NGINX_SSL_CERT_PATH`
 - `NGINX_SSL_KEY_PATH`
+- `MOU_ROOT_CA_CERT_PATH`
 
 The nginx container mounts those repo-root relative files directly for TLS termination. The
 internal `MOURootCA` stays a client trust concern on managed PCs; the Catalogue does not
 need a separate runtime CA file for this setup.
 
-This HTTPS certificate setup is separate from outbound client trust. LDAP and Alvao both use the shared MOU root CA at `certs/MOURootCA.crt`.
+This HTTPS certificate setup is separate from outbound client trust. LDAP and Alvao both use the shared MOU root CA configured by `MOU_ROOT_CA_CERT_PATH`.
 
 ### Deployed HTTPS settings
 

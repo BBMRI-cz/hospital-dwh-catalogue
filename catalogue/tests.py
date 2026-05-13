@@ -107,6 +107,7 @@ class LdapSettingsTest(SimpleTestCase):
         ).read_text(encoding='utf-8')
 
         self.assertNotIn('AUTH_LDAP_CA_CERT_PATH=', prod_example)
+        self.assertIn('MOU_ROOT_CA_CERT_PATH=certs/MOURootCA.crt', prod_example)
 
 
 class SettingsHelpersTest(SimpleTestCase):
