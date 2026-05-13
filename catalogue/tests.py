@@ -204,7 +204,7 @@ class ManagementCommandAvailabilityTest(SimpleTestCase):
         repo_root = Path(__file__).resolve().parent.parent
         commands = [
             repo_root / 'ticketing' / 'management' / 'commands' / 'check_alvao_tls.py',
-            repo_root / 'catalogue' / 'management' / 'commands' / 'check_observability.py',
+            repo_root / 'frontend' / 'management' / 'commands' / 'check_observability.py',
         ]
 
         for command in commands:
