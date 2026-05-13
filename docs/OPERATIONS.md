@@ -138,11 +138,12 @@ Relevant variables:
 - `ALVAO_SERVICE_ACCOUNT_PASSWORD`
 - `ALVAO_DEFAULT_SERVICE_ID`
 
-When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to create Alvao tickets on behalf of users.
+When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to call Alvao.
 
-When `MOCK_LDAP=True` and `MOCK_ALVAO=False`, the Catalogue does not send an
-explicit requester in the ticket payload. ALVAO creates the ticket under the
-authenticated service account from `ALVAO_SERVICE_ACCOUNT_USERNAME`.
+Ticket creation always sends an explicit Alvao requester ID. Before `POST /tickets`, the Catalogue searches `GET /users` and resolves the requester:
+
+- `MOCK_LDAP=False`: first by the logged-in user's email, then username, then display name.
+- `MOCK_LDAP=True`: by `ALVAO_SERVICE_ACCOUNT_USERNAME`, because mock LDAP users do not exist in Alvao.
 
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
@@ -161,9 +162,13 @@ python manage.py check_alvao_tls
 The check prints the ALVAO host, CA bundle path, TLS protocol, and the
 non-mutating `GET /tickets` HTTP status. It does not print credentials.
 
+If the Catalogue returns `Could not resolve Alvao requester ID`, check that the
+user exists in Alvao and can be found by email or username. In mock LDAP mode,
+check `ALVAO_SERVICE_ACCOUNT_USERNAME`.
+
 If ALVAO returns `The requester ... has no SLA for the service ...`, check that
-the service account has an SLA for the exact service configured by
-`ALVAO_DEFAULT_SERVICE_ID`.
+the requester named in the ALVAO error has an SLA for the exact service
+configured by `ALVAO_DEFAULT_SERVICE_ID`.
 
 ### HTTPS certificates for staging and production
 

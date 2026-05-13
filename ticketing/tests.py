@@ -62,12 +62,14 @@ class FakeAlvaoResponse:
 
 class FakeAlvaoSession:
     def __init__(self, response):
-        self.response = response
+        self.responses = list(response) if isinstance(response, (list, tuple)) else [response]
         self.requests = []
 
     def request(self, **kwargs):
         self.requests.append(kwargs)
-        return self.response
+        if len(self.responses) > 1:
+            return self.responses.pop(0)
+        return self.responses[0]
 
 
 class TicketRequestModelTest(TestCase):
@@ -271,13 +273,27 @@ class TicketDataTest(TestCase):
         self.assertNotIn('serviceId', result)
 
     def test_to_dict_omits_requester_without_email(self):
-        """Requester is optional so Alvao can use the authenticated service account."""
+        """Requester can be filled later by AlvaoService user lookup."""
         data = TicketData(subject='Test', description='Desc')
 
         result = data.to_dict()
 
         self.assertEqual(result['name'], 'Test')
         self.assertNotIn('requester', result)
+
+    def test_to_dict_uses_requester_id_when_set(self):
+        """Requester ID is preferred for registered Alvao users."""
+        data = TicketData(
+            subject='Test',
+            description='Desc',
+            requester_id=321,
+            requester_email='ignored@example.com',
+            requester_name='Ignored User',
+        )
+
+        result = data.to_dict()
+
+        self.assertEqual(result['requester'], {'id': 321})
 
     def test_to_dict_with_service_id(self):
         """to_dict includes service_id when set."""
@@ -367,11 +383,15 @@ class GetTicketServiceTest(TestCase):
 
 class AlvaoServiceTest(TestCase):
     def test_create_ticket_injects_default_service(self):
-        response = FakeAlvaoResponse(
+        user_response = FakeAlvaoResponse(
+            status_code=200,
+            json_data={'value': [{'id': 321, 'email': 'test@example.com'}]},
+        )
+        ticket_response = FakeAlvaoResponse(
             status_code=201,
             json_data={'id': 123, 'messageTag': 'T123SD', 'stateName': 'New'},
         )
-        session = FakeAlvaoSession(response)
+        session = FakeAlvaoSession([user_response, ticket_response])
         service = AlvaoService(
             api_url='https://alvao.example/AlvaoRestApi/v1',
             default_service_id=109,
@@ -383,7 +403,95 @@ class AlvaoServiceTest(TestCase):
         )
 
         self.assertEqual(result.ticket_id, '123')
-        self.assertEqual(session.requests[0]['json']['serviceId'], 109)
+        self.assertEqual(session.requests[0]['method'], 'GET')
+        self.assertEqual(session.requests[0]['params']['$search'], 'test@example.com')
+        self.assertEqual(session.requests[1]['method'], 'POST')
+        self.assertEqual(session.requests[1]['json']['serviceId'], 109)
+        self.assertEqual(session.requests[1]['json']['requester'], {'id': 321})
+
+    def test_create_ticket_resolves_service_account_when_requester_is_missing(self):
+        user_response = FakeAlvaoResponse(
+            status_code=200,
+            json_data={'value': [{'id': 555, 'userName': 'SR_Alvao_Servicedesk_DWH'}]},
+        )
+        ticket_response = FakeAlvaoResponse(
+            status_code=201,
+            json_data={'id': 123, 'messageTag': 'T123SD', 'stateName': 'New'},
+        )
+        session = FakeAlvaoSession([user_response, ticket_response])
+        service = AlvaoService(
+            api_url='https://alvao.example/AlvaoRestApi/v1',
+            service_account_username='SR_Alvao_Servicedesk_DWH',
+            default_service_id=109,
+        )
+        service._session = session
+
+        service.create_ticket(TicketData(subject='Test', description='Desc'))
+
+        self.assertEqual(
+            session.requests[0]['params']['$search'],
+            'SR_Alvao_Servicedesk_DWH',
+        )
+        self.assertEqual(session.requests[1]['json']['requester'], {'id': 555})
+
+    def test_create_ticket_falls_back_to_unprefixed_user_search(self):
+        empty_response = FakeAlvaoResponse(status_code=200, json_data={'value': []})
+        user_response = FakeAlvaoResponse(
+            status_code=200,
+            json_data={'value': [{'id': 321, 'email': 'test@example.com'}]},
+        )
+        ticket_response = FakeAlvaoResponse(
+            status_code=201,
+            json_data={'id': 123, 'messageTag': 'T123SD', 'stateName': 'New'},
+        )
+        session = FakeAlvaoSession([empty_response, user_response, ticket_response])
+        service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
+        service._session = session
+
+        service.create_ticket(
+            TicketData(subject='Test', description='Desc', requester_email='test@example.com')
+        )
+
+        self.assertEqual(session.requests[0]['params']['$search'], 'test@example.com')
+        self.assertEqual(session.requests[1]['params']['search'], 'test@example.com')
+        self.assertEqual(session.requests[2]['json']['requester'], {'id': 321})
+
+    def test_create_ticket_fails_when_requester_cannot_be_resolved(self):
+        service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
+        service._session = FakeAlvaoSession(
+            FakeAlvaoResponse(status_code=200, json_data={'value': []})
+        )
+
+        with self.assertRaises(AlvaoServiceException) as context:
+            service.create_ticket(
+                TicketData(
+                    subject='Test', description='Desc', requester_email='missing@example.com'
+                )
+            )
+
+        self.assertIn('Could not resolve Alvao requester ID', str(context.exception))
+
+    def test_create_ticket_does_not_fallback_to_service_account_for_named_requester(self):
+        service = AlvaoService(
+            api_url='https://alvao.example/AlvaoRestApi/v1',
+            service_account_username='SR_Alvao_Servicedesk_DWH',
+        )
+        service._session = FakeAlvaoSession(
+            FakeAlvaoResponse(status_code=200, json_data={'value': []})
+        )
+
+        with self.assertRaises(AlvaoServiceException):
+            service.create_ticket(
+                TicketData(
+                    subject='Test', description='Desc', requester_email='missing@example.com'
+                )
+            )
+
+        lookups = [
+            request['params'].get('$search') or request['params'].get('search')
+            for request in service._session.requests
+        ]
+        self.assertEqual(lookups, ['missing@example.com', 'missing@example.com'])
 
     def test_400_error_logs_response_body_and_extracts_validation_message(self):
         service = AlvaoService(api_url='https://alvao.example/AlvaoRestApi/v1')
@@ -807,12 +915,15 @@ class TicketingServiceSubmitTest(TestCase):
             description='Need access.',
         )
 
-    def test_submit_ticket_omits_requester_when_ldap_is_mocked(self):
-        """Mock LDAP users are not sent as Alvao requesters."""
+    def test_submit_ticket_uses_service_account_lookup_when_ldap_is_mocked(self):
+        """Mock LDAP tickets use the service account username for Alvao lookup."""
         backend = CapturingTicketBackend()
 
         with (
-            self.settings(MOCK_LDAP=True),
+            self.settings(
+                MOCK_LDAP=True,
+                ALVAO_SERVICE_ACCOUNT_USERNAME='SR_Alvao_Servicedesk_DWH',
+            ),
             mock.patch(
                 'ticketing.services.ticketing_service.get_ticket_service',
                 return_value=backend,
@@ -822,6 +933,7 @@ class TicketingServiceSubmitTest(TestCase):
 
         self.assertEqual(backend.ticket_data.requester_email, '')
         self.assertEqual(backend.ticket_data.requester_name, '')
+        self.assertEqual(backend.ticket_data.requester_username, 'SR_Alvao_Servicedesk_DWH')
         self.assertNotIn('requester', backend.ticket_data.to_dict())
 
     def test_submit_ticket_keeps_requester_when_ldap_is_real(self):
@@ -839,6 +951,7 @@ class TicketingServiceSubmitTest(TestCase):
 
         self.assertEqual(backend.ticket_data.requester_email, self.user.email)
         self.assertEqual(backend.ticket_data.requester_name, 'Mock User')
+        self.assertEqual(backend.ticket_data.requester_username, self.user.username)
         self.assertEqual(backend.ticket_data.to_dict()['requester']['email'], self.user.email)
 
 

@@ -26,6 +26,24 @@ _MAX_RETRIES = 3
 _RETRY_BACKOFF_BASE = 2
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 _MAX_ERROR_BODY_CHARS = 4000
+_USER_LIST_KEYS = ('value', 'items', 'data', 'users')
+_USER_ID_KEYS = ('id', 'personId', 'requesterId')
+_USER_MATCH_KEYS = (
+    'userName',
+    'username',
+    'accountName',
+    'login',
+    'loginName',
+    'samAccountName',
+    'sAMAccountName',
+    'userPrincipalName',
+    'upn',
+    'name',
+    'displayName',
+    'email',
+    'mail',
+    'emailAddress',
+)
 
 
 def _format_error_detail(value: Any) -> str:
@@ -69,8 +87,44 @@ def _response_body_for_log(response: requests.Response) -> str:
 def _ticket_requester_mode(payload: dict | None) -> tuple[str, str]:
     requester = payload.get('requester') if isinstance(payload, dict) else None
     if isinstance(requester, dict):
-        return 'explicit', str(requester.get('email') or requester.get('name') or '<unknown>')
+        return 'explicit', str(
+            requester.get('id') or requester.get('email') or requester.get('name') or '<unknown>'
+        )
     return 'service_account', '<omitted>'
+
+
+def _normalized(value: Any) -> str:
+    return str(value or '').strip().casefold()
+
+
+def _extract_users(response_data: Any) -> list[dict[str, Any]]:
+    if isinstance(response_data, list):
+        return [item for item in response_data if isinstance(item, dict)]
+    if not isinstance(response_data, dict):
+        return []
+
+    for key in _USER_LIST_KEYS:
+        value = response_data.get(key)
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, dict)]
+
+    if any(key in response_data for key in _USER_ID_KEYS):
+        return [response_data]
+    return []
+
+
+def _extract_user_id(user: dict[str, Any]) -> int | None:
+    for key in _USER_ID_KEYS:
+        value = user.get(key)
+        with contextlib.suppress(TypeError, ValueError):
+            if value not in (None, ''):
+                return int(value)
+    return None
+
+
+def _user_matches(user: dict[str, Any], lookup: str) -> bool:
+    expected = _normalized(lookup)
+    return any(_normalized(user.get(key)) == expected for key in _USER_MATCH_KEYS)
 
 
 class AlvaoServiceException(Exception):
@@ -259,14 +313,88 @@ class AlvaoService:
             logger.error('Alvao API request error: %s', e)
             raise AlvaoServiceException(f'API request failed: {e}')
 
+    def _search_users(self, lookup: str) -> list[dict[str, Any]]:
+        params_variants = (
+            {'$search': lookup, '$top': 20},
+            {'search': lookup, 'top': 20},
+        )
+        users: list[dict[str, Any]] = []
+        seen_users: set[str] = set()
+        for params in params_variants:
+            try:
+                response_data = self._make_request('GET', '/users', params=params)
+            except AlvaoServiceException as exc:
+                if exc.status_code == 400:
+                    continue
+                raise
+
+            matched = False
+            for user in _extract_users(response_data):
+                user_id = _extract_user_id(user)
+                user_key = f'id:{user_id}' if user_id else json.dumps(user, sort_keys=True)
+                if user_key in seen_users:
+                    continue
+                seen_users.add(user_key)
+                users.append(user)
+                matched = matched or _user_matches(user, lookup)
+            if matched:
+                return users
+        return users
+
+    def _find_user_id(self, lookup: str) -> int | None:
+        lookup = lookup.strip()
+        if not lookup:
+            return None
+
+        users = self._search_users(lookup)
+        exact_matches = [user for user in users if _user_matches(user, lookup)]
+        candidates = exact_matches
+        if not candidates and len(users) == 1:
+            candidates = users
+
+        if len(candidates) == 1:
+            return _extract_user_id(candidates[0])
+        return None
+
+    def _resolve_requester_id(self, ticket_data: TicketData) -> int:
+        if ticket_data.requester_id:
+            return ticket_data.requester_id
+
+        lookups: list[str] = []
+        for value in (
+            ticket_data.requester_email,
+            ticket_data.requester_username,
+            ticket_data.requester_name,
+        ):
+            value = str(value or '').strip()
+            if value and value not in lookups:
+                lookups.append(value)
+
+        if not lookups:
+            service_account_username = str(self.service_account_username or '').strip()
+            if service_account_username:
+                lookups.append(service_account_username)
+
+        for lookup in lookups:
+            user_id = self._find_user_id(lookup)
+            if user_id:
+                return user_id
+
+        raise AlvaoServiceException(
+            'Could not resolve Alvao requester ID for ticket creation. '
+            'Check that the requester exists in Alvao and is searchable by email or username. '
+            'When MOCK_LDAP=True, check ALVAO_SERVICE_ACCOUNT_USERNAME.'
+        )
+
     def create_ticket(self, ticket_data: TicketData) -> TicketResponse:
         """
         Create a new ticket in Alvao Service Desk.
 
-        POST /tickets - requires `serviceId` in the payload. When requester is
-        omitted, Alvao uses the authenticated service account.
+        POST /tickets - requires `serviceId` in the payload. The requester is
+        resolved to an Alvao person ID before ticket creation.
         Returns 201 Created with the ticket object.
         """
+        ticket_data.requester_id = self._resolve_requester_id(ticket_data)
         payload = ticket_data.to_dict()
 
         # serviceId is required by Alvao; inject default if not already set

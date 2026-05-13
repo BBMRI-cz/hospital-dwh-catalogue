@@ -77,9 +77,13 @@ class TicketingService:
         try:
             requester_email = ticket.requester_email
             requester_name = ticket.requester_name
+            requester_username = (
+                getattr(ticket.requester, 'username', '') if ticket.requester else ''
+            )
             if getattr(settings, 'MOCK_LDAP', False):
                 requester_email = ''
                 requester_name = ''
+                requester_username = getattr(settings, 'ALVAO_SERVICE_ACCOUNT_USERNAME', '')
 
             service = get_ticket_service()
             ticket_data = TicketData(
@@ -87,6 +91,7 @@ class TicketingService:
                 description=build_ticket_description(ticket.description, cart),
                 requester_email=requester_email,
                 requester_name=requester_name,
+                requester_username=requester_username,
             )
             response = service.create_ticket(ticket_data)
             ticket.alvao_ticket_id = response.ticket_id
