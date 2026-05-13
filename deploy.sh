@@ -69,6 +69,35 @@ enable_environment_defaults() {
     fi
 }
 
+sync_repository_for_deploy() {
+    local before_pull
+    local after_pull
+
+    if [ "$DEPLOY_ENV" = "dev" ] || [ "${DEPLOY_GIT_PULL_REEXECED:-}" = "true" ]; then
+        return
+    fi
+
+    if ! command -v git >/dev/null 2>&1; then
+        echo "git is required to deploy $DEPLOY_ENV because deploy pulls the latest code." >&2
+        return 1
+    fi
+
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "Cannot deploy $DEPLOY_ENV from a directory that is not a Git checkout." >&2
+        return 1
+    fi
+
+    before_pull="$(git rev-parse HEAD)"
+    echo "Updating repository for $DEPLOY_ENV with git pull --ff-only..."
+    git pull --ff-only
+    after_pull="$(git rev-parse HEAD)"
+
+    if [ "$before_pull" != "$after_pull" ]; then
+        echo "Repository updated; restarting deploy script with the pulled code..."
+        DEPLOY_GIT_PULL_REEXECED=true exec "$0" "$@"
+    fi
+}
+
 run_compose() {
     local args=()
 
@@ -254,6 +283,7 @@ main() {
     ensure_repo_root
     load_dotenv
     require_valid_deploy_env
+    sync_repository_for_deploy "$@"
     validate_deploy_contract
     enable_environment_defaults
 

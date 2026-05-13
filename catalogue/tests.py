@@ -130,6 +130,7 @@ class SettingsHelpersTest(SimpleTestCase):
             'ALVAO_SERVICE_ACCOUNT_USERNAME': 'svc',
             'ALVAO_SERVICE_ACCOUNT_PASSWORD': 'secret',
             'ALVAO_TEST_REQUESTER_EMAIL': 'alvao-user@example.com',
+            'ALVAO_TEST_REQUESTER_NAME': 'Alvao User',
             'ALVAO_DEFAULT_SERVICE_ID': '109',
         }
 
@@ -138,6 +139,7 @@ class SettingsHelpersTest(SimpleTestCase):
 
         self.assertEqual(settings['ALVAO_DEFAULT_SERVICE_ID'], 109)
         self.assertEqual(settings['ALVAO_TEST_REQUESTER_EMAIL'], 'alvao-user@example.com')
+        self.assertEqual(settings['ALVAO_TEST_REQUESTER_NAME'], 'Alvao User')
 
     def test_positive_int_or_default_returns_positive_values(self):
         self.assertEqual(positive_int_or_default('25', default=15), 25)
@@ -213,6 +215,14 @@ class DeployScriptResetOptionsTest(SimpleTestCase):
         self.assertIn('python manage.py check_observability', deploy_script)
         self.assertIn('WARNING: ALVAO post-deploy check failed.', deploy_script)
         self.assertIn('WARNING: observability post-deploy check failed.', deploy_script)
+
+    def test_deploy_script_pulls_latest_code_outside_dev(self):
+        deploy_script = self._deploy_script()
+
+        self.assertIn('sync_repository_for_deploy "$@"', deploy_script)
+        self.assertIn('git pull --ff-only', deploy_script)
+        self.assertIn('"$DEPLOY_ENV" = "dev"', deploy_script)
+        self.assertIn('DEPLOY_GIT_PULL_REEXECED=true exec "$0" "$@"', deploy_script)
 
 
 class ManagementCommandAvailabilityTest(SimpleTestCase):

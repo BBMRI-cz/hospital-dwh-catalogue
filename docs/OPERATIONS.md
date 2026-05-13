@@ -32,6 +32,7 @@ Then fill the generated `.env` with real values for the selected environment and
 ```
 
 Staging and production always include Loki, Grafana Alloy, and Grafana. Use `./deploy.sh --with-observability` only when you also want observability in dev.
+For `staging` and `prod`, `deploy.sh` first runs `git pull --ff-only` and then builds the Docker images from the updated checkout. Development deploys do not pull automatically.
 
 The helper scripts require Bash. Run them with `./init-env.sh`, `./deploy.sh`, or `bash <script>`
 
@@ -137,15 +138,16 @@ Relevant variables:
 - `ALVAO_SERVICE_ACCOUNT_USERNAME`
 - `ALVAO_SERVICE_ACCOUNT_PASSWORD`
 - `ALVAO_TEST_REQUESTER_EMAIL`
+- `ALVAO_TEST_REQUESTER_NAME`
 - `ALVAO_DEFAULT_SERVICE_ID`
 
 When `MOCK_ALVAO=True`, the Catalogue stores local mock ticket requests and does not call an external system. When `MOCK_ALVAO=False`, it uses one service account with HTTP Basic Auth to call Alvao.
 
-Ticket creation always sends an explicit Alvao requester ID. Before `POST /tickets`, the Catalogue calls `GET /users` and resolves the requester. For email lookups it first uses the documented OData filter form, for example `Email eq 'user@example.com'`, then falls back to full-text `$search`.
+Ticket creation sends requester email and name in the `POST /tickets` payload. It does not perform an Alvao user lookup and does not send requester IDs.
 
-- `MOCK_LDAP=False`: first by the logged-in user's email, then username, then display name.
-- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: by `ALVAO_SERVICE_ACCOUNT_USERNAME`, because mock LDAP users do not exist in Alvao.
-- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is set: by that email, which lets staging test the same Alvao requester lookup used with real LDAP.
+- `MOCK_LDAP=False`: uses the logged-in user's email and display name from LDAP.
+- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is set: uses `ALVAO_TEST_REQUESTER_EMAIL` and `ALVAO_TEST_REQUESTER_NAME`, which lets staging test the same name/email payload used with real LDAP.
+- `MOCK_LDAP=True` and `ALVAO_TEST_REQUESTER_EMAIL` is empty: omits the requester object and lets Alvao use the authenticated service account context.
 
 Set `ALVAO_API_URL` to the versioned REST API base URL, for example `https://alvao.example.cz/AlvaoRestApi/v1`.
 
@@ -162,13 +164,7 @@ python manage.py check_alvao_tls
 ```
 
 The check prints the ALVAO host, CA bundle path, TLS protocol, and the
-non-mutating `GET /tickets` HTTP status. In mock LDAP mode it also verifies
-the configured requester lookup. It does not print credentials.
-
-If the Catalogue returns `Could not resolve Alvao requester ID`, check that the
-user exists in Alvao and can be found by email or username. In mock LDAP mode,
-check `ALVAO_TEST_REQUESTER_EMAIL` first; if it is empty, check
-`ALVAO_SERVICE_ACCOUNT_USERNAME`.
+non-mutating `GET /tickets` HTTP status. It does not print credentials.
 
 If ALVAO returns `The requester ... has no SLA for the service ...`, check that
 the requester named in the ALVAO error has an SLA for the exact service
@@ -246,13 +242,14 @@ sessions plus admin log entries.
 `deploy.sh`:
 
 1. loads `.env`
-2. validates the contract for the selected `DEPLOY_ENV`
-3. attempts to update `health_dcat_ap` from Git when Git metadata is available
-4. checks the configured `HEALTH_DCAT_VERSION`
-5. renders the compose stack
-6. optionally resets persistent Docker volumes
-7. starts or updates the services
-8. runs post-deploy diagnostics for ALVAO and observability when enabled
+2. runs `git pull --ff-only` for `staging` and `prod`
+3. validates the contract for the selected `DEPLOY_ENV`
+4. attempts to update `health_dcat_ap` from Git when Git metadata is available
+5. checks the configured `HEALTH_DCAT_VERSION`
+6. renders the compose stack
+7. optionally resets persistent Docker volumes
+8. starts or updates the services
+9. runs post-deploy diagnostics for ALVAO and observability when enabled
 
 Before deploying `staging` or `prod`, place the provided certificate and private key into the
 repo-root `certs/` directory as `server.crt` and `server.key`. The generated `.env` already

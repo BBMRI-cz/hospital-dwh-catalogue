@@ -51,8 +51,6 @@ class TicketData:
     requester_email: str = ''
     requester_name: str = ''
     requester_username: str = ''
-    requester_id: int | None = None
-    requester_lookup_source: str = ''
     service_id: int | None = None
     priority: AlvaoPriority | None = None
     impact: AlvaoImpact | None = None
@@ -65,9 +63,7 @@ class TicketData:
             'name': self.subject,
             'descriptionHtml': _plain_to_html(self.description),
         }
-        if self.requester_id:
-            data['requester'] = {'id': self.requester_id}
-        elif self.requester_email:
+        if self.requester_email:
             requester: dict[str, Any] = {'email': self.requester_email}
             if self.requester_name:
                 requester['name'] = self.requester_name
