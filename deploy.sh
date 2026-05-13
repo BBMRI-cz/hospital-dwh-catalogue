@@ -120,6 +120,20 @@ wait_for_db() {
     return 1
 }
 
+wait_for_web() {
+    local attempt
+
+    for attempt in $(seq 1 60); do
+        if run_compose exec -T web python /app/scripts/check_login_health.py >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 1
+    done
+
+    echo "Timed out waiting for the web container to become healthy." >&2
+    return 1
+}
+
 backup_auth_db() {
     AUTH_DB_BACKUP_FILE="$(mktemp "${TMPDIR:-/tmp}/hospital-dwh-auth-db.XXXXXX.dump")"
 
@@ -187,6 +201,33 @@ reset_persistent_state() {
     fi
 }
 
+should_check_alvao() {
+    if [ "$DEPLOY_ENV" = "prod" ]; then
+        return 0
+    fi
+
+    [ "${MOCK_ALVAO:-True}" = "False" ]
+}
+
+run_post_deploy_diagnostics() {
+    echo "Waiting for web health check..."
+    wait_for_web
+
+    if should_check_alvao; then
+        echo "Checking ALVAO TLS/API reachability..."
+        if ! run_compose exec -T web python manage.py check_alvao_tls; then
+            echo "WARNING: ALVAO post-deploy check failed." >&2
+        fi
+    fi
+
+    if [ "$WITH_OBSERVABILITY" = true ]; then
+        echo "Checking observability pipeline..."
+        if ! run_compose exec -T web python manage.py check_observability; then
+            echo "WARNING: observability post-deploy check failed." >&2
+        fi
+    fi
+}
+
 print_deploy_summary() {
     echo "Target environment: $DEPLOY_ENV"
 
@@ -230,6 +271,8 @@ main() {
 
     echo "Building and starting services..."
     run_compose up -d --build --remove-orphans
+
+    run_post_deploy_diagnostics
 
     echo ""
     echo "Running containers:"

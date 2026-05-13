@@ -147,6 +147,16 @@ At container startup the Debian CA bundle and the mounted MOU CA are combined in
 `/tmp/mou-ca-bundle.crt`; Python `requests`, curl, and OpenLDAP are pointed at
 that combined bundle.
 
+When real ALVAO is enabled, `deploy.sh` runs this check from inside the web
+container:
+
+```bash
+python manage.py check_alvao_tls
+```
+
+The check prints the ALVAO host, CA bundle path, TLS protocol, and the
+non-mutating `GET /tickets` HTTP status. It does not print credentials.
+
 ### HTTPS certificates for staging and production
 
 By default, both deployed environments expect these repository-root relative paths in `.env`:
@@ -225,6 +235,7 @@ sessions plus admin log entries.
 5. renders the compose stack
 6. optionally resets persistent Docker volumes
 7. starts or updates the services
+8. runs post-deploy diagnostics for ALVAO and observability when enabled
 
 Before deploying `staging` or `prod`, place the provided certificate and private key into the
 repo-root `certs/` directory as `server.crt` and `server.key`. The generated `.env` already
@@ -341,6 +352,13 @@ Grafana is available at `/grafana/`, but only for logged-in Django staff users. 
 Dashboards are provisioned from `docker/grafana/provisioning/dashboards` on every
 Grafana startup. If you reset volumes, historical Loki log data is deleted, so
 the dashboard can be empty until the application writes new log lines.
+
+During deploy, the web container also emits a one-off marker log line and checks
+that Loki can query it:
+
+```bash
+python manage.py check_observability
+```
 
 ## Metadata compatibility check
 

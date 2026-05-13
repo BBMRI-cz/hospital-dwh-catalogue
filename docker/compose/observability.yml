@@ -22,7 +22,10 @@ services:
       - logs:/app/logs:ro
       - alloy_data:/var/lib/alloy/data
     depends_on:
-      - loki
+      loki:
+        condition: service_started
+      web:
+        condition: service_healthy
     restart: unless-stopped
 
   grafana:

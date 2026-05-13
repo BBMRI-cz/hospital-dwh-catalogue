@@ -178,16 +178,38 @@ exit 1
 
 
 class DeployScriptResetOptionsTest(SimpleTestCase):
+    def _deploy_script(self):
+        return (Path(__file__).resolve().parent.parent / 'deploy.sh').read_text(encoding='utf-8')
+
     def test_deploy_script_exposes_volume_reset_modes(self):
-        deploy_script = (Path(__file__).resolve().parent.parent / 'deploy.sh').read_text(
-            encoding='utf-8'
-        )
+        deploy_script = self._deploy_script()
 
         self.assertIn('--reset-volumes', deploy_script)
         self.assertIn('--reset-volumes-keep-users', deploy_script)
         self.assertIn('down --volumes --remove-orphans', deploy_script)
         self.assertIn('pg_dump', deploy_script)
         self.assertIn('pg_restore', deploy_script)
+
+    def test_deploy_script_runs_post_deploy_diagnostics(self):
+        deploy_script = self._deploy_script()
+
+        self.assertIn('python manage.py check_alvao_tls', deploy_script)
+        self.assertIn('python manage.py check_observability', deploy_script)
+        self.assertIn('WARNING: ALVAO post-deploy check failed.', deploy_script)
+        self.assertIn('WARNING: observability post-deploy check failed.', deploy_script)
+
+
+class ManagementCommandAvailabilityTest(SimpleTestCase):
+    def test_runtime_diagnostic_commands_exist(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        commands = [
+            repo_root / 'ticketing' / 'management' / 'commands' / 'check_alvao_tls.py',
+            repo_root / 'catalogue' / 'management' / 'commands' / 'check_observability.py',
+        ]
+
+        for command in commands:
+            with self.subTest(command=command.name):
+                self.assertTrue(command.is_file())
 
 
 class ObservabilityConfigTest(SimpleTestCase):
@@ -202,6 +224,14 @@ class ObservabilityConfigTest(SimpleTestCase):
 
         self.assertIn('/var/lib/grafana/dashboards:ro', compose)
         self.assertIn('path: /var/lib/grafana/dashboards', provider)
+
+    def test_alloy_waits_for_web_logs_before_starting(self):
+        compose = (
+            Path(__file__).resolve().parent.parent / 'docker' / 'compose' / 'observability.yml'
+        ).read_text(encoding='utf-8')
+
+        self.assertIn('web:', compose)
+        self.assertIn('condition: service_healthy', compose)
 
 
 class ReverseProxyHttpsSettingsTest(SimpleTestCase):
