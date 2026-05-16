@@ -18,6 +18,40 @@ validate_boolean_literal() {
     esac
 }
 
+validate_hour_interval() {
+    local key="$1"
+    local value="${!key:-}"
+
+    case "$value" in
+        ''|*[!0-9]*)
+            echo "Validation error: $key must be a whole number between 1 and 24." >&2
+            return 1
+            ;;
+    esac
+
+    if [ "$value" -lt 1 ] || [ "$value" -gt 24 ]; then
+        echo "Validation error: $key must be between 1 and 24." >&2
+        return 1
+    fi
+}
+
+validate_positive_integer() {
+    local key="$1"
+    local value="${!key:-}"
+
+    case "$value" in
+        ''|*[!0-9]*)
+            echo "Validation error: $key must be a positive whole number." >&2
+            return 1
+            ;;
+    esac
+
+    if [ "$value" -lt 1 ]; then
+        echo "Validation error: $key must be greater than 0." >&2
+        return 1
+    fi
+}
+
 require_non_empty() {
     local key
     for key in "$@"; do
@@ -147,6 +181,11 @@ validate_common_contract() {
         FAIR_GENOMES_SYNC_INTERVAL_HOURS
 
     require_release_dir
+    validate_hour_interval FAIR_GENOMES_SYNC_INTERVAL_HOURS
+
+    if [ -n "${DEPLOY_HEALTH_TIMEOUT_SECONDS:-}" ]; then
+        validate_positive_integer DEPLOY_HEALTH_TIMEOUT_SECONDS
+    fi
 }
 
 validate_mock_contract() {

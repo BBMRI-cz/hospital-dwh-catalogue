@@ -15,6 +15,7 @@ RESET_VOLUMES=false
 RESET_KEEP_USERS=false
 ASSUME_YES=false
 AUTH_DB_BACKUP_FILE=""
+DEFAULT_HEALTH_TIMEOUT_SECONDS=180
 
 usage() {
     cat <<'EOF'
@@ -135,8 +136,9 @@ confirm_reset() {
 
 wait_for_db() {
     local attempt
+    local timeout_seconds="${DEPLOY_HEALTH_TIMEOUT_SECONDS:-$DEFAULT_HEALTH_TIMEOUT_SECONDS}"
 
-    for attempt in $(seq 1 60); do
+    for attempt in $(seq 1 "$timeout_seconds"); do
         if run_compose exec -T db pg_isready \
             --username "$POSTGRES_USER" \
             --dbname postgres >/dev/null 2>&1; then
@@ -145,21 +147,55 @@ wait_for_db() {
         sleep 1
     done
 
-    echo "Timed out waiting for the Postgres container to become ready." >&2
+    echo "Timed out waiting ${timeout_seconds}s for the Postgres container to become ready." >&2
     return 1
+}
+
+service_health() {
+    local service="$1"
+    local status_json
+
+    status_json="$(run_compose ps --format json "$service" 2>/dev/null || true)"
+
+    case "$status_json" in
+        *'"Health":"healthy"'*)
+            echo "healthy"
+            ;;
+        *'"Health":"unhealthy"'*)
+            echo "unhealthy"
+            ;;
+        *'"State":"exited"'*|*'"State":"dead"'*)
+            echo "stopped"
+            ;;
+        *)
+            echo "starting"
+            ;;
+    esac
 }
 
 wait_for_web() {
     local attempt
+    local health
+    local timeout_seconds="${DEPLOY_HEALTH_TIMEOUT_SECONDS:-$DEFAULT_HEALTH_TIMEOUT_SECONDS}"
 
-    for attempt in $(seq 1 60); do
-        if run_compose exec -T web python /app/scripts/check_login_health.py >/dev/null 2>&1; then
+    for attempt in $(seq 1 "$timeout_seconds"); do
+        health="$(service_health web)"
+
+        if [ "$health" = "healthy" ]; then
             return 0
         fi
+
+        if [ "$health" = "unhealthy" ] || [ "$health" = "stopped" ]; then
+            echo "Web container reached health state '$health' before becoming healthy." >&2
+            run_compose ps web >&2 || true
+            return 1
+        fi
+
         sleep 1
     done
 
-    echo "Timed out waiting for the web container to become healthy." >&2
+    echo "Timed out waiting ${timeout_seconds}s for the web container to become healthy." >&2
+    run_compose ps web >&2 || true
     return 1
 }
 
@@ -249,12 +285,6 @@ run_post_deploy_diagnostics() {
         fi
     fi
 
-    if [ "$WITH_OBSERVABILITY" = true ]; then
-        echo "Checking observability pipeline..."
-        if ! run_compose exec -T web python manage.py check_observability; then
-            echo "WARNING: observability post-deploy check failed." >&2
-        fi
-    fi
 }
 
 print_deploy_summary() {

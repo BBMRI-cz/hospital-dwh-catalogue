@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     gettext \
     cron \
+    util-linux \
     gcc \
     libldap2-dev \
     ldap-utils \

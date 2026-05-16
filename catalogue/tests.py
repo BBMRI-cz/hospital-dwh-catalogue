@@ -194,6 +194,16 @@ exit 1
 
         self.assertEqual(result.stdout.strip(), str(repo_root / 'venv' / 'bin' / 'python'))
 
+    def test_compose_wrapper_disables_ansi_progress_redraws(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        common_script = (repo_root / 'scripts' / 'lib' / 'common.sh').read_text(encoding='utf-8')
+        compose_script = (repo_root / 'scripts' / 'compose.sh').read_text(encoding='utf-8')
+
+        self.assertIn('docker compose --ansi never "$@"', common_script)
+        self.assertIn('docker compose --ansi never', compose_script)
+        self.assertNotIn('--progress plain', common_script)
+        self.assertNotIn('--progress plain', compose_script)
+
 
 class DeployScriptResetOptionsTest(SimpleTestCase):
     def _deploy_script(self):
@@ -212,9 +222,23 @@ class DeployScriptResetOptionsTest(SimpleTestCase):
         deploy_script = self._deploy_script()
 
         self.assertIn('python manage.py check_alvao_tls', deploy_script)
-        self.assertIn('python manage.py check_observability', deploy_script)
         self.assertIn('WARNING: ALVAO post-deploy check failed.', deploy_script)
-        self.assertIn('WARNING: observability post-deploy check failed.', deploy_script)
+
+    def test_deploy_script_uses_configurable_health_timeout(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        deploy_script = self._deploy_script()
+        deploy_contract = (repo_root / 'scripts' / 'lib' / 'deploy_contract.sh').read_text(
+            encoding='utf-8'
+        )
+        dev_env = (repo_root / 'env-examples' / 'dev.env.example').read_text(encoding='utf-8')
+
+        self.assertIn('DEFAULT_HEALTH_TIMEOUT_SECONDS=180', deploy_script)
+        self.assertIn('DEPLOY_HEALTH_TIMEOUT_SECONDS', deploy_script)
+        self.assertIn('ps --format json "$service"', deploy_script)
+        self.assertIn('service_health web', deploy_script)
+        self.assertIn('Timed out waiting ${timeout_seconds}s', deploy_script)
+        self.assertIn('validate_positive_integer DEPLOY_HEALTH_TIMEOUT_SECONDS', deploy_contract)
+        self.assertIn('DEPLOY_HEALTH_TIMEOUT_SECONDS=180', dev_env)
 
     def test_deploy_script_pulls_latest_code_outside_dev(self):
         deploy_script = self._deploy_script()
@@ -230,12 +254,26 @@ class ManagementCommandAvailabilityTest(SimpleTestCase):
         repo_root = Path(__file__).resolve().parent.parent
         commands = [
             repo_root / 'ticketing' / 'management' / 'commands' / 'check_alvao_tls.py',
-            repo_root / 'frontend' / 'management' / 'commands' / 'check_observability.py',
         ]
 
         for command in commands:
             with self.subTest(command=command.name):
                 self.assertTrue(command.is_file())
+
+
+class SchedulerScriptTest(SimpleTestCase):
+    def test_scheduler_validates_interval_and_uses_lock(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        scheduler_script = (repo_root / 'docker' / 'scheduler-entrypoint.sh').read_text(
+            encoding='utf-8'
+        )
+        deploy_contract = (repo_root / 'scripts' / 'lib' / 'deploy_contract.sh').read_text(
+            encoding='utf-8'
+        )
+
+        self.assertIn('FAIR_GENOMES_SYNC_INTERVAL_HOURS must be between 1 and 24', scheduler_script)
+        self.assertIn('flock -n', scheduler_script)
+        self.assertIn('validate_hour_interval FAIR_GENOMES_SYNC_INTERVAL_HOURS', deploy_contract)
 
 
 class ObservabilityConfigTest(SimpleTestCase):
@@ -449,6 +487,12 @@ class WarehouseRouterTest(TestCase):
         t = TicketRequest(requester_email='t@e.com')
         item = TicketRequestItem(ticket_request=t)
         self.assertTrue(self.router.allow_relation(t, item))
+
+    def test_allow_relation_auth_ticketing_cross_db(self):
+        """Ticketing may reference auth users through db_constraint=False."""
+        user = User(username='test')
+        ticket = TicketRequest(requester=user, requester_email='t@e.com')
+        self.assertTrue(self.router.allow_relation(user, ticket))
 
     def test_allow_relation_different_db(self):
         """Relations across databases are blocked."""

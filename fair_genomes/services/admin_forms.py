@@ -139,14 +139,12 @@ class StatDefinitionForm(forms.ModelForm):
             choices=[('', '---------')] + [(table, table) for table in existing_tables],
             label=_('MOLGENIS table'),
             help_text=_('MOLGENIS is currently unreachable. Showing known values.'),
-            required=False,
         )
         self.fields['molgenis_column'] = forms.ChoiceField(
             choices=[('', '---------')]
             + [(column, f'{table} -> {column}') for table, column in existing_pairs],
             label=_('MOLGENIS column'),
             help_text=_('MOLGENIS is currently unreachable. Showing known values.'),
-            required=False,
         )
         self._molgenis_schema = None
 
@@ -193,6 +191,11 @@ class StatDefinitionForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        if not cleaned_data.get('molgenis_table') and 'molgenis_table' not in self.errors:
+            self.add_error('molgenis_table', _('This field is required.'))
+        if not cleaned_data.get('molgenis_column') and 'molgenis_column' not in self.errors:
+            self.add_error('molgenis_column', _('This field is required.'))
+
         rdf_status = get_rdf_inventory_status()
         if rdf_status['status'] != 'available':
             return cleaned_data

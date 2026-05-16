@@ -313,6 +313,13 @@ class CatalogueIndexViewTest(TestCase):
         response = self.client.get(reverse('frontend:catalogue'))
         self.assertNotEqual(response.status_code, 200)
 
+    def test_htmx_request_requires_login_with_full_page_redirect(self):
+        response = self.client.get(reverse('frontend:catalogue'), HTTP_HX_REQUEST='true')
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIn('/accounts/login/', response['HX-Redirect'])
+        self.assertIn('next=/', response['HX-Redirect'])
+
     @patch(_VIEW_CONTEXT_SERVICE_PATH)
     def test_returns_200_with_datasets(self, mock_cls):
         mock_svc = mock_cls.return_value
@@ -908,6 +915,7 @@ class DatasetDetailViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/turtle; charset=utf-8')
+        self.assertIn('filename="warehouse-dataset.ttl"', response['Content-Disposition'])
         self.assertEqual(response['X-Metadata-Export-Warning-Count'], '1')
         self.assertIn('Missing RDF term', response['X-Metadata-Export-Warnings'])
         self.assertNotIn('Missing RDF term', response.content.decode())
@@ -935,6 +943,7 @@ class DatasetDetailViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/ld+json; charset=utf-8')
+        self.assertIn('filename="warehouse-dataset.jsonld"', response['Content-Disposition'])
         self.assertEqual(response['X-Metadata-Export-Warning-Count'], '0')
         payload = json.loads(response.content.decode())
         self.assertEqual(set(payload.keys()), {'@context', '@graph'})

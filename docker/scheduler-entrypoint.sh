@@ -25,6 +25,19 @@ if [ -f "$MOU_CA_CERT" ]; then
 fi
 
 INTERVAL="${FAIR_GENOMES_SYNC_INTERVAL_HOURS:-24}"
+LOCK_FILE="/tmp/fair_genomes_sync.lock"
+
+case "$INTERVAL" in
+    ''|*[!0-9]*)
+        echo "FAIR_GENOMES_SYNC_INTERVAL_HOURS must be a whole number between 1 and 24." >&2
+        exit 1
+        ;;
+esac
+
+if [ "$INTERVAL" -lt 1 ] || [ "$INTERVAL" -gt 24 ]; then
+    echo "FAIR_GENOMES_SYNC_INTERVAL_HOURS must be between 1 and 24." >&2
+    exit 1
+fi
 
 # Persist the container's environment variables so the cron job can access them
 # (cron runs with a minimal environment that lacks DJANGO_SETTINGS_MODULE,
@@ -35,7 +48,7 @@ env | grep -Ev '^(HOME|USER|LOGNAME|PATH|SHELL|TERM|HOSTNAME|PWD|SHLVL|_)=' \
 # Write the cron job - executes the management command and streams output to
 # the container's stdout/stderr so it appears in `docker compose logs`.
 cat > /etc/cron.d/fair_genomes_sync << EOF
-0 */${INTERVAL} * * * root . /etc/environment; cd /app && python manage.py sync_fair_genomes >> /proc/1/fd/1 2>> /proc/1/fd/2
+0 */${INTERVAL} * * * root . /etc/environment; cd /app && flock -n ${LOCK_FILE} python manage.py sync_fair_genomes >> /proc/1/fd/1 2>> /proc/1/fd/2
 EOF
 
 chmod 0644 /etc/cron.d/fair_genomes_sync
@@ -45,6 +58,6 @@ crontab /etc/cron.d/fair_genomes_sync
 # first scheduled cron window. Runs in the background so the container starts
 # immediately without waiting for the (potentially slow) network sync to finish.
 echo "Running initial FAIR Genomes sync in background..."
-python manage.py sync_fair_genomes &
+flock -n "$LOCK_FILE" python manage.py sync_fair_genomes &
 
 exec cron -f

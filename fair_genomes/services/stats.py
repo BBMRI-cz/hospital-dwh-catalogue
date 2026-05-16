@@ -53,6 +53,11 @@ def sync_single_stat(
     table: str,
     column: str,
 ) -> tuple[bool, str]:
+    table = table.strip()
+    column = column.strip()
+    if not table or not column:
+        return False, 'MOLGENIS table and column are required.'
+
     table_cap = table[0].upper() + table[1:]
     queries = (
         f'{{ {table_cap}_groupBy {{ count {column} {{ value }} }} }}',

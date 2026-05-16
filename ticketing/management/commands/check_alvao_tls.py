@@ -32,6 +32,7 @@ class Command(BaseCommand):
         parser.add_argument('--timeout', type=int, default=10)
 
     def handle(self, *args, **options):
+        timeout = int(options['timeout'])
         if getattr(settings, 'MOCK_ALVAO', False):
             self.stdout.write('MOCK_ALVAO=True; skipping ALVAO check.')
             return
@@ -56,9 +57,7 @@ class Command(BaseCommand):
         try:
             context = ssl.create_default_context(cafile=cafile)
             with (
-                socket.create_connection(
-                    (parsed.hostname, port), timeout=options['timeout']
-                ) as sock,
+                socket.create_connection((parsed.hostname, port), timeout=timeout) as sock,
                 context.wrap_socket(sock, server_hostname=parsed.hostname) as tls_sock,
             ):
                 self.stdout.write(f'TLS protocol: {tls_sock.version()}')
@@ -67,13 +66,13 @@ class Command(BaseCommand):
 
         ticket_url = f'{api_url}/tickets'
         try:
-            response = requests.get(
+            response = requests.get(  # nosec B113 - timeout is passed through the CLI option.
                 ticket_url,
                 auth=(
                     getattr(settings, 'ALVAO_SERVICE_ACCOUNT_USERNAME', ''),
                     getattr(settings, 'ALVAO_SERVICE_ACCOUNT_PASSWORD', ''),
                 ),
-                timeout=options['timeout'],
+                timeout=timeout,
             )
         except requests.RequestException as exc:
             raise CommandError(f'ALVAO HTTPS request failed: {exc}') from exc
@@ -108,9 +107,7 @@ class Command(BaseCommand):
                 requester_source = 'ALVAO_SERVICE_ACCOUNT_USERNAME'
 
             try:
-                requester_id = AlvaoService(timeout=options['timeout'])._resolve_requester_id(
-                    ticket_data
-                )
+                requester_id = AlvaoService(timeout=timeout)._resolve_requester_id(ticket_data)
             except AlvaoServiceException as exc:
                 raise CommandError(f'ALVAO requester lookup failed: {exc}') from exc
 

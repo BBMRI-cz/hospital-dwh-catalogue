@@ -1,6 +1,24 @@
-"""
-Database routers for multi-database setup.
-"""
+"""Database routers for the multi-database setup."""
+
+AUTH_APPS = frozenset({'auth', 'contenttypes', 'sessions', 'admin'})
+APP_DATABASES = {
+    **dict.fromkeys(AUTH_APPS, 'auth_db'),
+    'fair_genomes': 'fair_genomes_db',
+    'warehouse': 'metadata_db',
+    'ticketing': 'default',
+    'frontend': 'default',
+    'schema_registry': 'default',
+}
+ALLOWED_CROSS_DATABASE_RELATIONS = frozenset(
+    {
+        frozenset({'auth', 'ticketing'}),
+    }
+)
+
+
+def database_for_app(app_label: str) -> str:
+    """Return the configured database alias for an app label."""
+    return APP_DATABASES.get(app_label, 'default')
 
 
 class AuthRouter:
@@ -14,25 +32,23 @@ class AuthRouter:
     - admin.LogEntry
     """
 
-    AUTH_APPS = {'auth', 'contenttypes', 'sessions', 'admin'}
-
     def db_for_read(self, model, **hints):
         """Direct read operations for auth models to auth_db."""
-        if model._meta.app_label in self.AUTH_APPS:
+        if model._meta.app_label in AUTH_APPS:
             return 'auth_db'
         return None
 
     def db_for_write(self, model, **hints):
         """Direct write operations for auth models to auth_db."""
-        if model._meta.app_label in self.AUTH_APPS:
+        if model._meta.app_label in AUTH_APPS:
             return 'auth_db'
         return None
 
     def allow_relation(self, obj1, obj2, **hints):
         """Allow relations between auth models or defer to next router."""
-        if obj1._meta.app_label in self.AUTH_APPS and obj2._meta.app_label in self.AUTH_APPS:
+        if obj1._meta.app_label in AUTH_APPS and obj2._meta.app_label in AUTH_APPS:
             return True
-        if obj1._meta.app_label in self.AUTH_APPS or obj2._meta.app_label in self.AUTH_APPS:
+        if obj1._meta.app_label in AUTH_APPS or obj2._meta.app_label in AUTH_APPS:
             # Defer to let cross-database FKs with db_constraint=False work
             # (e.g. TicketRequest.requester referencing auth_db User).
             return None
@@ -40,7 +56,7 @@ class AuthRouter:
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """Ensure auth models are only migrated to auth_db."""
-        if app_label in self.AUTH_APPS:
+        if app_label in AUTH_APPS:
             return db == 'auth_db'
         return None
 
@@ -57,28 +73,24 @@ class WarehouseRouter:
 
     def db_for_read(self, model, **hints):
         """Direct read operations to appropriate database."""
-        if model._meta.app_label == 'fair_genomes':
-            return 'fair_genomes_db'
-        if model._meta.app_label == 'warehouse':
-            return 'metadata_db'
-        if model._meta.app_label == 'ticketing':
-            return 'default'
-        return 'default'
+        if model._meta.app_label in AUTH_APPS:
+            return None
+        return database_for_app(model._meta.app_label)
 
     def db_for_write(self, model, **hints):
         """Direct write operations to appropriate database."""
-        if model._meta.app_label == 'fair_genomes':
-            return 'fair_genomes_db'
-        if model._meta.app_label == 'warehouse':
-            return 'metadata_db'
-        if model._meta.app_label == 'ticketing':
-            return 'default'
-        return 'default'
+        if model._meta.app_label in AUTH_APPS:
+            return None
+        return database_for_app(model._meta.app_label)
 
     def allow_relation(self, obj1, obj2, **hints):
-        """Allow relations if models are in the same database."""
-        db1 = self.db_for_read(obj1.__class__)
-        db2 = self.db_for_read(obj2.__class__)
+        """Allow same-database relations and documented cross-database relations."""
+        app_pair = frozenset({obj1._meta.app_label, obj2._meta.app_label})
+        if app_pair in ALLOWED_CROSS_DATABASE_RELATIONS:
+            return True
+
+        db1 = database_for_app(obj1._meta.app_label)
+        db2 = database_for_app(obj2._meta.app_label)
         return db1 == db2
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):

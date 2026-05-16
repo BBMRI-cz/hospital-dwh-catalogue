@@ -641,6 +641,31 @@ class StatDefinitionAdminSaveTest(TestCase):
             self.assertFalse(form.is_valid())
             self.assertIn('not synchronised', str(form.errors))
 
+    @patch('fair_genomes.services.admin_forms.get_molgenis_schema')
+    @patch('fair_genomes.services.admin_forms.get_rdf_inventory_status')
+    def test_form_requires_table_and_column_when_schema_is_unavailable(
+        self,
+        mock_rdf_status,
+        mock_schema,
+    ):
+        mock_schema.return_value = {}
+        mock_rdf_status.return_value = {'status': 'not_configured'}
+
+        form = StatDefinitionForm(
+            data={
+                'distribution': self.distribution.pk,
+                'molgenis_table': '',
+                'molgenis_column': '',
+                'display_label': '',
+                'sort_order': '0',
+                'is_active': 'on',
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('molgenis_table', form.errors)
+        self.assertIn('molgenis_column', form.errors)
+
 
 class FairGenomesAdminFullSyncCacheTest(TestCase):
     """Tests for admin-triggered full-sync cache invalidation."""

@@ -5,6 +5,8 @@ from __future__ import annotations
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
+from django.utils.http import content_disposition_header
+from django.utils.text import get_valid_filename
 from django.views.generic import View
 
 from frontend.export_warnings import add_export_warning_headers
@@ -15,6 +17,11 @@ from frontend.presentation import (
 )
 from shared.export import build_jsonld_result, build_turtle_result, dump_jsonld, has_distributions
 from shared.services import UnifiedCatalogService
+
+
+def _download_filename(name: str, extension: str) -> str:
+    safe_name = get_valid_filename(name) or 'dataset'
+    return f'{safe_name}.{extension}'
 
 
 def page_not_found(request, exception):
@@ -64,7 +71,10 @@ class DatasetRdfExportView(LoginRequiredMixin, View):
             result.content,
             content_type='text/turtle; charset=utf-8',
         )
-        response['Content-Disposition'] = f'attachment; filename="{name}.ttl"'
+        response['Content-Disposition'] = content_disposition_header(
+            True,
+            _download_filename(name, 'ttl'),
+        )
         return add_export_warning_headers(response, result.warnings)
 
 
@@ -84,7 +94,10 @@ class DatasetJsonLdDownloadView(LoginRequiredMixin, View):
             dump_jsonld(result.document),
             content_type='application/ld+json; charset=utf-8',
         )
-        response['Content-Disposition'] = f'attachment; filename="{name}.jsonld"'
+        response['Content-Disposition'] = content_disposition_header(
+            True,
+            _download_filename(name, 'jsonld'),
+        )
         return add_export_warning_headers(response, result.warnings)
 
 

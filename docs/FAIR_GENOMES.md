@@ -35,7 +35,7 @@ FAIR_GENOMES_SYNC_INTERVAL_HOURS=24
 | `FAIR_GENOMES_RDF_URL` | RDF / FAIR Data Point endpoint for dataset and distribution metadata |
 | `FAIR_GENOMES_API_URL` | MOLGENIS GraphQL endpoint for statistics |
 | `FAIR_GENOMES_API_TOKEN` | token used for GraphQL requests |
-| `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | scheduler interval in hours |
+| `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | scheduler interval in hours, from 1 to 24 |
 
 Notes:
 

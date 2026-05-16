@@ -169,6 +169,10 @@ compose_args_for_dev_check() {
     build_compose_args "dev" true false
 }
 
+docker_compose() {
+    docker compose --ansi never "$@"
+}
+
 run_compose() {
     local deploy_env="$1"
     local include_check="${2:-false}"
@@ -179,13 +183,13 @@ run_compose() {
     load_dotenv >/dev/null
     export_mou_root_ca_fingerprint
     build_compose_args "$deploy_env" "$include_check" "$include_observability"
-    DEPLOY_ENV="$deploy_env" docker compose --env-file "$DOTENV_FILE" "${COMPOSE_ARGS[@]}" "$@"
+    DEPLOY_ENV="$deploy_env" docker_compose --env-file "$DOTENV_FILE" "${COMPOSE_ARGS[@]}" "$@"
 }
 
 run_dev_check_compose() {
     ensure_repo_root
     compose_args_for_dev_check
-    DEPLOY_ENV=dev docker compose --env-file "$DOTENV_FILE" "${COMPOSE_ARGS[@]}" "$@"
+    DEPLOY_ENV=dev docker_compose --env-file "$DOTENV_FILE" "${COMPOSE_ARGS[@]}" "$@"
 }
 
 docker_check_runner_available() {

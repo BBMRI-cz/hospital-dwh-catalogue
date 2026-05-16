@@ -1,9 +1,47 @@
 import logging
 import time
+from urllib.parse import urlsplit
 
 from django.conf import settings
+from django.http import HttpResponse
+from django.shortcuts import resolve_url
 
 logger = logging.getLogger('catalogue.request')
+
+
+class HtmxLoginRedirectMiddleware:
+    """
+    Convert HTMX login redirects into full-page browser redirects.
+
+    Without this, an expired session makes HTMX follow Django's 302 to the
+    login page and swap the login HTML into the small target element.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if request.headers.get('HX-Request') != 'true':
+            return response
+
+        if response.status_code not in {301, 302, 303, 307, 308}:
+            return response
+
+        redirect_url = response.headers.get('Location')
+        if not redirect_url or not _is_login_redirect(redirect_url):
+            return response
+
+        htmx_response = HttpResponse(status=204)
+        htmx_response['HX-Redirect'] = redirect_url
+        return htmx_response
+
+
+def _is_login_redirect(redirect_url: str) -> bool:
+    login_path = urlsplit(resolve_url(settings.LOGIN_URL)).path
+    redirect_path = urlsplit(redirect_url).path
+    return redirect_path == login_path
 
 
 class RequestLoggingMiddleware:

@@ -61,4 +61,4 @@ require_valid_deploy_env
 export_mou_root_ca_fingerprint
 build_compose_args "$DEPLOY_ENV" "$WITH_CHECK" "$WITH_OBSERVABILITY"
 
-exec docker compose "${COMPOSE_ARGS[@]}" "$@"
+exec docker compose --ansi never "${COMPOSE_ARGS[@]}" "$@"

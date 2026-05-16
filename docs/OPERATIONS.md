@@ -81,6 +81,9 @@ is the local password for that env-managed account.
 Optional Catalogue tuning:
 
 - `CATALOGUE_PAGE_SIZE` controls how many datasets the main catalogue page shows per page and defaults to `15`
+- `DEPLOY_HEALTH_TIMEOUT_SECONDS` controls how long `deploy.sh` waits for
+  Postgres and the web health check during startup and defaults to `180`
+  seconds
 
 In production, `METADATA_DB_*` should point to the external warehouse-owned database, not to the stack-local `db` container.
 
@@ -125,7 +128,7 @@ Relevant variables:
 - `FAIR_GENOMES_RDF_URL`
 - `FAIR_GENOMES_API_URL`
 - `FAIR_GENOMES_API_TOKEN`
-- `FAIR_GENOMES_SYNC_INTERVAL_HOURS`
+- `FAIR_GENOMES_SYNC_INTERVAL_HOURS`, as a whole number from 1 to 24
 
 `dev` usually keeps FAIR Genomes mocked. `staging` and `prod` normally point to real FAIR Genomes services.
 
@@ -258,7 +261,7 @@ sessions plus admin log entries.
 6. renders the compose stack
 7. optionally resets persistent Docker volumes
 8. starts or updates the services
-9. runs post-deploy diagnostics for ALVAO and observability when enabled
+9. runs the ALVAO post-deploy diagnostic when real ALVAO is enabled
 
 Before deploying `staging` or `prod`, place the provided certificate and private key into the
 repo-root `certs/` directory as `server.crt` and `server.key`. The generated `.env` already
@@ -278,6 +281,7 @@ Shared requirements for all environments:
 - env-managed superuser credentials
 - all four PostgreSQL database aliases
 - `FAIR_GENOMES_SYNC_INTERVAL_HOURS`
+- `DEPLOY_HEALTH_TIMEOUT_SECONDS` is optional; when set, it must be a positive whole number
 
 ## Compose layout
 
@@ -375,13 +379,6 @@ Grafana is available at `/grafana/`, but only for logged-in Django staff users. 
 Dashboards are provisioned from `docker/grafana/provisioning/dashboards` on every
 Grafana startup. If you reset volumes, historical Loki log data is deleted, so
 the dashboard can be empty until the application writes new log lines.
-
-During deploy, the web container also emits a one-off marker log line and checks
-that Loki can query it:
-
-```bash
-python manage.py check_observability
-```
 
 ## Metadata compatibility check
 
