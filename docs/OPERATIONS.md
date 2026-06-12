@@ -120,6 +120,31 @@ When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory thr
 
 Real LDAP deployments use the shared MOU root CA from `MOU_ROOT_CA_CERT_PATH`. The web container installs it into the system trust store and points OpenLDAP at the resulting system CA bundle.
 
+When real LDAP is enabled, `deploy.sh` runs this check from inside the web
+container:
+
+```bash
+python manage.py check_ldap_connection
+```
+
+The check verifies the LDAP TLS handshake for `ldaps://`, binds with
+`AUTH_LDAP_BIND_DN` and `AUTH_LDAP_BIND_PASSWORD`, reads RootDSE naming
+contexts, and verifies that `AUTH_LDAP_USER_SEARCH_BASE` plus
+`AUTH_LDAP_LOGIN_ATTR` can find at least one non-computer user entry. It does
+not print the service account password.
+
+For discovery before `AUTH_LDAP_USER_SEARCH_BASE` is known, run the standalone
+script with the existing `AUTH_LDAP_SERVER_URI`, `AUTH_LDAP_BIND_DN`, and
+`AUTH_LDAP_BIND_PASSWORD` env values:
+
+```bash
+./scripts/compose.sh run --rm --no-deps --entrypoint python web scripts/discover_ldap_env.py
+```
+
+The discovery script binds with the same service account, reads RootDSE, probes
+the discovered naming contexts, and suggests candidate values for
+`AUTH_LDAP_USER_SEARCH_BASE` and `AUTH_LDAP_LOGIN_ATTR`.
+
 ### FAIR Genomes
 
 Relevant variables:

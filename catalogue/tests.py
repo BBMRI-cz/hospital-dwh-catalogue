@@ -221,6 +221,8 @@ class DeployScriptResetOptionsTest(SimpleTestCase):
     def test_deploy_script_runs_post_deploy_diagnostics(self):
         deploy_script = self._deploy_script()
 
+        self.assertIn('python manage.py check_ldap_connection', deploy_script)
+        self.assertIn('WARNING: LDAP post-deploy check failed.', deploy_script)
         self.assertIn('python manage.py check_alvao_tls', deploy_script)
         self.assertIn('WARNING: ALVAO post-deploy check failed.', deploy_script)
 
@@ -253,6 +255,7 @@ class ManagementCommandAvailabilityTest(SimpleTestCase):
     def test_runtime_diagnostic_commands_exist(self):
         repo_root = Path(__file__).resolve().parent.parent
         commands = [
+            repo_root / 'catalogue' / 'management' / 'commands' / 'check_ldap_connection.py',
             repo_root / 'ticketing' / 'management' / 'commands' / 'check_alvao_tls.py',
         ]
 

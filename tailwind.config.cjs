@@ -10,9 +10,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['Merriweather', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
         sans: [
-          'Inter',
           'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -20,7 +19,7 @@ module.exports = {
           'Roboto',
           'sans-serif',
         ],
-        mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
+        mono: ['Consolas', 'Monaco', 'Courier New', 'monospace'],
       },
       colors: {
         mmci: {

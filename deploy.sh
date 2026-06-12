@@ -266,17 +266,40 @@ reset_persistent_state() {
     fi
 }
 
-should_check_alvao() {
+alvao_is_mocked() {
     if [ "$DEPLOY_ENV" = "prod" ]; then
-        return 0
+        return 1
     fi
 
-    [ "${MOCK_ALVAO:-True}" = "False" ]
+    [ "${MOCK_ALVAO:-True}" = "True" ]
+}
+
+should_check_alvao() {
+    ! alvao_is_mocked
+}
+
+ldap_is_mocked() {
+    if [ "$DEPLOY_ENV" = "prod" ]; then
+        return 1
+    fi
+
+    [ "${MOCK_LDAP:-True}" = "True" ]
+}
+
+should_check_ldap() {
+    ! ldap_is_mocked
 }
 
 run_post_deploy_diagnostics() {
     echo "Waiting for web health check..."
     wait_for_web
+
+    if should_check_ldap; then
+        echo "Checking LDAP TLS/bind/search reachability..."
+        if ! run_compose exec -T web python manage.py check_ldap_connection; then
+            echo "WARNING: LDAP post-deploy check failed." >&2
+        fi
+    fi
 
     if should_check_alvao; then
         echo "Checking ALVAO TLS/API reachability..."

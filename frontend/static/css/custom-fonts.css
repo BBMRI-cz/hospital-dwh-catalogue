@@ -1,4 +1,4 @@
-/* Apply Inter font family to base elements */
+/* Prefer local system fonts; do not depend on external font providers. */
 body,
 .form-control,
 .form-label,
@@ -9,22 +9,20 @@ input,
 select,
 textarea,
 button {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
 
-/* Apply JetBrains Mono to code elements */
 code,
 pre,
 .font-mono,
 .form-text {
-    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace !important;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
 }
 
-/* Apply Merriweather to headings */
 h1, h2, h3, h4, h5, h6,
 .app-mmci-text,
 .font-serif {
-    font-family: 'Merriweather', Georgia, 'Cambria', 'Times New Roman', serif !important;
+    font-family: Georgia, 'Cambria', 'Times New Roman', serif !important;
 }
 
 /* Improve text rendering */
