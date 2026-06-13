@@ -25,7 +25,7 @@ from catalogue.ldap_diagnostics import (  # noqa: E402
     configured_ldap_cafile,
     discover_user_searches,
     load_config_from_env,
-    parse_endpoint,
+    parse_endpoints,
     probe_ldaps_tls,
     read_root_dse,
     validate_transport_config,
@@ -41,11 +41,16 @@ def main() -> int:
 
     try:
         config = load_config_from_env(timeout=args.timeout, require_search_base=False)
-        endpoint = parse_endpoint(config.server_uri)
+        endpoints = parse_endpoints(config.server_uri)
         cafile = configured_ldap_cafile()
 
-        print(f'LDAP host: {endpoint.host}:{endpoint.port}')
-        print(f'LDAP transport: {endpoint.scheme}; StartTLS: {config.start_tls}')
+        print(
+            'LDAP endpoints: '
+            + ', '.join(
+                f'{endpoint.scheme}://{endpoint.host}:{endpoint.port}' for endpoint in endpoints
+            )
+        )
+        print(f'LDAP StartTLS: {config.start_tls}')
         print(f'LDAP CA bundle: {cafile or "<system default>"}')
         print('LDAP bind account: <current AUTH_LDAP_BIND_DN value>')
 

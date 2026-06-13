@@ -120,6 +120,11 @@ When `MOCK_LDAP=False`, the Catalogue authenticates against Active Directory thr
 
 Real LDAP deployments use the shared MOU root CA from `MOU_ROOT_CA_CERT_PATH`. The web container installs it into the system trust store and points OpenLDAP at the resulting system CA bundle.
 
+`AUTH_LDAP_SERVER_URI` may contain one server URI or a comma-separated list of
+server URIs, for example
+`ldaps://dc1.example.com:636,ldaps://dc2.example.com:636`. The application
+normalizes this to the OpenLDAP URI-list format internally.
+
 When real LDAP is enabled, `deploy.sh` runs this check from inside the web
 container:
 

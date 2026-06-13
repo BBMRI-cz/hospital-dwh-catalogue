@@ -19,6 +19,7 @@ ROOT_DSE_ATTRS = (
     'supportedExtension',
 )
 LDAP_ATTR_RE = re.compile(r'^[A-Za-z][A-Za-z0-9.-]*$')
+LDAP_URI_SEPARATOR_RE = re.compile(r'[\s,]+')
 
 
 class LdapDiagnosticError(Exception):
@@ -77,8 +78,16 @@ def parse_bool(value: str | bool | None, *, default: bool = False) -> bool:
     return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
+def split_ldap_server_uris(server_uri: str) -> tuple[str, ...]:
+    return tuple(uri for uri in LDAP_URI_SEPARATOR_RE.split(server_uri.strip()) if uri)
+
+
+def normalize_ldap_server_uri(server_uri: str) -> str:
+    return ' '.join(split_ldap_server_uris(server_uri))
+
+
 def load_config_from_env(*, timeout: int, require_search_base: bool) -> LdapDiagnosticConfig:
-    server_uri = os.environ.get('AUTH_LDAP_SERVER_URI', '').strip()
+    server_uri = normalize_ldap_server_uri(os.environ.get('AUTH_LDAP_SERVER_URI', ''))
     bind_dn = os.environ.get('AUTH_LDAP_BIND_DN', '').strip()
     bind_password = os.environ.get('AUTH_LDAP_BIND_PASSWORD', '')
     user_search_base = os.environ.get('AUTH_LDAP_USER_SEARCH_BASE', '').strip()
@@ -116,11 +125,20 @@ def parse_endpoint(server_uri: str) -> LdapEndpoint:
         raise LdapDiagnosticError(
             'AUTH_LDAP_SERVER_URI must look like ldap://host:389 or ldaps://host:636.'
         )
-    return LdapEndpoint(
-        scheme=parsed.scheme,
-        host=parsed.hostname,
-        port=parsed.port or (636 if parsed.scheme == 'ldaps' else 389),
-    )
+    try:
+        port = parsed.port or (636 if parsed.scheme == 'ldaps' else 389)
+    except ValueError as exc:
+        raise LdapDiagnosticError(
+            f'Invalid LDAP port in AUTH_LDAP_SERVER_URI: {server_uri}'
+        ) from exc
+    return LdapEndpoint(scheme=parsed.scheme, host=parsed.hostname, port=port)
+
+
+def parse_endpoints(server_uri: str) -> tuple[LdapEndpoint, ...]:
+    uris = split_ldap_server_uris(server_uri)
+    if not uris:
+        raise LdapDiagnosticError('AUTH_LDAP_SERVER_URI is empty.')
+    return tuple(parse_endpoint(uri) for uri in uris)
 
 
 def configured_ldap_cafile() -> str:
@@ -134,38 +152,50 @@ def configured_ldap_cafile() -> str:
 
 
 def validate_transport_config(config: LdapDiagnosticConfig) -> list[str]:
-    endpoint = parse_endpoint(config.server_uri)
+    endpoints = parse_endpoints(config.server_uri)
     warnings: list[str] = []
-    if endpoint.scheme == 'ldaps' and config.start_tls:
+    if config.start_tls and any(endpoint.scheme == 'ldaps' for endpoint in endpoints):
         raise LdapDiagnosticError(
             'AUTH_LDAP_START_TLS must be False when AUTH_LDAP_SERVER_URI uses ldaps://.'
         )
-    if endpoint.scheme == 'ldap' and not config.start_tls:
+    ldap_plain_endpoints = [
+        f'{endpoint.host}:{endpoint.port}' for endpoint in endpoints if endpoint.scheme == 'ldap'
+    ]
+    if ldap_plain_endpoints and not config.start_tls:
         warnings.append(
-            'AUTH_LDAP_SERVER_URI uses ldap:// and AUTH_LDAP_START_TLS=False; credentials are '
-            'sent without LDAP transport encryption unless a network layer protects them.'
+            'AUTH_LDAP_SERVER_URI contains ldap:// endpoint(s) with AUTH_LDAP_START_TLS=False; '
+            f'credentials are sent without LDAP transport encryption: {", ".join(ldap_plain_endpoints)}.'
         )
     return warnings
 
 
 def probe_ldaps_tls(config: LdapDiagnosticConfig, *, cafile: str) -> str:
-    endpoint = parse_endpoint(config.server_uri)
-    if endpoint.scheme != 'ldaps':
+    endpoints = [
+        endpoint for endpoint in parse_endpoints(config.server_uri) if endpoint.scheme == 'ldaps'
+    ]
+    if not endpoints:
         return ''
     if cafile and not os.path.isfile(cafile):
         raise LdapDiagnosticError(f'Configured LDAP CA bundle does not exist: {cafile}')
 
     context = ssl.create_default_context(cafile=cafile or None)
-    try:
-        with (
-            socket.create_connection(
-                (endpoint.host, endpoint.port), timeout=config.timeout
-            ) as sock,
-            context.wrap_socket(sock, server_hostname=endpoint.host) as tls_sock,
-        ):
-            return tls_sock.version() or 'unknown'
-    except Exception as exc:
-        raise LdapDiagnosticError(f'LDAP TLS handshake failed: {exc}') from exc
+    results: list[str] = []
+    failures: list[str] = []
+    for endpoint in endpoints:
+        try:
+            with (
+                socket.create_connection(
+                    (endpoint.host, endpoint.port), timeout=config.timeout
+                ) as sock,
+                context.wrap_socket(sock, server_hostname=endpoint.host) as tls_sock,
+            ):
+                results.append(f'{endpoint.host}:{endpoint.port} {tls_sock.version() or "unknown"}')
+        except Exception as exc:
+            failures.append(f'{endpoint.host}:{endpoint.port}: {exc}')
+
+    if failures:
+        raise LdapDiagnosticError(f'LDAP TLS handshake failed: {"; ".join(failures)}')
+    return '; '.join(results)
 
 
 def _set_ldap_option(ldap_module: Any, target: Any, option_name: str, value: Any) -> None:

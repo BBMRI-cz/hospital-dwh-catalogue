@@ -22,6 +22,7 @@ from django.utils.translation import override
 
 from fair_genomes.admin import StatDefinitionAdmin
 from fair_genomes.services.admin_forms import StatDefinitionForm
+from fair_genomes.services.client import RdfResponseError, validate_rdf_response
 from frontend.presentation.cache import CATALOGUE_SNAPSHOT_CACHE_KEY
 from shared.export import build_turtle_result
 from shared.mappers import map_export_dataset
@@ -269,6 +270,33 @@ class FairGenomesServiceTest(TestCase):
 
     def test_exception_class_exists(self):
         self.assertTrue(issubclass(FairGenomesAPIException, Exception))
+
+
+class RdfClientTest(SimpleTestCase):
+    """Tests for RDF response validation before rdflib parsing."""
+
+    def _response(self, text: str, content_type: str = 'text/turtle') -> MagicMock:
+        response = MagicMock()
+        response.text = text
+        response.headers = {'Content-Type': content_type}
+        return response
+
+    def test_validate_rdf_response_accepts_turtle(self):
+        validate_rdf_response(self._response('@prefix dcterms: <http://purl.org/dc/terms/> .'))
+
+    def test_validate_rdf_response_rejects_html_validation_page(self):
+        response = self._response(
+            '<html><title>Validation request</title>'
+            '<body>User validation required to continue.</body></html>',
+            'text/html',
+        )
+
+        with self.assertRaisesMessage(RdfResponseError, 'returned HTML instead of RDF'):
+            validate_rdf_response(response)
+
+    def test_validate_rdf_response_rejects_empty_response(self):
+        with self.assertRaisesMessage(RdfResponseError, 'empty response'):
+            validate_rdf_response(self._response(''))
 
 
 class SchemaDiscoveryTest(SimpleTestCase):

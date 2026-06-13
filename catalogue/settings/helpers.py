@@ -7,6 +7,8 @@ from typing import Any
 
 from decouple import config
 
+from catalogue.ldap_diagnostics import normalize_ldap_server_uri
+
 
 def _split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(',') if item.strip()]
@@ -87,7 +89,7 @@ def ldap_settings(*, mock_ldap: bool) -> dict[str, Any]:
             'django_auth_ldap.backend.LDAPBackend',
             'django.contrib.auth.backends.ModelBackend',
         ],
-        'AUTH_LDAP_SERVER_URI': config('AUTH_LDAP_SERVER_URI'),
+        'AUTH_LDAP_SERVER_URI': normalize_ldap_server_uri(config('AUTH_LDAP_SERVER_URI')),
         'AUTH_LDAP_BIND_DN': config('AUTH_LDAP_BIND_DN'),
         'AUTH_LDAP_BIND_PASSWORD': config('AUTH_LDAP_BIND_PASSWORD'),
         'AUTH_LDAP_USER_SEARCH_BASE': auth_ldap_user_search_base,

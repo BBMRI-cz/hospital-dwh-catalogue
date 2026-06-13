@@ -15,7 +15,8 @@ from catalogue.ldap_diagnostics import (
     close_connection,
     configured_ldap_cafile,
     discover_user_searches,
-    parse_endpoint,
+    normalize_ldap_server_uri,
+    parse_endpoints,
     probe_ldaps_tls,
     read_root_dse,
     validate_transport_config,
@@ -43,11 +44,16 @@ class Command(BaseCommand):
         try:
             config = self._config_from_settings(timeout=timeout)
             warnings = validate_transport_config(config)
-            endpoint = parse_endpoint(config.server_uri)
+            endpoints = parse_endpoints(config.server_uri)
             cafile = configured_ldap_cafile()
 
-            self.stdout.write(f'LDAP host: {endpoint.host}:{endpoint.port}')
-            self.stdout.write(f'LDAP transport: {endpoint.scheme}; StartTLS: {config.start_tls}')
+            self.stdout.write(
+                'LDAP endpoints: '
+                + ', '.join(
+                    f'{endpoint.scheme}://{endpoint.host}:{endpoint.port}' for endpoint in endpoints
+                )
+            )
+            self.stdout.write(f'LDAP StartTLS: {config.start_tls}')
             self.stdout.write(f'LDAP CA bundle: {cafile or "<system default>"}')
             self.stdout.write(f'Configured user search base: {config.user_search_base}')
             self.stdout.write(f'Configured login attribute: {config.login_attr}')
@@ -78,13 +84,13 @@ class Command(BaseCommand):
                     timeout=timeout,
                 )
                 if not configured_search.found:
-                    message = (
-                        'Configured LDAP user search did not find a user entry for '
-                        f'{config.login_attr}=* below {config.user_search_base}.'
+                    raise CommandError(
+                        self._configured_search_error_message(
+                            configured_search,
+                            config=config,
+                            root_dse=root_dse,
+                        )
                     )
-                    if configured_search.error:
-                        message = f'{message} LDAP error: {configured_search.error}'
-                    raise CommandError(message)
                 self.stdout.write('Configured LDAP user search: OK')
 
                 if discover:
@@ -97,7 +103,9 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('LDAP connection check passed.'))
 
     def _config_from_settings(self, *, timeout: int) -> LdapDiagnosticConfig:
-        server_uri = str(getattr(settings, 'AUTH_LDAP_SERVER_URI', '') or '').strip()
+        server_uri = normalize_ldap_server_uri(
+            str(getattr(settings, 'AUTH_LDAP_SERVER_URI', '') or '')
+        )
         bind_dn = str(getattr(settings, 'AUTH_LDAP_BIND_DN', '') or '').strip()
         bind_password = str(getattr(settings, 'AUTH_LDAP_BIND_PASSWORD', '') or '')
         user_search_base = str(getattr(settings, 'AUTH_LDAP_USER_SEARCH_BASE', '') or '').strip()
@@ -124,6 +132,27 @@ class Command(BaseCommand):
             start_tls=bool(getattr(settings, 'AUTH_LDAP_START_TLS', False)),
             timeout=timeout,
         )
+
+    def _configured_search_error_message(self, configured_search, *, config, root_dse) -> str:
+        message = (
+            'Configured LDAP user search did not find a user entry for '
+            f'{config.login_attr}=* below {config.user_search_base}.'
+        )
+        if configured_search.error:
+            message = f'{message} LDAP error: {configured_search.error}'
+
+        default_context = root_dse.default_naming_context
+        if default_context and default_context.lower() != config.user_search_base.lower():
+            message = (
+                f'{message} RootDSE reports defaultNamingContext={default_context}; '
+                'set AUTH_LDAP_USER_SEARCH_BASE to that value or to a users OU below it.'
+            )
+        if configured_search.error and 'referral' in configured_search.error.lower():
+            message = (
+                f'{message} A referral usually means the configured search base belongs to '
+                'a different naming context than the connected domain controller.'
+            )
+        return message
 
     def _print_discovery(self, connection, config, root_dse, *, timeout: int) -> None:
         self.stdout.write('')

@@ -102,6 +102,31 @@ class LdapSettingsTest(SimpleTestCase):
             '(&(objectClass=user)(!(objectClass=computer))(userPrincipalName=%(user)s))',
         )
 
+    def test_ldap_settings_normalizes_comma_separated_server_uris(self):
+        env = {
+            'AUTH_LDAP_SERVER_URI': (
+                'ldaps://dc1.example.com:636,'
+                'ldaps://dc2.example.com:636,'
+                'ldaps://dc3.example.com:636'
+            ),
+            'AUTH_LDAP_BIND_DN': 'cn=svc,dc=example,dc=com',
+            'AUTH_LDAP_BIND_PASSWORD': 'secret',
+            'AUTH_LDAP_USER_SEARCH_BASE': 'ou=Users,dc=example,dc=com',
+        }
+
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(sys.modules, _ldap_test_modules()),
+        ):
+            settings = ldap_settings(mock_ldap=False)
+
+        self.assertEqual(
+            settings['AUTH_LDAP_SERVER_URI'],
+            'ldaps://dc1.example.com:636 '
+            'ldaps://dc2.example.com:636 '
+            'ldaps://dc3.example.com:636',
+        )
+
     def test_prod_env_example_uses_shared_mou_root_ca_for_ldap(self):
         prod_example = (
             Path(__file__).resolve().parent.parent / 'env-examples' / 'prod.env.example'
