@@ -27,6 +27,7 @@ When `MOCK_FAIR_GENOMES=False`, set:
 FAIR_GENOMES_RDF_URL=https://your-fdp-endpoint.example.com
 FAIR_GENOMES_API_URL=https://your-molgenis.example.com/graphql
 FAIR_GENOMES_API_TOKEN=your-molgenis-api-token
+FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED=False
 FAIR_GENOMES_SYNC_INTERVAL_HOURS=24
 ```
 
@@ -35,6 +36,7 @@ FAIR_GENOMES_SYNC_INTERVAL_HOURS=24
 | `FAIR_GENOMES_RDF_URL` | RDF / FAIR Data Point endpoint for dataset and distribution metadata |
 | `FAIR_GENOMES_API_URL` | MOLGENIS GraphQL endpoint for statistics |
 | `FAIR_GENOMES_API_TOKEN` | token used for GraphQL requests |
+| `FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED` | enables read-only admin-page probes of the RDF source; keep `False` unless the FDP path is allowlisted for machine access |
 | `FAIR_GENOMES_SYNC_INTERVAL_HOURS` | scheduler interval in hours, from 1 to 24 |
 
 Notes:
@@ -102,6 +104,8 @@ Go to `/admin/` and open FAIR Genomes Integration > Stat definitions.
 From there you can:
 
 - add or edit stat definitions
+- choose the default chart view for each statistic; users can switch each chart
+  between doughnut and bar views on the distribution detail page
 - activate or deactivate charts
 - reorder charts with `sort_order`
 - save an active stat definition and immediately attempt to synchronise that one aggregation
@@ -111,6 +115,12 @@ From there you can:
 If MOLGENIS schema introspection is available, the admin form offers dropdowns for table and column selection. If it is unavailable, the form falls back to known values already stored in the database.
 
 The stat-definition admin also checks the RDF source through a short-lived cache. This check is read-only and does not write metadata to the database. It helps staff notice when the RDF source exposes distributions that are not yet available in the local catalogue. If the RDF source check fails, the form falls back to locally synchronised distributions so existing configuration remains editable.
+
+Set `FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED=True` only when the FDP API path is
+safe for machine access. If the FDP endpoint is behind browser validation,
+CAPTCHA, or IP-based WAF challenges, keep this setting `False` so normal admin
+page loads do not repeatedly trigger machine requests. The explicit
+"Check and Synchronise FAIR Genomes" action still performs the metadata sync.
 
 ## Troubleshooting
 

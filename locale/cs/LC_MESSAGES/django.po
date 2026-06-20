@@ -589,7 +589,7 @@ msgstr "Stránka, kterou hledáte, neexistuje nebo byla přesunuta."
 #: frontend/templates/catalogue/index.html:23
 #: frontend/templates/registration/login.html:14
 msgid "Hospital Data Warehouse Catalogue"
-msgstr "Hospital Data Warehouse Catalogue"
+msgstr "Katalog nemocničního datového skladu"
 
 #: frontend/templates/base.html:22
 #: frontend/templates/includes/_toast_messages.html:7
@@ -1510,3 +1510,48 @@ msgstr "Definice PK"
 #: warehouse/models.py:207
 msgid "Primary key definition expression"
 msgstr "Výraz definice primárního klíče"
+
+#: fair_genomes/models.py:124
+#: frontend/templates/catalogue/components/_stat_charts.html:3
+msgid "Doughnut chart"
+msgstr "Prstencový graf"
+
+#: fair_genomes/models.py:125
+#: frontend/templates/catalogue/components/_stat_charts.html:4
+msgid "Bar chart"
+msgstr "Sloupcový graph"
+
+#: fair_genomes/models.py:153
+msgid "Default chart view"
+msgstr "Výchozí zobrazení grafu"
+
+#: fair_genomes/models.py:154
+msgid ""
+"Initial chart view shown to users. Users can switch each chart on the "
+"distribution page."
+msgstr ""
+"Počáteční zobrazení grafu pro uživatele. Uživatelé mohou každý graf "
+"přepnout na stránce distribuce."
+
+#: frontend/templates/catalogue/components/_stat_charts.html:29
+msgid "Chart view"
+msgstr "Zobrazení grafu"
+
+#: fair_genomes/services/admin_forms.py:101
+msgid ""
+"DCAT Distribution whose detail page should show this chart. Automatic RDF "
+"source checks are disabled; showing locally synchronised values."
+msgstr ""
+"Distribuce DCAT, na jejíž detailní stránce se má zobrazit tento graf. "
+"Automatické kontroly zdroje RDF jsou vypnuté; zobrazují se lokálně "
+"synchronizované hodnoty."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html:88
+msgid ""
+"Automatic RDF source checks are disabled. The form is using locally "
+"synchronised distributions; run the explicit FAIR Genomes synchronisation "
+"when the FDP endpoint is available for machine access."
+msgstr ""
+"Automatické kontroly zdroje RDF jsou vypnuté. Formulář používá lokálně "
+"synchronizované distribuce; explicitní synchronizaci FAIR Genomes spusťte, "
+"až bude endpoint FDP dostupný pro strojový přístup."

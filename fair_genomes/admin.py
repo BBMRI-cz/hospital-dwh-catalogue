@@ -40,6 +40,7 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         'molgenis_table',
         'molgenis_column',
         'display_label',
+        'chart_type',
         'sort_order',
         'is_active',
     )
@@ -49,11 +50,12 @@ class StatDefinitionAdmin(admin.ModelAdmin):
         'molgenis_table',
         'molgenis_column',
         'display_label',
+        'chart_type',
         'is_active',
         'sort_order',
     )
-    list_filter = ('is_active', 'distribution__dataset_name')
-    list_editable = ('is_active', 'sort_order')
+    list_filter = ('is_active', 'chart_type', 'distribution__dataset_name')
+    list_editable = ('chart_type', 'is_active', 'sort_order')
     ordering = ('distribution__dataset_name', 'distribution', 'sort_order')
     actions = ['sync_selected_stats']
     list_per_page = 50

@@ -32,6 +32,7 @@ class StatDefinitionForm(forms.ModelForm):
             'molgenis_table',
             'molgenis_column',
             'display_label',
+            'chart_type',
             'sort_order',
             'is_active',
         ]
@@ -94,6 +95,11 @@ class StatDefinitionForm(forms.ModelForm):
             return _(
                 'DCAT Distribution whose detail page should show this chart. '
                 'FAIR_GENOMES_RDF_URL is not configured; showing locally synchronised values.'
+            )
+        if rdf_status['status'] == 'disabled':
+            return _(
+                'DCAT Distribution whose detail page should show this chart. '
+                'Automatic RDF source checks are disabled; showing locally synchronised values.'
             )
         return base_help
 
@@ -171,6 +177,7 @@ class StatDefinitionForm(forms.ModelForm):
             'molgenis_table',
             'molgenis_column',
             'display_label',
+            'chart_type',
             'sort_order',
             'is_active',
         ]

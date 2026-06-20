@@ -120,6 +120,9 @@ def fair_genomes_settings(*, mock_fair_genomes: bool) -> dict[str, Any]:
             'FAIR_GENOMES_RDF_URL': config('FAIR_GENOMES_RDF_URL', default=''),
             'FAIR_GENOMES_API_URL': config('FAIR_GENOMES_API_URL', default=''),
             'FAIR_GENOMES_API_TOKEN': config('FAIR_GENOMES_API_TOKEN', default=''),
+            'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED': config(
+                'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED', default=False, cast=bool
+            ),
             'FAIR_GENOMES_SYNC_INTERVAL_HOURS': config(
                 'FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int
             ),
@@ -129,6 +132,9 @@ def fair_genomes_settings(*, mock_fair_genomes: bool) -> dict[str, Any]:
         'FAIR_GENOMES_RDF_URL': config('FAIR_GENOMES_RDF_URL'),
         'FAIR_GENOMES_API_URL': config('FAIR_GENOMES_API_URL'),
         'FAIR_GENOMES_API_TOKEN': config('FAIR_GENOMES_API_TOKEN'),
+        'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED': config(
+            'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED', default=False, cast=bool
+        ),
         'FAIR_GENOMES_SYNC_INTERVAL_HOURS': config(
             'FAIR_GENOMES_SYNC_INTERVAL_HOURS', default=24, cast=int
         ),

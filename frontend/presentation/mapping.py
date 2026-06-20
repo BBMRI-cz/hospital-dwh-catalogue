@@ -176,6 +176,7 @@ def normalise_stat_charts(charts: list[UnifiedStatChart]) -> list[FrontendStatCh
             label=chart.label,
             table_name=chart.table_name,
             column_name=chart.column_name,
+            chart_type=chart.chart_type,
             data=chart.data,
         )
         for chart in charts
@@ -217,6 +218,7 @@ def build_chart_groups(charts: list[FrontendStatChart]) -> list[FrontendStatChar
             label=chart.label,
             table_name=chart.table_name,
             column_name=chart.column_name,
+            chart_type=chart.chart_type,
             data=chart.data,
             canvas_idx=index,
         )
@@ -237,6 +239,7 @@ def serialise_stat_charts(charts: list[FrontendStatChart]) -> list[dict[str, obj
             'label': chart.label,
             'table_name': chart.table_name,
             'column_name': chart.column_name,
+            'chart_type': chart.chart_type,
             'data': chart.data,
             'canvas_idx': chart.canvas_idx,
         }

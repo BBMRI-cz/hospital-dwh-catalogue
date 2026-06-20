@@ -158,6 +158,7 @@ Relevant variables:
 - `FAIR_GENOMES_RDF_URL`
 - `FAIR_GENOMES_API_URL`
 - `FAIR_GENOMES_API_TOKEN`
+- `FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED` (`False` unless the FDP API path is allowlisted for machine access)
 - `FAIR_GENOMES_SYNC_INTERVAL_HOURS`, as a whole number from 1 to 24
 
 `dev` usually keeps FAIR Genomes mocked. `staging` and `prod` normally point to real FAIR Genomes services.

@@ -1575,6 +1575,7 @@ class ChartPayloadHelperTest(SimpleTestCase):
                 label='Instrument',
                 table_name='sequencing',
                 column_name='instrument',
+                chart_type='bar',
                 data={'MiSeq': 2, 'NovaSeq': 3},
             ),
             UnifiedStatChart(
@@ -1589,10 +1590,12 @@ class ChartPayloadHelperTest(SimpleTestCase):
         chart_groups = build_chart_groups(charts)
 
         self.assertEqual(charts[0].data['MiSeq'], 2)
+        self.assertEqual(charts[0].chart_type, 'bar')
         self.assertIsNone(charts[0].canvas_idx)
         self.assertEqual(len(chart_groups), 1)
         self.assertEqual(chart_groups[0].table_name, 'sequencing')
         self.assertEqual(chart_groups[0].charts[0].canvas_idx, 1)
+        self.assertEqual(chart_groups[0].charts[0].chart_type, 'bar')
         self.assertEqual(chart_groups[0].charts[1].canvas_idx, 2)
 
 

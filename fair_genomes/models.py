@@ -125,6 +125,10 @@ class StatDefinition(models.Model):
     Replaces the former hardcoded ``stat_config.py``.
     """
 
+    class ChartType(models.TextChoices):
+        DOUGHNUT = 'doughnut', _('Doughnut chart')
+        BAR = 'bar', _('Bar chart')
+
     distribution = models.ForeignKey(
         'Distribution',
         on_delete=models.CASCADE,
@@ -148,6 +152,16 @@ class StatDefinition(models.Model):
         default='',
         verbose_name=_('Display label'),
         help_text=_('Optional label for the chart. If blank, "table.column" is used.'),
+    )
+    chart_type = models.CharField(
+        max_length=20,
+        choices=ChartType.choices,
+        default=ChartType.DOUGHNUT,
+        verbose_name=_('Default chart view'),
+        help_text=_(
+            'Initial chart view shown to users. Users can switch each chart on the '
+            'distribution page.'
+        ),
     )
     sort_order = models.PositiveIntegerField(
         default=0,

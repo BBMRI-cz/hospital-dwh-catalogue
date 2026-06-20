@@ -91,6 +91,7 @@ class UnifiedStatChart:
     label: str
     table_name: str
     column_name: str
+    chart_type: str = 'doughnut'
     data: dict[str, int] = field(default_factory=dict)
 
 

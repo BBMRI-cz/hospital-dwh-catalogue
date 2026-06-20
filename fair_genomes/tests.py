@@ -22,6 +22,7 @@ from django.utils.translation import override
 
 from fair_genomes.admin import StatDefinitionAdmin
 from fair_genomes.services.admin_forms import StatDefinitionForm
+from fair_genomes.services.admin_support import get_rdf_source_inventory
 from fair_genomes.services.client import RdfResponseError, validate_rdf_response
 from frontend.presentation.cache import CATALOGUE_SNAPSHOT_CACHE_KEY
 from shared.export import build_turtle_result
@@ -298,6 +299,17 @@ class RdfClientTest(SimpleTestCase):
         with self.assertRaisesMessage(RdfResponseError, 'empty response'):
             validate_rdf_response(self._response(''))
 
+    @override_settings(
+        FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED=False,
+        FAIR_GENOMES_RDF_URL='https://fdp.example.org/api/rdf',
+    )
+    @patch('fair_genomes.services.admin_support.fetch_rdf')
+    def test_admin_rdf_inventory_check_can_be_disabled(self, mock_fetch_rdf):
+        inventory = get_rdf_source_inventory()
+
+        self.assertEqual(inventory['status'], 'disabled')
+        mock_fetch_rdf.assert_not_called()
+
 
 class SchemaDiscoveryTest(SimpleTestCase):
     """Tests for discovering live-style FDP classes and column predicates."""
@@ -552,6 +564,14 @@ class StatDefinitionModelTest(TestCase):
         sd = StatDefinition(molgenis_table='seq', molgenis_column='col', display_label='')
         self.assertEqual(sd.chart_label, 'seq.col')
 
+    def test_chart_type_defaults_to_doughnut(self):
+        sd = StatDefinition(molgenis_table='seq', molgenis_column='col')
+        self.assertEqual(sd.chart_type, StatDefinition.ChartType.DOUGHNUT)
+
+    def test_chart_type_choices_include_bar(self):
+        values = {value for value, _label in StatDefinition.ChartType.choices}
+        self.assertIn(StatDefinition.ChartType.BAR, values)
+
     def test_str_representation(self):
         sd = StatDefinition(
             molgenis_table='seq',
@@ -668,6 +688,23 @@ class StatDefinitionAdminSaveTest(TestCase):
 
             self.assertFalse(form.is_valid())
             self.assertIn('not synchronised', str(form.errors))
+
+    @patch('fair_genomes.services.admin_forms.get_molgenis_schema')
+    @patch('fair_genomes.services.admin_forms.get_rdf_inventory_status')
+    def test_form_exposes_chart_type_choice(self, mock_rdf_status, mock_schema):
+        mock_schema.return_value = {'sequencing': ['sequencinginstrumentmodel']}
+        mock_rdf_status.return_value = {
+            'status': 'available',
+            'missing_local_distribution_count': 0,
+            'stale_local_distribution_count': 0,
+        }
+
+        with override('en'):
+            form = StatDefinitionForm()
+
+        self.assertIn('chart_type', form.fields)
+        choice_values = {value for value, _label in form.fields['chart_type'].choices}
+        self.assertIn(StatDefinition.ChartType.BAR, choice_values)
 
     @patch('fair_genomes.services.admin_forms.get_molgenis_schema')
     @patch('fair_genomes.services.admin_forms.get_rdf_inventory_status')

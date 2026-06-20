@@ -63,6 +63,7 @@ class FrontendStatChart:
     label: str
     table_name: str
     column_name: str
+    chart_type: str
     data: dict[str, int]
     canvas_idx: int | None = None
 

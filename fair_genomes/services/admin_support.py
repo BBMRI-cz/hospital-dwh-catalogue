@@ -58,6 +58,14 @@ def _rdf_inventory_cache_key(url: str) -> str:
 def get_rdf_source_inventory() -> dict:
     """Return cached RDF source dataset/distribution names without writing to DB."""
     url = getattr(settings, 'FAIR_GENOMES_RDF_URL', '')
+    if not getattr(settings, 'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED', False):
+        return {
+            'status': 'disabled',
+            'source_url': url,
+            'datasets': set(),
+            'distributions': set(),
+            'error': 'FAIR_GENOMES_ADMIN_RDF_CHECK_ENABLED is disabled.',
+        }
     if not url:
         return {
             'status': 'not_configured',
@@ -123,8 +131,12 @@ def get_rdf_inventory_status() -> dict:
 
     source_distributions = set(inventory.get('distributions') or set())
     source_datasets = set(inventory.get('datasets') or set())
-    missing_local_distributions = sorted(source_distributions - local_distribution_names)
-    stale_local_distributions = sorted(local_distribution_names - source_distributions)
+    if inventory.get('status') == 'available':
+        missing_local_distributions = sorted(source_distributions - local_distribution_names)
+        stale_local_distributions = sorted(local_distribution_names - source_distributions)
+    else:
+        missing_local_distributions = []
+        stale_local_distributions = []
 
     return {
         **inventory,

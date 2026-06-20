@@ -43,6 +43,7 @@ class FairGenomesCatalogueService:
                     label=stat_def.chart_label,
                     table_name=stat_def.molgenis_table,
                     column_name=stat_def.molgenis_column,
+                    chart_type=stat_def.chart_type,
                     data=distributions_by_key.get(stat_key, {}),
                 )
             )

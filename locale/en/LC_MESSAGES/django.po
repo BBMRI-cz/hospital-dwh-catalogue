@@ -1511,3 +1511,47 @@ msgstr "PK Definition"
 #: warehouse/models.py:207
 msgid "Primary key definition expression"
 msgstr "Primary key definition expression"
+
+#: fair_genomes/models.py:124
+#: frontend/templates/catalogue/components/_stat_charts.html:3
+msgid "Doughnut chart"
+msgstr "Doughnut chart"
+
+#: fair_genomes/models.py:125
+#: frontend/templates/catalogue/components/_stat_charts.html:4
+msgid "Bar chart"
+msgstr "Bar chart"
+
+#: fair_genomes/models.py:153
+msgid "Default chart view"
+msgstr "Default chart view"
+
+#: fair_genomes/models.py:154
+msgid ""
+"Initial chart view shown to users. Users can switch each chart on the "
+"distribution page."
+msgstr ""
+"Initial chart view shown to users. Users can switch each chart on the "
+"distribution page."
+
+#: frontend/templates/catalogue/components/_stat_charts.html:29
+msgid "Chart view"
+msgstr "Chart view"
+
+#: fair_genomes/services/admin_forms.py:101
+msgid ""
+"DCAT Distribution whose detail page should show this chart. Automatic RDF "
+"source checks are disabled; showing locally synchronised values."
+msgstr ""
+"DCAT Distribution whose detail page should show this chart. Automatic RDF "
+"source checks are disabled; showing locally synchronised values."
+
+#: fair_genomes/templates/admin/fair_genomes/statdefinition/change_list.html:88
+msgid ""
+"Automatic RDF source checks are disabled. The form is using locally "
+"synchronised distributions; run the explicit FAIR Genomes synchronisation "
+"when the FDP endpoint is available for machine access."
+msgstr ""
+"Automatic RDF source checks are disabled. The form is using locally "
+"synchronised distributions; run the explicit FAIR Genomes synchronisation "
+"when the FDP endpoint is available for machine access."

@@ -86,6 +86,12 @@
                     {% trans "FAIR_GENOMES_RDF_URL is not configured. The form is using locally synchronised distributions." %}
                 </span>
             </p>
+            {% elif rdf_inventory_status.status == "disabled" %}
+            <p class="messagelist">
+                <span class="warning">
+                    {% trans "Automatic RDF source checks are disabled. The form is using locally synchronised distributions; run the explicit FAIR Genomes synchronisation when the FDP endpoint is available for machine access." %}
+                </span>
+            </p>
             {% endif %}
         {% endif %}
     </div>
