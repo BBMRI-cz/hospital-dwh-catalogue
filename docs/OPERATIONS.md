@@ -87,6 +87,9 @@ Optional Catalogue tuning:
 
 In production, `METADATA_DB_*` should point to the external warehouse-owned database, not to the stack-local `db` container.
 
+For local database sharing and legacy metadata migration details, see
+[Metadata Database](METADATA_DATABASE.md).
+
 ### Authentication
 
 The Catalogue supports:
@@ -353,11 +356,17 @@ The Postgres container creates:
 
 - `POSTGRES_DB` automatically
 - `AUTH_DB_NAME` if needed
+- `METADATA_DB_NAME` if it points at the stack-local `db` service and differs from `POSTGRES_DB`
 - `FAIR_GENOMES_DB_NAME` if needed
 
 This behavior lives in [docker/postgres/initdb.d/00_create_databases.sh](../docker/postgres/initdb.d/00_create_databases.sh).
 
-`metadata_db` is never created or migrated by Django. In production it typically points to an external warehouse-managed database; in development or staging it can point to a stack-local clone exposed through the same alias.
+`metadata_db` is never migrated by Django. In production it typically points to
+an external warehouse-managed database; in development or staging it can point to
+a stack-local clone exposed through the same alias. When `METADATA_DB_NAME` is a
+separate stack-local database, [docker/postgres/initdb.d/03_init_metadata_database.sh](../docker/postgres/initdb.d/03_init_metadata_database.sh)
+loads the warehouse metadata schema and mock data into it on first volume
+initialization.
 
 ## Auth and admin operations
 

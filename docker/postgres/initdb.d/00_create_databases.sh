@@ -14,7 +14,10 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = :'db_name')\gexec
 EOSQL
 }
 
-# The Postgres image creates POSTGRES_DB automatically. The metadata schema bootstraps
-# into that database, so only the extra logical databases need to be created here.
+# The Postgres image creates POSTGRES_DB automatically. Extra logical databases
+# are created here when they are backed by the stack-local Postgres service.
 create_database "${AUTH_DB_NAME:-}"
+if [ "${METADATA_DB_HOST:-db}" = "db" ] || [ "${METADATA_DB_HOST:-db}" = "localhost" ] || [ "${METADATA_DB_HOST:-db}" = "127.0.0.1" ]; then
+    create_database "${METADATA_DB_NAME:-}"
+fi
 create_database "${FAIR_GENOMES_DB_NAME:-}"
