@@ -15,6 +15,7 @@ from startup_tasks import (
     env_superuser_credentials,
     should_collectstatic,
     should_seed_mock_fair_genomes,
+    should_seed_mock_warehouse_metadata,
     table_is_missing,
     tailwind_build_command,
     translations_need_compile,
@@ -134,17 +135,6 @@ def _build_tailwind_css(base_dir: Path) -> None:
         print('Tailwind CSS built successfully.', flush=True)
 
 
-def _check_metadata_db() -> None:
-    """Check metadata_db connectivity without writing migration state to it."""
-    try:
-        connections['metadata_db'].ensure_connection()
-    except Exception:
-        print(
-            'metadata_db unavailable - Warehouse data will not appear in the catalogue.',
-            flush=True,
-        )
-
-
 def _migrate_database(database: str) -> None:
     kwargs = {'interactive': False, 'verbosity': 1}
     if database != 'default':
@@ -182,9 +172,14 @@ def _repair_missing_app_table(
 
 def _seed_mock_data_if_needed() -> None:
     if not should_seed_mock_fair_genomes(os.environ):
-        return
-    print('MOCK_FAIR_GENOMES=True - seeding fair_genomes_db with mock data...', flush=True)
-    call_command('seed_fair_genomes_mock')
+        pass
+    else:
+        print('MOCK_FAIR_GENOMES=True - seeding fair_genomes_db with mock data...', flush=True)
+        call_command('seed_fair_genomes_mock')
+
+    if should_seed_mock_warehouse_metadata(os.environ):
+        print('MOCK_WAREHOUSE_METADATA=True - seeding metadata_db with mock data...', flush=True)
+        call_command('seed_warehouse_mock')
 
 
 def _compile_translations_if_needed(base_dir: Path) -> None:
@@ -219,7 +214,8 @@ def main() -> None:
         app_label='fair_genomes',
         sentinel_table='fair_genomes_contact_point',
     )
-    _check_metadata_db()
+
+    _migrate_database('metadata_db')
 
     # -- Seed mock data --------------------------------------------------------
     _seed_mock_data_if_needed()

@@ -2,14 +2,13 @@
 Warehouse Models - Local Metadata HealthDCAT-AP Profile
 =======================================================
 
-Concrete, managed=False Django models for the Local Metadata catalogue.
-All models map to pre-existing tables in the metadata_db PostgreSQL schema
-(metadata."lm_*") and extend the shared HealthDCAT-AP abstract base models.
+Concrete Django models for the Local Metadata catalogue.  All models map to
+tables in the metadata_db PostgreSQL schema (metadata."lm_*") and extend the
+shared HealthDCAT-AP abstract base models.
 
-Why managed=False?
-  The metadata_db schema is maintained externally (DDL migrations are outside
-  Django's control).  Django is schema-tracking only; it never creates or
-  drops these tables.
+Schema ownership
+  The catalogue owns this schema.  Django migrations create and evolve the
+  metadata_db tables.
 
 Extension points vs the shared base
   * Distribution adds db_layer - the physical DWH layer identifier.  This
@@ -46,8 +45,8 @@ class ContactPoint(ContactPointBase):
     """
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_contact_point'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Contact Point')
         verbose_name_plural = _('Contact Points')
 
@@ -61,8 +60,8 @@ class Agent(AgentBase):
     """
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_agent'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Agent')
         verbose_name_plural = _('Agents')
 
@@ -76,8 +75,8 @@ class Catalog(CatalogBase):
     """
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_catalog'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Catalog')
         verbose_name_plural = _('Catalogs')
 
@@ -96,8 +95,8 @@ class Dataset(DatasetBase):
     """
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_dataset'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Dataset')
         verbose_name_plural = _('Datasets')
         ordering = ['name']
@@ -127,8 +126,8 @@ class Distribution(DistributionBase):
     )
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_distribution'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Distribution')
         verbose_name_plural = _('Distributions')
 
@@ -147,8 +146,8 @@ class Table(TableBase):
     """
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_table'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Table')
         verbose_name_plural = _('Tables')
         ordering = ['name']
@@ -208,8 +207,8 @@ class Column(ColumnBase):
     )
 
     class Meta:
-        managed = False
         db_table = 'metadata"."lm_column'
+        required_db_vendor = 'postgresql'
         verbose_name = _('Column')
         verbose_name_plural = _('Columns')
         ordering = ['var_order', 'name']

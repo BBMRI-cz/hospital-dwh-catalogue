@@ -43,7 +43,7 @@ Open `http://localhost` and sign in with any non-empty username and password.
 ```text
 catalogue/          Settings, middleware, URLs, auth gate, database routers
 frontend/           Pages, API views, presentation mapping, templates, static assets
-warehouse/          Read-only warehouse metadata models and queries
+warehouse/          Managed warehouse metadata models and queries
 fair_genomes/       FAIR Genomes models, sync logic, statistics, admin
 ticketing/          Cart, ticket submission flow, Alvao integration
 shared/             DTOs, mappers, export builders, normalization, source loaders

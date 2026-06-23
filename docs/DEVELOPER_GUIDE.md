@@ -123,8 +123,8 @@ Add a Django app with models similar to `warehouse` or `fair_genomes`.
 
 Decide whether the schema is:
 
-- managed by Django migrations, like `fair_genomes`
-- externally managed, like `warehouse`
+- managed by Django migrations, like `warehouse` and `fair_genomes`
+- externally managed, only when another system must remain the schema owner
 
 ### 2. Add a database alias
 

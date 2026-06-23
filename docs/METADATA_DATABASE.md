@@ -1,8 +1,7 @@
 # Metadata Database
 
-The Django app reads warehouse catalogue content from the `metadata_db` database
-alias. It expects the `metadata.lm_*` tables defined in
-`docker/postgres/initdb.d/01_ddl.sql`.
+The Django app owns warehouse catalogue content through the `metadata_db`
+database alias. Django migrations create and evolve the `metadata.lm_*` tables.
 
 ## Local Network Access
 
@@ -31,25 +30,87 @@ POSTGRES_PUBLISH_HOST=127.0.0.1
 Exposing Postgres on a LAN should be limited to trusted networks and protected
 with a non-default password plus host firewall rules.
 
-## Separate Metadata DB
+## Managed Metadata DB
 
-For new dev and staging stacks, the env examples now use a separate metadata
-database:
+All environment examples use a separate catalogue-owned metadata database:
 
 ```env
 METADATA_DB_NAME=warehouse_metadata_dev
 METADATA_DB_HOST=db
 ```
 
-When `METADATA_DB_HOST` points at the stack-local Postgres service, the init
-scripts create `METADATA_DB_NAME` and load the same `metadata.lm_*` schema/mock
-data there. If `METADATA_DB_HOST` points at an external warehouse database, the
-stack-local init skips that external target.
+The Postgres init script creates `METADATA_DB_NAME` when it points at the
+stack-local `db` service. The web startup then runs Django migrations against
+`metadata_db`.
 
 Postgres init scripts only run when the Docker volume is first created. Existing
-dev/staging volumes need either a reset or a manual database/schema load.
+dev/staging volumes need either a reset or a manual database creation before the
+web container can migrate `metadata_db`.
 
-## Legacy Schema Migration
+## Mock Metadata
+
+Development enables:
+
+```env
+MOCK_WAREHOUSE_METADATA=True
+```
+
+After `metadata_db` migrations finish, startup runs:
+
+```bash
+python manage.py seed_warehouse_mock
+```
+
+The seeder writes public sample rows into the catalogue-owned `metadata.lm_*`
+tables. Staging and production keep `MOCK_WAREHOUSE_METADATA=False` by default.
+
+## Updating Metadata From SQL
+
+The warehouse team can update the catalogue metadata database with SQL through
+the repository helper script:
+
+```bash
+./scripts/run-metadata-sql.sh /path/to/warehouse_metadata_load.sql
+```
+
+The script loads `.env`, uses `METADATA_DB_NAME`, `METADATA_DB_USER`, and
+`METADATA_DB_PASSWORD`, and runs `psql` inside the Compose `db` service. It does
+not require a second database user or a network-exposed Postgres port.
+
+Multiple files can be supplied and are executed in order:
+
+```bash
+./scripts/run-metadata-sql.sh 01_contacts.sql 02_datasets.sql 03_tables.sql
+```
+
+Each file is executed in one transaction by default. Use `--no-transaction` only
+for SQL that cannot run inside a transaction:
+
+```bash
+./scripts/run-metadata-sql.sh --no-transaction /path/to/script.sql
+```
+
+Write only to the managed `metadata.lm_*` tables. Do not change Django migration
+state, drop the schema, or alter ownership from loader SQL.
+
+Use upserts so repeated loads are safe:
+
+```sql
+INSERT INTO metadata."lm_contact_point" (id, email, contact_page)
+OVERRIDING SYSTEM VALUE
+VALUES (100, 'metadata@example.org', NULL)
+ON CONFLICT (id) DO UPDATE
+SET email = EXCLUDED.email,
+    contact_page = EXCLUDED.contact_page;
+
+INSERT INTO metadata."lm_agent" (name, contact_point_id, description)
+VALUES ('AGENT_DWH', 100, 'Warehouse metadata owner')
+ON CONFLICT (name) DO UPDATE
+SET contact_point_id = EXCLUDED.contact_point_id,
+    description = EXCLUDED.description;
+```
+
+## Legacy Imports
 
 `00_ddl_dwhi_test_metadata.sql` originally created only these legacy tables:
 
@@ -60,7 +121,7 @@ dev/staging volumes need either a reset or a manual database/schema load.
 - `metadata.db_table_list`
 - `metadata.db_table_schemes`
 
-The current catalogue needs these additional tables:
+The current catalogue stores migrated metadata in:
 
 - `metadata.lm_contact_point`
 - `metadata.lm_agent`
@@ -70,17 +131,6 @@ The current catalogue needs these additional tables:
 - `metadata.lm_table`
 - `metadata.lm_column`
 
-For a fresh database, the local `00_ddl_dwhi_test_metadata.sql` has been updated
-to create both the legacy tables and the `lm_*` compatibility tables, so the
-current `02_mock_data.sql` can load.
-
-For an existing old-format database, run:
-
-```bash
-psql "$DATABASE_URL" -f scripts/migrate_legacy_metadata_to_lm.sql
-```
-
-The migration script creates missing `lm_*` tables and copies legacy rows into
-the new shape. It preserves dataset, dataclass, table, and column names where
-possible and fills mandatory HealthDCAT-AP fields with defaults because the old
-schema did not contain those values.
+Do not commit site-specific legacy dumps or private migration scripts to this
+repository. Keep those files outside git and run them manually with the
+metadata SQL runner after Django has created the managed tables.

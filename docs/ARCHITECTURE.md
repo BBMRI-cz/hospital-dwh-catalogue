@@ -21,7 +21,7 @@ The Catalogue is server-rendered. Users log in, browse datasets and distribution
 
 - `catalogue` - settings, URL configuration, middleware, database routers
 - `frontend` - catalogue pages, API views, presentation mapping, templates, static assets
-- `warehouse` - read-only metadata models for the hospital warehouse schema
+- `warehouse` - managed metadata models for the hospital warehouse catalogue
 - `fair_genomes` - managed models, sync logic, statistics, admin actions
 - `ticketing` - cart, request submission, Alvao integration
 - `schema_registry` - HealthDCAT-AP term metadata loader for the configured release
@@ -46,7 +46,7 @@ The runtime uses four aliases:
 |---|---|
 | `default` | Ticketing tables and uncategorized Django app tables |
 | `auth_db` | Users, groups, permissions, sessions, admin logs |
-| `metadata_db` | Warehouse catalogue tables in an externally managed schema; in production this usually points to a warehouse-owned database outside the app stack |
+| `metadata_db` | Catalogue-managed warehouse metadata tables |
 | `fair_genomes_db` | FAIR Genomes models and statistics |
 
 The routing rules live in [catalogue/routers.py](../catalogue/routers.py).
@@ -57,9 +57,10 @@ The project has three runtime environments:
 
 - `dev` - smallest config surface, all integrations mocked
 - `staging` - LDAP mocked by default, FAIR Genomes and Alvao configured like a live environment
-- `prod` - real integrations only, with `metadata_db` connected to the external warehouse database
+- `prod` - real integrations only, with `metadata_db` managed inside the catalogue stack
 
-In production, `metadata_db` sits outside the deployed app stack. Development and staging can still point that alias at a stack-local Postgres clone when needed.
+In every environment, `metadata_db` is a catalogue-owned database alias. Django
+migrations create and evolve the warehouse metadata schema there.
 
 Environment templates live in [env-examples/](../env-examples/), and `.env` is created with `./init-env.sh`.
 

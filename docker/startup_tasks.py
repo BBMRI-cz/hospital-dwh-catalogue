@@ -46,5 +46,9 @@ def should_seed_mock_fair_genomes(environ: Mapping[str, str]) -> bool:
     return environ.get('MOCK_FAIR_GENOMES', 'False') == 'True'
 
 
+def should_seed_mock_warehouse_metadata(environ: Mapping[str, str]) -> bool:
+    return environ.get('MOCK_WAREHOUSE_METADATA', 'False') == 'True'
+
+
 def should_collectstatic(settings_module: str) -> bool:
     return settings_module != 'catalogue.settings.dev'

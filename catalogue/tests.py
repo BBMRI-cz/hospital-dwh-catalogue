@@ -282,11 +282,23 @@ class ManagementCommandAvailabilityTest(SimpleTestCase):
         commands = [
             repo_root / 'catalogue' / 'management' / 'commands' / 'check_ldap_connection.py',
             repo_root / 'ticketing' / 'management' / 'commands' / 'check_alvao_tls.py',
+            repo_root / 'warehouse' / 'management' / 'commands' / 'seed_warehouse_mock.py',
         ]
 
         for command in commands:
             with self.subTest(command=command.name):
                 self.assertTrue(command.is_file())
+
+    def test_metadata_sql_runner_uses_configured_metadata_database(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        script = repo_root / 'scripts' / 'run-metadata-sql.sh'
+        contents = script.read_text(encoding='utf-8')
+
+        self.assertTrue(script.is_file())
+        self.assertIn('METADATA_DB_NAME', contents)
+        self.assertIn('METADATA_DB_USER', contents)
+        self.assertIn('METADATA_DB_PASSWORD', contents)
+        self.assertIn('--single-transaction', contents)
 
 
 class SchedulerScriptTest(SimpleTestCase):
@@ -368,6 +380,7 @@ class ReverseProxyHttpsSettingsTest(SimpleTestCase):
             'FAIR_GENOMES_DB_PORT': '5432',
             'MOCK_LDAP': 'True',
             'MOCK_FAIR_GENOMES': 'True',
+            'MOCK_WAREHOUSE_METADATA': 'False',
             'MOCK_ALVAO': 'True',
         }
 
@@ -503,8 +516,12 @@ class WarehouseRouterTest(TestCase):
         self.assertFalse(self.router.allow_migrate('default', 'fair_genomes'))
 
     def test_allow_migrate_warehouse(self):
-        """Warehouse models are never migrated by Django."""
-        self.assertFalse(self.router.allow_migrate('metadata_db', 'warehouse'))
+        """Warehouse models migrate to metadata_db."""
+        self.assertTrue(self.router.allow_migrate('metadata_db', 'warehouse'))
+
+    def test_allow_migrate_warehouse_wrong_db(self):
+        """Warehouse models cannot migrate to default."""
+        self.assertFalse(self.router.allow_migrate('default', 'warehouse'))
 
     def test_allow_migrate_ticketing(self):
         """Ticketing can migrate to default."""

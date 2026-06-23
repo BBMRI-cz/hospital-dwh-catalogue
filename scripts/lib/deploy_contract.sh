@@ -178,10 +178,12 @@ validate_common_contract() {
         FAIR_GENOMES_DB_PASSWORD \
         FAIR_GENOMES_DB_HOST \
         FAIR_GENOMES_DB_PORT \
-        FAIR_GENOMES_SYNC_INTERVAL_HOURS
+        FAIR_GENOMES_SYNC_INTERVAL_HOURS \
+        MOCK_WAREHOUSE_METADATA
 
     require_release_dir
     validate_hour_interval FAIR_GENOMES_SYNC_INTERVAL_HOURS
+    validate_boolean_literal MOCK_WAREHOUSE_METADATA
 
     if [ -n "${DEPLOY_HEALTH_TIMEOUT_SECONDS:-}" ]; then
         validate_positive_integer DEPLOY_HEALTH_TIMEOUT_SECONDS

@@ -85,7 +85,8 @@ Optional Catalogue tuning:
   Postgres and the web health check during startup and defaults to `180`
   seconds
 
-In production, `METADATA_DB_*` should point to the external warehouse-owned database, not to the stack-local `db` container.
+`METADATA_DB_*` points to the catalogue-managed warehouse metadata database.
+The environment templates use the stack-local `db` service.
 
 For local database sharing and legacy metadata migration details, see
 [Metadata Database](METADATA_DATABASE.md).
@@ -165,6 +166,18 @@ Relevant variables:
 - `FAIR_GENOMES_SYNC_INTERVAL_HOURS`, as a whole number from 1 to 24
 
 `dev` usually keeps FAIR Genomes mocked. `staging` and `prod` normally point to real FAIR Genomes services.
+
+### Warehouse metadata
+
+Relevant variables:
+
+- `MOCK_WAREHOUSE_METADATA`
+- `METADATA_DB_*`
+
+`metadata_db` is catalogue-owned and migrated by Django. `dev` seeds public mock
+warehouse metadata when `MOCK_WAREHOUSE_METADATA=True`; `staging` and `prod`
+keep it `False` and expect warehouse metadata to be loaded through the managed
+tables with [scripts/run-metadata-sql.sh](../scripts/run-metadata-sql.sh).
 
 ### Ticketing / Alvao
 
@@ -342,8 +355,8 @@ It:
 4. repairs ticketing migration drift if needed
 5. migrates `fair_genomes_db`
 6. repairs FAIR Genomes migration drift if needed
-7. checks `metadata_db` connectivity without running Django migrations against it
-8. seeds mock FAIR Genomes data when enabled
+7. migrates `metadata_db`
+8. seeds mock FAIR Genomes and warehouse metadata when enabled
 9. builds Tailwind CSS
 10. compiles translations when needed
 11. runs `collectstatic` outside development
@@ -361,12 +374,9 @@ The Postgres container creates:
 
 This behavior lives in [docker/postgres/initdb.d/00_create_databases.sh](../docker/postgres/initdb.d/00_create_databases.sh).
 
-`metadata_db` is never migrated by Django. In production it typically points to
-an external warehouse-managed database; in development or staging it can point to
-a stack-local clone exposed through the same alias. When `METADATA_DB_NAME` is a
-separate stack-local database, [docker/postgres/initdb.d/03_init_metadata_database.sh](../docker/postgres/initdb.d/03_init_metadata_database.sh)
-loads the warehouse metadata schema and mock data into it on first volume
-initialization.
+`metadata_db` is migrated by Django and owned by the catalogue. The Postgres
+init scripts create the database when it is stack-local; [docker/startup.py](../docker/startup.py)
+runs the `warehouse` migrations against it during startup.
 
 ## Auth and admin operations
 

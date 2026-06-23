@@ -63,7 +63,7 @@ class AuthRouter:
 
 class WarehouseRouter:
     """
-    Router for warehouse metadata and FAIR Genomes data.
+    Router for catalogue data split across logical databases.
 
     - 'fair_genomes' app models -> fair_genomes_db
     - 'warehouse' app models -> metadata_db
@@ -98,7 +98,7 @@ class WarehouseRouter:
         if app_label == 'fair_genomes':
             return db == 'fair_genomes_db'
         if app_label == 'warehouse':
-            return False
+            return db == 'metadata_db'
         if app_label == 'ticketing':
             return db == 'default'
         return db == 'default'

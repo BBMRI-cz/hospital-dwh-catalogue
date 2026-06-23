@@ -21,8 +21,8 @@ class ContactPointModelTest(TestCase):
         obj = ContactPoint(contact_page='https://example.com/contact')
         self.assertEqual(str(obj), 'https://example.com/contact')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(ContactPoint._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(ContactPoint._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(ContactPoint._meta.db_table, 'metadata"."lm_contact_point')
@@ -37,8 +37,8 @@ class AgentModelTest(TestCase):
         obj = Agent(name='Hospital Publisher')
         self.assertEqual(str(obj), 'Hospital Publisher')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Agent._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Agent._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Agent._meta.db_table, 'metadata"."lm_agent')
@@ -57,8 +57,8 @@ class CatalogModelTest(TestCase):
         obj = Catalog(name='cat1', title='')
         self.assertEqual(str(obj), 'cat1')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Catalog._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Catalog._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Catalog._meta.db_table, 'metadata"."lm_catalog')
@@ -83,8 +83,8 @@ class DatasetModelTest(TestCase):
         obj = Dataset(name='ds1', title='')
         self.assertEqual(str(obj), 'ds1')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Dataset._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Dataset._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Dataset._meta.db_table, 'metadata"."lm_dataset')
@@ -120,8 +120,8 @@ class DistributionModelTest(TestCase):
         self.assertTrue(field.null)
         self.assertTrue(field.blank)
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Distribution._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Distribution._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Distribution._meta.db_table, 'metadata"."lm_distribution')
@@ -145,8 +145,8 @@ class TableModelTest(TestCase):
         obj = Table(name='TBL_PAT_RAW', title=None)
         self.assertEqual(str(obj), 'TBL_PAT_RAW')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Table._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Table._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Table._meta.db_table, 'metadata"."lm_table')
@@ -173,8 +173,8 @@ class ColumnModelTest(TestCase):
         obj = Column(name='COL_PAT_ID', title='')
         self.assertEqual(str(obj), 'COL_PAT_ID')
 
-    def test_meta_managed_false(self):
-        self.assertFalse(Column._meta.managed)
+    def test_meta_managed_true(self):
+        self.assertTrue(Column._meta.managed)
 
     def test_meta_db_table(self):
         self.assertEqual(Column._meta.db_table, 'metadata"."lm_column')

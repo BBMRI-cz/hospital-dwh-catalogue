@@ -61,7 +61,7 @@ DATABASES = build_postgres_databases(
             'host_default': 'db',
         },
         'metadata_db': {
-            'name_default': 'dwhi_dev',
+            'name_default': 'warehouse_metadata_dev',
             'user_default': 'root',
             'password_default': 'dwh_password',
             'host_default': 'db',
@@ -85,6 +85,7 @@ FAIR_GENOMES_RDF_URL = _FAIR_GENOMES_SETTINGS['FAIR_GENOMES_RDF_URL']
 FAIR_GENOMES_API_URL = _FAIR_GENOMES_SETTINGS['FAIR_GENOMES_API_URL']
 FAIR_GENOMES_API_TOKEN = _FAIR_GENOMES_SETTINGS['FAIR_GENOMES_API_TOKEN']
 FAIR_GENOMES_SYNC_INTERVAL_HOURS = _FAIR_GENOMES_SETTINGS['FAIR_GENOMES_SYNC_INTERVAL_HOURS']
+MOCK_WAREHOUSE_METADATA = config('MOCK_WAREHOUSE_METADATA', default=True, cast=bool)
 
 MOCK_ALVAO = config('MOCK_ALVAO', default=True, cast=bool)
 _ALVAO_SETTINGS = alvao_settings(mock_alvao=MOCK_ALVAO)
