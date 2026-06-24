@@ -216,6 +216,11 @@ def main() -> None:
     )
 
     _migrate_database('metadata_db')
+    _repair_missing_app_table(
+        database='metadata_db',
+        app_label='warehouse',
+        sentinel_table='lm_contact_point',
+    )
 
     # -- Seed mock data --------------------------------------------------------
     _seed_mock_data_if_needed()

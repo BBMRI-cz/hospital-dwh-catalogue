@@ -39,7 +39,16 @@ def tailwind_build_command(base_dir: Path) -> list[str]:
 
 
 def table_is_missing(table_names: list[str], table_name: str) -> bool:
-    return table_name not in table_names
+    if table_name in table_names:
+        return False
+
+    unqualified = table_name.split('.')[-1].strip('"')
+    for candidate in table_names:
+        if candidate == unqualified:
+            return False
+        if candidate.endswith(f'.{unqualified}'):
+            return False
+    return True
 
 
 def should_seed_mock_fair_genomes(environ: Mapping[str, str]) -> bool:
