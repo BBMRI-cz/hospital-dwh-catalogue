@@ -10,6 +10,8 @@ services:
     image: postgres:17
     env_file:
       - ../../.env
+    ports:
+      - "${POSTGRES_PUBLISH_HOST:-127.0.0.1}:${POSTGRES_PUBLISH_PORT:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../../docker/postgres/initdb.d:/docker-entrypoint-initdb.d:ro

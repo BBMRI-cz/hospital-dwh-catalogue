@@ -328,6 +328,8 @@ print_deploy_summary() {
     else
         echo "Reset: disabled"
     fi
+
+    echo "DB viewer access: ${POSTGRES_PUBLISH_HOST:-127.0.0.1}:${POSTGRES_PUBLISH_PORT:-15432} on the server; use an SSH tunnel from the workstation"
 }
 
 main() {

@@ -52,6 +52,29 @@ validate_positive_integer() {
     fi
 }
 
+validate_postgres_publish_settings() {
+    if [ -n "${POSTGRES_PUBLISH_PORT:-}" ]; then
+        validate_positive_integer POSTGRES_PUBLISH_PORT
+    fi
+
+    if [ -z "${POSTGRES_PUBLISH_HOST:-}" ]; then
+        return 0
+    fi
+
+    case "$DEPLOY_ENV:${POSTGRES_PUBLISH_HOST}" in
+        dev:*)
+            return 0
+            ;;
+        *:127.0.0.1)
+            return 0
+            ;;
+        *)
+            echo "Validation error: POSTGRES_PUBLISH_HOST must be 127.0.0.1 outside dev." >&2
+            return 1
+            ;;
+    esac
+}
+
 require_non_empty() {
     local key
     for key in "$@"; do
@@ -182,6 +205,7 @@ validate_common_contract() {
 
     require_release_dir
     validate_hour_interval FAIR_GENOMES_SYNC_INTERVAL_HOURS
+    validate_postgres_publish_settings
     if [ -n "${MOCK_WAREHOUSE_METADATA:-}" ]; then
         validate_boolean_literal MOCK_WAREHOUSE_METADATA
     fi

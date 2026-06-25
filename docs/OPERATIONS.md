@@ -298,6 +298,11 @@ automation. `--reset-volumes-keep-users` exports `auth_db`, deletes all Compose
 volumes, restores the auth database into the fresh Postgres volume, and clears
 sessions plus admin log entries.
 
+Postgres is always published on the server loopback interface for DB viewer
+access through SSH tunneling. The default bind is `127.0.0.1:15432`; see
+[Metadata Database](METADATA_DATABASE.md#database-viewer-access) for DBeaver,
+pgAdmin, and DataGrip connection settings.
+
 `deploy.sh`:
 
 1. loads `.env`
@@ -377,6 +382,15 @@ This behavior lives in [docker/postgres/initdb.d/00_create_databases.sh](../dock
 `metadata_db` is migrated by Django and owned by the catalogue. The Postgres
 init scripts create the database when it is stack-local; [docker/startup.py](../docker/startup.py)
 runs the `warehouse` migrations against it during startup.
+
+For database viewers, create a read-only PostgreSQL login:
+
+```bash
+METADATA_VIEWER_USER=metadata_viewer bash ./scripts/create-metadata-viewer-role.sh
+```
+
+The viewer should connect through an SSH tunnel to the server loopback port,
+not directly to the server network interface.
 
 ## Auth and admin operations
 

@@ -3,16 +3,17 @@
 The Django app owns warehouse catalogue content through the `metadata_db`
 database alias. Django migrations create and evolve the `metadata.lm_*` tables.
 
-## Local Network Access
+## Database Viewer Access
 
-The development compose override publishes Postgres with:
+Every deployment publishes the Compose PostgreSQL container on the server
+loopback interface:
 
 ```yaml
-${POSTGRES_PUBLISH_HOST:-0.0.0.0}:${POSTGRES_PUBLISH_PORT:-5433}:5432
+${POSTGRES_PUBLISH_HOST:-127.0.0.1}:${POSTGRES_PUBLISH_PORT:-15432}:5432
 ```
 
-With the default dev example, another machine on the same network can connect to
-the Docker host IP on port `5433`.
+That port is not meant to be opened directly to the network. Connect from a
+workstation DB viewer through SSH port forwarding.
 
 Use these databases:
 
@@ -21,14 +22,37 @@ Use these databases:
 - `hospital_dwh_auth` for users, groups, and sessions.
 - `fair_genomes` for FAIR Genomes state.
 
-If the database should only be reachable from the local computer, set:
+Create a read-only login for metadata viewers instead of sharing the
+application database owner:
 
-```env
-POSTGRES_PUBLISH_HOST=127.0.0.1
+```bash
+METADATA_VIEWER_USER=metadata_viewer bash ./scripts/create-metadata-viewer-role.sh
 ```
 
-Exposing Postgres on a LAN should be limited to trusted networks and protected
-with a non-default password plus host firewall rules.
+Open the tunnel from the workstation:
+
+```bash
+ssh -N -L 15432:127.0.0.1:15432 <user>@INT.MOU.CZ@172.16.55.202
+```
+
+Use `172.16.55.200` for staging. In a PostgreSQL viewer such as DBeaver,
+pgAdmin, or DataGrip, connect to:
+
+- host: `127.0.0.1`
+- port: `15432`
+- database: the deployed `METADATA_DB_NAME`
+- user: the read-only viewer role
+- password: the viewer role password
+
+For local development only, `POSTGRES_PUBLISH_HOST` can be changed to a LAN
+address if another machine must connect directly:
+
+```env
+POSTGRES_PUBLISH_HOST=0.0.0.0
+```
+
+Do not use a LAN bind in staging or production. The deploy contract rejects it
+outside development.
 
 ## Managed Metadata DB
 
