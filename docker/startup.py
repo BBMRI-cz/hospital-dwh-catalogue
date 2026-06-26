@@ -8,6 +8,7 @@ Called by docker/entrypoint.sh before the main server command.
 import os
 import shutil
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 
 from startup_tasks import (
@@ -16,7 +17,7 @@ from startup_tasks import (
     should_collectstatic,
     should_seed_mock_fair_genomes,
     should_seed_mock_warehouse_metadata,
-    table_is_missing,
+    table_exists,
     tailwind_build_command,
     translations_need_compile,
 )
@@ -24,6 +25,28 @@ from startup_tasks import (
 import django
 from django.core.management import call_command
 from django.db import connections
+
+KNOWN_INITIAL_MIGRATION_TABLES = {
+    'fair_genomes': (
+        'fair_genomes_agent',
+        'fair_genomes_contact_point',
+        'fair_genomes_sync_state',
+        'fair_genomes_catalog',
+        'fair_genomes_dataset',
+        'fair_genomes_distribution',
+        'fair_genomes_stat_result',
+        'fair_genomes_stat_definition',
+    ),
+    'warehouse': (
+        'metadata.lm_agent',
+        'metadata.lm_contact_point',
+        'metadata.lm_catalog',
+        'metadata.lm_dataset',
+        'metadata.lm_distribution',
+        'metadata.lm_table',
+        'metadata.lm_column',
+    ),
+}
 
 
 def _ensure_env_superuser() -> None:
@@ -151,14 +174,63 @@ def _migrate_app(database: str, app_label: str, *targets: str, fake: bool = Fals
     call_command('migrate', app_label, *targets, **kwargs)
 
 
+def _migration_is_recorded(database: str, app_label: str, migration_name: str) -> bool:
+    connection = connections[database]
+    if not table_exists(connection, 'django_migrations'):
+        return False
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT 1
+            FROM django_migrations
+            WHERE app = %s
+              AND name = %s
+            LIMIT 1
+            """,
+            [app_label, migration_name],
+        )
+        return cursor.fetchone() is not None
+
+
+def _fake_initial_migration_if_schema_exists(
+    *,
+    database: str,
+    app_label: str,
+    migration_name: str = '0001_initial',
+    table_names: Sequence[str],
+) -> None:
+    if _migration_is_recorded(database, app_label, migration_name):
+        return
+
+    connection = connections[database]
+    existing_tables = [table_name for table_name in table_names if table_exists(connection, table_name)]
+    if not existing_tables:
+        return
+
+    if len(existing_tables) != len(table_names):
+        missing_tables = sorted(set(table_names) - set(existing_tables))
+        raise RuntimeError(
+            f'{database} contains a partial {app_label} initial schema without a '
+            f'{migration_name} migration record. Existing tables: {sorted(existing_tables)}. '
+            f'Missing tables: {missing_tables}. Repair the schema before deploying.'
+        )
+
+    print(
+        f'{database} has all {app_label} initial tables but no {migration_name} '
+        'migration record. Marking the migration as applied.',
+        flush=True,
+    )
+    _migrate_app(database, app_label, migration_name, fake=True)
+
+
 def _repair_missing_app_table(
     *,
     database: str,
     app_label: str,
     sentinel_table: str,
 ) -> None:
-    tables = connections[database].introspection.table_names()
-    if not table_is_missing(tables, sentinel_table):
+    if table_exists(connections[database], sentinel_table):
         return
 
     print(
@@ -208,6 +280,11 @@ def main() -> None:
         sentinel_table='ticketing_ticket_request',
     )
 
+    _fake_initial_migration_if_schema_exists(
+        database='fair_genomes_db',
+        app_label='fair_genomes',
+        table_names=KNOWN_INITIAL_MIGRATION_TABLES['fair_genomes'],
+    )
     _migrate_database('fair_genomes_db')
     _repair_missing_app_table(
         database='fair_genomes_db',
@@ -215,11 +292,16 @@ def main() -> None:
         sentinel_table='fair_genomes_contact_point',
     )
 
+    _fake_initial_migration_if_schema_exists(
+        database='metadata_db',
+        app_label='warehouse',
+        table_names=KNOWN_INITIAL_MIGRATION_TABLES['warehouse'],
+    )
     _migrate_database('metadata_db')
     _repair_missing_app_table(
         database='metadata_db',
         app_label='warehouse',
-        sentinel_table='lm_contact_point',
+        sentinel_table='metadata.lm_contact_point',
     )
 
     # -- Seed mock data --------------------------------------------------------

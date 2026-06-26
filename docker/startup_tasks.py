@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 ENV_SUPERUSER_SENTINEL_EMAIL = 'env-managed-superuser@localhost'
 
@@ -38,17 +39,64 @@ def tailwind_build_command(base_dir: Path) -> list[str]:
     ]
 
 
+def normalize_table_identifier(table_name: str) -> str:
+    """Normalize Django/Postgres table identifiers for existence checks.
+
+    Django models use ``metadata"."lm_contact_point`` to make PostgreSQL emit
+    ``"metadata"."lm_contact_point"``.  For direct catalog checks this needs to
+    become the regular schema-qualified form ``metadata.lm_contact_point``.
+    """
+    return table_name.strip().replace('"."', '.').replace('"', '').strip('.')
+
+
 def table_is_missing(table_names: list[str], table_name: str) -> bool:
-    if table_name in table_names:
+    normalized_table_name = normalize_table_identifier(table_name)
+    normalized_table_names = {normalize_table_identifier(candidate) for candidate in table_names}
+
+    if normalized_table_name in normalized_table_names:
         return False
 
-    unqualified = table_name.split('.')[-1].strip('"')
-    for candidate in table_names:
+    unqualified = normalized_table_name.split('.')[-1]
+    for candidate in normalized_table_names:
         if candidate == unqualified:
             return False
         if candidate.endswith(f'.{unqualified}'):
             return False
     return True
+
+
+def table_exists(connection: Any, table_name: str) -> bool:
+    """Return whether a table exists, including PostgreSQL schema-qualified names."""
+    if connection.vendor == 'postgresql':
+        return _postgres_table_exists(connection, table_name)
+
+    return not table_is_missing(connection.introspection.table_names(), table_name)
+
+
+def _postgres_table_exists(connection: Any, table_name: str) -> bool:
+    normalized_table_name = normalize_table_identifier(table_name)
+    parts = normalized_table_name.split('.', 1)
+
+    with connection.cursor() as cursor:
+        if len(parts) == 2:
+            schema_name, relation_name = parts
+            cursor.execute(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.tables
+                    WHERE table_schema = %s
+                      AND table_name = %s
+                )
+                """,
+                [schema_name, relation_name],
+            )
+        else:
+            cursor.execute('SELECT to_regclass(%s) IS NOT NULL', [normalized_table_name])
+
+        row = cursor.fetchone()
+
+    return bool(row and row[0])
 
 
 def should_seed_mock_fair_genomes(environ: Mapping[str, str]) -> bool:

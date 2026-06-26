@@ -686,6 +686,28 @@ class BuildJsonldContextTest(TestCase):
         turtle = build_turtle_result(self._make_dataset()).content
         self.assertIn('Test dataset', turtle)
 
+    def test_mailto_email_input_exports_single_mailto_iri(self) -> None:
+        ds = self._make_dataset()
+        ds.contact_point = self._make_contact_point(
+            email='mailto:dataset-mailto@acme.example',
+            contact_page=None,
+        )
+
+        result = self._build(ds)
+        contact_point_node = next(
+            node
+            for node in result['@graph']
+            if _node_has_type(node, 'cv:ContactPoint')
+            and node.get('cv:email') == 'dataset-mailto@acme.example'
+        )
+
+        self.assertEqual(contact_point_node.get('@id'), 'mailto:dataset-mailto@acme.example')
+        self.assertEqual(contact_point_node.get('cv:email'), 'dataset-mailto@acme.example')
+        self.assertEqual(
+            contact_point_node.get('vcard:hasEmail'),
+            {'@id': 'mailto:dataset-mailto@acme.example'},
+        )
+
     def test_build_jsonld_result_omits_missing_property_and_records_warning(self) -> None:
         profile = deepcopy(get_context_profile())
         del profile['properties']['Dataset']['title']

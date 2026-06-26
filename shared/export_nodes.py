@@ -9,6 +9,7 @@ from shared.dtos import (
     ExportDataset,
     ExportDistribution,
 )
+from shared.email_utils import mailto_iri, normalise_email
 from shared.export_graph import JsonLdGraphBuilder
 from shared.export_specs import CATALOG_FIELDS, DATASET_FIELDS, DISTRIBUTION_FIELDS
 from shared.export_terms import ExportEntity, ExportFieldSpec, ExportRdfClass
@@ -35,9 +36,7 @@ def agent_iri(name: str) -> str | None:
 def contact_point_iri(contact_point: ExportContactPoint) -> str | None:
     if contact_point.contact_page:
         return contact_point.contact_page
-    if contact_point.email:
-        return f'mailto:{contact_point.email}'
-    return None
+    return mailto_iri(contact_point.email)
 
 
 def apply_field_specs(
@@ -83,12 +82,14 @@ def build_contact_point_node(
     iri = contact_point_iri(contact_point)
     if iri is not None:
         node['@id'] = iri
-    if contact_point.email:
-        builder.set_property(node, builder.profile.term('cv:email'), contact_point.email)
+    email = normalise_email(contact_point.email)
+    email_iri = mailto_iri(email)
+    if email and email_iri:
+        builder.set_property(node, builder.profile.term('cv:email'), email)
         builder.set_property(
             node,
             builder.profile.term('vcard:hasEmail'),
-            id_ref(f'mailto:{contact_point.email}'),
+            id_ref(email_iri),
         )
     if contact_point.contact_page:
         builder.set_property(

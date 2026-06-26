@@ -8,6 +8,7 @@ from datetime import datetime
 from fair_genomes.models import Agent, Catalog, ContactPoint, Dataset, Distribution
 from fair_genomes.services.parser import parse_raw_records, resolve_related
 from fair_genomes.services.rdf_schema import RawRecord
+from shared.email_utils import normalise_email
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def process_graph(graph, *, rdf_url: str) -> dict:
         return value if isinstance(value, int) else None
 
     for record in raw_records['ContactPoint']:
-        email = str_value(record, 'email')
+        email = normalise_email(str_value(record, 'email'))
         contact_page = str_value(record, 'contact_page')
         if not email and not contact_page:
             logger.warning('Skipping ContactPoint with no email or page: %s', record.subject_uri)

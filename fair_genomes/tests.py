@@ -11,7 +11,7 @@ from io import StringIO
 from unittest.mock import MagicMock, patch
 
 import requests as req_lib
-from rdflib import Graph, URIRef
+from rdflib import Graph, Literal, URIRef
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -867,6 +867,27 @@ class ProcessGraphFullTest(TestCase):
         )
         self.assertTrue(
             Distribution.objects.using('fair_genomes_db').filter(name='test-distribution').exists()
+        )
+
+    def test_mailto_contact_email_is_normalized_on_import(self):
+        g = _load_graph('test_full_graph.ttl')
+        contact_point = URIRef('http://fdp.example.org/api/rdf/ContactPoint/email=contact%40example.org')
+        email_predicate = URIRef('http://fdp.example.org/api/rdf/ContactPoint/column/email')
+        g.remove((contact_point, email_predicate, None))
+        g.add((contact_point, email_predicate, Literal('mailto:contact@example.org')))
+
+        svc = FairGenomesService(rdf_url='http://fdp.example.org', api_url='', api_token='')
+        svc._process_graph(g)
+
+        self.assertTrue(
+            ContactPoint.objects.using('fair_genomes_db')
+            .filter(email='contact@example.org')
+            .exists()
+        )
+        self.assertFalse(
+            ContactPoint.objects.using('fair_genomes_db')
+            .filter(email='mailto:contact@example.org')
+            .exists()
         )
 
     def test_duplicate_theme_from_multiple_predicates_saved_once(self):

@@ -16,6 +16,7 @@ from shared.dtos import (
     UnifiedDataset,
     UnifiedDistribution,
 )
+from shared.email_utils import normalise_email
 
 if TYPE_CHECKING:
     from fair_genomes import models as fgm
@@ -57,7 +58,7 @@ def map_export_contact_point(
     return ExportContactPoint(
         app=app,
         identifier=str(obj.pk),
-        email=getattr(obj, 'email', None),
+        email=normalise_email(getattr(obj, 'email', None)),
         contact_page=getattr(obj, 'contact_page', None),
     )
 
@@ -194,7 +195,7 @@ def map_unified_dataset(obj: wm.Dataset | fgm.Dataset, app: str) -> UnifiedDatas
         keyword=obj.keyword,
         source=_fk_name(obj, 'source'),
         creator=_fk_name(obj, 'creator'),
-        contact_point=getattr(cp, 'email', None),
+        contact_point=normalise_email(getattr(cp, 'email', None)),
         provenance=obj.provenance,
         catalog_name=_fk_name(obj, 'catalog'),
         access_rights=obj.access_rights,

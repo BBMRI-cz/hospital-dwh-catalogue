@@ -29,6 +29,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from shared.email_utils import normalise_email
 from shared.validators import validate_mandatory_fields
 
 
@@ -50,7 +51,7 @@ class ContactPointBase(models.Model):
         verbose_name=_('Email'),
         help_text=_(
             'Contact e-mail address (vcard:hasEmail). '
-            'Store as plain email (e.g. user@example.org); exported as mailto: URI on RDF output. '
+            'Plain email or mailto: input is accepted; exported as mailto: URI on RDF output. '
             'At least one of email or contact_page is required.'
         ),
     )
@@ -72,8 +73,13 @@ class ContactPointBase(models.Model):
     def __str__(self) -> str:
         return self.email or self.contact_page or f'ContactPoint #{self.pk}'
 
+    def save(self, *args, **kwargs):
+        self.email = normalise_email(self.email)
+        return super().save(*args, **kwargs)
+
     def clean(self) -> None:
         super().clean()
+        self.email = normalise_email(self.email)
         if not self.email and not self.contact_page:
             raise ValidationError(
                 _(
